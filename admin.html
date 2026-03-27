@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Want | Panel de Vendedor</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="admin-header">
+    <h2>Mis Pedidos</h2>
+    <div class="admin-actions">
+        <button class="btn-refresh" id="btn-refresh">
+            <i class="fas fa-sync-alt"></i> Actualizar
+        </button>
+        <div class="vendedor-info" id="vendedor-info"></div>
+    </div>
+</div>
+    </header>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu" id="mobile-menu">
+        <button class="menu-close" id="menu-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="mobile-nav">
+            <a href="index.html" class="mobile-nav-link">Inicio</a>
+            <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">Contacto</a>
+        </div>
+        <div class="mobile-social">
+            <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+            <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    </div>
+    <div class="menu-overlay" id="menu-overlay"></div>
+
+    <main>
+        <div class="container">
+            <!-- Panel de autenticación simple -->
+            <div class="admin-auth" id="admin-auth">
+                <div class="auth-card">
+                    <h2>Panel de Vendedor</h2>
+                    <p>Ingresá tu ID de vendedor para ver tus pedidos</p>
+                    <div class="form-group">
+                        <label for="vendedor-id">ID del vendedor</label>
+                        <input type="number" id="vendedor-id" placeholder="Ej: 1" required>
+                    </div>
+                    <button class="btn btn-primary" id="btn-ingresar">Ingresar</button>
+                </div>
+            </div>
+
+            <!-- Panel de pedidos (oculto inicialmente) -->
+            <div class="admin-panel" id="admin-panel" style="display: none;">
+                <div class="admin-header">
+                    <h2>Mis Pedidos</h2>
+                    <div class="vendedor-info" id="vendedor-info"></div>
+                </div>
+
+                <!-- Filtros -->
+<div class="filtros">
+    <button class="filtro-btn active" data-estado="preparando">📦 Nuevos pedidos (0)</button>
+    <button class="filtro-btn" data-estado="en preparacion">👨‍🍳 En preparación (0)</button>
+    <button class="filtro-btn" data-estado="en camino">🚚 En camino (0)</button>
+    <button class="filtro-btn" data-estado="entregado">✅ Entregados (0)</button>
+</div>
+
+                <!-- Lista de pedidos -->
+                <div class="pedidos-container" id="pedidos-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando pedidos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="contacto-section" id="contacto-section" style="display: none;">
+        <div class="container">
+            <h2>Contacto</h2>
+            <div class="contacto-info">
+                <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
+                <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
+                <div class="social-icons" style="justify-content: center; margin-top: 20px;">
+                    <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
