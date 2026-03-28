@@ -1,5 +1,6 @@
 // ===================================================
 // ADMIN - Panel con autenticación (email + contraseña)
+// Versión completa con nuevo diseño
 // ===================================================
 
 // Configuración de Cloudinary
@@ -18,7 +19,7 @@ let tabActual = 'pedidos';
 // UTILIDADES DE AUTENTICACIÓN
 // ===================================================
 
-// Función simple para hashear contraseñas (usando SHA-256)
+// Función para hashear contraseñas (SHA-256)
 async function hashPassword(password) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
@@ -48,7 +49,14 @@ function cargarSesion() {
 // Cerrar sesión
 function cerrarSesion() {
     sessionStorage.removeItem('vendedor_sesion');
-    location.reload();
+    // Ocultar header y menú móvil
+    document.getElementById('header-admin').style.display = 'none';
+    document.getElementById('mobile-menu-admin').style.display = 'none';
+    document.getElementById('menu-overlay-admin').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'none';
+    document.getElementById('admin-auth').style.display = 'flex';
+    // Limpiar formularios
+    document.getElementById('login-form').reset();
 }
 
 // ===================================================
@@ -66,21 +74,167 @@ function normalizarEstado(estado) {
 }
 
 // ===================================================
-// AUTENTICACIÓN - TABS
+// INICIALIZACIÓN
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 Panel de administración iniciado');
-    inicializarMenu();
+    inicializarMenuGeneral();
     inicializarAuthTabs();
     
     // Verificar sesión guardada
     const sesion = cargarSesion();
     if (sesion) {
-        // Intentar cargar vendedor con la sesión
         cargarVendedorPorId(sesion.id);
     }
 });
+
+// ===================================================
+// MENÚ GENERAL (fuera del login)
+// ===================================================
+
+function inicializarMenuGeneral() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuClose = document.getElementById('menu-close');
+    const contactoLink = document.getElementById('contacto-link');
+    const contactoLinkMobile = document.getElementById('contacto-link-mobile');
+    const contactoSection = document.getElementById('contacto-section');
+
+    function openMenu() { 
+        if (mobileMenu) mobileMenu.classList.add('active'); 
+        if (menuOverlay) menuOverlay.classList.add('active'); 
+        document.body.style.overflow = 'hidden'; 
+    }
+    
+    function closeMenu() { 
+        if (mobileMenu) mobileMenu.classList.remove('active'); 
+        if (menuOverlay) menuOverlay.classList.remove('active'); 
+        document.body.style.overflow = ''; 
+    }
+    
+    if (menuToggle) menuToggle.addEventListener('click', openMenu);
+    if (menuClose) menuClose.addEventListener('click', closeMenu);
+    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+    
+    function mostrarContacto(e) { 
+        e.preventDefault(); 
+        closeMenu(); 
+        if (contactoSection) { 
+            contactoSection.style.display = 'block'; 
+            contactoSection.scrollIntoView({ behavior: 'smooth' }); 
+        } 
+    }
+    
+    if (contactoLink) contactoLink.addEventListener('click', mostrarContacto);
+    if (contactoLinkMobile) contactoLinkMobile.addEventListener('click', mostrarContacto);
+}
+
+// ===================================================
+// UI ADMIN - Control de menú móvil después del login
+// ===================================================
+
+function inicializarUIAdmin() {
+    const menuToggle = document.getElementById('menu-toggle-admin');
+    const mobileMenu = document.getElementById('mobile-menu-admin');
+    const menuOverlay = document.getElementById('menu-overlay-admin');
+    const menuClose = document.getElementById('menu-close-admin');
+    
+    function openMenu() {
+        if (mobileMenu) mobileMenu.classList.add('active');
+        if (menuOverlay) menuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeMenu() {
+        if (mobileMenu) mobileMenu.classList.remove('active');
+        if (menuOverlay) menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    if (menuToggle) menuToggle.addEventListener('click', openMenu);
+    if (menuClose) menuClose.addEventListener('click', closeMenu);
+    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+    
+    // Mobile tabs
+    const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
+    mobileTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            cambiarTab(tabId);
+            closeMenu();
+        });
+    });
+    
+    // Mobile logout
+    const mobileLogout = document.getElementById('mobile-logout-btn');
+    if (mobileLogout) {
+        mobileLogout.addEventListener('click', () => {
+            cerrarSesion();
+        });
+    }
+}
+
+function mostrarPanelDespuesLogin(vendedor) {
+    // Mostrar header admin
+    const headerAdmin = document.getElementById('header-admin');
+    if (headerAdmin) headerAdmin.style.display = 'block';
+    
+    // Mostrar menú móvil admin
+    const mobileMenu = document.getElementById('mobile-menu-admin');
+    const menuOverlay = document.getElementById('menu-overlay-admin');
+    if (mobileMenu) mobileMenu.style.display = 'flex';
+    if (menuOverlay) menuOverlay.style.display = 'block';
+}
+
+// ===================================================
+// TABS
+// ===================================================
+
+function inicializarTabs() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            cambiarTab(tabId);
+        });
+    });
+}
+
+function cambiarTab(tabId) {
+    tabActual = tabId;
+    
+    // Actualizar botones escritorio
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === tabId) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Actualizar botones móvil
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === tabId) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Actualizar contenido
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    
+    if (tabId === 'productos') {
+        cargarProductos();
+    }
+}
+
+// ===================================================
+// AUTENTICACIÓN - TABS
+// ===================================================
 
 function inicializarAuthTabs() {
     const tabs = document.querySelectorAll('.auth-tab');
@@ -127,14 +281,6 @@ function inicializarAuthTabs() {
     if (btnReset) {
         btnReset.addEventListener('click', async () => {
             await resetearPassword();
-        });
-    }
-    
-    // Logout button
-    const btnLogout = document.getElementById('btn-logout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            cerrarSesion();
         });
     }
 }
@@ -218,7 +364,6 @@ async function register() {
         
         if (response.success) {
             mostrarToast('¡Registro exitoso! Ahora podés iniciar sesión', 'success');
-            // Limpiar formulario y cambiar a login
             document.querySelector('.auth-tab[data-tab="login"]').click();
             document.getElementById('login-email').value = email;
         } else {
@@ -248,8 +393,11 @@ async function solicitarRecuperacion() {
         const response = await postAPI('solicitarRecuperacion', { email });
         
         if (response.success) {
-            mostrarToast('Código de recuperación enviado a tu email', 'success');
+            mostrarToast('Código de recuperación enviado', 'success');
             document.getElementById('recover-code-section').style.display = 'block';
+            if (response.codigo) {
+                console.log('Código (testing):', response.codigo);
+            }
         } else {
             throw new Error(response.error || 'Email no encontrado');
         }
@@ -294,6 +442,7 @@ async function resetearPassword() {
             document.querySelector('.auth-tab[data-tab="login"]').click();
             document.getElementById('login-email').value = email;
             document.getElementById('recover-code-section').style.display = 'none';
+            document.getElementById('recover-form').reset();
         } else {
             throw new Error(response.error || 'Código inválido');
         }
@@ -312,7 +461,7 @@ async function cargarVendedorPorId(vendedorId) {
         const response = await callAPI('getVendedores', {}, true);
         if (response.success) {
             const vendedor = response.vendedores.find(v => v.id.toString() === vendedorId.toString());
-            if (vendedor) {
+            if (vendedor && vendedor.activo === 'SI') {
                 vendedorActual = vendedor;
                 await iniciarPanel(vendedorActual);
             } else {
@@ -326,72 +475,263 @@ async function cargarVendedorPorId(vendedorId) {
 }
 
 // ===================================================
-// INICIAR PANEL PRINCIPAL
+// INICIAR PANEL PRINCIPAL (DESPUÉS DEL LOGIN)
 // ===================================================
 
 async function iniciarPanel(vendedor) {
+    // Ocultar autenticación y mostrar panel
     document.getElementById('admin-auth').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
-    document.getElementById('vendedor-info').innerHTML = `
-        <p><strong>${escapeHTML(vendedor.nombre)}</strong> | ${vendedor.email}</p>
-    `;
     
-    // Cargar datos
+    // Mostrar header admin y menú móvil
+    mostrarPanelDespuesLogin(vendedor);
+    
+    // Actualizar información del panel
+    document.getElementById('panel-nombre').textContent = vendedor.nombre;
+    document.getElementById('panel-email').textContent = vendedor.email;
+    document.getElementById('perfil-nombre-display').textContent = vendedor.nombre;
+    document.getElementById('perfil-email-display').textContent = vendedor.email;
+    
+    // Cargar datos del vendedor
     await cargarPedidos();
     await cargarProductos();
     cargarPerfil();
     
-    // Botón actualizar
+    // Botón actualizar datos
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
-        btnRefresh.addEventListener('click', () => {
+        const newBtnRefresh = btnRefresh.cloneNode(true);
+        btnRefresh.parentNode.replaceChild(newBtnRefresh, btnRefresh);
+        newBtnRefresh.addEventListener('click', () => {
             actualizarPedidos();
             cargarProductos(true);
         });
     }
     
-    // Botón nuevo producto
+    // Botón agregar producto
     const btnAgregar = document.getElementById('btn-agregar-producto');
     if (btnAgregar) {
-        btnAgregar.addEventListener('click', () => mostrarModalProducto());
+        const newBtnAgregar = btnAgregar.cloneNode(true);
+        btnAgregar.parentNode.replaceChild(newBtnAgregar, btnAgregar);
+        newBtnAgregar.addEventListener('click', () => mostrarModalProducto());
     }
     
+    // Botón cerrar sesión (escritorio)
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        const newBtnLogout = btnLogout.cloneNode(true);
+        btnLogout.parentNode.replaceChild(newBtnLogout, btnLogout);
+        newBtnLogout.addEventListener('click', () => {
+            cerrarSesion();
+        });
+    }
+    
+    // Inicializar filtros y tabs
     inicializarFiltros();
     inicializarTabs();
+    
+    // Inicializar UI admin (menú móvil)
+    inicializarUIAdmin();
 }
 
 // ===================================================
-// TABS
+// PEDIDOS
 // ===================================================
 
-function inicializarTabs() {
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            cambiarTab(tabId);
+async function cargarPedidos(forceRefresh = false) {
+    if (!vendedorActual) return;
+    if (cargandoPedidos) return;
+    
+    cargandoPedidos = true;
+    const container = document.getElementById('pedidos-container');
+    container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>`;
+    
+    try {
+        const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
+        if (response.error) throw new Error(response.error);
+        
+        pedidos = (response.pedidos || []).map(p => ({ ...p, estado: normalizarEstado(p.estado) }));
+        actualizarContadores();
+        actualizarBadges();
+        renderizarPedidos();
+        
+        if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
+    } catch (error) {
+        console.error('Error cargar pedidos:', error);
+        container.innerHTML = `<div class="error-mensaje"><p>⚠️ Error al cargar pedidos</p></div>`;
+    } finally {
+        cargandoPedidos = false;
+    }
+}
+
+async function actualizarPedidos() {
+    if (!vendedorActual) return;
+    const btnRefresh = document.getElementById('btn-refresh');
+    if (btnRefresh) {
+        btnRefresh.disabled = true;
+        btnRefresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    await cargarPedidos(true);
+    if (btnRefresh) {
+        btnRefresh.disabled = false;
+        btnRefresh.innerHTML = '<i class="fas fa-sync-alt"></i>';
+    }
+}
+
+function actualizarContadores() {
+    const contarPorEstado = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
+    pedidos.forEach(p => { if (contarPorEstado[p.estado] !== undefined) contarPorEstado[p.estado]++; });
+    
+    // Filtros escritorio
+    const btnPreparando = document.querySelector('.filtro-btn[data-estado="preparando"]');
+    const btnEnPreparacion = document.querySelector('.filtro-btn[data-estado="en preparacion"]');
+    const btnEnCamino = document.querySelector('.filtro-btn[data-estado="en camino"]');
+    const btnEntregado = document.querySelector('.filtro-btn[data-estado="entregado"]');
+    
+    if (btnPreparando) btnPreparando.innerHTML = `📦 Nuevos <span class="filtro-count">${contarPorEstado.preparando}</span>`;
+    if (btnEnPreparacion) btnEnPreparacion.innerHTML = `👨‍🍳 Preparación <span class="filtro-count">${contarPorEstado['en preparacion']}</span>`;
+    if (btnEnCamino) btnEnCamino.innerHTML = `🚚 En camino <span class="filtro-count">${contarPorEstado['en camino']}</span>`;
+    if (btnEntregado) btnEntregado.innerHTML = `✅ Entregados <span class="filtro-count">${contarPorEstado.entregado}</span>`;
+    
+    // Contadores móvil
+    const countPreparando = document.getElementById('count-preparando');
+    const countPreparacion = document.getElementById('count-preparacion');
+    const countCamino = document.getElementById('count-camino');
+    const countEntregado = document.getElementById('count-entregado');
+    
+    if (countPreparando) countPreparando.textContent = contarPorEstado.preparando;
+    if (countPreparacion) countPreparacion.textContent = contarPorEstado['en preparacion'];
+    if (countCamino) countCamino.textContent = contarPorEstado['en camino'];
+    if (countEntregado) countEntregado.textContent = contarPorEstado.entregado;
+}
+
+function actualizarBadges() {
+    const badgePedidos = document.getElementById('badge-pedidos');
+    if (badgePedidos) badgePedidos.textContent = pedidos.length;
+    
+    const badgeProductos = document.getElementById('badge-productos');
+    if (badgeProductos) badgeProductos.textContent = productos.length;
+}
+
+function renderizarPedidos() {
+    const container = document.getElementById('pedidos-container');
+    let pedidosFiltrados = filtroActual !== 'todos' ? pedidos.filter(p => p.estado === filtroActual) : pedidos;
+    
+    if (pedidosFiltrados.length === 0) {
+        container.innerHTML = `<div class="sin-pedidos"><p>📭 No hay pedidos</p></div>`;
+        return;
+    }
+    
+    container.innerHTML = pedidosFiltrados.map(p => `
+        <div class="pedido-card">
+            <div class="pedido-header">
+                <div class="pedido-id">Pedido #${p.id}</div>
+                <div class="pedido-fecha">${formatearFecha(p.fecha)}</div>
+            </div>
+            <div class="pedido-cliente">
+                <strong><i class="fas fa-user"></i> ${escapeHTML(p.cliente_nombre)}</strong>
+                <span><i class="fas fa-phone"></i> ${p.cliente_telefono}</span>
+                <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(p.direccion || 'Sin dirección')}</span>
+                <span><i class="fas fa-money-bill-wave"></i> ${formatearMetodoPago(p.metodo_pago)}</span>
+            </div>
+            <div class="pedido-productos">
+                <strong>Productos:</strong>
+                <ul>${p.productos ? p.productos.map(pr => `<li>${pr.cantidad}x ${escapeHTML(pr.nombre)} - ${formatearPrecio(pr.precio * pr.cantidad)}</li>`).join('') : '<li>No hay detalles</li>'}</ul>
+                <div class="pedido-total">Total: ${formatearPrecio(p.total)}</div>
+            </div>
+            <div class="pedido-actions">
+                <div class="estado-actual"><span class="estado-badge estado-${p.estado.replace(' ', '-')}">${getEstadoTexto(p.estado)}</span></div>
+                <div class="botones-estado">
+                    ${p.estado !== 'preparando' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">📦 Nuevo</button>` : ''}
+                    ${p.estado !== 'en preparacion' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">👨‍🍳 Preparar</button>` : ''}
+                    ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">🚚 En camino</button>` : ''}
+                    ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">✅ Entregar</button>` : ''}
+                </div>
+                <div class="botones-acciones">
+                    <button class="btn-notificar" onclick="notificarCliente(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
+                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getEstadoTexto(estado) {
+    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
+    return textos[estado] || estado.toUpperCase();
+}
+
+async function actualizarEstado(pedidoId, nuevoEstado, boton) {
+    if (!boton) return;
+    const textoOriginal = boton.innerHTML;
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        const response = await postAPI('actualizarEstado', { pedidoId, estado: nuevoEstado });
+        if (response && response.success) {
+            mostrarToast(`Pedido #${pedidoId} actualizado`, 'success');
+            const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+            if (pedido) pedido.estado = nuevoEstado;
+            actualizarContadores();
+            renderizarPedidos();
+        } else throw new Error(response?.error || 'Error');
+    } catch (error) {
+        mostrarToast('Error al actualizar', 'error');
+        boton.innerHTML = textoOriginal;
+        boton.disabled = false;
+    }
+}
+
+async function cancelarPedido(pedidoId, boton) {
+    if (!confirm('⚠️ ¿Cancelar este pedido? Se eliminará permanentemente.')) return;
+    if (!boton) return;
+    const textoOriginal = boton.innerHTML;
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        const response = await postAPI('cancelarPedido', { pedidoId });
+        if (response && response.success) {
+            mostrarToast(`Pedido #${pedidoId} cancelado`, 'success');
+            pedidos = pedidos.filter(p => p.id.toString() !== pedidoId.toString());
+            actualizarContadores();
+            renderizarPedidos();
+        } else throw new Error(response?.error || 'Error');
+    } catch (error) {
+        mostrarToast('Error al cancelar', 'error');
+        boton.innerHTML = textoOriginal;
+        boton.disabled = false;
+    }
+}
+
+function notificarCliente(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    if (!boton) return;
+    const textoOriginal = boton.innerHTML;
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    const estadoTexto = {
+        'preparando': '🍳 hemos recibido tu pedido',
+        'en preparacion': '👨‍🍳 estamos preparando tu pedido',
+        'en camino': '🚚 tu pedido está en camino',
+        'entregado': '✅ tu pedido ha sido entregado'
+    };
+    const mensaje = `🍕 *WANT* 🍕\nHola ${pedido.cliente_nombre},\n${estadoTexto[pedido.estado] || `tu pedido está ${pedido.estado}`}.\n\nPedido #${pedido.id}\nTotal: ${formatearPrecio(pedido.total)}`;
+    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+    setTimeout(() => { window.open(url, '_blank'); boton.innerHTML = textoOriginal; boton.disabled = false; }, 500);
+}
+
+function inicializarFiltros() {
+    const filtros = document.querySelectorAll('.filtro-btn');
+    filtros.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filtros.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filtroActual = btn.getAttribute('data-estado');
+            renderizarPedidos();
         });
     });
-}
-
-function cambiarTab(tabId) {
-    tabActual = tabId;
-    
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-tab') === tabId) {
-            btn.classList.add('active');
-        }
-    });
-    
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-    
-    if (tabId === 'productos') {
-        cargarProductos();
-    }
 }
 
 // ===================================================
@@ -410,6 +750,7 @@ async function cargarProductos(forceRefresh = false) {
         
         productos = response.productos || [];
         renderizarProductosAdmin();
+        actualizarBadges();
         
     } catch (error) {
         console.error('Error cargar productos:', error);
@@ -421,7 +762,7 @@ function renderizarProductosAdmin() {
     const container = document.getElementById('productos-admin-grid');
     
     if (productos.length === 0) {
-        container.innerHTML = `<div class="sin-pedidos"><p>📭 No tenés productos cargados</p><button class="btn-primary" onclick="mostrarModalProducto()">Agregar primer producto</button></div>`;
+        container.innerHTML = `<div class="sin-pedidos"><p>📭 No tenés productos cargados</p><button class="btn-primary btn-add-producto" onclick="mostrarModalProducto()"><i class="fas fa-plus"></i> Agregar producto</button></div>`;
         return;
     }
     
@@ -630,13 +971,31 @@ function cargarPerfil() {
     if (!vendedorActual) return;
     
     document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
-    document.getElementById('perfil-email').value = vendedorActual.email || '';
     document.getElementById('perfil-telefono').value = vendedorActual.telefono || '';
     document.getElementById('perfil-direccion').value = vendedorActual.direccion || '';
     document.getElementById('perfil-horario').value = vendedorActual.horario || '';
     
     if (vendedorActual.logo_url) {
-        document.getElementById('logo-preview').innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 150px;">`;
+        document.getElementById('logo-preview').innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 100px; border-radius: 12px;">`;
+    }
+    
+    // Botón subir logo
+    const btnUploadLogo = document.getElementById('btn-upload-logo');
+    const logoInput = document.getElementById('perfil-logo');
+    if (btnUploadLogo && logoInput) {
+        btnUploadLogo.addEventListener('click', () => {
+            logoInput.click();
+        });
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('logo-preview').innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
     
     const form = document.getElementById('perfil-form');
@@ -690,7 +1049,8 @@ async function actualizarPerfil() {
         if (response && response.success) {
             mostrarToast('Perfil actualizado', 'success');
             vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl };
-            document.getElementById('vendedor-info').innerHTML = `<p><strong>${escapeHTML(nombre)}</strong> | ${vendedorActual.email}</p>`;
+            document.getElementById('panel-nombre').textContent = nombre;
+            document.getElementById('perfil-nombre-display').textContent = nombre;
             document.getElementById('perfil-new-password').value = '';
         } else {
             throw new Error(response?.error || 'Error al actualizar');
@@ -699,185 +1059,6 @@ async function actualizarPerfil() {
         console.error('Error actualizar perfil:', error);
         mostrarToast('Error al actualizar perfil', 'error');
     }
-}
-
-// ===================================================
-// PEDIDOS
-// ===================================================
-
-async function cargarPedidos(forceRefresh = false) {
-    if (!vendedorActual) return;
-    if (cargandoPedidos) return;
-    
-    cargandoPedidos = true;
-    const container = document.getElementById('pedidos-container');
-    container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>`;
-    
-    try {
-        const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
-        if (response.error) throw new Error(response.error);
-        
-        pedidos = (response.pedidos || []).map(p => ({ ...p, estado: normalizarEstado(p.estado) }));
-        actualizarContadores();
-        renderizarPedidos();
-        
-        if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
-    } catch (error) {
-        console.error('Error cargar pedidos:', error);
-        container.innerHTML = `<div class="error-mensaje"><p>⚠️ Error al cargar pedidos</p></div>`;
-    } finally {
-        cargandoPedidos = false;
-    }
-}
-
-async function actualizarPedidos() {
-    if (!vendedorActual) return;
-    const btnRefresh = document.getElementById('btn-refresh');
-    if (btnRefresh) {
-        btnRefresh.disabled = true;
-        btnRefresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
-    }
-    await cargarPedidos(true);
-    if (btnRefresh) {
-        btnRefresh.disabled = false;
-        btnRefresh.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
-    }
-}
-
-function actualizarContadores() {
-    const contarPorEstado = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
-    pedidos.forEach(p => { if (contarPorEstado[p.estado] !== undefined) contarPorEstado[p.estado]++; });
-    
-    const btnPreparando = document.querySelector('.filtro-btn[data-estado="preparando"]');
-    const btnEnPreparacion = document.querySelector('.filtro-btn[data-estado="en preparacion"]');
-    const btnEnCamino = document.querySelector('.filtro-btn[data-estado="en camino"]');
-    const btnEntregado = document.querySelector('.filtro-btn[data-estado="entregado"]');
-    
-    if (btnPreparando) btnPreparando.innerHTML = `📦 Nuevos pedidos (${contarPorEstado.preparando})`;
-    if (btnEnPreparacion) btnEnPreparacion.innerHTML = `👨‍🍳 En preparación (${contarPorEstado['en preparacion']})`;
-    if (btnEnCamino) btnEnCamino.innerHTML = `🚚 En camino (${contarPorEstado['en camino']})`;
-    if (btnEntregado) btnEntregado.innerHTML = `✅ Entregados (${contarPorEstado.entregado})`;
-}
-
-function renderizarPedidos() {
-    const container = document.getElementById('pedidos-container');
-    let pedidosFiltrados = filtroActual !== 'todos' ? pedidos.filter(p => p.estado === filtroActual) : pedidos;
-    
-    if (pedidosFiltrados.length === 0) {
-        container.innerHTML = `<div class="sin-pedidos"><p>📭 No hay pedidos</p></div>`;
-        return;
-    }
-    
-    container.innerHTML = pedidosFiltrados.map(p => `
-        <div class="pedido-card">
-            <div class="pedido-header">
-                <div class="pedido-id">Pedido #${p.id}</div>
-                <div class="pedido-fecha">${formatearFecha(p.fecha)}</div>
-            </div>
-            <div class="pedido-cliente">
-                <strong><i class="fas fa-user"></i> ${escapeHTML(p.cliente_nombre)}</strong>
-                <span><i class="fas fa-phone"></i> ${p.cliente_telefono}</span>
-                <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(p.direccion || 'Sin dirección')}</span>
-                <span><i class="fas fa-money-bill-wave"></i> ${formatearMetodoPago(p.metodo_pago)}</span>
-            </div>
-            <div class="pedido-productos">
-                <strong>Productos:</strong>
-                <ul>${p.productos ? p.productos.map(pr => `<li>${pr.cantidad}x ${escapeHTML(pr.nombre)} - ${formatearPrecio(pr.precio * pr.cantidad)}</li>`).join('') : '<li>No hay detalles</li>'}</ul>
-                <div class="pedido-total">Total: ${formatearPrecio(p.total)}</div>
-            </div>
-            <div class="pedido-actions">
-                <div class="estado-actual"><span class="estado-badge estado-${p.estado.replace(' ', '-')}">${getEstadoTexto(p.estado)}</span></div>
-                <div class="botones-estado">
-                    ${p.estado !== 'preparando' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">📦 Nuevo</button>` : ''}
-                    ${p.estado !== 'en preparacion' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">👨‍🍳 Preparar</button>` : ''}
-                    ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">🚚 En camino</button>` : ''}
-                    ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">✅ Entregar</button>` : ''}
-                </div>
-                <div class="botones-acciones">
-                    <button class="btn-notificar" onclick="notificarCliente(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
-                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
-    return textos[estado] || estado.toUpperCase();
-}
-
-async function actualizarEstado(pedidoId, nuevoEstado, boton) {
-    if (!boton) return;
-    const textoOriginal = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    try {
-        const response = await postAPI('actualizarEstado', { pedidoId, estado: nuevoEstado });
-        if (response && response.success) {
-            mostrarToast(`Pedido #${pedidoId} actualizado`, 'success');
-            const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-            if (pedido) pedido.estado = nuevoEstado;
-            actualizarContadores();
-            renderizarPedidos();
-        } else throw new Error(response?.error || 'Error');
-    } catch (error) {
-        mostrarToast('Error al actualizar', 'error');
-        boton.innerHTML = textoOriginal;
-        boton.disabled = false;
-    }
-}
-
-async function cancelarPedido(pedidoId, boton) {
-    if (!confirm('⚠️ ¿Cancelar este pedido? Se eliminará permanentemente.')) return;
-    if (!boton) return;
-    const textoOriginal = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    try {
-        const response = await postAPI('cancelarPedido', { pedidoId });
-        if (response && response.success) {
-            mostrarToast(`Pedido #${pedidoId} cancelado`, 'success');
-            pedidos = pedidos.filter(p => p.id.toString() !== pedidoId.toString());
-            actualizarContadores();
-            renderizarPedidos();
-        } else throw new Error(response?.error || 'Error');
-    } catch (error) {
-        mostrarToast('Error al cancelar', 'error');
-        boton.innerHTML = textoOriginal;
-        boton.disabled = false;
-    }
-}
-
-function notificarCliente(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    if (!boton) return;
-    const textoOriginal = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
-    const estadoTexto = {
-        'preparando': '🍳 hemos recibido tu pedido',
-        'en preparacion': '👨‍🍳 estamos preparando tu pedido',
-        'en camino': '🚚 tu pedido está en camino',
-        'entregado': '✅ tu pedido ha sido entregado'
-    };
-    const mensaje = `🍕 *WANT* 🍕\nHola ${pedido.cliente_nombre},\n${estadoTexto[pedido.estado] || `tu pedido está ${pedido.estado}`}.\n\nPedido #${pedido.id}\nTotal: ${formatearPrecio(pedido.total)}`;
-    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
-    setTimeout(() => { window.open(url, '_blank'); boton.innerHTML = textoOriginal; boton.disabled = false; }, 500);
-}
-
-function inicializarFiltros() {
-    const filtros = document.querySelectorAll('.filtro-btn');
-    filtros.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filtros.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            filtroActual = btn.getAttribute('data-estado');
-            renderizarPedidos();
-        });
-    });
 }
 
 // ===================================================
@@ -892,25 +1073,6 @@ function formatearFecha(fechaISO) {
 function formatearMetodoPago(metodo) {
     const metodos = { 'efectivo': 'Efectivo', 'transferencia': 'Transferencia', 'mercado_pago': 'Mercado Pago' };
     return metodos[metodo] || metodo || 'No especificado';
-}
-
-function inicializarMenu() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    const menuClose = document.getElementById('menu-close');
-    const contactoLink = document.getElementById('contacto-link');
-    const contactoLinkMobile = document.getElementById('contacto-link-mobile');
-    const contactoSection = document.getElementById('contacto-section');
-
-    function openMenu() { if (mobileMenu) mobileMenu.classList.add('active'); if (menuOverlay) menuOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeMenu() { if (mobileMenu) mobileMenu.classList.remove('active'); if (menuOverlay) menuOverlay.classList.remove('active'); document.body.style.overflow = ''; }
-    if (menuToggle) menuToggle.addEventListener('click', openMenu);
-    if (menuClose) menuClose.addEventListener('click', closeMenu);
-    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-    function mostrarContacto(e) { e.preventDefault(); closeMenu(); if (contactoSection) { contactoSection.style.display = 'block'; contactoSection.scrollIntoView({ behavior: 'smooth' }); } }
-    if (contactoLink) contactoLink.addEventListener('click', mostrarContacto);
-    if (contactoLinkMobile) contactoLinkMobile.addEventListener('click', mostrarContacto);
 }
 
 function escapeHTML(str) {
