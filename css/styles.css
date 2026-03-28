@@ -326,6 +326,34 @@ body {
     justify-content: center;
 }
 
+.negocio-info {
+    padding: 20px;
+}
+
+.negocio-nombre {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.negocio-direccion {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.negocio-horario {
+    font-size: 0.8rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 /* ===================================================
    PRODUCTOS (tienda)
    =================================================== */
@@ -411,17 +439,26 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
 }
 
 .producto-imagen img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: #f8f8f8;
+    padding: 15px;
 }
 
 .producto-imagen .placeholder-img {
     font-size: 2.5rem;
     color: #ccc;
+    background: #f8f8f8;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .producto-info {
@@ -777,6 +814,10 @@ body {
         height: 100px;
     }
 
+    .negocio-logo img {
+        padding: 8px;
+    }
+
     .negocio-info {
         padding: 10px;
     }
@@ -792,6 +833,10 @@ body {
 
     .producto-imagen {
         height: 120px;
+    }
+
+    .producto-imagen img {
+        padding: 10px;
     }
 
     .producto-info {
@@ -1248,17 +1293,20 @@ body {
 .producto-admin-imagen {
     width: 100%;
     height: 150px;
-    background: #f5f5f5;
+    background: #f8f8f8;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
 }
 
 .producto-admin-imagen img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: #f8f8f8;
+    padding: 10px;
 }
 
 .producto-admin-info {
@@ -1645,12 +1693,15 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
 }
 
 .producto-admin-imagen img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: #f8f8f8;
+    padding: 10px;
 }
 
 .producto-admin-info {
@@ -2153,4 +2204,3 @@ body {
         margin-bottom: 15px;
     }
 }
-
