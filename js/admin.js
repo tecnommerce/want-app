@@ -3,7 +3,7 @@
 // ===================================================
 
 // Configuración de Cloudinary
-const CLOUDINARY_CLOUD_NAME = 'TU_CLOUD_NAME'; // Reemplazá con tu cloud name
+const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r'; // Reemplazá con tu cloud name
 const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
 
 // Variables globales
