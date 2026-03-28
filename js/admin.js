@@ -1,10 +1,10 @@
 // ===================================================
 // ADMIN - Panel con autenticación (email + contraseña)
-// Versión completa con nuevo diseño
+// Versión completa con login rediseñado
 // ===================================================
 
 // Configuración de Cloudinary
-const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r'; // Reemplazá con tu cloud name
+const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
 const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
 
 // Variables globales
@@ -28,7 +28,7 @@ async function hashPassword(password) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Guardar sesión
+// Guardar sesión (temporal)
 function guardarSesion(vendedor) {
     sessionStorage.setItem('vendedor_sesion', JSON.stringify({
         id: vendedor.id,
@@ -37,26 +37,55 @@ function guardarSesion(vendedor) {
     }));
 }
 
-// Cargar sesión
-function cargarSesion() {
-    const sesion = sessionStorage.getItem('vendedor_sesion');
-    if (sesion) {
-        return JSON.parse(sesion);
+// Cargar sesión guardada (al iniciar la página)
+function cargarSesionGuardada() {
+    // Primero verificar localStorage (remember me)
+    const localSesion = localStorage.getItem('want_sesion');
+    if (localSesion) {
+        try {
+            const sesion = JSON.parse(localSesion);
+            if (sesion && sesion.id) {
+                cargarVendedorPorId(sesion.id);
+                return true;
+            }
+        } catch (e) {
+            console.error('Error al cargar sesión local:', e);
+        }
     }
-    return null;
+    
+    // Luego verificar sessionStorage
+    const sessionSesion = sessionStorage.getItem('vendedor_sesion');
+    if (sessionSesion) {
+        try {
+            const sesion = JSON.parse(sessionSesion);
+            if (sesion && sesion.id) {
+                cargarVendedorPorId(sesion.id);
+                return true;
+            }
+        } catch (e) {
+            console.error('Error al cargar sesión:', e);
+        }
+    }
+    
+    return false;
 }
 
 // Cerrar sesión
 function cerrarSesion() {
+    localStorage.removeItem('want_sesion');
     sessionStorage.removeItem('vendedor_sesion');
     // Ocultar header y menú móvil
-    document.getElementById('header-admin').style.display = 'none';
-    document.getElementById('mobile-menu-admin').style.display = 'none';
-    document.getElementById('menu-overlay-admin').style.display = 'none';
+    const headerAdmin = document.getElementById('header-admin');
+    const mobileMenu = document.getElementById('mobile-menu-admin');
+    const menuOverlay = document.getElementById('menu-overlay-admin');
+    if (headerAdmin) headerAdmin.style.display = 'none';
+    if (mobileMenu) mobileMenu.style.display = 'none';
+    if (menuOverlay) menuOverlay.style.display = 'none';
     document.getElementById('admin-panel').style.display = 'none';
     document.getElementById('admin-auth').style.display = 'flex';
     // Limpiar formularios
     document.getElementById('login-form').reset();
+    document.getElementById('remember-me').checked = false;
 }
 
 // ===================================================
@@ -82,10 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarMenuGeneral();
     inicializarAuthTabs();
     
-    // Verificar sesión guardada
-    const sesion = cargarSesion();
-    if (sesion) {
-        cargarVendedorPorId(sesion.id);
+    // Cargar sesión guardada
+    if (!cargarSesionGuardada()) {
+        console.log('No hay sesión guardada, mostrando login');
     }
 });
 
@@ -233,21 +261,63 @@ function cambiarTab(tabId) {
 }
 
 // ===================================================
-// AUTENTICACIÓN - TABS
+// AUTENTICACIÓN - TABS Y LOGIN (ACTUALIZADO)
 // ===================================================
 
 function inicializarAuthTabs() {
-    const tabs = document.querySelectorAll('.auth-tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            document.querySelectorAll('.auth-panel').forEach(panel => panel.style.display = 'none');
-            document.getElementById(`${tabId}-panel`).style.display = 'block';
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                btn.querySelector('i').classList.toggle('fa-eye');
+                btn.querySelector('i').classList.toggle('fa-eye-slash');
+            }
         });
     });
+    
+    // Mostrar panel de registro
+    const btnShowRegister = document.getElementById('btn-show-register');
+    if (btnShowRegister) {
+        btnShowRegister.addEventListener('click', () => {
+            document.getElementById('login-panel').style.display = 'none';
+            document.getElementById('register-panel').style.display = 'block';
+            document.getElementById('recover-panel').style.display = 'none';
+        });
+    }
+    
+    // Mostrar panel de recuperación
+    const btnShowRecover = document.getElementById('btn-show-recover');
+    if (btnShowRecover) {
+        btnShowRecover.addEventListener('click', () => {
+            document.getElementById('login-panel').style.display = 'none';
+            document.getElementById('register-panel').style.display = 'none';
+            document.getElementById('recover-panel').style.display = 'block';
+        });
+    }
+    
+    // Volver desde registro
+    const backToLogin = document.getElementById('back-to-login');
+    if (backToLogin) {
+        backToLogin.addEventListener('click', () => {
+            document.getElementById('login-panel').style.display = 'block';
+            document.getElementById('register-panel').style.display = 'none';
+            document.getElementById('recover-panel').style.display = 'none';
+        });
+    }
+    
+    // Volver desde recuperación
+    const backToLoginRecover = document.getElementById('back-to-login-recover');
+    if (backToLoginRecover) {
+        backToLoginRecover.addEventListener('click', () => {
+            document.getElementById('login-panel').style.display = 'block';
+            document.getElementById('register-panel').style.display = 'none';
+            document.getElementById('recover-panel').style.display = 'none';
+        });
+    }
     
     // Login form
     const loginForm = document.getElementById('login-form');
@@ -286,12 +356,13 @@ function inicializarAuthTabs() {
 }
 
 // ===================================================
-// LOGIN
+// LOGIN (CON RECORDARME)
 // ===================================================
 
 async function login() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
+    const rememberMe = document.getElementById('remember-me')?.checked || false;
     
     if (!email || !password) {
         mostrarToast('Completá todos los campos', 'error');
@@ -305,7 +376,23 @@ async function login() {
         
         if (response.success && response.vendedor) {
             vendedorActual = response.vendedor;
-            guardarSesion(vendedorActual);
+            
+            if (rememberMe) {
+                // Guardar sesión con remember me (usando localStorage)
+                const sesionData = {
+                    id: vendedorActual.id,
+                    email: vendedorActual.email,
+                    nombre: vendedorActual.nombre,
+                    remember: true
+                };
+                localStorage.setItem('want_sesion', JSON.stringify(sesionData));
+                sessionStorage.removeItem('vendedor_sesion');
+            } else {
+                // Guardar sesión temporal (sessionStorage)
+                guardarSesion(vendedorActual);
+                localStorage.removeItem('want_sesion');
+            }
+            
             await iniciarPanel(vendedorActual);
             mostrarToast(`Bienvenido ${vendedorActual.nombre}`, 'success');
         } else {
@@ -364,8 +451,12 @@ async function register() {
         
         if (response.success) {
             mostrarToast('¡Registro exitoso! Ahora podés iniciar sesión', 'success');
-            document.querySelector('.auth-tab[data-tab="login"]').click();
+            // Limpiar y volver al login
+            document.getElementById('login-panel').style.display = 'block';
+            document.getElementById('register-panel').style.display = 'none';
+            document.getElementById('recover-panel').style.display = 'none';
             document.getElementById('login-email').value = email;
+            document.getElementById('register-form').reset();
         } else {
             throw new Error(response.error || 'Error al registrar');
         }
@@ -439,9 +530,12 @@ async function resetearPassword() {
         
         if (response.success) {
             mostrarToast('Contraseña restablecida. Ahora podés iniciar sesión', 'success');
-            document.querySelector('.auth-tab[data-tab="login"]').click();
-            document.getElementById('login-email').value = email;
+            // Volver al login
+            document.getElementById('login-panel').style.display = 'block';
+            document.getElementById('register-panel').style.display = 'none';
+            document.getElementById('recover-panel').style.display = 'none';
             document.getElementById('recover-code-section').style.display = 'none';
+            document.getElementById('login-email').value = email;
             document.getElementById('recover-form').reset();
         } else {
             throw new Error(response.error || 'Código inválido');
