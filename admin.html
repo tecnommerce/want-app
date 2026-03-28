@@ -53,17 +53,158 @@
         <div class="container">
             <!-- Panel de autenticación -->
             <div class="admin-auth" id="admin-auth">
-                <div class="auth-card">
-                    <div class="auth-logo">
-                        <h1 class="auth-logo-text">Want<span class="logo-dot">.</span></h1>
-                        <p class="auth-subtitle">Panel de vendedores</p>
+    <!-- Botón volver atrás -->
+    <button class="btn-back" id="btn-back" onclick="window.location.href='index.html'">
+        <i class="fas fa-arrow-left"></i> Volver
+    </button>
+    
+    <div class="auth-card">
+        <div class="auth-logo">
+            <h1 class="auth-logo-text">Want<span class="logo-dot">.</span></h1>
+            <p class="auth-subtitle">Panel de vendedores</p>
+        </div>
+        
+        <!-- Login Panel (visible por defecto) -->
+        <div class="auth-panel active" id="login-panel">
+            <form id="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="login-email" placeholder="tu@email.com" required>
+                </div>
+                <div class="form-group password-group">
+                    <label><i class="fas fa-lock"></i> Contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                        <button type="button" class="toggle-password" data-target="login-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
-                    
-                    <div class="auth-tabs">
-                        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
-                        <button class="auth-tab" data-tab="register">Registrarse</button>
-                        <button class="auth-tab" data-tab="recover">Recuperar</button>
+                </div>
+                <div class="form-group remember-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remember-me"> Recordarme
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Ingresar
+                </button>
+            </form>
+            
+            <div class="auth-divider">
+                <span>¿No tenés cuenta?</span>
+            </div>
+            
+            <button class="btn btn-outline btn-block" id="btn-show-register">
+                <i class="fas fa-user-plus"></i> Registrarse
+            </button>
+            
+            <div class="auth-links">
+                <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
+            </div>
+        </div>
+
+        <!-- Register Panel (oculto inicialmente) -->
+        <div class="auth-panel" id="register-panel" style="display: none;">
+            <button class="back-to-login" id="back-to-login">
+                <i class="fas fa-arrow-left"></i> Volver al inicio
+            </button>
+            
+            <form id="register-form">
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label><i class="fas fa-store"></i> Nombre del negocio *</label>
+                        <input type="text" id="reg-nombre" placeholder="Ej: Pizzería Don Juan" required>
                     </div>
+                    <div class="form-group half">
+                        <label><i class="fas fa-envelope"></i> Email *</label>
+                        <input type="email" id="reg-email" placeholder="tu@email.com" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label><i class="fab fa-whatsapp"></i> Teléfono *</label>
+                        <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
+                    </div>
+                    <div class="form-group half">
+                        <label><i class="fas fa-map-marker-alt"></i> Dirección *</label>
+                        <input type="text" id="reg-direccion" placeholder="Calle, número" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Horario de atención</label>
+                    <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label><i class="fas fa-lock"></i> Contraseña *</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required>
+                            <button type="button" class="toggle-password" data-target="reg-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group half">
+                        <label><i class="fas fa-lock"></i> Confirmar *</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-password2" placeholder="Repetir contraseña" required>
+                            <button type="button" class="toggle-password" data-target="reg-password2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+            </form>
+        </div>
+
+        <!-- Recover Panel (oculto inicialmente) -->
+        <div class="auth-panel" id="recover-panel" style="display: none;">
+            <button class="back-to-login" id="back-to-login-recover">
+                <i class="fas fa-arrow-left"></i> Volver al inicio
+            </button>
+            
+            <form id="recover-form">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="recover-email" placeholder="tu@email.com" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-paper-plane"></i> Enviar código
+                </button>
+            </form>
+            <div id="recover-code-section" style="display: none; margin-top: 20px;">
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> Código de recuperación</label>
+                    <input type="text" id="recover-code" placeholder="Código de 6 dígitos">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Nueva contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="recover-new-password" placeholder="Mínimo 6 caracteres">
+                        <button type="button" class="toggle-password" data-target="recover-new-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Confirmar</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="recover-new-password2" placeholder="Repetir contraseña">
+                        <button type="button" class="toggle-password" data-target="recover-new-password2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block" id="btn-reset-password">
+                    <i class="fas fa-save"></i> Restablecer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <!-- Login -->
                     <div class="auth-panel active" id="login-panel">

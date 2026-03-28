@@ -1950,3 +1950,194 @@ body {
         display: none !important;
     }
 }
+
+/* ===================================================
+   LOGIN REDISEÑADO
+   =================================================== */
+
+/* Botón volver atrás */
+.btn-back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: white;
+    border: 1px solid #eee;
+    padding: 10px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.btn-back:hover {
+    background: #FF5A00;
+    color: white;
+    border-color: #FF5A00;
+}
+
+.admin-auth {
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+/* Wrapper para contraseña con toggle */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    flex: 1;
+    padding-right: 45px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    font-size: 1rem;
+    padding: 8px;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover {
+    color: #FF5A00;
+}
+
+/* Checkbox recordarme */
+.remember-group {
+    margin-bottom: 20px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.checkbox-label input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #FF5A00;
+}
+
+/* Divisor */
+.auth-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.auth-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #eee;
+}
+
+.auth-divider span {
+    background: white;
+    padding: 0 15px;
+    position: relative;
+    color: #888;
+    font-size: 0.8rem;
+}
+
+/* Enlaces */
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: #FF5A00;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.link-btn:hover {
+    color: #e04e00;
+}
+
+/* Botón volver dentro de paneles */
+.back-to-login {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.back-to-login:hover {
+    color: #FF5A00;
+}
+
+/* Botón bloque */
+.btn-block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #FF5A00;
+    color: #FF5A00;
+}
+
+.btn-outline:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+/* Ajuste responsive */
+@media (max-width: 768px) {
+    .btn-back {
+        top: 10px;
+        left: 10px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .half {
+        width: 100%;
+    }
+}
