@@ -3,7 +3,7 @@
 // ===================================================
 
 // Configuración de la API
-const API_URL = 'https://script.google.com/macros/s/AKfycbzUdhEDY1ESQk3iv4M_BbG4jMjPm0B8/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzNvzxNU5KGH1Aj48qX5KoQf1MG__n5DFn-Ga9MWB9asb7aS9fwwYjsvcC2bTlfMBNH/exec';
 
 // ===================================================
 // FUNCIONES DE API (copiadas de utils.js)
