@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel completo con gestión de productos
+// ADMIN - Panel con autenticación (email + contraseña)
 // ===================================================
 
 // Configuración de Cloudinary
@@ -13,6 +13,43 @@ let productos = [];
 let filtroActual = 'preparando';
 let cargandoPedidos = false;
 let tabActual = 'pedidos';
+
+// ===================================================
+// UTILIDADES DE AUTENTICACIÓN
+// ===================================================
+
+// Función simple para hashear contraseñas (usando SHA-256)
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Guardar sesión
+function guardarSesion(vendedor) {
+    sessionStorage.setItem('vendedor_sesion', JSON.stringify({
+        id: vendedor.id,
+        email: vendedor.email,
+        nombre: vendedor.nombre
+    }));
+}
+
+// Cargar sesión
+function cargarSesion() {
+    const sesion = sessionStorage.getItem('vendedor_sesion');
+    if (sesion) {
+        return JSON.parse(sesion);
+    }
+    return null;
+}
+
+// Cerrar sesión
+function cerrarSesion() {
+    sessionStorage.removeItem('vendedor_sesion');
+    location.reload();
+}
 
 // ===================================================
 // NORMALIZACIÓN DE ESTADOS
@@ -29,86 +66,298 @@ function normalizarEstado(estado) {
 }
 
 // ===================================================
-// AUTENTICACIÓN
+// AUTENTICACIÓN - TABS
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 Panel de administración iniciado');
     inicializarMenu();
+    inicializarAuthTabs();
     
-    const btnIngresar = document.getElementById('btn-ingresar');
-    if (btnIngresar) {
-        btnIngresar.addEventListener('click', ingresarVendedor);
+    // Verificar sesión guardada
+    const sesion = cargarSesion();
+    if (sesion) {
+        // Intentar cargar vendedor con la sesión
+        cargarVendedorPorId(sesion.id);
     }
+});
+
+function inicializarAuthTabs() {
+    const tabs = document.querySelectorAll('.auth-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            document.querySelectorAll('.auth-panel').forEach(panel => panel.style.display = 'none');
+            document.getElementById(`${tabId}-panel`).style.display = 'block';
+        });
+    });
     
-    const inputId = document.getElementById('vendedor-id');
-    if (inputId) {
-        inputId.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') ingresarVendedor();
+    // Login form
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await login();
         });
     }
     
-    // Inicializar tabs
-    inicializarTabs();
-});
+    // Register form
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await register();
+        });
+    }
+    
+    // Recover form
+    const recoverForm = document.getElementById('recover-form');
+    if (recoverForm) {
+        recoverForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await solicitarRecuperacion();
+        });
+    }
+    
+    // Reset password button
+    const btnReset = document.getElementById('btn-reset-password');
+    if (btnReset) {
+        btnReset.addEventListener('click', async () => {
+            await resetearPassword();
+        });
+    }
+    
+    // Logout button
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            cerrarSesion();
+        });
+    }
+}
 
-async function ingresarVendedor() {
-    const vendedorId = document.getElementById('vendedor-id').value.trim();
-    if (!vendedorId) {
-        mostrarToast('Ingresá un ID de vendedor', 'error');
+// ===================================================
+// LOGIN
+// ===================================================
+
+async function login() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    if (!email || !password) {
+        mostrarToast('Completá todos los campos', 'error');
         return;
     }
     
     try {
-        const response = await callAPI('getVendedores', {}, true);
-        if (response.error || !response.success) {
-            throw new Error(response.error || 'Error al cargar vendedores');
+        mostrarToast('Validando credenciales...', 'info');
+        
+        const response = await callAPI('loginVendedor', { email, password: await hashPassword(password) }, true);
+        
+        if (response.success && response.vendedor) {
+            vendedorActual = response.vendedor;
+            guardarSesion(vendedorActual);
+            await iniciarPanel(vendedorActual);
+            mostrarToast(`Bienvenido ${vendedorActual.nombre}`, 'success');
+        } else {
+            throw new Error(response.error || 'Email o contraseña incorrectos');
         }
-        
-        const vendedores = response.vendedores || [];
-        const vendedor = vendedores.find(v => v.id.toString() === vendedorId);
-        
-        if (!vendedor) {
-            mostrarToast('ID de vendedor no válido', 'error');
-            return;
-        }
-        
-        vendedorActual = vendedor;
-        
-        document.getElementById('admin-auth').style.display = 'none';
-        document.getElementById('admin-panel').style.display = 'block';
-        document.getElementById('vendedor-info').innerHTML = `
-            <p><strong>${escapeHTML(vendedor.nombre)}</strong> | Tel: ${vendedor.telefono}</p>
-        `;
-        
-        mostrarToast(`Bienvenido ${vendedor.nombre}`, 'success');
-        
-        // Cargar datos
-        await cargarPedidos();
-        await cargarProductos();
-        cargarPerfil();
-        
-        // Botón actualizar
-        const btnRefresh = document.getElementById('btn-refresh');
-        if (btnRefresh) {
-            btnRefresh.addEventListener('click', () => {
-                actualizarPedidos();
-                cargarProductos(true);
-            });
-        }
-        
-        // Botón nuevo producto
-        const btnAgregar = document.getElementById('btn-agregar-producto');
-        if (btnAgregar) {
-            btnAgregar.addEventListener('click', () => mostrarModalProducto());
-        }
-        
-        inicializarFiltros();
-        
     } catch (error) {
-        console.error('Error al ingresar:', error);
-        mostrarToast('Error al conectar con el servidor', 'error');
+        console.error('Error login:', error);
+        mostrarToast(error.message, 'error');
     }
+}
+
+// ===================================================
+// REGISTRO
+// ===================================================
+
+async function register() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const telefono = document.getElementById('reg-telefono').value.trim();
+    const direccion = document.getElementById('reg-direccion').value.trim();
+    const horario = document.getElementById('reg-horario').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const password2 = document.getElementById('reg-password2').value;
+    
+    if (!nombre || !email || !telefono || !direccion || !password) {
+        mostrarToast('Completá todos los campos obligatorios', 'error');
+        return;
+    }
+    
+    if (password !== password2) {
+        mostrarToast('Las contraseñas no coinciden', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
+    if (!telefono.match(/^\d{10,15}$/)) {
+        mostrarToast('Teléfono inválido (solo números, 10-15 dígitos)', 'error');
+        return;
+    }
+    
+    try {
+        mostrarToast('Creando cuenta...', 'info');
+        
+        const response = await postAPI('registrarVendedor', {
+            nombre,
+            email,
+            telefono,
+            direccion,
+            horario,
+            password_hash: await hashPassword(password)
+        });
+        
+        if (response.success) {
+            mostrarToast('¡Registro exitoso! Ahora podés iniciar sesión', 'success');
+            // Limpiar formulario y cambiar a login
+            document.querySelector('.auth-tab[data-tab="login"]').click();
+            document.getElementById('login-email').value = email;
+        } else {
+            throw new Error(response.error || 'Error al registrar');
+        }
+    } catch (error) {
+        console.error('Error registro:', error);
+        mostrarToast(error.message, 'error');
+    }
+}
+
+// ===================================================
+// RECUPERACIÓN DE CONTRASEÑA
+// ===================================================
+
+async function solicitarRecuperacion() {
+    const email = document.getElementById('recover-email').value.trim();
+    
+    if (!email) {
+        mostrarToast('Ingresá tu email', 'error');
+        return;
+    }
+    
+    try {
+        mostrarToast('Enviando código...', 'info');
+        
+        const response = await postAPI('solicitarRecuperacion', { email });
+        
+        if (response.success) {
+            mostrarToast('Código de recuperación enviado a tu email', 'success');
+            document.getElementById('recover-code-section').style.display = 'block';
+        } else {
+            throw new Error(response.error || 'Email no encontrado');
+        }
+    } catch (error) {
+        console.error('Error recuperación:', error);
+        mostrarToast(error.message, 'error');
+    }
+}
+
+async function resetearPassword() {
+    const email = document.getElementById('recover-email').value.trim();
+    const codigo = document.getElementById('recover-code').value.trim();
+    const newPassword = document.getElementById('recover-new-password').value;
+    const newPassword2 = document.getElementById('recover-new-password2').value;
+    
+    if (!codigo || !newPassword) {
+        mostrarToast('Completá todos los campos', 'error');
+        return;
+    }
+    
+    if (newPassword !== newPassword2) {
+        mostrarToast('Las contraseñas no coinciden', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
+    try {
+        mostrarToast('Restableciendo contraseña...', 'info');
+        
+        const response = await postAPI('resetearPassword', {
+            email,
+            codigo,
+            new_password_hash: await hashPassword(newPassword)
+        });
+        
+        if (response.success) {
+            mostrarToast('Contraseña restablecida. Ahora podés iniciar sesión', 'success');
+            document.querySelector('.auth-tab[data-tab="login"]').click();
+            document.getElementById('login-email').value = email;
+            document.getElementById('recover-code-section').style.display = 'none';
+        } else {
+            throw new Error(response.error || 'Código inválido');
+        }
+    } catch (error) {
+        console.error('Error reset password:', error);
+        mostrarToast(error.message, 'error');
+    }
+}
+
+// ===================================================
+// CARGAR VENDEDOR POR ID (para sesión guardada)
+// ===================================================
+
+async function cargarVendedorPorId(vendedorId) {
+    try {
+        const response = await callAPI('getVendedores', {}, true);
+        if (response.success) {
+            const vendedor = response.vendedores.find(v => v.id.toString() === vendedorId.toString());
+            if (vendedor) {
+                vendedorActual = vendedor;
+                await iniciarPanel(vendedorActual);
+            } else {
+                cerrarSesion();
+            }
+        }
+    } catch (error) {
+        console.error('Error cargar vendedor:', error);
+        cerrarSesion();
+    }
+}
+
+// ===================================================
+// INICIAR PANEL PRINCIPAL
+// ===================================================
+
+async function iniciarPanel(vendedor) {
+    document.getElementById('admin-auth').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    document.getElementById('vendedor-info').innerHTML = `
+        <p><strong>${escapeHTML(vendedor.nombre)}</strong> | ${vendedor.email}</p>
+    `;
+    
+    // Cargar datos
+    await cargarPedidos();
+    await cargarProductos();
+    cargarPerfil();
+    
+    // Botón actualizar
+    const btnRefresh = document.getElementById('btn-refresh');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', () => {
+            actualizarPedidos();
+            cargarProductos(true);
+        });
+    }
+    
+    // Botón nuevo producto
+    const btnAgregar = document.getElementById('btn-agregar-producto');
+    if (btnAgregar) {
+        btnAgregar.addEventListener('click', () => mostrarModalProducto());
+    }
+    
+    inicializarFiltros();
+    inicializarTabs();
 }
 
 // ===================================================
@@ -128,7 +377,6 @@ function inicializarTabs() {
 function cambiarTab(tabId) {
     tabActual = tabId;
     
-    // Actualizar botones
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('data-tab') === tabId) {
@@ -136,13 +384,11 @@ function cambiarTab(tabId) {
         }
     });
     
-    // Actualizar contenido
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    // Recargar datos si es necesario
     if (tabId === 'productos') {
         cargarProductos();
     }
@@ -245,13 +491,11 @@ function mostrarModalProducto(productoId = null) {
         </div>
     `;
     
-    // Agregar modal al body
     const modalContainer = document.createElement('div');
     modalContainer.id = 'modal-producto-container';
     modalContainer.innerHTML = modalHTML;
     document.body.appendChild(modalContainer);
     
-    // Evento para subir imagen
     const inputImagen = document.getElementById('producto-imagen');
     if (inputImagen) {
         inputImagen.addEventListener('change', (e) => {
@@ -286,7 +530,6 @@ async function guardarProducto(productoId) {
     
     let imagenUrl = null;
     
-    // Subir imagen a Cloudinary si hay
     if (imagenFile) {
         mostrarToast('Subiendo imagen...', 'info');
         imagenUrl = await subirImagenACloudinary(imagenFile);
@@ -295,7 +538,6 @@ async function guardarProducto(productoId) {
             return;
         }
     } else if (productoId) {
-        // Si es edición y no se subió nueva imagen, mantener la existente
         const productoExistente = productos.find(p => p.id.toString() === productoId.toString());
         if (productoExistente && productoExistente.imagen_url) {
             imagenUrl = productoExistente.imagen_url;
@@ -316,10 +558,8 @@ async function guardarProducto(productoId) {
         
         let response;
         if (productoId) {
-            // Actualizar producto existente
             response = await postAPI('actualizarProducto', { ...producto, id: productoId });
         } else {
-            // Crear nuevo producto
             response = await postAPI('crearProducto', producto);
         }
         
@@ -383,13 +623,14 @@ async function subirImagenACloudinary(file) {
 }
 
 // ===================================================
-// PERFIL - Actualizar datos del negocio
+// PERFIL
 // ===================================================
 
 function cargarPerfil() {
     if (!vendedorActual) return;
     
     document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
+    document.getElementById('perfil-email').value = vendedorActual.email || '';
     document.getElementById('perfil-telefono').value = vendedorActual.telefono || '';
     document.getElementById('perfil-direccion').value = vendedorActual.direccion || '';
     document.getElementById('perfil-horario').value = vendedorActual.horario || '';
@@ -412,6 +653,7 @@ async function actualizarPerfil() {
     const telefono = document.getElementById('perfil-telefono').value.trim();
     const direccion = document.getElementById('perfil-direccion').value.trim();
     const horario = document.getElementById('perfil-horario').value.trim();
+    const newPassword = document.getElementById('perfil-new-password').value;
     const logoFile = document.getElementById('perfil-logo')?.files[0];
     
     let logoUrl = vendedorActual.logo_url;
@@ -425,20 +667,31 @@ async function actualizarPerfil() {
         }
     }
     
+    const updateData = {
+        id: vendedorActual.id,
+        nombre,
+        telefono,
+        direccion,
+        horario,
+        logo_url: logoUrl
+    };
+    
+    if (newPassword) {
+        if (newPassword.length < 6) {
+            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        updateData.password_hash = await hashPassword(newPassword);
+    }
+    
     try {
-        const response = await postAPI('actualizarVendedor', {
-            id: vendedorActual.id,
-            nombre,
-            telefono,
-            direccion,
-            horario,
-            logo_url: logoUrl
-        });
+        const response = await postAPI('actualizarVendedor', updateData);
         
         if (response && response.success) {
             mostrarToast('Perfil actualizado', 'success');
             vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl };
-            document.getElementById('vendedor-info').innerHTML = `<p><strong>${escapeHTML(nombre)}</strong> | Tel: ${telefono}</p>`;
+            document.getElementById('vendedor-info').innerHTML = `<p><strong>${escapeHTML(nombre)}</strong> | ${vendedorActual.email}</p>`;
+            document.getElementById('perfil-new-password').value = '';
         } else {
             throw new Error(response?.error || 'Error al actualizar');
         }
@@ -449,7 +702,7 @@ async function actualizarPerfil() {
 }
 
 // ===================================================
-// PEDIDOS (funciones existentes)
+// PEDIDOS
 // ===================================================
 
 async function cargarPedidos(forceRefresh = false) {
