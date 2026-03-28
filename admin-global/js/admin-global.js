@@ -2,7 +2,140 @@
 // ADMIN GLOBAL - Funciones principales
 // ===================================================
 
-// Variables globales
+// Configuración de la API
+const API_URL = 'https://script.google.com/macros/s/AKfycbzUdhEDY1ESQk3iv4M_BbG4jMjPm0B8/exec';
+
+// ===================================================
+// FUNCIONES DE API (copiadas de utils.js)
+// ===================================================
+
+async function callAPI(action, data = {}, forceRefresh = false) {
+    try {
+        let url = `${API_URL}?action=${action}`;
+        
+        if (data && Object.keys(data).length > 0) {
+            for (let key in data) {
+                url += `&${key}=${encodeURIComponent(data[key])}`;
+            }
+        }
+        
+        console.log('📡 GET:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('📥 Respuesta GET:', result);
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Error en callAPI:', error);
+        return { error: error.message };
+    }
+}
+
+async function postAPI(action, data = {}) {
+    try {
+        const url = API_URL;
+        
+        console.log('📡 POST a:', url);
+        console.log('📦 Datos enviados:', { action, ...data });
+        
+        const jsonData = JSON.stringify({ action, ...data });
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain',
+            },
+            body: jsonData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('📥 Respuesta POST:', result);
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Error en postAPI:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ===================================================
+// UTILITARIAS
+// ===================================================
+
+function formatearPrecio(precio) {
+    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
+}
+
+function formatearFecha(fechaISO) {
+    if (!fechaISO) return 'N/A';
+    const fecha = new Date(fechaISO);
+    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function getEstadoTexto(estado) {
+    const textos = { 'preparando': 'Nuevo', 'en preparacion': 'En preparación', 'en camino': 'En camino', 'entregado': 'Entregado' };
+    return textos[estado] || estado || 'Nuevo';
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function mostrarToast(mensaje, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.textContent = mensaje;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '50px';
+    toast.style.zIndex = '9999';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function convertToCSV(data) {
+    if (!data || data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(header => JSON.stringify(obj[header] || '')).join(','));
+    return [headers.join(','), ...rows].join('\n');
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// ===================================================
+// VARIABLES GLOBALES
+// ===================================================
+
 let allVendedores = [];
 let allPedidos = [];
 let allProductos = [];
@@ -16,10 +149,13 @@ let productoAEliminar = null;
 
 async function cargarTodosLosDatos() {
     try {
+        console.log('🔄 Cargando todos los datos...');
+        
         // Cargar vendedores
         const vendedoresRes = await callAPI('getVendedores');
         if (vendedoresRes.success) {
             allVendedores = vendedoresRes.vendedores || [];
+            console.log(`✅ Cargados ${allVendedores.length} vendedores`);
         }
         
         // Cargar pedidos de todos los vendedores
@@ -30,6 +166,7 @@ async function cargarTodosLosDatos() {
                 allPedidos.push(...pedidosRes.pedidos.map(p => ({ ...p, vendedor_nombre: v.nombre })));
             }
         }
+        console.log(`✅ Cargados ${allPedidos.length} pedidos`);
         
         // Cargar productos de todos los vendedores
         allProductos = [];
@@ -39,6 +176,7 @@ async function cargarTodosLosDatos() {
                 allProductos.push(...productosRes.productos.map(p => ({ ...p, vendedor_nombre: v.nombre })));
             }
         }
+        console.log(`✅ Cargados ${allProductos.length} productos`);
         
         actualizarDashboard();
         return true;
@@ -60,10 +198,15 @@ function actualizarDashboard() {
     const ingresosTotales = allPedidos.reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     
     // Actualizar stats
-    document.getElementById('total-vendedores').textContent = totalVendedores;
-    document.getElementById('total-pedidos').textContent = totalPedidos;
-    document.getElementById('total-productos').textContent = totalProductos;
-    document.getElementById('total-ingresos').textContent = formatearPrecio(ingresosTotales);
+    const totalVendedoresEl = document.getElementById('total-vendedores');
+    const totalPedidosEl = document.getElementById('total-pedidos');
+    const totalProductosEl = document.getElementById('total-productos');
+    const totalIngresosEl = document.getElementById('total-ingresos');
+    
+    if (totalVendedoresEl) totalVendedoresEl.textContent = totalVendedores;
+    if (totalPedidosEl) totalPedidosEl.textContent = totalPedidos;
+    if (totalProductosEl) totalProductosEl.textContent = totalProductos;
+    if (totalIngresosEl) totalIngresosEl.textContent = formatearPrecio(ingresosTotales);
     
     // Gráfico de pedidos por estado
     const estados = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
@@ -72,19 +215,21 @@ function actualizarDashboard() {
         if (estados[estado] !== undefined) estados[estado]++;
     });
     
-    if (charts.estados) charts.estados.destroy();
-    const ctxEstados = document.getElementById('estados-chart').getContext('2d');
-    charts.estados = new Chart(ctxEstados, {
-        type: 'doughnut',
-        data: {
-            labels: ['Nuevos', 'En preparación', 'En camino', 'Entregados'],
-            datasets: [{
-                data: [estados.preparando, estados['en preparacion'], estados['en camino'], estados.entregado],
-                backgroundColor: ['#FF9800', '#FFC107', '#2196F3', '#4CAF50']
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: true }
-    });
+    const ctxEstados = document.getElementById('estados-chart');
+    if (ctxEstados) {
+        if (charts.estados) charts.estados.destroy();
+        charts.estados = new Chart(ctxEstados, {
+            type: 'doughnut',
+            data: {
+                labels: ['Nuevos', 'En preparación', 'En camino', 'Entregados'],
+                datasets: [{
+                    data: [estados.preparando, estados['en preparacion'], estados['en camino'], estados.entregado],
+                    backgroundColor: ['#FF9800', '#FFC107', '#2196F3', '#4CAF50']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
     
     // Gráfico de ventas por día (últimos 7 días)
     const ultimos7Dias = [];
@@ -104,22 +249,24 @@ function actualizarDashboard() {
         }
     });
     
-    if (charts.ventas) charts.ventas.destroy();
-    const ctxVentas = document.getElementById('ventas-chart').getContext('2d');
-    charts.ventas = new Chart(ctxVentas, {
-        type: 'line',
-        data: {
-            labels: ultimos7Dias.map(d => d.slice(5)),
-            datasets: [{
-                label: 'Ventas',
-                data: ultimos7Dias.map(d => ventasPorDia[d]),
-                borderColor: '#FF5A00',
-                backgroundColor: 'rgba(255, 90, 0, 0.1)',
-                fill: true
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: true }
-    });
+    const ctxVentas = document.getElementById('ventas-chart');
+    if (ctxVentas) {
+        if (charts.ventas) charts.ventas.destroy();
+        charts.ventas = new Chart(ctxVentas, {
+            type: 'line',
+            data: {
+                labels: ultimos7Dias.map(d => d.slice(5)),
+                datasets: [{
+                    label: 'Ventas',
+                    data: ultimos7Dias.map(d => ventasPorDia[d]),
+                    borderColor: '#FF5A00',
+                    backgroundColor: 'rgba(255, 90, 0, 0.1)',
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
     
     // Top 5 vendedores
     const ventasPorVendedor = {};
@@ -341,6 +488,20 @@ function cerrarModalConfirmar() {
     vendedorAEliminar = null;
 }
 
+function exportarVendedores() {
+    const data = allVendedores.map(v => ({
+        ID: v.id,
+        Nombre: v.nombre,
+        Email: v.email,
+        Telefono: v.telefono,
+        Direccion: v.direccion,
+        Horario: v.horario,
+        Estado: v.activo === 'SI' ? 'Activo' : 'Inactivo'
+    }));
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'vendedores_want.csv');
+}
+
 // ===================================================
 // PEDIDOS
 // ===================================================
@@ -416,7 +577,6 @@ function exportarPedidos() {
         Total: p.total,
         Estado: p.estado
     }));
-    
     const csv = convertToCSV(data);
     downloadCSV(csv, 'pedidos_want.csv');
 }
@@ -577,6 +737,19 @@ function cerrarModalConfirmarProducto() {
     productoAEliminar = null;
 }
 
+function exportarProductos() {
+    const data = allProductos.map(p => ({
+        ID: p.id,
+        Nombre: p.nombre,
+        Vendedor: p.vendedor_nombre,
+        Precio: p.precio,
+        Descripcion: p.descripcion,
+        Disponible: p.disponible === 'SI' ? 'Sí' : 'No'
+    }));
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'productos_want.csv');
+}
+
 // ===================================================
 // CONFIGURACIÓN
 // ===================================================
@@ -651,93 +824,6 @@ function initConfigForm() {
 }
 
 // ===================================================
-// UTILITARIAS
-// ===================================================
-
-function formatearPrecio(precio) {
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
-}
-
-function formatearFecha(fechaISO) {
-    if (!fechaISO) return 'N/A';
-    const fecha = new Date(fechaISO);
-    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-}
-
-function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'Nuevo', 'en preparacion': 'En preparación', 'en camino': 'En camino', 'entregado': 'Entregado' };
-    return textos[estado] || estado || 'Nuevo';
-}
-
-function escapeHTML(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function mostrarToast(mensaje, tipo = 'info') {
-    const toast = document.createElement('div');
-    toast.textContent = mensaje;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
-    toast.style.color = 'white';
-    toast.style.padding = '12px 24px';
-    toast.style.borderRadius = '50px';
-    toast.style.zIndex = '9999';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-
-function convertToCSV(data) {
-    if (!data || data.length === 0) return '';
-    const headers = Object.keys(data[0]);
-    const rows = data.map(obj => headers.map(header => JSON.stringify(obj[header] || '')).join(','));
-    return [headers.join(','), ...rows].join('\n');
-}
-
-function downloadCSV(csv, filename) {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
-function exportarVendedores() {
-    const data = allVendedores.map(v => ({
-        ID: v.id,
-        Nombre: v.nombre,
-        Email: v.email,
-        Telefono: v.telefono,
-        Direccion: v.direccion,
-        Horario: v.horario,
-        Estado: v.activo === 'SI' ? 'Activo' : 'Inactivo'
-    }));
-    const csv = convertToCSV(data);
-    downloadCSV(csv, 'vendedores_want.csv');
-}
-
-function exportarProductos() {
-    const data = allProductos.map(p => ({
-        ID: p.id,
-        Nombre: p.nombre,
-        Vendedor: p.vendedor_nombre,
-        Precio: p.precio,
-        Descripcion: p.descripcion,
-        Disponible: p.disponible === 'SI' ? 'Sí' : 'No'
-    }));
-    const csv = convertToCSV(data);
-    downloadCSV(csv, 'productos_want.csv');
-}
-
-// ===================================================
 // MENÚ MÓVIL
 // ===================================================
 
@@ -764,7 +850,7 @@ function initMobileMenu() {
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    initPasswordToggle();
+    console.log('🚀 Panel Administrativo Global iniciado');
     initMobileMenu();
     
     const path = window.location.pathname;
