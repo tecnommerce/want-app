@@ -51,13 +51,8 @@
 
     <main>
         <div class="container">
-            <!-- Panel de autenticación -->
+            <!-- Panel de autenticación (sin botón volver) -->
             <div class="admin-auth" id="admin-auth">
-                <!-- Botón volver atrás (solo en autenticación) -->
-                <button class="btn-back" id="btn-back" onclick="window.location.href='index.html'">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                
                 <div class="auth-card">
                     <div class="auth-logo">
                         <h1 class="auth-logo-text">Want<span class="logo-dot">.</span></h1>
@@ -208,6 +203,11 @@
 
             <!-- Panel principal (oculto inicialmente) -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
+                <!-- Botón volver atrás (solo dentro del panel) -->
+                <button class="btn-back-panel" id="btn-back-panel" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                
                 <div class="panel-header">
                     <div class="panel-header-left">
                         <h2 id="panel-nombre">Mi Negocio</h2>

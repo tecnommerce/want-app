@@ -2141,3 +2141,35 @@ body {
         width: 100%;
     }
 }
+
+/* Botón volver dentro del panel (solo visible después de login) */
+.btn-back-panel {
+    background: white;
+    border: 1px solid #eee;
+    padding: 10px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-back-panel:hover {
+    background: #FF5A00;
+    color: white;
+    border-color: #FF5A00;
+    transform: translateX(-2px);
+}
+
+@media (max-width: 768px) {
+    .btn-back-panel {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+    }
+}
