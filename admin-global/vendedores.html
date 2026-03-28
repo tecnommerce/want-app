@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Want | Administrar Vendedores</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-global.css">
+</head>
+<body>
+    <div class="admin-wrapper" id="admin-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Want<span class="logo-dot">.</span></h2>
+                <p>Administrador</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="vendedores.html" class="nav-item active" data-page="vendedores">
+                    <i class="fas fa-store"></i> Vendedores
+                </a>
+                <a href="pedidos.html" class="nav-item" data-page="pedidos">
+                    <i class="fas fa-box"></i> Pedidos
+                </a>
+                <a href="productos.html" class="nav-item" data-page="productos">
+                    <i class="fas fa-pizza-slice"></i> Productos
+                </a>
+                <a href="configuracion.html" class="nav-item" data-page="configuracion">
+                    <i class="fas fa-cog"></i> Configuración
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="top-bar-info">
+                    <span id="admin-name">Administrador</span>
+                    <span class="badge">Global</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2>Gestión de Vendedores</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-vendedor" placeholder="Buscar vendedor...">
+                        </div>
+                        <button class="btn-export" id="export-vendedores">
+                            <i class="fas fa-file-excel"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="vendedores-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Dirección</th>
+                                <th>Estado</th>
+                                <th>Pedidos</th>
+                                <th>Ingresos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendedores-tbody">
+                            <tr><td colspan="9" class="loading-text">Cargando vendedores...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Editar Vendedor -->
+    <div class="modal" id="modal-editar-vendedor">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Vendedor</h3>
+                <button class="modal-close" onclick="cerrarModalEditar()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editar-vendedor-form">
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label>Nombre del negocio</label>
+                        <input type="text" id="edit-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="edit-telefono" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" id="edit-direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horario</label>
+                        <input type="text" id="edit-horario">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="edit-activo">
+                            <option value="SI">Activo</option>
+                            <option value="NO">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="guardarEditarVendedor()">Guardar cambios</button>
+                <button class="btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación Eliminar -->
+    <div class="modal" id="modal-confirmar">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Confirmar eliminación</h3>
+                <button class="modal-close" onclick="cerrarModalConfirmar()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que querés eliminar este vendedor?</p>
+                <p class="warning">Esta acción eliminará todos sus productos y pedidos. No se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger" id="confirmar-eliminar">Eliminar</button>
+                <button class="btn-secondary" onclick="cerrarModalConfirmar()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/admin-global.js"></script>
+</body>
+</html>
