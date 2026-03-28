@@ -10,15 +10,19 @@
 <body>
     <header class="header">
         <div class="container">
-            <div class="admin-header">
-    <h2>Mis Pedidos</h2>
-    <div class="admin-actions">
-        <button class="btn-refresh" id="btn-refresh">
-            <i class="fas fa-sync-alt"></i> Actualizar
-        </button>
-        <div class="vendedor-info" id="vendedor-info"></div>
-    </div>
-</div>
+            <div class="header-content">
+                <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
+                
+                <div class="nav-desktop">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                    <a href="#contacto" class="nav-link" id="contacto-link">Contacto</a>
+                </div>
+
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
     </header>
 
     <!-- Menú móvil -->
@@ -56,23 +60,75 @@
             <!-- Panel de pedidos (oculto inicialmente) -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
                 <div class="admin-header">
-                    <h2>Mis Pedidos</h2>
-                    <div class="vendedor-info" id="vendedor-info"></div>
+                    <h2>Mi Negocio</h2>
+                    <div class="admin-actions">
+                        <button class="btn-refresh" id="btn-refresh">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                        <div class="vendedor-info" id="vendedor-info"></div>
+                    </div>
                 </div>
 
-                <!-- Filtros -->
-<div class="filtros">
-    <button class="filtro-btn active" data-estado="preparando">📦 Nuevos pedidos (0)</button>
-    <button class="filtro-btn" data-estado="en preparacion">👨‍🍳 En preparación (0)</button>
-    <button class="filtro-btn" data-estado="en camino">🚚 En camino (0)</button>
-    <button class="filtro-btn" data-estado="entregado">✅ Entregados (0)</button>
-</div>
+                <!-- Tabs -->
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="pedidos">📦 Pedidos</button>
+                    <button class="tab-btn" data-tab="productos">🍕 Productos</button>
+                    <button class="tab-btn" data-tab="perfil">⚙️ Perfil</button>
+                </div>
 
-                <!-- Lista de pedidos -->
-                <div class="pedidos-container" id="pedidos-container">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Cargando pedidos...</p>
+                <!-- Tab: Pedidos -->
+                <div class="tab-content active" id="tab-pedidos">
+                    <div class="filtros">
+                        <button class="filtro-btn active" data-estado="preparando">📦 Nuevos pedidos (0)</button>
+                        <button class="filtro-btn" data-estado="en preparacion">👨‍🍳 En preparación (0)</button>
+                        <button class="filtro-btn" data-estado="en camino">🚚 En camino (0)</button>
+                        <button class="filtro-btn" data-estado="entregado">✅ Entregados (0)</button>
+                    </div>
+                    <div class="pedidos-container" id="pedidos-container">
+                        <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
+                    </div>
+                </div>
+
+                <!-- Tab: Productos -->
+                <div class="tab-content" id="tab-productos">
+                    <div class="productos-admin-header">
+                        <button class="btn-primary" id="btn-agregar-producto">
+                            <i class="fas fa-plus"></i> Nuevo producto
+                        </button>
+                    </div>
+                    <div class="productos-admin-grid" id="productos-admin-grid">
+                        <div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>
+                    </div>
+                </div>
+
+                <!-- Tab: Perfil -->
+                <div class="tab-content" id="tab-perfil">
+                    <div class="perfil-form">
+                        <h3>Información del negocio</h3>
+                        <form id="perfil-form">
+                            <div class="form-group">
+                                <label>Nombre del negocio</label>
+                                <input type="text" id="perfil-nombre" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono (WhatsApp)</label>
+                                <input type="tel" id="perfil-telefono" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección</label>
+                                <input type="text" id="perfil-direccion" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Horario de atención</label>
+                                <input type="text" id="perfil-horario" class="form-control" placeholder="Ej: Lun a Dom 18-24hs">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo del negocio</label>
+                                <input type="file" id="perfil-logo" accept="image/*">
+                                <div id="logo-preview" class="image-preview"></div>
+                            </div>
+                            <button type="submit" class="btn-primary">Guardar cambios</button>
+                        </form>
                     </div>
                 </div>
             </div>
