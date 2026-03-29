@@ -6,15 +6,13 @@
     <title>Want | Panel de Vendedor</title>
     
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header solo visible después de login -->
-    <header class="header header-admin" id="header-admin" style="display: none;">
+    <header class="header">
         <div class="container">
             <div class="header-content">
                 <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
@@ -27,7 +25,7 @@
         </div>
     </header>
 
-    <!-- Menú móvil para admin (solo después de login) -->
+    <!-- Menú móvil para admin -->
     <div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
         <button class="menu-close" id="menu-close-admin">
             <i class="fas fa-times"></i>
@@ -51,7 +49,7 @@
 
     <main>
         <div class="container">
-            <!-- Panel de autenticación (sin botón volver) -->
+            <!-- Panel de autenticación -->
             <div class="admin-auth" id="admin-auth">
                 <div class="auth-card">
                     <div class="auth-logo">
@@ -59,14 +57,14 @@
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
-                    <!-- Login Panel (visible por defecto) -->
+                    <!-- Login Panel -->
                     <div class="auth-panel active" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
                                 <label><i class="fas fa-envelope"></i> Email</label>
                                 <input type="email" id="login-email" placeholder="tu@email.com" required>
                             </div>
-                            <div class="form-group password-group">
+                            <div class="form-group">
                                 <label><i class="fas fa-lock"></i> Contraseña</label>
                                 <div class="password-wrapper">
                                     <input type="password" id="login-password" placeholder="••••••••" required>
@@ -98,116 +96,104 @@
                         </div>
                     </div>
 
-                    <!-- Register Panel (oculto inicialmente) -->
+                    <!-- Register Panel -->
                     <div class="auth-panel" id="register-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
                         </button>
-                        
                         <form id="register-form">
                             <div class="form-row">
                                 <div class="form-group half">
-                                    <label><i class="fas fa-store"></i> Nombre del negocio *</label>
-                                    <input type="text" id="reg-nombre" placeholder="Ej: Pizzería Don Juan" required>
+                                    <label>Nombre del negocio *</label>
+                                    <input type="text" id="reg-nombre" required>
                                 </div>
                                 <div class="form-group half">
-                                    <label><i class="fas fa-envelope"></i> Email *</label>
-                                    <input type="email" id="reg-email" placeholder="tu@email.com" required>
+                                    <label>Email *</label>
+                                    <input type="email" id="reg-email" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group half">
-                                    <label><i class="fab fa-whatsapp"></i> Teléfono *</label>
+                                    <label>Teléfono *</label>
                                     <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
                                 </div>
                                 <div class="form-group half">
-                                    <label><i class="fas fa-map-marker-alt"></i> Dirección *</label>
-                                    <input type="text" id="reg-direccion" placeholder="Calle, número" required>
+                                    <label>Dirección *</label>
+                                    <input type="text" id="reg-direccion" required>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label><i class="fas fa-clock"></i> Horario de atención</label>
+                                <label>Horario de atención</label>
                                 <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
                             </div>
                             <div class="form-row">
                                 <div class="form-group half">
-                                    <label><i class="fas fa-lock"></i> Contraseña *</label>
+                                    <label>Contraseña *</label>
                                     <div class="password-wrapper">
-                                        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required>
+                                        <input type="password" id="reg-password" required>
                                         <button type="button" class="toggle-password" data-target="reg-password">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="form-group half">
-                                    <label><i class="fas fa-lock"></i> Confirmar *</label>
+                                    <label>Confirmar *</label>
                                     <div class="password-wrapper">
-                                        <input type="password" id="reg-password2" placeholder="Repetir contraseña" required>
+                                        <input type="password" id="reg-password2" required>
                                         <button type="button" class="toggle-password" data-target="reg-password2">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fas fa-user-plus"></i> Registrarse
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
                         </form>
                     </div>
 
-                    <!-- Recover Panel (oculto inicialmente) -->
+                    <!-- Recover Panel -->
                     <div class="auth-panel" id="recover-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login-recover">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
                         </button>
-                        
                         <form id="recover-form">
                             <div class="form-group">
-                                <label><i class="fas fa-envelope"></i> Email</label>
-                                <input type="email" id="recover-email" placeholder="tu@email.com" required>
+                                <label>Email</label>
+                                <input type="email" id="recover-email" required>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fas fa-paper-plane"></i> Enviar código
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Enviar código</button>
                         </form>
-                        <div id="recover-code-section" style="display: none; margin-top: 20px;">
+                        <div id="recover-code-section" style="display: none;">
                             <div class="form-group">
-                                <label><i class="fas fa-key"></i> Código de recuperación</label>
-                                <input type="text" id="recover-code" placeholder="Código de 6 dígitos">
+                                <label>Código de recuperación</label>
+                                <input type="text" id="recover-code">
                             </div>
                             <div class="form-group">
-                                <label><i class="fas fa-lock"></i> Nueva contraseña</label>
+                                <label>Nueva contraseña</label>
                                 <div class="password-wrapper">
-                                    <input type="password" id="recover-new-password" placeholder="Mínimo 6 caracteres">
+                                    <input type="password" id="recover-new-password">
                                     <button type="button" class="toggle-password" data-target="recover-new-password">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label><i class="fas fa-lock"></i> Confirmar</label>
+                                <label>Confirmar</label>
                                 <div class="password-wrapper">
-                                    <input type="password" id="recover-new-password2" placeholder="Repetir contraseña">
+                                    <input type="password" id="recover-new-password2">
                                     <button type="button" class="toggle-password" data-target="recover-new-password2">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
                             </div>
-                            <button class="btn btn-primary btn-block" id="btn-reset-password">
-                                <i class="fas fa-save"></i> Restablecer
-                            </button>
+                            <button class="btn btn-primary btn-block" id="btn-reset-password">Restablecer</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel principal (oculto inicialmente) -->
+            <!-- Panel principal -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
-                <!-- Botón volver atrás (solo dentro del panel) -->
-                <button class="btn-back-panel" id="btn-back-panel" onclick="window.location.href='index.html'">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                
+                <!-- Header con métricas -->
                 <div class="panel-header">
                     <div class="panel-header-left">
                         <h2 id="panel-nombre">Mi Negocio</h2>
@@ -223,8 +209,47 @@
                     </div>
                 </div>
 
-                <!-- Tabs escritorio -->
-                <div class="admin-tabs desktop-tabs">
+                <!-- Tarjetas de métricas -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="metric-info">
+                            <h3 id="ventas-hoy">$0</h3>
+                            <p>Ventas hoy</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-week"></i></div>
+                        <div class="metric-info">
+                            <h3 id="ventas-semana">$0</h3>
+                            <p>Ventas esta semana</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="metric-info">
+                            <h3 id="ventas-mes">$0</h3>
+                            <p>Ventas este mes</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="metric-info">
+                            <h3 id="pedidos-entregados">0</h3>
+                            <p>Pedidos entregados</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-truck"></i></div>
+                        <div class="metric-info">
+                            <h3 id="pedidos-pendientes">0</h3>
+                            <p>Pedidos pendientes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="pedidos">
                         <i class="fas fa-box"></i> Pedidos
                         <span class="tab-badge" id="badge-pedidos">0</span>
@@ -240,20 +265,25 @@
 
                 <!-- Tab: Pedidos -->
                 <div class="tab-content active" id="tab-pedidos">
-                    <div class="filtros-mobile" id="filtros-mobile">
-                        <button class="filtro-btn active" data-estado="preparando">
-                            📦 Nuevos <span class="filtro-count" id="count-preparando">0</span>
+                    <!-- Filtros de estado -->
+                    <div class="filtros-pedidos">
+                        <button class="filtro-btn active" data-estado="todos">
+                            <i class="fas fa-list"></i> Todos <span id="count-todos">0</span>
+                        </button>
+                        <button class="filtro-btn" data-estado="preparando">
+                            <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
                         </button>
                         <button class="filtro-btn" data-estado="en preparacion">
-                            👨‍🍳 Preparación <span class="filtro-count" id="count-preparacion">0</span>
+                            <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
                         </button>
                         <button class="filtro-btn" data-estado="en camino">
-                            🚚 En camino <span class="filtro-count" id="count-camino">0</span>
+                            <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
                         </button>
                         <button class="filtro-btn" data-estado="entregado">
-                            ✅ Entregados <span class="filtro-count" id="count-entregado">0</span>
+                            <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
                         </button>
                     </div>
+                    
                     <div class="pedidos-container" id="pedidos-container">
                         <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
                     </div>
@@ -300,7 +330,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Horario de atención</label>
-                                <input type="text" id="perfil-horario" class="form-control" placeholder="Ej: Lun a Dom 18-24hs">
+                                <input type="text" id="perfil-horario" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label>Logo del negocio</label>
