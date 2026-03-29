@@ -16,9 +16,12 @@ async function callAPI(action, data = {}) {
                 url += `&${key}=${encodeURIComponent(data[key])}`;
             }
         }
+        console.log('📡 GET:', url);
         const response = await fetch(url, { method: 'GET', mode: 'cors' });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
+        const result = await response.json();
+        console.log('📥 Respuesta:', result);
+        return result;
     } catch (error) {
         console.error('❌ Error en callAPI:', error);
         return { error: error.message };
@@ -27,6 +30,7 @@ async function callAPI(action, data = {}) {
 
 async function postAPI(action, data = {}) {
     try {
+        console.log('📡 POST:', API_URL);
         const response = await fetch(API_URL, {
             method: 'POST',
             mode: 'cors',
@@ -34,7 +38,9 @@ async function postAPI(action, data = {}) {
             body: JSON.stringify({ action, ...data })
         });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
+        const result = await response.json();
+        console.log('📥 Respuesta POST:', result);
+        return result;
     } catch (error) {
         console.error('❌ Error en postAPI:', error);
         return { success: false, error: error.message };
@@ -56,13 +62,23 @@ function formatearFecha(fechaISO) {
 }
 
 function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'Nuevo', 'en preparacion': 'En preparación', 'en camino': 'En camino', 'entregado': 'Entregado' };
+    const textos = { 
+        'preparando': 'Nuevo', 
+        'en preparacion': 'En preparación', 
+        'en camino': 'En camino', 
+        'entregado': 'Entregado' 
+    };
     return textos[estado] || estado || 'Nuevo';
 }
 
 function escapeHTML(str) {
     if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function mostrarToast(mensaje, tipo = 'info') {
@@ -76,9 +92,16 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.color = 'white';
     toast.style.padding = '12px 24px';
     toast.style.borderRadius = '50px';
+    toast.style.fontSize = '0.9rem';
+    toast.style.fontWeight = '500';
     toast.style.zIndex = '9999';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.style.animation = 'fadeInUp 0.3s ease';
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => {
+        toast.style.animation = 'fadeOutDown 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // ===================================================
@@ -97,29 +120,83 @@ let charts = {};
 async function cargarTodosLosDatos() {
     console.log('🔄 Cargando todos los datos...');
     
-    const vendedoresRes = await callAPI('getVendedores');
-    if (vendedoresRes.success) {
-        allVendedores = vendedoresRes.vendedores || [];
-        console.log(`✅ Cargados ${allVendedores.length} vendedores`);
+    try {
+        const vendedoresRes = await callAPI('getVendedores');
+        if (vendedoresRes.success) {
+            allVendedores = vendedoresRes.vendedores || [];
+            console.log(`✅ Cargados ${allVendedores.length} vendedores`);
+        }
+        
+        const pedidosRes = await callAPI('getAllPedidos');
+        if (pedidosRes.success) {
+            allPedidos = pedidosRes.pedidos || [];
+            console.log(`✅ Cargados ${allPedidos.length} pedidos`);
+        }
+        
+        const productosRes = await callAPI('getAllProductos');
+        if (productosRes.success) {
+            allProductos = productosRes.productos || [];
+            console.log(`✅ Cargados ${allProductos.length} productos`);
+        }
+        
+        actualizarDashboard();
+        renderizarVendedores();
+        renderizarPedidos();
+        renderizarProductos();
+        cargarFiltros();
+        
+        return true;
+    } catch (error) {
+        console.error('Error cargando datos:', error);
+        return false;
+    }
+}
+
+// ===================================================
+// ACTUALIZACIÓN MANUAL DE DATOS
+// ===================================================
+
+async function actualizarDatosManual() {
+    const btnRefresh = document.getElementById('btn-refresh-data');
+    if (btnRefresh) {
+        btnRefresh.disabled = true;
+        btnRefresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
     }
     
-    const pedidosRes = await callAPI('getAllPedidos');
-    if (pedidosRes.success) {
-        allPedidos = pedidosRes.pedidos || [];
-        console.log(`✅ Cargados ${allPedidos.length} pedidos`);
-    }
+    mostrarToast('Actualizando datos...', 'info');
     
-    const productosRes = await callAPI('getAllProductos');
-    if (productosRes.success) {
-        allProductos = productosRes.productos || [];
-        console.log(`✅ Cargados ${allProductos.length} productos`);
+    try {
+        const vendedoresRes = await callAPI('getVendedores');
+        if (vendedoresRes.success) {
+            allVendedores = vendedoresRes.vendedores || [];
+        }
+        
+        const pedidosRes = await callAPI('getAllPedidos');
+        if (pedidosRes.success) {
+            allPedidos = pedidosRes.pedidos || [];
+        }
+        
+        const productosRes = await callAPI('getAllProductos');
+        if (productosRes.success) {
+            allProductos = productosRes.productos || [];
+        }
+        
+        actualizarDashboard();
+        renderizarVendedores();
+        renderizarPedidos();
+        renderizarProductos();
+        cargarFiltros();
+        
+        mostrarToast('Datos actualizados correctamente', 'success');
+    } catch (error) {
+        console.error('Error al actualizar:', error);
+        mostrarToast('Error al actualizar datos', 'error');
+    } finally {
+        if (btnRefresh) {
+            btnRefresh.disabled = false;
+            btnRefresh.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
+        }
     }
-    
-    actualizarDashboard();
-    renderizarVendedores();
-    renderizarPedidos();
-    renderizarProductos();
-    cargarFiltros();
 }
 
 // ===================================================
@@ -132,10 +209,15 @@ function actualizarDashboard() {
     const totalProductos = allProductos.length;
     const ingresosTotales = allPedidos.reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     
-    document.getElementById('total-vendedores').textContent = totalVendedores;
-    document.getElementById('total-pedidos').textContent = totalPedidos;
-    document.getElementById('total-productos').textContent = totalProductos;
-    document.getElementById('total-ingresos').textContent = formatearPrecio(ingresosTotales);
+    const totalVendedoresEl = document.getElementById('total-vendedores');
+    const totalPedidosEl = document.getElementById('total-pedidos');
+    const totalProductosEl = document.getElementById('total-productos');
+    const totalIngresosEl = document.getElementById('total-ingresos');
+    
+    if (totalVendedoresEl) totalVendedoresEl.textContent = totalVendedores;
+    if (totalPedidosEl) totalPedidosEl.textContent = totalPedidos;
+    if (totalProductosEl) totalProductosEl.textContent = totalProductos;
+    if (totalIngresosEl) totalIngresosEl.textContent = formatearPrecio(ingresosTotales);
     
     const estados = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
     allPedidos.forEach(p => {
@@ -150,9 +232,19 @@ function actualizarDashboard() {
             type: 'doughnut',
             data: {
                 labels: ['Nuevos', 'En preparación', 'En camino', 'Entregados'],
-                datasets: [{ data: [estados.preparando, estados['en preparacion'], estados['en camino'], estados.entregado], backgroundColor: ['#FF9800', '#FFC107', '#2196F3', '#4CAF50'] }]
+                datasets: [{
+                    data: [estados.preparando, estados['en preparacion'], estados['en camino'], estados.entregado],
+                    backgroundColor: ['#FF9800', '#FFC107', '#2196F3', '#4CAF50'],
+                    borderWidth: 0
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: true }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
         });
     }
     
@@ -180,9 +272,26 @@ function actualizarDashboard() {
             type: 'line',
             data: {
                 labels: ultimos7Dias.map(d => d.slice(5)),
-                datasets: [{ label: 'Ventas', data: ultimos7Dias.map(d => ventasPorDia[d]), borderColor: '#FF5A00', backgroundColor: 'rgba(255, 90, 0, 0.1)', fill: true }]
+                datasets: [{
+                    label: 'Ventas',
+                    data: ultimos7Dias.map(d => ventasPorDia[d]),
+                    borderColor: '#FF5A00',
+                    backgroundColor: 'rgba(255, 90, 0, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#FF5A00',
+                    pointBorderColor: 'white',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: true }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
         });
     }
     
@@ -195,8 +304,16 @@ function actualizarDashboard() {
     
     const topVendedoresDiv = document.getElementById('top-vendedores-list');
     if (topVendedoresDiv) {
-        topVendedoresDiv.innerHTML = topVendedores.map(([nombre, total]) => `<div class="top-item"><span class="top-item-name">${escapeHTML(nombre)}</span><span class="top-item-value">${formatearPrecio(total)}</span></div>`).join('');
-        if (topVendedores.length === 0) topVendedoresDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
+        if (topVendedores.length === 0) {
+            topVendedoresDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
+        } else {
+            topVendedoresDiv.innerHTML = topVendedores.map(([nombre, total]) => `
+                <div class="top-item">
+                    <span class="top-item-name">${escapeHTML(nombre)}</span>
+                    <span class="top-item-value">${formatearPrecio(total)}</span>
+                </div>
+            `).join('');
+        }
     }
     
     const ventasPorProducto = {};
@@ -211,24 +328,35 @@ function actualizarDashboard() {
     
     const topProductosDiv = document.getElementById('top-productos-list');
     if (topProductosDiv) {
-        topProductosDiv.innerHTML = topProductos.map(([nombre, cantidad]) => `<div class="top-item"><span class="top-item-name">${escapeHTML(nombre)}</span><span class="top-item-value">${cantidad} unidades</span></div>`).join('');
-        if (topProductos.length === 0) topProductosDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
+        if (topProductos.length === 0) {
+            topProductosDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
+        } else {
+            topProductosDiv.innerHTML = topProductos.map(([nombre, cantidad]) => `
+                <div class="top-item">
+                    <span class="top-item-name">${escapeHTML(nombre)}</span>
+                    <span class="top-item-value">${cantidad} unidades</span>
+                </div>
+            `).join('');
+        }
     }
     
     const recentOrders = allPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
     const tbody = document.getElementById('recent-orders-tbody');
     if (tbody) {
-        tbody.innerHTML = recentOrders.map(p => `
-             <tr>
-                 <td>#${p.id}</td>
-                 <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-                 <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-                 <td>${formatearPrecio(p.total)}</td>
-                 <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-                 <td>${formatearFecha(p.fecha)}</td>
-             </tr>
-        `).join('');
-        if (recentOrders.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay pedidos</td></tr>';
+        if (recentOrders.length === 0) {
+            tbody.innerHTML = '}<tr><td colspan="6" class="loading-text">No hay pedidos</td></tr>';
+        } else {
+            tbody.innerHTML = recentOrders.map(p => `
+                <tr>
+                    <td>#${p.id}</td>
+                    <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
+                    <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+                    <td>${formatearPrecio(p.total)}</td>
+                    <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
+                    <td>${formatearFecha(p.fecha)}</td>
+                </tr>
+            `).join('');
+        }
     }
 }
 
@@ -254,11 +382,37 @@ function renderizarVendedores() {
             <td>${escapeHTML(v.direccion || '-')}</td>
             <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
             <td>
-                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
+                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button>
             </td>
         </tr>
     `).join('');
+}
+
+function editarVendedor(id) {
+    const vendedor = allVendedores.find(v => v.id.toString() === id.toString());
+    if (!vendedor) return;
+    
+    // Implementar modal de edición
+    mostrarToast('Funcionalidad en desarrollo', 'info');
+}
+
+async function eliminarVendedor(id) {
+    const confirmar = confirm('¿Estás seguro que querés eliminar este vendedor? Se eliminarán todos sus productos y pedidos.');
+    if (!confirmar) return;
+    
+    try {
+        const response = await postAPI('eliminarVendedor', { vendedorId: id });
+        if (response.success) {
+            mostrarToast('Vendedor eliminado correctamente', 'success');
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al eliminar vendedor', 'error');
+    }
 }
 
 // ===================================================
@@ -273,7 +427,7 @@ function renderizarPedidos() {
     
     const filtroVendedor = document.getElementById('filtro-vendedor')?.value;
     if (filtroVendedor) {
-        pedidosFiltrados = pedidosFiltrados.filter(p => p.vendedor_id.toString() === filtroVendedor);
+        pedidosFiltrados = pedidosFiltrados.filter(p => p.vendedor_id?.toString() === filtroVendedor);
     }
     
     const filtroEstado = document.getElementById('filtro-estado')?.value;
@@ -310,10 +464,34 @@ function cargarFiltros() {
     const filtroVendedor = document.getElementById('filtro-vendedor');
     const filtroVendedorProd = document.getElementById('filtro-vendedor-prod');
     
-    const options = '<option value="">Todos los vendedores</option>' + allVendedores.map(v => `<option value="${v.id}">${escapeHTML(v.nombre)}</option>`).join('');
+    const options = '<option value="">Todos los vendedores</option>' + 
+        allVendedores.map(v => `<option value="${v.id}">${escapeHTML(v.nombre)}</option>`).join('');
     
     if (filtroVendedor) filtroVendedor.innerHTML = options;
     if (filtroVendedorProd) filtroVendedorProd.innerHTML = options;
+}
+
+function exportarPedidos() {
+    if (allPedidos.length === 0) {
+        mostrarToast('No hay datos para exportar', 'error');
+        return;
+    }
+    
+    const data = allPedidos.map(p => ({
+        ID: p.id,
+        Fecha: p.fecha,
+        Cliente: p.cliente_nombre,
+        Telefono: p.cliente_telefono,
+        Vendedor: p.vendedor_nombre,
+        Direccion: p.direccion,
+        MetodoPago: p.metodo_pago,
+        Total: p.total,
+        Estado: p.estado
+    }));
+    
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'pedidos_want.csv');
+    mostrarToast('Exportando pedidos...', 'success');
 }
 
 // ===================================================
@@ -328,12 +506,15 @@ function renderizarProductos() {
     
     const filtroVendedor = document.getElementById('filtro-vendedor-prod')?.value;
     if (filtroVendedor) {
-        productosFiltrados = productosFiltrados.filter(p => p.vendedor_id.toString() === filtroVendedor);
+        productosFiltrados = productosFiltrados.filter(p => p.vendedor_id?.toString() === filtroVendedor);
     }
     
     const searchTerm = document.getElementById('search-producto')?.value.toLowerCase();
     if (searchTerm) {
-        productosFiltrados = productosFiltrados.filter(p => p.nombre?.toLowerCase().includes(searchTerm) || p.descripcion?.toLowerCase().includes(searchTerm));
+        productosFiltrados = productosFiltrados.filter(p => 
+            p.nombre?.toLowerCase().includes(searchTerm) || 
+            p.descripcion?.toLowerCase().includes(searchTerm)
+        );
     }
     
     if (productosFiltrados.length === 0) {
@@ -351,11 +532,170 @@ function renderizarProductos() {
             <td>0</td>
             <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
             <td>
-                <button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i></button>
+                <button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i> Eliminar</button>
             </td>
         </tr>
     `).join('');
+}
+
+function editarProducto(id) {
+    mostrarToast('Funcionalidad en desarrollo', 'info');
+}
+
+async function eliminarProducto(id) {
+    const confirmar = confirm('¿Estás seguro que querés eliminar este producto?');
+    if (!confirmar) return;
+    
+    try {
+        const response = await postAPI('eliminarProducto', { productoId: id });
+        if (response.success) {
+            mostrarToast('Producto eliminado correctamente', 'success');
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al eliminar producto', 'error');
+    }
+}
+
+function exportarProductos() {
+    if (allProductos.length === 0) {
+        mostrarToast('No hay datos para exportar', 'error');
+        return;
+    }
+    
+    const data = allProductos.map(p => ({
+        ID: p.id,
+        Nombre: p.nombre,
+        Vendedor: p.vendedor_nombre,
+        Precio: p.precio,
+        Descripcion: p.descripcion,
+        Disponible: p.disponible === 'SI' ? 'Sí' : 'No'
+    }));
+    
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'productos_want.csv');
+    mostrarToast('Exportando productos...', 'success');
+}
+
+function exportarVendedores() {
+    if (allVendedores.length === 0) {
+        mostrarToast('No hay datos para exportar', 'error');
+        return;
+    }
+    
+    const data = allVendedores.map(v => ({
+        ID: v.id,
+        Nombre: v.nombre,
+        Email: v.email,
+        Telefono: v.telefono,
+        Direccion: v.direccion,
+        Horario: v.horario,
+        Estado: v.activo === 'SI' ? 'Activo' : 'Inactivo'
+    }));
+    
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'vendedores_want.csv');
+    mostrarToast('Exportando vendedores...', 'success');
+}
+
+// ===================================================
+// CONFIGURACIÓN
+// ===================================================
+
+function cargarConfiguracion() {
+    const savedConfig = localStorage.getItem('admin_config');
+    if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        if (document.getElementById('config-email')) document.getElementById('config-email').value = config.admin_email || 'admin@want.com';
+        if (document.getElementById('config-comision')) document.getElementById('config-comision').value = config.comision || '5';
+        if (document.getElementById('config-soporte-email')) document.getElementById('config-soporte-email').value = config.soporte_email || 'soporte@want.com';
+        if (document.getElementById('config-soporte-whatsapp')) document.getElementById('config-soporte-whatsapp').value = config.soporte_whatsapp || '';
+    } else {
+        if (document.getElementById('config-email')) document.getElementById('config-email').value = 'admin@want.com';
+        if (document.getElementById('config-comision')) document.getElementById('config-comision').value = '5';
+        if (document.getElementById('config-soporte-email')) document.getElementById('config-soporte-email').value = 'soporte@want.com';
+    }
+}
+
+function initConfigForm() {
+    const adminForm = document.getElementById('config-admin-form');
+    if (adminForm) {
+        adminForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newEmail = document.getElementById('config-email').value.trim();
+            const newPassword = document.getElementById('config-password').value;
+            const newPassword2 = document.getElementById('config-password2').value;
+            
+            if (newPassword && newPassword !== newPassword2) {
+                mostrarToast('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            const config = {
+                admin_email: newEmail,
+                comision: document.getElementById('config-comision')?.value || '5',
+                soporte_email: document.getElementById('config-soporte-email')?.value || '',
+                soporte_whatsapp: document.getElementById('config-soporte-whatsapp')?.value || ''
+            };
+            localStorage.setItem('admin_config', JSON.stringify(config));
+            
+            mostrarToast('Configuración guardada', 'success');
+            if (newPassword) {
+                mostrarToast('La contraseña se actualizará al reiniciar sesión', 'info');
+            }
+        });
+    }
+    
+    const comisionForm = document.getElementById('config-comision-form');
+    if (comisionForm) {
+        comisionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const config = JSON.parse(localStorage.getItem('admin_config') || '{}');
+            config.comision = document.getElementById('config-comision').value;
+            localStorage.setItem('admin_config', JSON.stringify(config));
+            mostrarToast('Comisión guardada', 'success');
+        });
+    }
+    
+    const contactoForm = document.getElementById('config-contacto-form');
+    if (contactoForm) {
+        contactoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const config = JSON.parse(localStorage.getItem('admin_config') || '{}');
+            config.soporte_email = document.getElementById('config-soporte-email').value;
+            config.soporte_whatsapp = document.getElementById('config-soporte-whatsapp').value;
+            localStorage.setItem('admin_config', JSON.stringify(config));
+            mostrarToast('Contacto guardado', 'success');
+        });
+    }
+}
+
+// ===================================================
+// UTILITARIAS DE EXPORTACIÓN
+// ===================================================
+
+function convertToCSV(data) {
+    if (!data || data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(header => JSON.stringify(obj[header] || '')).join(','));
+    return [headers.join(','), ...rows].join('\n');
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 // ===================================================
@@ -363,16 +703,13 @@ function renderizarProductos() {
 // ===================================================
 
 function cambiarSeccion(seccionId) {
-    // Ocultar todas las secciones
     document.querySelectorAll('.section-content').forEach(section => {
         section.style.display = 'none';
     });
     
-    // Mostrar la sección seleccionada
     const seccion = document.getElementById(`section-${seccionId}`);
     if (seccion) seccion.style.display = 'block';
     
-    // Actualizar clase activa en el menú
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
         if (item.getAttribute('data-section') === seccionId) {
@@ -380,6 +717,35 @@ function cambiarSeccion(seccionId) {
         }
     });
 }
+
+// ===================================================
+// ANIMACIONES CSS PARA TOAST
+// ===================================================
+
+const styleToast = document.createElement('style');
+styleToast.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+    @keyframes fadeOutDown {
+        from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+    }
+`;
+document.head.appendChild(styleToast);
 
 // ===================================================
 // INICIALIZACIÓN
@@ -400,6 +766,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
     
+    // Botón actualizar manual
+    const btnRefresh = document.getElementById('btn-refresh-data');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', actualizarDatosManual);
+    }
+    
     // Filtros de pedidos
     const filtros = ['filtro-vendedor', 'filtro-estado', 'filtro-fecha'];
     filtros.forEach(id => {
@@ -416,7 +788,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (searchVendedor) {
         searchVendedor.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
-            const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
+            const filtered = allVendedores.filter(v => 
+                v.nombre?.toLowerCase().includes(term) || 
+                v.email?.toLowerCase().includes(term)
+            );
             const tbody = document.getElementById('vendedores-tbody');
             if (tbody) {
                 if (filtered.length === 0) {
@@ -431,14 +806,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <td>${escapeHTML(v.direccion || '-')}</td>
                             <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
                             <td>
-                                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
-                                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
+                                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button>
                             </td>
                         </tr>
                     `).join('');
                 }
             }
         });
+    }
+    
+    // Botones de exportación
+    const exportVendedores = document.getElementById('export-vendedores');
+    if (exportVendedores) exportVendedores.addEventListener('click', exportarVendedores);
+    
+    const exportPedidos = document.getElementById('export-pedidos');
+    if (exportPedidos) exportPedidos.addEventListener('click', exportarPedidos);
+    
+    const exportProductos = document.getElementById('export-productos');
+    if (exportProductos) exportProductos.addEventListener('click', exportarProductos);
+    
+    // Configuración
+    if (document.getElementById('configuracion')) {
+        cargarConfiguracion();
+        initConfigForm();
     }
     
     // Botón cerrar sesión
