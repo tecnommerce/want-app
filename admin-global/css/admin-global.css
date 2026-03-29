@@ -1,5 +1,6 @@
 /* ===================================================
-   ADMIN GLOBAL - Estilos
+   ADMIN GLOBAL - ESTILOS WANT
+   Colores: Naranja #FF5A00, #FF7A00
    =================================================== */
 
 * {
@@ -10,8 +11,9 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: #f5f7fa;
+    background-color: #f8f9fa;
     color: #1a1a1a;
+    line-height: 1.5;
 }
 
 /* ===================================================
@@ -133,6 +135,11 @@ body {
     text-decoration: none;
     transition: all 0.2s;
     font-size: 0.95rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
 }
 
 .nav-item i {
@@ -155,26 +162,6 @@ body {
     border-top: 1px solid #eee;
 }
 
-.btn-logout {
-    width: 100%;
-    background: #fee2e2;
-    color: #dc2626;
-    border: none;
-    padding: 10px;
-    border-radius: 30px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-}
-
-.btn-logout:hover {
-    background: #dc2626;
-    color: white;
-}
-
 /* Main Content */
 .main-content {
     flex: 1;
@@ -182,24 +169,16 @@ body {
     padding: 20px;
 }
 
+/* Top Bar */
 .top-bar {
     background: white;
     border-radius: 16px;
-    padding: 15px 20px;
+    padding: 12px 20px;
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.mobile-menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.3rem;
-    cursor: pointer;
-    color: #666;
 }
 
 .top-bar-info {
@@ -217,7 +196,179 @@ body {
     font-weight: 500;
 }
 
-/* Stats Grid */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #666;
+}
+
+/* ===================================================
+   BOTONES WANT (estilo uniforme)
+   =================================================== */
+
+/* Botón primario naranja */
+.btn-primary {
+    background: #FF5A00;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    background: #e04e00;
+    transform: scale(1.02);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Botón secundario outline */
+.btn-outline {
+    background: transparent;
+    border: 1px solid #FF5A00;
+    color: #FF5A00;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-outline:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+/* Botón de actualizar */
+.btn-refresh {
+    background: #f0f0f0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+}
+
+.btn-refresh:hover {
+    background: #FF5A00;
+    color: white;
+    transform: scale(1.02);
+}
+
+.btn-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Botón exportar */
+.btn-export {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-export:hover {
+    background: #059669;
+    transform: scale(1.02);
+}
+
+/* Botón editar */
+.btn-edit {
+    background: #f0f0f0;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-edit:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+/* Botón eliminar */
+.btn-delete {
+    background: #fee2e2;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    color: #dc2626;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    color: white;
+}
+
+/* Botón cerrar sesión */
+.btn-logout {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-logout:hover {
+    background: #dc2626;
+    color: white;
+}
+
+/* ===================================================
+   STATS CARDS
+   =================================================== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -258,7 +409,9 @@ body {
     font-size: 0.85rem;
 }
 
-/* Charts */
+/* ===================================================
+   CHARTS
+   =================================================== */
 .charts-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -279,7 +432,9 @@ body {
     color: #333;
 }
 
-/* Lists */
+/* ===================================================
+   LISTS
+   =================================================== */
 .lists-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -323,7 +478,9 @@ body {
     font-weight: 600;
 }
 
-/* Recent Orders */
+/* ===================================================
+   RECENT ORDERS
+   =================================================== */
 .recent-orders {
     background: white;
     border-radius: 20px;
@@ -336,14 +493,20 @@ body {
     font-size: 1.1rem;
 }
 
-/* Tables */
+/* ===================================================
+   TABLAS
+   =================================================== */
 .table-responsive {
     overflow-x: auto;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.85rem;
 }
 
 .data-table th,
@@ -356,30 +519,32 @@ body {
 .data-table th {
     font-weight: 600;
     color: #666;
-    font-size: 0.85rem;
     background: #fafafa;
 }
 
-.data-table td {
-    font-size: 0.85rem;
+.data-table tr:hover {
+    background: #f9f9f9;
 }
 
 .loading-text {
     text-align: center;
-    color: #888;
     padding: 40px;
+    color: #888;
 }
 
-/* Status Badges */
+/* ===================================================
+   BADGES DE ESTADO
+   =================================================== */
 .status-badge {
     display: inline-block;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.7rem;
     font-weight: 600;
+    text-align: center;
 }
 
-.status-preparando {
+.status-preparando, .status-activo {
     background: #FFF3E0;
     color: #FF9800;
 }
@@ -399,46 +564,14 @@ body {
     color: #4CAF50;
 }
 
-/* Action Buttons */
-.btn-edit, .btn-delete, .btn-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 5px 8px;
-    border-radius: 8px;
-    transition: all 0.2s;
+.status-inactivo {
+    background: #FFEBEE;
+    color: #F44336;
 }
 
-.btn-edit {
-    color: #FF5A00;
-}
-
-.btn-edit:hover {
-    background: #FFF5EB;
-}
-
-.btn-delete {
-    color: #dc2626;
-}
-
-.btn-delete:hover {
-    background: #fee2e2;
-}
-
-.btn-toggle {
-    color: #888;
-}
-
-.btn-toggle.active {
-    color: #10b981;
-}
-
-.btn-toggle.inactive {
-    color: #dc2626;
-}
-
-/* Page Header */
+/* ===================================================
+   PAGE HEADER
+   =================================================== */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -460,14 +593,23 @@ body {
     align-items: center;
 }
 
+/* ===================================================
+   BUSCADOR Y FILTROS
+   =================================================== */
 .search-box {
     display: flex;
     align-items: center;
     background: white;
     border: 1px solid #ddd;
-    border-radius: 30px;
+    border-radius: 40px;
     padding: 8px 16px;
     gap: 8px;
+    transition: all 0.2s;
+}
+
+.search-box:focus-within {
+    border-color: #FF5A00;
+    box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
 }
 
 .search-box i {
@@ -479,147 +621,47 @@ body {
     outline: none;
     font-size: 0.85rem;
     min-width: 200px;
+    background: transparent;
 }
 
 .filtros {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .filtros select,
 .filtros input {
     padding: 8px 12px;
     border: 1px solid #ddd;
-    border-radius: 30px;
+    border-radius: 40px;
     font-size: 0.85rem;
     background: white;
-}
-
-.btn-export {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 30px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
+    transition: all 0.2s;
 }
 
-.btn-export:hover {
-    background: #059669;
+.filtros select:focus,
+.filtros input:focus {
+    border-color: #FF5A00;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
 }
 
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 24px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.modal-content.small {
-    max-width: 400px;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-    font-size: 1.2rem;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #999;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 15px 20px;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-
-.btn-primary {
-    background: #FF5A00;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.btn-secondary {
-    background: #f0f0f0;
-    color: #666;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-}
-
-.btn-danger {
-    background: #dc2626;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-}
-
-.warning {
-    color: #dc2626;
-    font-size: 0.8rem;
-    margin-top: 10px;
-}
-
-/* Form Groups */
+/* ===================================================
+   FORMULARIOS
+   =================================================== */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     font-weight: 500;
     font-size: 0.85rem;
+    color: #666;
 }
 
 .form-group input,
@@ -630,21 +672,17 @@ body {
     border: 1px solid #ddd;
     border-radius: 12px;
     font-size: 0.9rem;
+    transition: all 0.2s;
 }
 
-.form-group textarea {
-    resize: vertical;
-    min-height: 80px;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #FF5A00;
+    box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
 }
 
-.form-group small {
-    display: block;
-    margin-top: 5px;
-    color: #888;
-    font-size: 0.7rem;
-}
-
-/* Password wrapper */
 .password-wrapper {
     position: relative;
     display: flex;
@@ -663,9 +701,12 @@ body {
     border: none;
     cursor: pointer;
     color: #999;
+    padding: 8px;
 }
 
-/* Config Section */
+/* ===================================================
+   CONFIGURACIÓN
+   =================================================== */
 .config-section {
     max-width: 800px;
     margin: 0 auto;
@@ -685,7 +726,9 @@ body {
     color: #333;
 }
 
-/* Responsive */
+/* ===================================================
+   RESPONSIVE
+   =================================================== */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -728,5 +771,15 @@ body {
     
     .search-box input {
         min-width: auto;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+    }
+    
+    .btn-edit, .btn-delete {
+        padding: 4px 8px;
+        font-size: 0.7rem;
     }
 }
