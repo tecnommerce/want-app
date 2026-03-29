@@ -1,8 +1,7 @@
 // ===================================================
-// ADMIN GLOBAL - Funciones principales
+// ADMIN GLOBAL - SPA (Single Page Application)
 // ===================================================
 
-// Usar la URL de API que ya funciona
 const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
 
 // ===================================================
@@ -17,12 +16,9 @@ async function callAPI(action, data = {}) {
                 url += `&${key}=${encodeURIComponent(data[key])}`;
             }
         }
-        console.log('📡 GET:', url);
         const response = await fetch(url, { method: 'GET', mode: 'cors' });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const result = await response.json();
-        console.log('📥 Respuesta:', result);
-        return result;
+        return await response.json();
     } catch (error) {
         console.error('❌ Error en callAPI:', error);
         return { error: error.message };
@@ -31,18 +27,14 @@ async function callAPI(action, data = {}) {
 
 async function postAPI(action, data = {}) {
     try {
-        const url = API_URL;
-        console.log('📡 POST:', url);
-        const response = await fetch(url, {
+        const response = await fetch(API_URL, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action, ...data })
         });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const result = await response.json();
-        console.log('📥 Respuesta POST:', result);
-        return result;
+        return await response.json();
     } catch (error) {
         console.error('❌ Error en postAPI:', error);
         return { success: false, error: error.message };
@@ -99,38 +91,40 @@ let allProductos = [];
 let charts = {};
 
 // ===================================================
-// CARGA DE DATOS
+// CARGA DE DATOS (UNA SOLA VEZ)
 // ===================================================
 
 async function cargarTodosLosDatos() {
-    try {
-        console.log('🔄 Cargando todos los datos...');
-        
-        const vendedoresRes = await callAPI('getVendedores');
-        if (vendedoresRes.success) {
-            allVendedores = vendedoresRes.vendedores || [];
-            console.log(`✅ Cargados ${allVendedores.length} vendedores`);
-        }
-        
-        const pedidosRes = await callAPI('getAllPedidos');
-        if (pedidosRes.success) {
-            allPedidos = pedidosRes.pedidos || [];
-            console.log(`✅ Cargados ${allPedidos.length} pedidos`);
-        }
-        
-        const productosRes = await callAPI('getAllProductos');
-        if (productosRes.success) {
-            allProductos = productosRes.productos || [];
-            console.log(`✅ Cargados ${allProductos.length} productos`);
-        }
-        
-        actualizarDashboard();
-        return true;
-    } catch (error) {
-        console.error('Error cargando datos:', error);
-        return false;
+    console.log('🔄 Cargando todos los datos...');
+    
+    const vendedoresRes = await callAPI('getVendedores');
+    if (vendedoresRes.success) {
+        allVendedores = vendedoresRes.vendedores || [];
+        console.log(`✅ Cargados ${allVendedores.length} vendedores`);
     }
+    
+    const pedidosRes = await callAPI('getAllPedidos');
+    if (pedidosRes.success) {
+        allPedidos = pedidosRes.pedidos || [];
+        console.log(`✅ Cargados ${allPedidos.length} pedidos`);
+    }
+    
+    const productosRes = await callAPI('getAllProductos');
+    if (productosRes.success) {
+        allProductos = productosRes.productos || [];
+        console.log(`✅ Cargados ${allProductos.length} productos`);
+    }
+    
+    actualizarDashboard();
+    renderizarVendedores();
+    renderizarPedidos();
+    renderizarProductos();
+    cargarFiltros();
 }
+
+// ===================================================
+// DASHBOARD
+// ===================================================
 
 function actualizarDashboard() {
     const totalVendedores = allVendedores.length;
@@ -225,82 +219,40 @@ function actualizarDashboard() {
     const tbody = document.getElementById('recent-orders-tbody');
     if (tbody) {
         tbody.innerHTML = recentOrders.map(p => `
-            <tr>
-                <td>#${p.id}</td>
-                <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-                <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-                <td>${formatearPrecio(p.total)}</td>
-                <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-                <td>${formatearFecha(p.fecha)}</td>
-            </tr>
+             <tr>
+                 <td>#${p.id}</td>
+                 <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
+                 <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+                 <td>${formatearPrecio(p.total)}</td>
+                 <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
+                 <td>${formatearFecha(p.fecha)}</td>
+             </tr>
         `).join('');
         if (recentOrders.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay pedidos</td></tr>';
     }
 }
 
 // ===================================================
-// INICIALIZACIÓN
+// VENDEDORES
 // ===================================================
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Dashboard Administrativo Global iniciado');
-    
-    // Botón cerrar sesión
-    const btnLogout = document.getElementById('btn-logout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            sessionStorage.removeItem('admin_session');
-            window.location.href = 'login.html';
-        });
-    }
-    
-    await cargarTodosLosDatos();
-});
-
-// ===================================================
-// FUNCIONES PARA VENDEDORES
-// ===================================================
-
-async function cargarVendedores() {
+function renderizarVendedores() {
     const tbody = document.getElementById('vendedores-tbody');
     if (!tbody) return;
     
-    tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Cargando vendedores...</td></tr>';
-    
-    try {
-        const response = await callAPI('getVendedores');
-        if (response.success && response.vendedores) {
-            renderizarVendedores(response.vendedores);
-        } else {
-            tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error al cargar vendedores</td></tr>';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error de conexión</td></tr>';
-    }
-}
-
-function renderizarVendedores(vendedores) {
-    const tbody = document.getElementById('vendedores-tbody');
-    if (!tbody) return;
-    
-    if (vendedores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores registrados</td></tr>';
+    if (allVendedores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay vendedores registrados</td></tr>';
         return;
     }
     
-    tbody.innerHTML = vendedores.map(v => `
+    tbody.innerHTML = allVendedores.map(v => `
         <tr>
             <td>${v.id}</td>
             <td><strong>${escapeHTML(v.nombre)}</strong></td>
             <td>${escapeHTML(v.email || '-')}</td>
             <td>${v.telefono || '-'}</td>
             <td>${escapeHTML(v.direccion || '-')}</td>
-            <td>
-                <span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">
-                    ${v.activo === 'SI' ? 'Activo' : 'Inactivo'}
-                </span>
-            </td>
+            <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
             <td>
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
@@ -310,38 +262,38 @@ function renderizarVendedores(vendedores) {
 }
 
 // ===================================================
-// FUNCIONES PARA PEDIDOS
+// PEDIDOS
 // ===================================================
 
-async function cargarPedidos() {
+function renderizarPedidos() {
     const tbody = document.getElementById('pedidos-tbody');
     if (!tbody) return;
     
-    tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Cargando pedidos...</td></tr>';
+    let pedidosFiltrados = [...allPedidos];
     
-    try {
-        const response = await callAPI('getAllPedidos');
-        if (response.success && response.pedidos) {
-            renderizarPedidos(response.pedidos);
-        } else {
-            tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Error al cargar pedidos</td></tr>';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Error de conexión</td></tr>';
+    const filtroVendedor = document.getElementById('filtro-vendedor')?.value;
+    if (filtroVendedor) {
+        pedidosFiltrados = pedidosFiltrados.filter(p => p.vendedor_id.toString() === filtroVendedor);
     }
-}
-
-function renderizarPedidos(pedidos) {
-    const tbody = document.getElementById('pedidos-tbody');
-    if (!tbody) return;
     
-    if (pedidos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay pedidos registrados</td></tr>';
+    const filtroEstado = document.getElementById('filtro-estado')?.value;
+    if (filtroEstado) {
+        pedidosFiltrados = pedidosFiltrados.filter(p => p.estado === filtroEstado);
+    }
+    
+    const filtroFecha = document.getElementById('filtro-fecha')?.value;
+    if (filtroFecha) {
+        pedidosFiltrados = pedidosFiltrados.filter(p => p.fecha && p.fecha.split('T')[0] === filtroFecha);
+    }
+    
+    pedidosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+    if (pedidosFiltrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay pedidos</td></tr>';
         return;
     }
     
-    tbody.innerHTML = pedidos.slice(0, 50).map(p => `
+    tbody.innerHTML = pedidosFiltrados.slice(0, 100).map(p => `
         <tr>
             <td>#${p.id}</td>
             <td>${formatearFecha(p.fecha)}</td>
@@ -354,39 +306,42 @@ function renderizarPedidos(pedidos) {
     `).join('');
 }
 
-// ===================================================
-// FUNCIONES PARA PRODUCTOS
-// ===================================================
-
-async function cargarProductos() {
-    const tbody = document.getElementById('productos-tbody');
-    if (!tbody) return;
+function cargarFiltros() {
+    const filtroVendedor = document.getElementById('filtro-vendedor');
+    const filtroVendedorProd = document.getElementById('filtro-vendedor-prod');
     
-    tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Cargando productos...</td></tr>';
+    const options = '<option value="">Todos los vendedores</option>' + allVendedores.map(v => `<option value="${v.id}">${escapeHTML(v.nombre)}</option>`).join('');
     
-    try {
-        const response = await callAPI('getAllProductos');
-        if (response.success && response.productos) {
-            renderizarProductos(response.productos);
-        } else {
-            tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Error al cargar productos</td></tr>';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Error de conexión</td></tr>';
-    }
+    if (filtroVendedor) filtroVendedor.innerHTML = options;
+    if (filtroVendedorProd) filtroVendedorProd.innerHTML = options;
 }
 
-function renderizarProductos(productos) {
+// ===================================================
+// PRODUCTOS
+// ===================================================
+
+function renderizarProductos() {
     const tbody = document.getElementById('productos-tbody');
     if (!tbody) return;
     
-    if (productos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay productos registrados</td></tr>';
+    let productosFiltrados = [...allProductos];
+    
+    const filtroVendedor = document.getElementById('filtro-vendedor-prod')?.value;
+    if (filtroVendedor) {
+        productosFiltrados = productosFiltrados.filter(p => p.vendedor_id.toString() === filtroVendedor);
+    }
+    
+    const searchTerm = document.getElementById('search-producto')?.value.toLowerCase();
+    if (searchTerm) {
+        productosFiltrados = productosFiltrados.filter(p => p.nombre?.toLowerCase().includes(searchTerm) || p.descripcion?.toLowerCase().includes(searchTerm));
+    }
+    
+    if (productosFiltrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay productos</td></tr>';
         return;
     }
     
-    tbody.innerHTML = productos.map(p => `
+    tbody.innerHTML = productosFiltrados.map(p => `
         <tr>
             <td>${p.id}</td>
             <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">` : '<span style="color:#ccc;">📷</span>'}</td>
@@ -402,3 +357,108 @@ function renderizarProductos(productos) {
         </tr>
     `).join('');
 }
+
+// ===================================================
+// NAVEGACIÓN ENTRE SECCIONES (sin recargar)
+// ===================================================
+
+function cambiarSeccion(seccionId) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('.section-content').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Mostrar la sección seleccionada
+    const seccion = document.getElementById(`section-${seccionId}`);
+    if (seccion) seccion.style.display = 'block';
+    
+    // Actualizar clase activa en el menú
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-section') === seccionId) {
+            item.classList.add('active');
+        }
+    });
+}
+
+// ===================================================
+// INICIALIZACIÓN
+// ===================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Panel Administrativo Global iniciado');
+    
+    // Cargar todos los datos una sola vez
+    await cargarTodosLosDatos();
+    
+    // Configurar navegación
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const seccion = item.getAttribute('data-section');
+            cambiarSeccion(seccion);
+        });
+    });
+    
+    // Filtros de pedidos
+    const filtros = ['filtro-vendedor', 'filtro-estado', 'filtro-fecha'];
+    filtros.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => renderizarPedidos());
+    });
+    
+    // Buscador de productos
+    const searchProducto = document.getElementById('search-producto');
+    if (searchProducto) searchProducto.addEventListener('input', () => renderizarProductos());
+    
+    // Buscador de vendedores
+    const searchVendedor = document.getElementById('search-vendedor');
+    if (searchVendedor) {
+        searchVendedor.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
+            const tbody = document.getElementById('vendedores-tbody');
+            if (tbody) {
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay vendedores</td></tr>';
+                } else {
+                    tbody.innerHTML = filtered.map(v => `
+                        <tr>
+                            <td>${v.id}</td>
+                            <td><strong>${escapeHTML(v.nombre)}</strong></td>
+                            <td>${escapeHTML(v.email || '-')}</td>
+                            <td>${v.telefono || '-'}</td>
+                            <td>${escapeHTML(v.direccion || '-')}</td>
+                            <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+                            <td>
+                                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
+                                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        });
+    }
+    
+    // Botón cerrar sesión
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            sessionStorage.removeItem('admin_session');
+            window.location.href = 'login.html';
+        });
+    }
+    
+    // Menú móvil
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+});
