@@ -1,50 +1,76 @@
 // ===================================================
-// ADMIN GLOBAL - usando Google.script.run (sin CORS)
+// ADMIN GLOBAL - Versión simplificada con fetch directo
 // ===================================================
 
-// Configuración de la API
 const API_URL = 'https://script.google.com/macros/s/AKfycbxnvRYb9za-mDyd2IZluyBa30nSPe8RwHQoiHSWEFNy9cqPmPtQTjs0IKPLzJXI1qAe/exec';
 
-// Función para cargar el script de Google
-function loadGoogleScript() {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = API_URL;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
-
-// Función para llamar a la API usando postMessage (porque google.script.run no funciona en iframe)
 async function callAPI(action, data = {}) {
-  return new Promise((resolve, reject) => {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = API_URL;
-    document.body.appendChild(iframe);
-    
-    const timeout = setTimeout(() => {
-      document.body.removeChild(iframe);
-      reject(new Error('Timeout'));
-    }, 10000);
-    
-    window.addEventListener('message', function handler(event) {
-      if (event.source === iframe.contentWindow) {
-        clearTimeout(timeout);
-        window.removeEventListener('message', handler);
-        document.body.removeChild(iframe);
-        resolve(event.data);
-      }
-    });
-    
-    iframe.onload = () => {
-      iframe.contentWindow.postMessage({ action, data }, '*');
-    };
-  });
+    try {
+        let url = `${API_URL}?action=${action}`;
+        
+        if (data && Object.keys(data).length > 0) {
+            for (let key in data) {
+                url += `&${key}=${encodeURIComponent(data[key])}`;
+            }
+        }
+        
+        console.log('📡 GET:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('📥 Respuesta:', result);
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Error en callAPI:', error);
+        return { error: error.message };
+    }
 }
 
-// Las demás funciones (formatearPrecio, etc.) se mantienen igual
+async function postAPI(action, data = {}) {
+    try {
+        const url = API_URL;
+        
+        console.log('📡 POST:', url);
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: action,
+                ...data
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('📥 Respuesta POST:', result);
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Error en postAPI:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// El resto de las funciones (formatearPrecio, etc.) se mantienen igual
 function formatearPrecio(precio) {
     return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
 }
@@ -120,7 +146,6 @@ async function cargarTodosLosDatos() {
     try {
         console.log('🔄 Cargando todos los datos...');
         
-        // Cargar vendedores
         const vendedoresRes = await callAPI('getVendedores');
         if (vendedoresRes.success) {
             allVendedores = vendedoresRes.vendedores || [];
@@ -129,7 +154,6 @@ async function cargarTodosLosDatos() {
             console.error('Error cargando vendedores:', vendedoresRes.error);
         }
         
-        // Cargar pedidos de todos los vendedores
         allPedidos = [];
         for (const v of allVendedores) {
             const pedidosRes = await callAPI('getPedidos', { vendedorId: v.id });
@@ -139,7 +163,6 @@ async function cargarTodosLosDatos() {
         }
         console.log(`✅ Cargados ${allPedidos.length} pedidos`);
         
-        // Cargar productos de todos los vendedores
         allProductos = [];
         for (const v of allVendedores) {
             const productosRes = await callAPI('getProductos', { vendedorId: v.id });
@@ -162,13 +185,11 @@ async function cargarTodosLosDatos() {
 // ===================================================
 
 function actualizarDashboard() {
-    // Calcular métricas
     const totalVendedores = allVendedores.length;
     const totalPedidos = allPedidos.length;
     const totalProductos = allProductos.length;
     const ingresosTotales = allPedidos.reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     
-    // Actualizar stats
     const totalVendedoresEl = document.getElementById('total-vendedores');
     const totalPedidosEl = document.getElementById('total-pedidos');
     const totalProductosEl = document.getElementById('total-productos');
@@ -179,7 +200,6 @@ function actualizarDashboard() {
     if (totalProductosEl) totalProductosEl.textContent = totalProductos;
     if (totalIngresosEl) totalIngresosEl.textContent = formatearPrecio(ingresosTotales);
     
-    // Gráfico de pedidos por estado
     const estados = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
     allPedidos.forEach(p => {
         const estado = p.estado || 'preparando';
@@ -202,7 +222,6 @@ function actualizarDashboard() {
         });
     }
     
-    // Gráfico de ventas por día (últimos 7 días)
     const ultimos7Dias = [];
     const ventasPorDia = {};
     for (let i = 6; i >= 0; i--) {
@@ -239,15 +258,12 @@ function actualizarDashboard() {
         });
     }
     
-    // Top 5 vendedores
     const ventasPorVendedor = {};
     allPedidos.forEach(p => {
         const nombre = p.vendedor_nombre || 'Desconocido';
         ventasPorVendedor[nombre] = (ventasPorVendedor[nombre] || 0) + (parseFloat(p.total) || 0);
     });
-    const topVendedores = Object.entries(ventasPorVendedor)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
+    const topVendedores = Object.entries(ventasPorVendedor).sort((a, b) => b[1] - a[1]).slice(0, 5);
     
     const topVendedoresDiv = document.getElementById('top-vendedores-list');
     if (topVendedoresDiv) {
@@ -260,7 +276,6 @@ function actualizarDashboard() {
         if (topVendedores.length === 0) topVendedoresDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
     }
     
-    // Top 5 productos
     const ventasPorProducto = {};
     allPedidos.forEach(p => {
         if (p.productos) {
@@ -270,9 +285,7 @@ function actualizarDashboard() {
             });
         }
     });
-    const topProductos = Object.entries(ventasPorProducto)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
+    const topProductos = Object.entries(ventasPorProducto).sort((a, b) => b[1] - a[1]).slice(0, 5);
     
     const topProductosDiv = document.getElementById('top-productos-list');
     if (topProductosDiv) {
@@ -285,7 +298,6 @@ function actualizarDashboard() {
         if (topProductos.length === 0) topProductosDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
     }
     
-    // Últimos pedidos
     const recentOrders = allPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
     const tbody = document.getElementById('recent-orders-tbody');
     if (tbody) {
@@ -304,7 +316,7 @@ function actualizarDashboard() {
 }
 
 // ===================================================
-// VENDEDORES
+// VENDEDORES - Funciones simplificadas
 // ===================================================
 
 async function cargarVendedores() {
@@ -321,7 +333,7 @@ async function cargarVendedores() {
         }
     } catch (error) {
         console.error('Error cargar vendedores:', error);
-        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error al cargar</td> </tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error al cargar</td></tr>';
     }
 }
 
@@ -329,7 +341,6 @@ function renderizarVendedores(vendedores) {
     const tbody = document.getElementById('vendedores-tbody');
     if (!tbody) return;
     
-    // Calcular pedidos e ingresos por vendedor
     const stats = {};
     allPedidos.forEach(p => {
         const id = p.vendedor_id;
@@ -357,24 +368,12 @@ function renderizarVendedores(vendedores) {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-delete" onclick="confirmarEliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
             </td>
-         </tr>
+        </tr>
     `).join('');
 }
 
-function editarVendedor(id) {
-    const vendedor = allVendedores.find(v => v.id.toString() === id.toString());
-    if (!vendedor) return;
-    
-    document.getElementById('edit-id').value = vendedor.id;
-    document.getElementById('edit-nombre').value = vendedor.nombre || '';
-    document.getElementById('edit-email').value = vendedor.email || '';
-    document.getElementById('edit-telefono').value = vendedor.telefono || '';
-    document.getElementById('edit-direccion').value = vendedor.direccion || '';
-    document.getElementById('edit-horario').value = vendedor.horario || '';
-    document.getElementById('edit-activo').value = vendedor.activo || 'SI';
-    
-    document.getElementById('modal-editar-vendedor').classList.add('active');
-}
+// Resto de funciones (editarVendedor, guardarEditarVendedor, etc.) se mantienen igual
+// pero con callAPI en lugar de postAPI para escritura
 
 async function guardarEditarVendedor() {
     const id = document.getElementById('edit-id').value;
@@ -389,7 +388,7 @@ async function guardarEditarVendedor() {
     };
     
     try {
-        const response = await callAPI('actualizarVendedor', data);
+        const response = await postAPI('actualizarVendedor', data);
         if (response.success) {
             mostrarToast('Vendedor actualizado correctamente', 'success');
             cerrarModalEditar();
@@ -410,7 +409,7 @@ async function toggleVendedorActivo(id) {
     const nuevoEstado = vendedor.activo === 'SI' ? 'NO' : 'SI';
     
     try {
-        const response = await callAPI('actualizarVendedor', {
+        const response = await postAPI('actualizarVendedor', {
             id: parseInt(id),
             activo: nuevoEstado
         });
@@ -426,16 +425,11 @@ async function toggleVendedorActivo(id) {
     }
 }
 
-function confirmarEliminarVendedor(id) {
-    vendedorAEliminar = id;
-    document.getElementById('modal-confirmar').classList.add('active');
-}
-
 async function eliminarVendedor() {
     if (!vendedorAEliminar) return;
     
     try {
-        const response = await callAPI('eliminarVendedor', { vendedorId: vendedorAEliminar });
+        const response = await postAPI('eliminarVendedor', { vendedorId: vendedorAEliminar });
         if (response.success) {
             mostrarToast('Vendedor eliminado correctamente', 'success');
             cerrarModalConfirmar();
@@ -450,6 +444,21 @@ async function eliminarVendedor() {
     vendedorAEliminar = null;
 }
 
+function editarVendedor(id) {
+    const vendedor = allVendedores.find(v => v.id.toString() === id.toString());
+    if (!vendedor) return;
+    
+    document.getElementById('edit-id').value = vendedor.id;
+    document.getElementById('edit-nombre').value = vendedor.nombre || '';
+    document.getElementById('edit-email').value = vendedor.email || '';
+    document.getElementById('edit-telefono').value = vendedor.telefono || '';
+    document.getElementById('edit-direccion').value = vendedor.direccion || '';
+    document.getElementById('edit-horario').value = vendedor.horario || '';
+    document.getElementById('edit-activo').value = vendedor.activo || 'SI';
+    
+    document.getElementById('modal-editar-vendedor').classList.add('active');
+}
+
 function cerrarModalEditar() {
     document.getElementById('modal-editar-vendedor').classList.remove('active');
 }
@@ -457,6 +466,11 @@ function cerrarModalEditar() {
 function cerrarModalConfirmar() {
     document.getElementById('modal-confirmar').classList.remove('active');
     vendedorAEliminar = null;
+}
+
+function confirmarEliminarVendedor(id) {
+    vendedorAEliminar = id;
+    document.getElementById('modal-confirmar').classList.add('active');
 }
 
 function exportarVendedores() {
@@ -474,7 +488,7 @@ function exportarVendedores() {
 }
 
 // ===================================================
-// PEDIDOS
+// PEDIDOS - Funciones simplificadas
 // ===================================================
 
 async function cargarPedidosGlobal() {
@@ -485,7 +499,6 @@ async function cargarPedidosGlobal() {
     
     await cargarTodosLosDatos();
     
-    // Cargar vendedores en filtro
     const filtroVendedor = document.getElementById('filtro-vendedor');
     if (filtroVendedor) {
         filtroVendedor.innerHTML = '<option value="">Todos los vendedores</option>' + 
@@ -501,19 +514,16 @@ function renderizarPedidosGlobal() {
     
     let pedidosFiltrados = [...allPedidos];
     
-    // Filtro vendedor
     const filtroVendedor = document.getElementById('filtro-vendedor')?.value;
     if (filtroVendedor) {
         pedidosFiltrados = pedidosFiltrados.filter(p => p.vendedor_id.toString() === filtroVendedor);
     }
     
-    // Filtro estado
     const filtroEstado = document.getElementById('filtro-estado')?.value;
     if (filtroEstado) {
         pedidosFiltrados = pedidosFiltrados.filter(p => p.estado === filtroEstado);
     }
     
-    // Filtro fecha
     const filtroFecha = document.getElementById('filtro-fecha')?.value;
     if (filtroFecha) {
         pedidosFiltrados = pedidosFiltrados.filter(p => p.fecha && p.fecha.split('T')[0] === filtroFecha);
@@ -553,7 +563,7 @@ function exportarPedidos() {
 }
 
 // ===================================================
-// PRODUCTOS
+// PRODUCTOS - Funciones simplificadas
 // ===================================================
 
 async function cargarProductosGlobal() {
@@ -564,7 +574,6 @@ async function cargarProductosGlobal() {
     
     await cargarTodosLosDatos();
     
-    // Cargar vendedores en filtro
     const filtroVendedor = document.getElementById('filtro-vendedor-prod');
     if (filtroVendedor) {
         filtroVendedor.innerHTML = '<option value="">Todos los vendedores</option>' + 
@@ -580,13 +589,11 @@ function renderizarProductosGlobal() {
     
     let productosFiltrados = [...allProductos];
     
-    // Filtro vendedor
     const filtroVendedor = document.getElementById('filtro-vendedor-prod')?.value;
     if (filtroVendedor) {
         productosFiltrados = productosFiltrados.filter(p => p.vendedor_id.toString() === filtroVendedor);
     }
     
-    // Búsqueda
     const searchTerm = document.getElementById('search-producto')?.value.toLowerCase();
     if (searchTerm) {
         productosFiltrados = productosFiltrados.filter(p => 
@@ -595,7 +602,6 @@ function renderizarProductosGlobal() {
         );
     }
     
-    // Calcular ventas por producto
     const ventasPorProducto = {};
     allPedidos.forEach(p => {
         if (p.productos) {
@@ -611,20 +617,12 @@ function renderizarProductosGlobal() {
         return `
             <tr>
                 <td>${p.id}</td>
-                <td>
-                    ${p.imagen_url ? 
-                        `<img src="${p.imagen_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">` : 
-                        '<span style="color:#ccc;">📷</span>'}
-                </td>
+                <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">` : '<span style="color:#ccc;">📷</span>'}</td>
                 <td><strong>${escapeHTML(p.nombre)}</strong></td>
                 <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
                 <td>${formatearPrecio(p.precio)}</td>
                 <td>${ventas}</td>
-                <td>
-                    <span class="status-badge ${p.disponible === 'SI' ? 'status-entregado' : 'status-preparando'}">
-                        ${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}
-                    </span>
-                </td>
+                <td><span class="status-badge ${p.disponible === 'SI' ? 'status-entregado' : 'status-preparando'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
                 <td>
                     <button class="btn-edit" onclick="editarProducto(${p.id}, ${p.vendedor_id})"><i class="fas fa-edit"></i></button>
                     <button class="btn-delete" onclick="confirmarEliminarProducto(${p.id}, ${p.vendedor_id})"><i class="fas fa-trash"></i></button>
@@ -663,7 +661,7 @@ async function guardarEditarProducto() {
     };
     
     try {
-        const response = await callAPI('actualizarProducto', data);
+        const response = await postAPI('actualizarProducto', data);
         if (response.success) {
             mostrarToast('Producto actualizado correctamente', 'success');
             cerrarModalEditarProducto();
@@ -685,7 +683,7 @@ async function eliminarProducto() {
     if (!productoAEliminar) return;
     
     try {
-        const response = await callAPI('eliminarProducto', { productoId: productoAEliminar.id });
+        const response = await postAPI('eliminarProducto', { productoId: productoAEliminar.id });
         if (response.success) {
             mostrarToast('Producto eliminado correctamente', 'success');
             cerrarModalConfirmarProducto();
@@ -754,7 +752,6 @@ function initConfigForm() {
                 return;
             }
             
-            // Guardar configuración
             const config = {
                 admin_email: newEmail,
                 comision: document.getElementById('config-comision')?.value || '5',
@@ -857,7 +854,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         initConfigForm();
         
     } else {
-        // Dashboard
         await cargarTodosLosDatos();
     }
 });
