@@ -2,7 +2,7 @@
 // ADMIN GLOBAL - Versión simplificada con fetch directo
 // ===================================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxbfzAO6KQRq3hkSrGPua1gvRrb-HGsF2QJOYOFaQK012vScBA1owxLrPDbsprTUGIj/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
 
 async function callAPI(action, data = {}) {
     try {
