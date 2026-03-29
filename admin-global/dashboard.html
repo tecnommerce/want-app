@@ -3,64 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Want | Panel Administrativo</title>
+    <title>Want | Dashboard Administrativo</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/admin-global.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Pantalla de Login -->
-    <div class="login-container" id="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>Want<span class="logo-dot">.</span></h1>
-                <p>Panel de Administración</p>
-            </div>
-            <form id="login-form">
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="admin-email" placeholder="admin@want.com" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> Contraseña</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="admin-password" placeholder="••••••••" required>
-                        <button type="button" class="toggle-password" data-target="admin-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <button type="submit" class="btn-login">Ingresar</button>
-            </form>
-            <div class="login-footer">
-                <span>Área restringida - Solo administradores</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Panel Principal (oculto inicialmente) -->
-    <div class="admin-wrapper" id="admin-wrapper" style="display: none;">
-        <!-- Sidebar -->
+    <div class="admin-wrapper">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Want<span class="logo-dot">.</span></h2>
                 <p>Administrador</p>
             </div>
             <nav class="sidebar-nav">
-                <a href="index.html" class="nav-item active" data-page="dashboard">
+                <a href="dashboard.html" class="nav-item active">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
-                <a href="vendedores.html" class="nav-item" data-page="vendedores">
+                <a href="vendedores.html" class="nav-item">
                     <i class="fas fa-store"></i> Vendedores
                 </a>
-                <a href="pedidos.html" class="nav-item" data-page="pedidos">
+                <a href="pedidos.html" class="nav-item">
                     <i class="fas fa-box"></i> Pedidos
                 </a>
-                <a href="productos.html" class="nav-item" data-page="productos">
+                <a href="productos.html" class="nav-item">
                     <i class="fas fa-pizza-slice"></i> Productos
                 </a>
-                <a href="configuracion.html" class="nav-item" data-page="configuracion">
+                <a href="configuracion.html" class="nav-item">
                     <i class="fas fa-cog"></i> Configuración
                 </a>
             </nav>
@@ -71,7 +40,6 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <header class="top-bar">
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
@@ -83,8 +51,7 @@
                 </div>
             </header>
 
-            <!-- Dashboard Content -->
-            <div class="page-content" id="dashboard-content">
+            <div class="page-content">
                 <!-- Stats Cards -->
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -145,7 +112,7 @@
                 <div class="recent-orders">
                     <h3>Últimos pedidos</h3>
                     <div class="table-responsive">
-                        <table class="data-table" id="recent-orders-table">
+                        <table class="data-table">
                             <thead>
                                 <tr><th>ID</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Fecha</th></tr>
                             </thead>
@@ -159,7 +126,6 @@
         </main>
     </div>
 
-    <!-- Scripts -->
     <script src="js/auth.js"></script>
     <script src="js/admin-global.js"></script>
 </body>

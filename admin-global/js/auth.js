@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - Autenticación simplificada
+// ADMIN GLOBAL - Autenticación
 // ===================================================
 
 const ADMIN_CONFIG = {
@@ -30,7 +30,22 @@ async function login(email, password) {
 
 function logout() {
     sessionStorage.removeItem('admin_session');
-    window.location.href = '/admin-global/';
+    window.location.href = 'login.html';
+}
+
+function initPasswordToggle() {
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                btn.querySelector('i').classList.toggle('fa-eye');
+                btn.querySelector('i').classList.toggle('fa-eye-slash');
+            }
+        });
+    });
 }
 
 function initLogin() {
@@ -41,13 +56,9 @@ function initLogin() {
             const email = document.getElementById('admin-email').value.trim();
             const password = document.getElementById('admin-password').value;
             
-            console.log('Intentando login...');
             const success = await login(email, password);
-            console.log('Login success:', success);
-            
             if (success) {
-                console.log('Redirigiendo a index.html');
-                window.location.href = '/admin-global/index.html';
+                window.location.href = 'dashboard.html';
             } else {
                 alert('Email o contraseña incorrectos');
             }
@@ -56,21 +67,20 @@ function initLogin() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Auth.js cargado');
-    const path = window.location.pathname;
+    initPasswordToggle();
     
-    if (path === '/admin-global/' || path.endsWith('index.html') || path === '/admin-global') {
+    const path = window.location.pathname;
+    const isLoginPage = path.includes('login.html') || path === '/admin-global/' || path.endsWith('/');
+    
+    if (isLoginPage) {
         if (checkSession()) {
-            console.log('Sesión activa, redirigiendo a dashboard');
-            window.location.href = '/admin-global/index.html';
+            window.location.href = 'dashboard.html';
         } else {
-            console.log('Mostrando login');
             initLogin();
         }
     } else {
         if (!checkSession()) {
-            console.log('No hay sesión, redirigiendo a login');
-            window.location.href = '/admin-global/';
+            window.location.href = 'login.html';
         }
     }
 });
