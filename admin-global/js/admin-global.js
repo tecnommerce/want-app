@@ -1,81 +1,50 @@
 // ===================================================
-// ADMIN GLOBAL - Funciones principales
+// ADMIN GLOBAL - usando Google.script.run (sin CORS)
 // ===================================================
 
 // Configuración de la API
-const API_URL = 'https://script.google.com/macros/s/AKfycbzqaSm8NzZvbzASTB9tQKjwkSC4pdjIdVg3uy46BwquDrRuUFyYT5OuX39n8WUX11Ff/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxnvRYb9za-mDyd2IZluyBa30nSPe8RwHQoiHSWEFNy9cqPmPtQTjs0IKPLzJXI1qAe/exec';
 
-// ===================================================
-// FUNCIONES DE API (copiadas de utils.js)
-// ===================================================
-
-async function callAPI(action, data = {}, forceRefresh = false) {
-    try {
-        let url = `${API_URL}?action=${action}`;
-        
-        if (data && Object.keys(data).length > 0) {
-            for (let key in data) {
-                url += `&${key}=${encodeURIComponent(data[key])}`;
-            }
-        }
-        
-        console.log('📡 GET:', url);
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors'
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('📥 Respuesta GET:', result);
-        return result;
-        
-    } catch (error) {
-        console.error('❌ Error en callAPI:', error);
-        return { error: error.message };
-    }
+// Función para cargar el script de Google
+function loadGoogleScript() {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = API_URL;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
 }
 
-async function postAPI(action, data = {}) {
-    try {
-        const url = API_URL;
-        
-        console.log('📡 POST a:', url);
-        console.log('📦 Datos enviados:', { action, ...data });
-        
-        const jsonData = JSON.stringify({ action, ...data });
-        
-        const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-            body: jsonData
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('📥 Respuesta POST:', result);
-        return result;
-        
-    } catch (error) {
-        console.error('❌ Error en postAPI:', error);
-        return { success: false, error: error.message };
-    }
+// Función para llamar a la API usando postMessage (porque google.script.run no funciona en iframe)
+async function callAPI(action, data = {}) {
+  return new Promise((resolve, reject) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = API_URL;
+    document.body.appendChild(iframe);
+    
+    const timeout = setTimeout(() => {
+      document.body.removeChild(iframe);
+      reject(new Error('Timeout'));
+    }, 10000);
+    
+    window.addEventListener('message', function handler(event) {
+      if (event.source === iframe.contentWindow) {
+        clearTimeout(timeout);
+        window.removeEventListener('message', handler);
+        document.body.removeChild(iframe);
+        resolve(event.data);
+      }
+    });
+    
+    iframe.onload = () => {
+      iframe.contentWindow.postMessage({ action, data }, '*');
+    };
+  });
 }
 
-// ===================================================
-// UTILITARIAS
-// ===================================================
-
+// Las demás funciones (formatearPrecio, etc.) se mantienen igual
 function formatearPrecio(precio) {
     return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
 }
@@ -156,6 +125,8 @@ async function cargarTodosLosDatos() {
         if (vendedoresRes.success) {
             allVendedores = vendedoresRes.vendedores || [];
             console.log(`✅ Cargados ${allVendedores.length} vendedores`);
+        } else {
+            console.error('Error cargando vendedores:', vendedoresRes.error);
         }
         
         // Cargar pedidos de todos los vendedores
@@ -216,7 +187,7 @@ function actualizarDashboard() {
     });
     
     const ctxEstados = document.getElementById('estados-chart');
-    if (ctxEstados) {
+    if (ctxEstados && typeof Chart !== 'undefined') {
         if (charts.estados) charts.estados.destroy();
         charts.estados = new Chart(ctxEstados, {
             type: 'doughnut',
@@ -250,7 +221,7 @@ function actualizarDashboard() {
     });
     
     const ctxVentas = document.getElementById('ventas-chart');
-    if (ctxVentas) {
+    if (ctxVentas && typeof Chart !== 'undefined') {
         if (charts.ventas) charts.ventas.destroy();
         charts.ventas = new Chart(ctxVentas, {
             type: 'line',
@@ -350,7 +321,7 @@ async function cargarVendedores() {
         }
     } catch (error) {
         console.error('Error cargar vendedores:', error);
-        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error al cargar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error al cargar</td> </tr>';
     }
 }
 
@@ -386,7 +357,7 @@ function renderizarVendedores(vendedores) {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-delete" onclick="confirmarEliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
             </td>
-        </tr>
+         </tr>
     `).join('');
 }
 
@@ -418,7 +389,7 @@ async function guardarEditarVendedor() {
     };
     
     try {
-        const response = await postAPI('actualizarVendedor', data);
+        const response = await callAPI('actualizarVendedor', data);
         if (response.success) {
             mostrarToast('Vendedor actualizado correctamente', 'success');
             cerrarModalEditar();
@@ -439,7 +410,7 @@ async function toggleVendedorActivo(id) {
     const nuevoEstado = vendedor.activo === 'SI' ? 'NO' : 'SI';
     
     try {
-        const response = await postAPI('actualizarVendedor', {
+        const response = await callAPI('actualizarVendedor', {
             id: parseInt(id),
             activo: nuevoEstado
         });
@@ -464,7 +435,7 @@ async function eliminarVendedor() {
     if (!vendedorAEliminar) return;
     
     try {
-        const response = await postAPI('eliminarVendedor', { vendedorId: vendedorAEliminar });
+        const response = await callAPI('eliminarVendedor', { vendedorId: vendedorAEliminar });
         if (response.success) {
             mostrarToast('Vendedor eliminado correctamente', 'success');
             cerrarModalConfirmar();
@@ -692,7 +663,7 @@ async function guardarEditarProducto() {
     };
     
     try {
-        const response = await postAPI('actualizarProducto', data);
+        const response = await callAPI('actualizarProducto', data);
         if (response.success) {
             mostrarToast('Producto actualizado correctamente', 'success');
             cerrarModalEditarProducto();
@@ -714,7 +685,7 @@ async function eliminarProducto() {
     if (!productoAEliminar) return;
     
     try {
-        const response = await postAPI('eliminarProducto', { productoId: productoAEliminar.id });
+        const response = await callAPI('eliminarProducto', { productoId: productoAEliminar.id });
         if (response.success) {
             mostrarToast('Producto eliminado correctamente', 'success');
             cerrarModalConfirmarProducto();
@@ -836,7 +807,6 @@ function initMobileMenu() {
             sidebar.classList.toggle('active');
         });
         
-        // Cerrar al hacer clic fuera
         document.addEventListener('click', (e) => {
             if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) {
                 sidebar.classList.remove('active');
