@@ -256,3 +256,149 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await cargarTodosLosDatos();
 });
+
+// ===================================================
+// FUNCIONES PARA VENDEDORES
+// ===================================================
+
+async function cargarVendedores() {
+    const tbody = document.getElementById('vendedores-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Cargando vendedores...</td></tr>';
+    
+    try {
+        const response = await callAPI('getVendedores');
+        if (response.success && response.vendedores) {
+            renderizarVendedores(response.vendedores);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error al cargar vendedores</td></tr>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Error de conexión</td></tr>';
+    }
+}
+
+function renderizarVendedores(vendedores) {
+    const tbody = document.getElementById('vendedores-tbody');
+    if (!tbody) return;
+    
+    if (vendedores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = vendedores.map(v => `
+        <tr>
+            <td>${v.id}</td>
+            <td><strong>${escapeHTML(v.nombre)}</strong></td>
+            <td>${escapeHTML(v.email || '-')}</td>
+            <td>${v.telefono || '-'}</td>
+            <td>${escapeHTML(v.direccion || '-')}</td>
+            <td>
+                <span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">
+                    ${v.activo === 'SI' ? 'Activo' : 'Inactivo'}
+                </span>
+            </td>
+            <td>
+                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ===================================================
+// FUNCIONES PARA PEDIDOS
+// ===================================================
+
+async function cargarPedidos() {
+    const tbody = document.getElementById('pedidos-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Cargando pedidos...</td></tr>';
+    
+    try {
+        const response = await callAPI('getAllPedidos');
+        if (response.success && response.pedidos) {
+            renderizarPedidos(response.pedidos);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Error al cargar pedidos</td></tr>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Error de conexión</td></tr>';
+    }
+}
+
+function renderizarPedidos(pedidos) {
+    const tbody = document.getElementById('pedidos-tbody');
+    if (!tbody) return;
+    
+    if (pedidos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay pedidos registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = pedidos.slice(0, 50).map(p => `
+        <tr>
+            <td>#${p.id}</td>
+            <td>${formatearFecha(p.fecha)}</td>
+            <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
+            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+            <td>${formatearPrecio(p.total)}</td>
+            <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
+            <td>${p.productos ? p.productos.length : 0} productos</td>
+        </tr>
+    `).join('');
+}
+
+// ===================================================
+// FUNCIONES PARA PRODUCTOS
+// ===================================================
+
+async function cargarProductos() {
+    const tbody = document.getElementById('productos-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Cargando productos...</td></tr>';
+    
+    try {
+        const response = await callAPI('getAllProductos');
+        if (response.success && response.productos) {
+            renderizarProductos(response.productos);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Error al cargar productos</td></tr>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Error de conexión</td></tr>';
+    }
+}
+
+function renderizarProductos(productos) {
+    const tbody = document.getElementById('productos-tbody');
+    if (!tbody) return;
+    
+    if (productos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay productos registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = productos.map(p => `
+        <tr>
+            <td>${p.id}</td>
+            <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">` : '<span style="color:#ccc;">📷</span>'}</td>
+            <td><strong>${escapeHTML(p.nombre)}</strong></td>
+            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+            <td>${formatearPrecio(p.precio)}</td>
+            <td>0</td>
+            <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
