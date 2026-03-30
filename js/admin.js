@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor con métricas y mejoras
+// ADMIN - Panel de vendedor con mejoras
 // ===================================================
 
 // Configuración de Cloudinary
@@ -10,7 +10,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
 let vendedorActual = null;
 let pedidos = [];
 let productos = [];
-let filtroActual = 'todos';
+let filtroActual = 'preparando';
 
 // ===================================================
 // UTILIDADES DE AUTENTICACIÓN
@@ -63,6 +63,24 @@ function cerrarSesion() {
     location.reload();
 }
 
+async function subirImagenACloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        return data.secure_url || null;
+    } catch (error) {
+        console.error('Error subir imagen:', error);
+        return null;
+    }
+}
+
 // ===================================================
 // NORMALIZACIÓN DE ESTADOS
 // ===================================================
@@ -107,7 +125,7 @@ function calcularMetricas() {
             if (fechaPedido >= hoy) ventasHoy += total;
             if (fechaPedido >= inicioSemana) ventasSemana += total;
             if (fechaPedido >= inicioMes) ventasMes += total;
-        } else {
+        } else if (pedido.estado !== 'entregado' && pedido.estado !== 'cancelado') {
             pedidosPendientes++;
         }
     });
@@ -125,7 +143,6 @@ function calcularMetricas() {
 
 function actualizarContadoresPedidos() {
     const contarPorEstado = {
-        todos: pedidos.length,
         preparando: 0,
         'en preparacion': 0,
         'en camino': 0,
@@ -137,7 +154,6 @@ function actualizarContadoresPedidos() {
         if (contarPorEstado[estado] !== undefined) contarPorEstado[estado]++;
     });
     
-    document.getElementById('count-todos').textContent = contarPorEstado.todos;
     document.getElementById('count-preparando').textContent = contarPorEstado.preparando;
     document.getElementById('count-preparacion').textContent = contarPorEstado['en preparacion'];
     document.getElementById('count-camino').textContent = contarPorEstado['en camino'];
@@ -146,27 +162,25 @@ function actualizarContadoresPedidos() {
 }
 
 // ===================================================
-// RENDERIZAR PEDIDOS
+// RENDERIZAR PEDIDOS (sin filtro "Todos")
 // ===================================================
 
 function renderizarPedidos() {
     const container = document.getElementById('pedidos-container');
     
-    let pedidosFiltrados = pedidos;
-    if (filtroActual !== 'todos') {
-        pedidosFiltrados = pedidos.filter(p => p.estado === filtroActual);
-    }
+    let pedidosFiltrados = pedidos.filter(p => p.estado === filtroActual);
     
     pedidosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
     if (pedidosFiltrados.length === 0) {
-        container.innerHTML = `<div class="sin-pedidos"><p>📭 No hay pedidos</p></div>`;
+        container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
     
     container.innerHTML = pedidosFiltrados.map(p => {
         const fecha = new Date(p.fecha);
         const numeroPedido = p.id;
+        const metodoPago = p.metodo_pago || 'efectivo';
         
         return `
             <div class="pedido-card">
@@ -178,7 +192,7 @@ function renderizarPedidos() {
                     <strong><i class="fas fa-user"></i> ${escapeHTML(p.cliente_nombre)}</strong>
                     <span><i class="fas fa-phone"></i> ${p.cliente_telefono}</span>
                     <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(p.direccion || 'Sin dirección')}</span>
-                    <span><i class="fas fa-money-bill-wave"></i> ${formatearMetodoPago(p.metodo_pago)}</span>
+                    <span><i class="fas fa-money-bill-wave"></i> ${metodoPago === 'transferencia' ? 'Transferencia' : 'Efectivo'}</span>
                 </div>
                 <div class="pedido-productos">
                     <strong>Productos:</strong>
@@ -194,15 +208,17 @@ function renderizarPedidos() {
                         <span class="estado-badge estado-${p.estado.replace(' ', '-')}">${getEstadoTexto(p.estado)}</span>
                     </div>
                     <div class="botones-estado">
-                        ${p.estado !== 'preparando' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">📦 Nuevo</button>` : ''}
-                        ${p.estado !== 'en preparacion' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">👨‍🍳 Preparar</button>` : ''}
-                        ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">🚚 En camino</button>` : ''}
-                        ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">✅ Entregar</button>` : ''}
+                        ${p.estado !== 'preparando' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">Nuevo</button>` : ''}
+                        ${p.estado !== 'en preparacion' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">Preparar</button>` : ''}
+                        ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">En camino</button>` : ''}
+                        ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">Entregar</button>` : ''}
                     </div>
                     <div class="botones-acciones">
-                        <button class="btn-notificar" onclick="notificarCliente(${p.id}, this)">
-                            <i class="fab fa-whatsapp"></i> Notificar
-                        </button>
+                        ${p.estado === 'preparando' || p.estado === 'en camino' ? `
+                            <button class="btn-notificar" onclick="notificarCliente(${p.id}, this)">
+                                <i class="fab fa-whatsapp"></i> Notificar
+                            </button>
+                        ` : ''}
                         <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
                             <i class="fas fa-trash-alt"></i> Cancelar
                         </button>
@@ -214,7 +230,62 @@ function renderizarPedidos() {
 }
 
 // ===================================================
-// ACTUALIZAR ESTADO
+// NOTIFICAR CLIENTE CON TIEMPO DE ENTREGA
+// ===================================================
+
+async function notificarCliente(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    let tiempoEntrega = '';
+    let mensaje = '';
+    
+    if (pedido.estado === 'preparando') {
+        tiempoEntrega = prompt('Ingrese el tiempo estimado de entrega (ej: 45 minutos, 1 hora, etc.):', '45 minutos');
+        if (!tiempoEntrega) {
+            mostrarToast('Debe ingresar un tiempo de entrega', 'error');
+            return;
+        }
+        
+        const productosTexto = pedido.productos.map(p => `${p.cantidad}x ${p.nombre}`).join(', ');
+        const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+        
+        mensaje = `Hola ${pedido.cliente_nombre}, como estas? Recibimos tu pedido: ${productosTexto}. Ahora lo estamos preparando y te lo enviamos en aproximadamente ${tiempoEntrega}. Numero de orden: #${pedido.id}. Total a pagar: ${formatearPrecio(pedido.total)}.`;
+        
+        if (metodoPagoTexto === 'transferencia') {
+            mensaje += ` Te pasamos nuestro alias y CBU para que nos realices el pago.`;
+        } else {
+            mensaje += ` Nos indicaste que pagarias con efectivo. Debes pagarle a nuestro delivery cuando te entregue el pedido. Muchas gracias por tu compra. Te avisamos cuando el pedido este en camino.`;
+        }
+        
+    } else if (pedido.estado === 'en camino') {
+        mensaje = `Hola ${pedido.cliente_nombre}, tu pedido esta en camino. Quedate pendiente al delivery. Muchas gracias por tu compra.`;
+    } else {
+        mostrarToast('No se puede notificar en este estado', 'error');
+        return;
+    }
+    
+    if (boton) {
+        const originalText = boton.innerHTML;
+        boton.disabled = true;
+        boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        
+        const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+        setTimeout(() => {
+            window.open(url, '_blank');
+            boton.innerHTML = originalText;
+            boton.disabled = false;
+        }, 500);
+    }
+}
+
+function getEstadoTexto(estado) {
+    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
+    return textos[estado] || estado.toUpperCase();
+}
+
+// ===================================================
+// ACTUALIZAR ESTADO CON EFECTO DE CARGA
 // ===================================================
 
 async function actualizarEstado(pedidoId, nuevoEstado, boton) {
@@ -243,7 +314,7 @@ async function actualizarEstado(pedidoId, nuevoEstado, boton) {
 }
 
 async function cancelarPedido(pedidoId, boton) {
-    if (!confirm('⚠️ ¿Cancelar este pedido? Se eliminará permanentemente.')) return;
+    if (!confirm('¿Cancelar este pedido? Se eliminará permanentemente.')) return;
     if (!boton) return;
     const textoOriginal = boton.innerHTML;
     boton.disabled = true;
@@ -267,186 +338,35 @@ async function cancelarPedido(pedidoId, boton) {
     }
 }
 
-function notificarCliente(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    if (!boton) return;
-    const textoOriginal = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
-    const estadoTexto = {
-        'preparando': '🍳 hemos recibido tu pedido',
-        'en preparacion': '👨‍🍳 estamos preparando tu pedido',
-        'en camino': '🚚 tu pedido está en camino',
-        'entregado': '✅ tu pedido ha sido entregado'
-    };
-    const mensaje = `🍕 *WANT* 🍕\nHola ${pedido.cliente_nombre},\n${estadoTexto[pedido.estado] || `tu pedido está ${pedido.estado}`}.\n\nPedido #${pedido.id}\nTotal: ${formatearPrecio(pedido.total)}`;
-    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
-    
-    setTimeout(() => {
-        window.open(url, '_blank');
-        boton.innerHTML = textoOriginal;
-        boton.disabled = false;
-    }, 500);
-}
-
-function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
-    return textos[estado] || estado.toUpperCase();
-}
-
 // ===================================================
-// PRODUCTOS
+// REGISTRO CON LOGO
 // ===================================================
 
-async function cargarProductos(forceRefresh = false) {
-    if (!vendedorActual) return;
-    const container = document.getElementById('productos-admin-grid');
-    container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
+async function registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile) {
+    let logoUrl = null;
     
-    try {
-        const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
-        if (response.error) throw new Error(response.error);
-        productos = response.productos || [];
-        renderizarProductosAdmin();
-        document.getElementById('badge-productos').textContent = productos.length;
-    } catch (error) {
-        container.innerHTML = `<div class="error-mensaje"><p>⚠️ Error al cargar productos</p></div>`;
-    }
-}
-
-function renderizarProductosAdmin() {
-    const container = document.getElementById('productos-admin-grid');
-    if (productos.length === 0) {
-        container.innerHTML = `<div class="sin-pedidos"><p>📭 No tenés productos cargados</p><button class="btn-primary btn-add-producto" onclick="mostrarModalProducto()">Agregar producto</button></div>`;
-        return;
-    }
-    
-    container.innerHTML = productos.map(p => `
-        <div class="producto-admin-card">
-            <div class="producto-admin-imagen">
-                ${p.imagen_url ? `<img src="${p.imagen_url}" alt="${escapeHTML(p.nombre)}">` : '<div class="placeholder-img">🍕</div>'}
-            </div>
-            <div class="producto-admin-info">
-                <div class="producto-admin-nombre">${escapeHTML(p.nombre)}</div>
-                <div class="producto-admin-precio">${formatearPrecio(p.precio)}</div>
-                <div class="producto-admin-descripcion">${escapeHTML(p.descripcion || 'Sin descripción')}</div>
-                <div class="producto-admin-actions">
-                    <button class="btn-editar" onclick="mostrarModalProducto(${p.id})">✏️ Editar</button>
-                    <button class="btn-eliminar" onclick="eliminarProducto(${p.id})">🗑️ Eliminar</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// ===================================================
-// PERFIL
-// ===================================================
-
-function cargarPerfil() {
-    if (!vendedorActual) return;
-    document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
-    document.getElementById('perfil-telefono').value = vendedorActual.telefono || '';
-    document.getElementById('perfil-direccion').value = vendedorActual.direccion || '';
-    document.getElementById('perfil-horario').value = vendedorActual.horario || '';
-    
-    if (vendedorActual.logo_url) {
-        document.getElementById('logo-preview').innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 100px; border-radius: 12px;">`;
-    }
-    
-    const btnUploadLogo = document.getElementById('btn-upload-logo');
-    const logoInput = document.getElementById('perfil-logo');
-    if (btnUploadLogo && logoInput) {
-        btnUploadLogo.addEventListener('click', () => logoInput.click());
-        logoInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('logo-preview').innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    
-    const form = document.getElementById('perfil-form');
-    if (form) {
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            await actualizarPerfil();
-        };
-    }
-}
-
-async function actualizarPerfil() {
-    const nombre = document.getElementById('perfil-nombre').value.trim();
-    const telefono = document.getElementById('perfil-telefono').value.trim();
-    const direccion = document.getElementById('perfil-direccion').value.trim();
-    const horario = document.getElementById('perfil-horario').value.trim();
-    const newPassword = document.getElementById('perfil-new-password').value;
-    const logoFile = document.getElementById('perfil-logo')?.files[0];
-    
-    let logoUrl = vendedorActual.logo_url;
     if (logoFile) {
         mostrarToast('Subiendo logo...', 'info');
         logoUrl = await subirImagenACloudinary(logoFile);
         if (!logoUrl) {
-            mostrarToast('Error al subir logo', 'error');
-            return;
+            mostrarToast('Error al subir el logo', 'error');
+            return false;
         }
     }
     
-    const updateData = { id: vendedorActual.id, nombre, telefono, direccion, horario, logo_url: logoUrl };
-    if (newPassword) {
-        if (newPassword.length < 6) {
-            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
-            return;
-        }
-        updateData.password_hash = await hashPassword(newPassword);
-    }
+    const passwordHash = await hashPassword(password);
     
-    try {
-        const response = await postAPI('actualizarVendedor', updateData);
-        if (response && response.success) {
-            mostrarToast('Perfil actualizado', 'success');
-            vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl };
-            document.getElementById('panel-nombre').textContent = nombre;
-            document.getElementById('perfil-nombre-display').textContent = nombre;
-            document.getElementById('perfil-new-password').value = '';
-        } else {
-            throw new Error(response?.error || 'Error');
-        }
-    } catch (error) {
-        mostrarToast('Error al actualizar perfil', 'error');
-    }
+    const response = await postAPI('registrarVendedor', {
+        nombre, email, telefono, direccion, horario,
+        password_hash: passwordHash,
+        logo_url: logoUrl
+    });
+    
+    return response;
 }
 
 // ===================================================
-// CLOUDINARY
-// ===================================================
-
-async function subirImagenACloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        return data.secure_url || null;
-    } catch (error) {
-        return null;
-    }
-}
-
-// ===================================================
-// INICIALIZACIÓN
+// INICIALIZACIÓN Y AUTENTICACIÓN
 // ===================================================
 
 async function iniciarPanel(vendedor) {
@@ -575,7 +495,144 @@ async function cargarPedidos(forceRefresh = false) {
         renderizarPedidos();
         if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
     } catch (error) {
-        container.innerHTML = `<div class="error-mensaje"><p>⚠️ Error al cargar pedidos</p></div>`;
+        container.innerHTML = `<div class="error-mensaje"><p>Error al cargar pedidos</p></div>`;
+    }
+}
+
+async function cargarProductos(forceRefresh = false) {
+    if (!vendedorActual) return;
+    const container = document.getElementById('productos-admin-grid');
+    container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
+    
+    try {
+        const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
+        if (response.error) throw new Error(response.error);
+        productos = response.productos || [];
+        renderizarProductosAdmin();
+        document.getElementById('badge-productos').textContent = productos.length;
+    } catch (error) {
+        container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`;
+    }
+}
+
+function renderizarProductosAdmin() {
+    const container = document.getElementById('productos-admin-grid');
+    if (productos.length === 0) {
+        container.innerHTML = `<div class="sin-pedidos"><p>No tenés productos cargados</p><button class="btn-primary btn-add-producto" onclick="mostrarModalProducto()">Agregar producto</button></div>`;
+        return;
+    }
+    
+    container.innerHTML = productos.map(p => `
+        <div class="producto-admin-card">
+            <div class="producto-admin-imagen">
+                ${p.imagen_url ? `<img src="${p.imagen_url}" alt="${escapeHTML(p.nombre)}">` : '<div class="placeholder-img">🍕</div>'}
+            </div>
+            <div class="producto-admin-info">
+                <div class="producto-admin-nombre">${escapeHTML(p.nombre)}</div>
+                <div class="producto-admin-precio">${formatearPrecio(p.precio)}</div>
+                <div class="producto-admin-descripcion">${escapeHTML(p.descripcion || 'Sin descripción')}</div>
+                <div class="producto-admin-actions">
+                    <button class="btn-editar" onclick="mostrarModalProducto(${p.id})">Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarProducto(${p.id})">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function mostrarModalProducto(productoId = null) {
+    mostrarToast('Funcionalidad en desarrollo', 'info');
+}
+
+async function eliminarProducto(productoId) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    try {
+        const response = await postAPI('eliminarProducto', { productoId });
+        if (response.success) {
+            mostrarToast('Producto eliminado', 'success');
+            await cargarProductos(true);
+        }
+    } catch (error) {
+        mostrarToast('Error al eliminar', 'error');
+    }
+}
+
+function cargarPerfil() {
+    if (!vendedorActual) return;
+    document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
+    document.getElementById('perfil-telefono').value = vendedorActual.telefono || '';
+    document.getElementById('perfil-direccion').value = vendedorActual.direccion || '';
+    document.getElementById('perfil-horario').value = vendedorActual.horario || '';
+    
+    if (vendedorActual.logo_url) {
+        document.getElementById('logo-preview').innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 100px; border-radius: 12px;">`;
+    }
+    
+    const btnUploadLogo = document.getElementById('btn-upload-logo');
+    const logoInput = document.getElementById('perfil-logo');
+    if (btnUploadLogo && logoInput) {
+        btnUploadLogo.addEventListener('click', () => logoInput.click());
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('logo-preview').innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    const form = document.getElementById('perfil-form');
+    if (form) {
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await actualizarPerfil();
+        };
+    }
+}
+
+async function actualizarPerfil() {
+    const nombre = document.getElementById('perfil-nombre').value.trim();
+    const telefono = document.getElementById('perfil-telefono').value.trim();
+    const direccion = document.getElementById('perfil-direccion').value.trim();
+    const horario = document.getElementById('perfil-horario').value.trim();
+    const newPassword = document.getElementById('perfil-new-password').value;
+    const logoFile = document.getElementById('perfil-logo')?.files[0];
+    
+    let logoUrl = vendedorActual.logo_url;
+    if (logoFile) {
+        mostrarToast('Subiendo logo...', 'info');
+        logoUrl = await subirImagenACloudinary(logoFile);
+        if (!logoUrl) {
+            mostrarToast('Error al subir logo', 'error');
+            return;
+        }
+    }
+    
+    const updateData = { id: vendedorActual.id, nombre, telefono, direccion, horario, logo_url: logoUrl };
+    if (newPassword) {
+        if (newPassword.length < 6) {
+            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        updateData.password_hash = await hashPassword(newPassword);
+    }
+    
+    try {
+        const response = await postAPI('actualizarVendedor', updateData);
+        if (response && response.success) {
+            mostrarToast('Perfil actualizado', 'success');
+            vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl };
+            document.getElementById('panel-nombre').textContent = nombre;
+            document.getElementById('perfil-nombre-display').textContent = nombre;
+            document.getElementById('perfil-new-password').value = '';
+        } else {
+            throw new Error(response?.error || 'Error');
+        }
+    } catch (error) {
+        mostrarToast('Error al actualizar perfil', 'error');
     }
 }
 
@@ -604,11 +661,6 @@ function formatearPrecio(precio) {
     return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
 }
 
-function formatearMetodoPago(metodo) {
-    const metodos = { 'efectivo': 'Efectivo', 'transferencia': 'Transferencia', 'mercado_pago': 'Mercado Pago' };
-    return metodos[metodo] || metodo || 'No especificado';
-}
-
 function escapeHTML(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -631,28 +683,7 @@ function mostrarToast(mensaje, tipo = 'info') {
 }
 
 // ===================================================
-// FUNCIONES DE MODAL PRODUCTO (simplificadas)
-// ===================================================
-
-function mostrarModalProducto(productoId = null) {
-    mostrarToast('Funcionalidad en desarrollo', 'info');
-}
-
-async function eliminarProducto(productoId) {
-    if (!confirm('¿Eliminar este producto?')) return;
-    try {
-        const response = await postAPI('eliminarProducto', { productoId });
-        if (response.success) {
-            mostrarToast('Producto eliminado', 'success');
-            await cargarProductos(true);
-        }
-    } catch (error) {
-        mostrarToast('Error al eliminar', 'error');
-    }
-}
-
-// ===================================================
-// AUTENTICACIÓN INICIAL
+// INICIALIZACIÓN DEL LOGIN Y REGISTRO
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -699,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Register
+    // Register con logo
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -711,18 +742,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const horario = document.getElementById('reg-horario').value.trim();
             const password = document.getElementById('reg-password').value;
             const password2 = document.getElementById('reg-password2').value;
+            const logoFile = document.getElementById('reg-logo')?.files[0];
             
             if (password !== password2) {
                 alert('Las contraseñas no coinciden');
                 return;
             }
             
-            const response = await postAPI('registrarVendedor', { nombre, email, telefono, direccion, horario, password_hash: await hashPassword(password) });
-            if (response.success) {
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile);
+            
+            if (response && response.success) {
                 alert('Registro exitoso. Ahora podés iniciar sesión.');
-                document.querySelector('.auth-tab[data-tab="login"]').click();
+                document.getElementById('register-panel').style.display = 'none';
+                document.getElementById('login-panel').style.display = 'block';
+                document.getElementById('register-form').reset();
             } else {
-                alert(response.error || 'Error al registrar');
+                alert(response?.error || 'Error al registrar');
             }
         });
     }
@@ -760,7 +800,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await postAPI('resetearPassword', { email, codigo, new_password_hash: await hashPassword(newPassword) });
             if (response.success) {
                 alert('Contraseña restablecida. Iniciá sesión.');
-                document.querySelector('.auth-tab[data-tab="login"]').click();
+                document.getElementById('recover-panel').style.display = 'none';
+                document.getElementById('login-panel').style.display = 'block';
             } else {
                 alert(response.error);
             }

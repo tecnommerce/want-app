@@ -1578,6 +1578,7 @@ body {
 .tab-btn.active {
     color: #FF5A00;
     border-bottom: 2px solid #FF5A00;
+    background: transparent;
 }
 
 .tab-badge {
