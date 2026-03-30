@@ -1,70 +1,11 @@
 // ===================================================
 // TIENDA - Lógica de catálogo y carrito
-// Con carrito separado por vendedor
 // ===================================================
 
 // Variables globales
 let vendedorActual = null;
-let vendedorIdActual = null;
 let productos = [];
 let carrito = [];
-
-// ===================================================
-// FUNCIONES DE CARRITO POR VENDEDOR
-// ===================================================
-
-// Obtener clave única para el carrito del vendedor
-function getCarritoKey(vendedorId) {
-    return `want_carrito_vendedor_${vendedorId}`;
-}
-
-// Cargar carrito del vendedor actual desde localStorage
-function cargarCarritoDelVendedor(vendedorId) {
-    const carritoKey = getCarritoKey(vendedorId);
-    const carritoGuardado = localStorage.getItem(carritoKey);
-    
-    if (carritoGuardado) {
-        try {
-            carrito = JSON.parse(carritoGuardado);
-            console.log(`🛒 Carrito cargado para vendedor ${vendedorId}:`, carrito);
-        } catch (e) {
-            console.error('Error al cargar carrito:', e);
-            carrito = [];
-        }
-    } else {
-        carrito = [];
-        console.log(`🛒 Carrito vacío para vendedor ${vendedorId}`);
-    }
-    
-    actualizarContadorCarrito();
-}
-
-// Guardar carrito del vendedor actual en localStorage
-function guardarCarritoDelVendedor() {
-    if (!vendedorIdActual) {
-        console.warn('⚠️ No hay vendedor actual, no se guarda carrito');
-        return;
-    }
-    
-    const carritoKey = getCarritoKey(vendedorIdActual);
-    localStorage.setItem(carritoKey, JSON.stringify(carrito));
-    console.log(`💾 Carrito guardado para vendedor ${vendedorIdActual}:`, carrito);
-}
-
-// Limpiar carrito del vendedor actual (después de pedido)
-function limpiarCarritoDelVendedor() {
-    if (!vendedorIdActual) return;
-    
-    carrito = [];
-    const carritoKey = getCarritoKey(vendedorIdActual);
-    localStorage.removeItem(carritoKey);
-    actualizarContadorCarrito();
-    console.log(`🧹 Carrito limpiado para vendedor ${vendedorIdActual}`);
-}
-
-// ===================================================
-// FUNCIONES PRINCIPALES
-// ===================================================
 
 // Obtener ID del vendedor desde la URL
 function obtenerVendedorId() {
@@ -84,12 +25,6 @@ async function cargarTienda() {
         return;
     }
     
-    // Guardar ID del vendedor actual
-    vendedorIdActual = vendedorId;
-    
-    // Cargar carrito de ESTE vendedor específico
-    cargarCarritoDelVendedor(vendedorIdActual);
-    
     try {
         const grid = document.getElementById('productos-grid');
         if (grid) {
@@ -103,13 +38,19 @@ async function cargarTienda() {
         
         const vendedoresRes = await callAPI('getVendedores');
         if (vendedoresRes.success) {
-            vendedorActual = vendedoresRes.vendedores.find(v => v.id.toString() === vendedorId);
+            vendedorActual = vendedoresRes.vendedores.find(v => v.id.toString() === vendedorId && v.activo === 'SI');
             if (vendedorActual) {
                 const nombreNegocio = document.getElementById('negocio-nombre');
                 if (nombreNegocio) {
                     nombreNegocio.textContent = vendedorActual.nombre;
                 }
                 console.log('✅ Vendedor cargado:', vendedorActual);
+            } else {
+                mostrarToast('Este negocio no está disponible', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
             }
         }
         
@@ -155,8 +96,8 @@ function renderizarProductos() {
     grid.innerHTML = productos.map(producto => `
         <div class="producto-card">
             <div class="producto-imagen">
-                ${producto.imagen_url ? 
-                    `<img src="${producto.imagen_url}" alt="${escapeHTML(producto.nombre)}" loading="lazy">` : 
+                ${producto.imagen_url && producto.imagen_url !== '' ? 
+                    `<img src="${producto.imagen_url}" alt="${escapeHTML(producto.nombre)}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'55\' font-size=\'40\' text-anchor=\'middle\' fill=\'%23ccc\'%3E🍕%3C/text%3E%3C/svg%3E'">` : 
                     `<div class="placeholder-img">🍕</div>`
                 }
             </div>
@@ -191,25 +132,42 @@ function agregarAlCarrito(productoId) {
         });
     }
     
-    // Guardar en localStorage para este vendedor
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
     renderizarCarrito();
     mostrarToast(`${producto.nombre} agregado al carrito`, 'success');
 }
 
-// Actualizar el contador del carrito en el botón
+function guardarCarritoDelVendedor() {
+    if (!vendedorActual) return;
+    const carritoKey = `want_carrito_vendedor_${vendedorActual.id}`;
+    localStorage.setItem(carritoKey, JSON.stringify(carrito));
+}
+
+function cargarCarritoDelVendedor() {
+    if (!vendedorActual) return;
+    const carritoKey = `want_carrito_vendedor_${vendedorActual.id}`;
+    const carritoGuardado = localStorage.getItem(carritoKey);
+    if (carritoGuardado) {
+        try {
+            carrito = JSON.parse(carritoGuardado);
+        } catch(e) {
+            carrito = [];
+        }
+    } else {
+        carrito = [];
+    }
+    actualizarContadorCarrito();
+}
+
 function actualizarContadorCarrito() {
     const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
     const cartCountElement = document.getElementById('cart-count');
-    
     if (cartCountElement) {
         cartCountElement.textContent = totalItems;
-        console.log(`🔄 Contador actualizado: ${totalItems} productos (vendedor ${vendedorIdActual})`);
     }
 }
 
-// Renderizar el carrito en el modal
 function renderizarCarrito() {
     const container = document.getElementById('carrito-items');
     const totalSpan = document.getElementById('carrito-total');
@@ -248,7 +206,6 @@ function renderizarCarrito() {
     if (totalSpan) totalSpan.textContent = formatearPrecio(total);
 }
 
-// Modificar cantidad de un producto en el carrito
 function modificarCantidad(productoId, cambio) {
     const item = carrito.find(i => i.id === productoId);
     
@@ -265,7 +222,6 @@ function modificarCantidad(productoId, cambio) {
     }
 }
 
-// Eliminar producto del carrito
 function eliminarDelCarrito(productoId) {
     carrito = carrito.filter(item => item.id !== productoId);
     guardarCarritoDelVendedor();
@@ -274,49 +230,22 @@ function eliminarDelCarrito(productoId) {
     mostrarToast('Producto eliminado', 'info');
 }
 
-// Vaciar carrito del vendedor actual
-function vaciarCarrito() {
-    carrito = [];
-    guardarCarritoDelVendedor();
-    actualizarContadorCarrito();
-    renderizarCarrito();
-    mostrarToast('Carrito vaciado', 'info');
-}
-
-// Mostrar formulario de cliente
 function mostrarFormularioCliente() {
     if (carrito.length === 0) {
         mostrarToast('El carrito está vacío', 'error');
         return;
     }
-    
-    const modal = document.getElementById('cliente-modal');
-    if (modal) modal.classList.add('active');
+    document.getElementById('cliente-modal').classList.add('active');
 }
 
-// Confirmar pedido y enviar a WhatsApp + guardar en Google Sheets
 async function confirmarPedido() {
-    console.log('🚀 Iniciando confirmación de pedido...');
-    
     const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
     const telefono = document.getElementById('cliente-telefono')?.value.trim() || '';
     const direccion = document.getElementById('cliente-direccion')?.value.trim() || '';
     const metodoPago = document.getElementById('metodo-pago')?.value || '';
     
-    if (!nombre) {
-        mostrarToast('Completá tu nombre', 'error');
-        return;
-    }
-    if (!telefono) {
-        mostrarToast('Completá tu teléfono', 'error');
-        return;
-    }
-    if (!direccion) {
-        mostrarToast('Completá tu dirección de entrega', 'error');
-        return;
-    }
-    if (!metodoPago) {
-        mostrarToast('Seleccioná un método de pago', 'error');
+    if (!nombre || !telefono || !direccion || !metodoPago) {
+        mostrarToast('Completá todos los campos', 'error');
         return;
     }
     
@@ -332,13 +261,7 @@ async function confirmarPedido() {
     }
     
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-    
-    if (!vendedorActual) {
-        mostrarToast('Error: No se encontró información del negocio', 'error');
-        return;
-    }
-    
-    const telefonoVendedor = vendedorActual.telefono ? vendedorActual.telefono.toString().replace(/\D/g, '') : null;
+    const telefonoVendedor = vendedorActual?.telefono?.toString().replace(/\D/g, '');
     
     if (!telefonoVendedor) {
         mostrarToast('El negocio no tiene número de WhatsApp configurado', 'error');
@@ -364,42 +287,31 @@ async function confirmarPedido() {
         fecha: new Date().toISOString()
     };
     
-    // Guardar pedido en histórico (global)
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
     const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    // Intentar guardar en Google Sheets
     await guardarPedidoEnSheets(pedido);
     
-    // Limpiar carrito de ESTE vendedor (NO de otros)
-    limpiarCarritoDelVendedor();
+    carrito = [];
+    guardarCarritoDelVendedor();
+    actualizarContadorCarrito();
     
-    // Cerrar modales
-    const clienteModal = document.getElementById('cliente-modal');
-    const carritoModal = document.getElementById('carrito-modal');
-    if (clienteModal) clienteModal.classList.remove('active');
-    if (carritoModal) carritoModal.classList.remove('active');
-    
-    // Limpiar formulario
-    const clienteForm = document.getElementById('cliente-form');
-    if (clienteForm) clienteForm.reset();
+    document.getElementById('cliente-modal').classList.remove('active');
+    document.getElementById('carrito-modal').classList.remove('active');
+    document.getElementById('cliente-form').reset();
     
     mostrarToast('¡Pedido listo! Redirigiendo a WhatsApp...', 'success');
     
     const urlWhatsApp = `https://wa.me/${telefonoVendedor}?text=${encodeURIComponent(mensaje)}`;
-    
     setTimeout(() => {
         window.open(urlWhatsApp, '_blank');
     }, 1000);
 }
 
-// Función para guardar en Google Sheets
 async function guardarPedidoEnSheets(pedido) {
     try {
-        console.log('📤 Intentando guardar en Google Sheets...');
-        
         const response = await postAPI('crearPedido', {
             cliente_nombre: pedido.cliente_nombre,
             cliente_telefono: pedido.cliente_telefono,
@@ -409,44 +321,22 @@ async function guardarPedidoEnSheets(pedido) {
             productos: pedido.productos,
             total: pedido.total
         });
-        
         if (response && response.success) {
-            console.log('✅ Pedido guardado en Google Sheets. ID:', response.pedidoId);
-            
+            console.log('✅ Pedido guardado en Google Sheets');
             let pedidos = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
             const ultimoPedido = pedidos[pedidos.length - 1];
             if (ultimoPedido && ultimoPedido.id === Date.now()) {
                 ultimoPedido.sheetsId = response.pedidoId;
-                ultimoPedido.sincronizado = true;
                 localStorage.setItem('want_pedidos', JSON.stringify(pedidos));
             }
-            return { success: true };
-        } else {
-            console.error('❌ Error al guardar en Sheets:', response?.error || 'Error desconocido');
-            return { success: false, error: response?.error };
         }
     } catch (error) {
-        console.error('❌ Error en guardarPedidoEnSheets:', error);
-        return { success: false, error: error.message };
+        console.error('Error guardar en Sheets:', error);
     }
 }
 
-// Generar mensaje para WhatsApp
 function generarMensajeWhatsApp(clienteNombre, clienteTelefono, direccion, metodoPago, carrito, total, vendedor) {
-    let metodoPagoTexto = '';
-    switch(metodoPago) {
-        case 'efectivo':
-            metodoPagoTexto = 'Efectivo';
-            break;
-        case 'transferencia':
-            metodoPagoTexto = 'Transferencia bancaria';
-            break;
-        case 'mercado_pago':
-            metodoPagoTexto = 'Mercado Pago';
-            break;
-        default:
-            metodoPagoTexto = metodoPago;
-    }
+    let metodoPagoTexto = metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria';
     
     let mensaje = `🍕 *NUEVO PEDIDO - WANT* 🍕\n\n`;
     mensaje += `*Cliente:* ${clienteNombre}\n`;
@@ -466,173 +356,47 @@ function generarMensajeWhatsApp(clienteNombre, clienteTelefono, direccion, metod
     return mensaje;
 }
 
-// ===================================================
-// MENÚ MÓVIL Y CONTACTO
-// ===================================================
-
-function inicializarMenuTienda() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    const menuClose = document.getElementById('menu-close');
-    const contactoLink = document.getElementById('contacto-link');
-    const contactoLinkMobile = document.getElementById('contacto-link-mobile');
-    const contactoSection = document.getElementById('contacto-section');
-
-    function openMenu() {
-        if (mobileMenu) mobileMenu.classList.add('active');
-        if (menuOverlay) menuOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeMenu() {
-        if (mobileMenu) mobileMenu.classList.remove('active');
-        if (menuOverlay) menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    if (menuToggle) menuToggle.addEventListener('click', openMenu);
-    if (menuClose) menuClose.addEventListener('click', closeMenu);
-    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-
-    function mostrarContacto(e) {
-        e.preventDefault();
-        closeMenu();
-        if (contactoSection) {
-            contactoSection.style.display = 'block';
-            contactoSection.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    if (contactoLink) contactoLink.addEventListener('click', mostrarContacto);
-    if (contactoLinkMobile) contactoLinkMobile.addEventListener('click', mostrarContacto);
-}
-
-// ===================================================
-// EVENT LISTENERS
-// ===================================================
-
+// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Tienda de Want iniciada');
+    cargarTienda();
+    cargarCarritoDelVendedor();
     
-    // Cargar tienda (esto también carga el carrito del vendedor)
-    async function cargarTienda() {
-    const vendedorId = obtenerVendedorId();
-    
-    if (!vendedorId) {
-        mostrarToast('No se especificó un negocio', 'error');
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000);
-        return;
-    }
-    
-    try {
-        const grid = document.getElementById('productos-grid');
-        if (grid) {
-            grid.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Cargando productos...</p>
-                </div>
-            `;
-        }
-        
-        const vendedoresRes = await callAPI('getVendedores');
-        if (vendedoresRes.success) {
-            // Verificar que el vendedor existe y está ACTIVO
-            vendedorActual = vendedoresRes.vendedores.find(v => 
-                v.id.toString() === vendedorId && v.activo === 'SI'
-            );
-            
-            if (!vendedorActual) {
-                mostrarToast('Este negocio no está disponible actualmente', 'error');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-                return;
-            }
-            
-            const nombreNegocio = document.getElementById('negocio-nombre');
-            if (nombreNegocio) {
-                nombreNegocio.textContent = vendedorActual.nombre;
-            }
-            console.log('✅ Vendedor cargado:', vendedorActual);
-        }
-        
-        const response = await callAPI('getProductos', { vendedorId: vendedorId });
-        
-        if (response.error) {
-            throw new Error(response.error);
-        }
-        
-        productos = response.productos || [];
-        renderizarProductos();
-        
-    } catch (error) {
-        console.error('Error al cargar tienda:', error);
-        const grid = document.getElementById('productos-grid');
-        if (grid) {
-            grid.innerHTML = `
-                <div class="error-mensaje">
-                    <p>⚠️ Error al cargar los productos</p>
-                    <p style="font-size: 0.8rem; margin-top: 5px;">${error.message}</p>
-                    <button onclick="location.reload()" class="btn btn-outline" style="margin-top: 15px;">Reintentar</button>
-                </div>
-            `;
-        }
-    }
-}
-    
-    // Inicializar menú móvil
-    inicializarMenuTienda();
-    
-    // Evento del carrito
     const cartIcon = document.getElementById('cart-icon');
     if (cartIcon) {
         cartIcon.addEventListener('click', (e) => {
             e.preventDefault();
             renderizarCarrito();
-            const carritoModal = document.getElementById('carrito-modal');
-            if (carritoModal) carritoModal.classList.add('active');
+            document.getElementById('carrito-modal').classList.add('active');
         });
     }
     
-    // Cerrar modal carrito
     const cerrarModal = document.getElementById('cerrar-modal');
     if (cerrarModal) {
         cerrarModal.addEventListener('click', () => {
-            const carritoModal = document.getElementById('carrito-modal');
-            if (carritoModal) carritoModal.classList.remove('active');
+            document.getElementById('carrito-modal').classList.remove('active');
         });
     }
     
-    // Finalizar pedido desde carrito
     const finalizarPedido = document.getElementById('finalizar-pedido');
     if (finalizarPedido) {
         finalizarPedido.addEventListener('click', () => {
-            const carritoModal = document.getElementById('carrito-modal');
-            if (carritoModal) carritoModal.classList.remove('active');
+            document.getElementById('carrito-modal').classList.remove('active');
             mostrarFormularioCliente();
         });
     }
     
-    // Cerrar modal cliente
     const cerrarClienteModal = document.getElementById('cerrar-cliente-modal');
     if (cerrarClienteModal) {
         cerrarClienteModal.addEventListener('click', () => {
-            const clienteModal = document.getElementById('cliente-modal');
-            if (clienteModal) clienteModal.classList.remove('active');
+            document.getElementById('cliente-modal').classList.remove('active');
         });
     }
     
-    // Confirmar pedido
     const confirmarPedidoBtn = document.getElementById('confirmar-pedido');
     if (confirmarPedidoBtn) {
         confirmarPedidoBtn.addEventListener('click', confirmarPedido);
     }
     
-    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -650,4 +414,24 @@ function escapeHTML(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function formatearPrecio(precio) {
+    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
+}
+
+function mostrarToast(mensaje, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.textContent = mensaje;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '50px';
+    toast.style.zIndex = '9999';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
