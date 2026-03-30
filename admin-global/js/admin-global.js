@@ -1,19 +1,22 @@
 // ===================================================
-// ADMIN GLOBAL - Funciones completas
+// ADMIN GLOBAL - Funciones completas (con GET para escritura)
 // ===================================================
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
 
 // ===================================================
-// FUNCIONES DE API
+// FUNCIONES DE API (TODAS USAN GET PARA EVITAR CORS)
 // ===================================================
 
 async function callAPI(action, data = {}) {
     try {
         let url = `${API_URL}?action=${action}`;
         if (data && Object.keys(data).length > 0) {
-            for (let key in data) url += `&${key}=${encodeURIComponent(data[key])}`;
+            for (let key in data) {
+                url += `&${key}=${encodeURIComponent(data[key])}`;
+            }
         }
+        console.log('📡 GET:', url);
         const response = await fetch(url, { method: 'GET', mode: 'cors' });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
@@ -23,12 +26,17 @@ async function callAPI(action, data = {}) {
     }
 }
 
+// Función para operaciones de escritura (también usa GET)
 async function postAPI(action, data = {}) {
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action, ...data })
-        });
+        let url = `${API_URL}?action=${action}`;
+        for (let key in data) {
+            if (data[key] !== undefined && data[key] !== null) {
+                url += `&${key}=${encodeURIComponent(data[key])}`;
+            }
+        }
+        console.log('📡 POST (via GET):', url);
+        const response = await fetch(url, { method: 'GET', mode: 'cors' });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -114,7 +122,7 @@ async function cargarTodosLosDatos() {
 
 async function actualizarDatosManual() {
     const btnRefresh = document.getElementById('btn-refresh-data');
-    if (btnRefresh) { btnRefresh.disabled = true; btnRefresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...'; }
+    if (btnRefresh) { btnRefresh.disabled = true; btnRefresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
     mostrarToast('Actualizando datos...', 'info');
     try {
         const vendedoresRes = await callAPI('getVendedores');
@@ -124,9 +132,9 @@ async function actualizarDatosManual() {
         const productosRes = await callAPI('getAllProductos');
         if (productosRes.success) allProductos = productosRes.productos || [];
         actualizarDashboard(); renderizarVendedores(); renderizarPedidos(); renderizarProductos(); cargarFiltros();
-        mostrarToast('Datos actualizados correctamente', 'success');
-    } catch (error) { mostrarToast('Error al actualizar datos', 'error'); }
-    finally { if (btnRefresh) { btnRefresh.disabled = false; btnRefresh.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar'; } }
+        mostrarToast('Datos actualizados', 'success');
+    } catch (error) { mostrarToast('Error al actualizar', 'error'); }
+    finally { if (btnRefresh) { btnRefresh.disabled = false; btnRefresh.innerHTML = '<i class="fas fa-sync-alt"></i>'; } }
 }
 
 // ===================================================
@@ -170,7 +178,7 @@ function actualizarDashboard() {
     document.getElementById('top-productos-list').innerHTML = topProductos.map(([nombre, cantidad]) => `<div class="top-item"><span>${escapeHTML(nombre)}</span><span>${cantidad} unidades</span></div>`).join('') || '<p class="loading-text">No hay datos</p>';
     
     const recentOrders = allPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
-    document.getElementById('recent-orders-tbody').innerHTML = recentOrders.map(p => `<tr><td>#${p.id}</td><td>${escapeHTML(p.cliente_nombre || 'N/A')}</td><td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td><td>${formatearPrecio(p.total)}</td><td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td><td>${formatearFecha(p.fecha)}</td></tr>`).join('') || '<tr><td colspan="6" class="loading-text">No hay pedidos</td></tr>';
+    document.getElementById('recent-orders-tbody').innerHTML = recentOrders.map(p => `<tr><td>#${p.id}</td><td>${escapeHTML(p.cliente_nombre || 'N/A')}</td><td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td><td>${formatearPrecio(p.total)}</td><td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td><td>${formatearFecha(p.fecha)}</td>`).join('') || '<tr><td colspan="6" class="loading-text">No hay pedidos</td></tr>';
 }
 
 // ===================================================
@@ -191,7 +199,7 @@ function renderizarVendedores() {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id})"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button>
-            </td>
+             </td>
         </tr>
     `).join('');
 }
@@ -219,8 +227,8 @@ async function guardarEditarVendedor() {
     };
     try {
         const res = await postAPI('actualizarVendedor', data);
-        if (res.success) { mostrarToast('Vendedor actualizado', 'success'); cerrarModal('modal-editar-vendedor'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast('Vendedor actualizado', 'success'); cerrarModal('modal-editar-vendedor'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
     } catch (error) { mostrarToast('Error al actualizar', 'error'); }
 }
 
@@ -230,8 +238,8 @@ async function toggleVendedorStatus(id) {
     const nuevoEstado = v.activo === 'SI' ? 'NO' : 'SI';
     try {
         const res = await postAPI('actualizarVendedor', { id: parseInt(id), activo: nuevoEstado });
-        if (res.success) { mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al cambiar estado', 'error'); }
     } catch (error) { mostrarToast('Error al cambiar estado', 'error'); }
 }
 
@@ -244,8 +252,8 @@ async function confirmarEliminarVendedor() {
     if (!window.vendedorAEliminar) return;
     try {
         const res = await postAPI('eliminarVendedor', { vendedorId: window.vendedorAEliminar });
-        if (res.success) { mostrarToast('Vendedor eliminado', 'success'); cerrarModal('modal-confirmar-vendedor'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast('Vendedor eliminado', 'success'); cerrarModal('modal-confirmar-vendedor'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
     } catch (error) { mostrarToast('Error al eliminar', 'error'); }
     window.vendedorAEliminar = null;
 }
@@ -264,7 +272,7 @@ function renderizarProductos() {
     if (searchTerm) filtered = filtered.filter(p => p.nombre?.toLowerCase().includes(searchTerm) || p.descripcion?.toLowerCase().includes(searchTerm));
     const ventasPorProducto = {};
     allPedidos.forEach(p => { if (p.productos) p.productos.forEach(prod => { const key = `${prod.id}_${p.vendedor_id}`; ventasPorProducto[key] = (ventasPorProducto[key] || 0) + prod.cantidad; }); });
-    tbody.innerHTML = filtered.map(p => `<tr><td>${p.id}</td><td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '<span>📷</span>'}</td><td><strong>${escapeHTML(p.nombre)}</strong></td><td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td><td>${formatearPrecio(p.precio)}</td><td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td><td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td><td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i> Eliminar</button></td></tr>`).join('');
+    tbody.innerHTML = filtered.map(p => `<tr><td>${p.id}</td><td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '<span>📷</span>'}</td><td><strong>${escapeHTML(p.nombre)}</strong></td><td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td><td>${formatearPrecio(p.precio)}</td><td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td><td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td><td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i> Eliminar</button></td>`).join('');
 }
 
 function editarProducto(id) {
@@ -288,8 +296,8 @@ async function guardarEditarProducto() {
     };
     try {
         const res = await postAPI('actualizarProducto', data);
-        if (res.success) { mostrarToast('Producto actualizado', 'success'); cerrarModal('modal-editar-producto'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast('Producto actualizado', 'success'); cerrarModal('modal-editar-producto'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
     } catch (error) { mostrarToast('Error al actualizar', 'error'); }
 }
 
@@ -302,8 +310,8 @@ async function confirmarEliminarProducto() {
     if (!window.productoAEliminar) return;
     try {
         const res = await postAPI('eliminarProducto', { productoId: window.productoAEliminar });
-        if (res.success) { mostrarToast('Producto eliminado', 'success'); cerrarModal('modal-confirmar-producto'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast('Producto eliminado', 'success'); cerrarModal('modal-confirmar-producto'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
     } catch (error) { mostrarToast('Error al eliminar', 'error'); }
     window.productoAEliminar = null;
 }
@@ -323,16 +331,13 @@ function renderizarPedidos() {
     if (filtroEstado) filtered = filtered.filter(p => p.estado === filtroEstado);
     if (filtroFecha) filtered = filtered.filter(p => p.fecha && p.fecha.split('T')[0] === filtroFecha);
     filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    tbody.innerHTML = filtered.slice(0, 100).map(p => `<tr>
-        <td>#${p.id}</td>
-        <td>${formatearFecha(p.fecha)}</td>
-        <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-        <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-        <td>${formatearPrecio(p.total)}</td>
+    tbody.innerHTML = filtered.slice(0, 100).map(p => `<td>
+        <td>#${p.id}</td><td>${formatearFecha(p.fecha)}</td><td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
+        <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td><td>${formatearPrecio(p.total)}</td>
         <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
         <td>${p.productos ? p.productos.length : 0} productos</td>
         <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id})"><i class="fas fa-trash"></i> Eliminar</button></td>
-        </tr>`).join('');
+     `).join('');
 }
 
 function editarPedido(id) {
@@ -352,8 +357,8 @@ async function guardarEditarPedido() {
     const nuevoEstado = document.getElementById('edit-pedido-estado').value;
     try {
         const res = await postAPI('actualizarEstado', { pedidoId: parseInt(id), estado: nuevoEstado });
-        if (res.success) { mostrarToast('Pedido actualizado', 'success'); cerrarModal('modal-editar-pedido'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast('Pedido actualizado', 'success'); cerrarModal('modal-editar-pedido'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
     } catch (error) { mostrarToast('Error al actualizar', 'error'); }
 }
 
@@ -366,8 +371,8 @@ async function confirmarEliminarPedido() {
     if (!window.pedidoAEliminar) return;
     try {
         const res = await postAPI('cancelarPedido', { pedidoId: window.pedidoAEliminar });
-        if (res.success) { mostrarToast('Pedido eliminado', 'success'); cerrarModal('modal-confirmar-pedido'); await actualizarDatosManual(); }
-        else throw new Error(res.error);
+        if (res && res.success) { mostrarToast('Pedido eliminado', 'success'); cerrarModal('modal-confirmar-pedido'); await actualizarDatosManual(); }
+        else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
     } catch (error) { mostrarToast('Error al eliminar', 'error'); }
     window.pedidoAEliminar = null;
 }
@@ -378,8 +383,10 @@ async function confirmarEliminarPedido() {
 
 function cargarFiltros() {
     const options = '<option value="">Todos los vendedores</option>' + allVendedores.map(v => `<option value="${v.id}">${escapeHTML(v.nombre)}</option>`).join('');
-    document.getElementById('filtro-vendedor').innerHTML = options;
-    document.getElementById('filtro-vendedor-prod').innerHTML = options;
+    const filtroVendedor = document.getElementById('filtro-vendedor');
+    const filtroVendedorProd = document.getElementById('filtro-vendedor-prod');
+    if (filtroVendedor) filtroVendedor.innerHTML = options;
+    if (filtroVendedorProd) filtroVendedorProd.innerHTML = options;
 }
 
 function exportarVendedores() {
@@ -450,7 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td></tr>'; return; }
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
-        tbody.innerHTML = filtered.map(v => `<tr><td>${v.id}</td><td><strong>${escapeHTML(v.nombre)}</strong></td><td>${escapeHTML(v.email || '-')}</td><td>${v.telefono || '-'}</td><td>${escapeHTML(v.direccion || '-')}</td><td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td><td>${stats[v.id]?.pedidos || 0}</td><td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td><td><button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id})"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button><button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button></td></tr>`).join('');
+        tbody.innerHTML = filtered.map(v => `<tr><td>${v.id}</td><td><strong>${escapeHTML(v.nombre)}</strong></td><td>${escapeHTML(v.email || '-')}</td><td>${v.telefono || '-'}</td><td>${escapeHTML(v.direccion || '-')}</td><td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td><td>${stats[v.id]?.pedidos || 0}</td><td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td><td><button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id})"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button><button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button></td>`).join('');
     });
     
     document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
