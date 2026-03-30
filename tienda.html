@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Want | Pedidos simples a tus negocios favoritos</title>
-    
-    <!-- Favicon con W naranja -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    
+    <title>Want | Tienda</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -16,58 +11,25 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
-                
-                <div class="search-container">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Buscar productos..." id="search-input">
-                    </div>
-                </div>
-
-                <div class="nav-desktop">
-                    <a href="#contacto" class="nav-link" id="contacto-link">Contacto</a>
-                    <div class="social-icons">
-                        <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-
-                <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+                <a href="index.html" class="logo-link">
+                    <h1 class="logo">Want<span class="logo-dot">.</span></h1>
+                </a>
+                <p class="tagline" id="negocio-nombre">Cargando negocio...</p>
+                <div class="header-actions">
                     <a href="#" class="cart-icon" id="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="cart-count">0</span>
                     </a>
-                    <button class="menu-toggle" id="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Menú móvil -->
-    <div class="mobile-menu" id="mobile-menu">
-        <button class="menu-close" id="menu-close">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="mobile-nav">
-            <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">Contacto</a>
-        </div>
-        <div class="mobile-social">
-            <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-            <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-        </div>
-    </div>
-    <div class="menu-overlay" id="menu-overlay"></div>
-
     <main>
         <section class="productos-section">
             <div class="container">
                 <div class="productos-header">
-                    <h2 id="negocio-nombre">Cargando negocio...</h2>
+                    <h2>Nuestros productos</h2>
                 </div>
                 <div class="productos-grid" id="productos-grid">
                     <div class="loading">
@@ -98,7 +60,7 @@
         </div>
     </div>
 
-    <!-- Modal del formulario de cliente -->
+    <!-- Modal del formulario de cliente (con diseño mejorado) -->
     <div class="modal" id="cliente-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -107,30 +69,32 @@
             </div>
             <div class="modal-body">
                 <form id="cliente-form">
-                    <div class="form-group">
-                        <label for="cliente-nombre">Nombre completo *</label>
-                        <input type="text" id="cliente-nombre" required>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="cliente-nombre">Nombre completo <span class="required">*</span></label>
+                            <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required>
+                        </div>
+                        <div class="form-group half">
+                            <label for="cliente-telefono">Teléfono <span class="required">*</span></label>
+                            <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="cliente-telefono">Teléfono (con código de área) *</label>
-                        <input type="tel" id="cliente-telefono" placeholder="ej: 5491112345678" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-direccion">Dirección de entrega *</label>
+                        <label for="cliente-direccion">Dirección de entrega <span class="required">*</span></label>
                         <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required>
                     </div>
                     <div class="form-group">
-    <label for="pedido-detalles">Detalles del pedido</label>
-    <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, etc."></textarea>
-    <small>Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
-</div>
+                        <label for="pedido-detalles">Detalles del pedido</label>
+                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, etc."></textarea>
+                        <small class="input-help">Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
+                    </div>
                     <div class="form-group">
-                        <label for="metodo-pago">Método de pago *</label>
+                        <label for="metodo-pago">Método de pago <span class="required">*</span></label>
                         <select id="metodo-pago" required>
                             <option value="">Seleccioná una opción</option>
                             <option value="efectivo">Efectivo</option>
                             <option value="transferencia">Transferencia bancaria</option>
-                            
+                            <option value="mercado_pago">Mercado Pago</option>
                         </select>
                     </div>
                 </form>
@@ -140,21 +104,6 @@
             </div>
         </div>
     </div>
-
-    <section class="contacto-section" id="contacto-section" style="display: none;">
-        <div class="container">
-            <h2>Contacto</h2>
-            <div class="contacto-info">
-                <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
-                <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
-                <div class="social-icons" style="justify-content: center; margin-top: 20px;">
-                    <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <footer class="footer">
         <div class="container">

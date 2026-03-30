@@ -238,7 +238,7 @@ function mostrarFormularioCliente() {
     document.getElementById('cliente-modal').classList.add('active');
 }
 
-// Confirmar pedido (sin WhatsApp, solo guarda en Sheets)
+// Confirmar pedido
 async function confirmarPedido() {
     const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
     const telefono = document.getElementById('cliente-telefono')?.value.trim() || '';
@@ -309,7 +309,6 @@ async function confirmarPedido() {
     }
 }
 
-// Función para guardar en Google Sheets
 async function guardarPedidoEnSheets(pedido) {
     try {
         console.log('📤 Intentando guardar en Google Sheets...');
