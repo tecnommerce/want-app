@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Want | Panel de Vendedor</title>
     
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
-    
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -25,7 +23,6 @@
         </div>
     </header>
 
-    <!-- Menú móvil para admin -->
     <div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
         <button class="menu-close" id="menu-close-admin">
             <i class="fas fa-times"></i>
@@ -57,7 +54,6 @@
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
-                    <!-- Login Panel -->
                     <div class="auth-panel active" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
@@ -78,35 +74,20 @@
                                     <input type="checkbox" id="remember-me"> Recordarme
                                 </label>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fas fa-sign-in-alt"></i> Ingresar
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
                         </form>
-                        
-                        <div class="auth-divider">
-                            <span>¿No tenés cuenta?</span>
-                        </div>
-                        
-                        <button class="btn btn-outline btn-block" id="btn-show-register">
-                            <i class="fas fa-user-plus"></i> Registrarse
-                        </button>
-                        
+                        <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
+                        <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
                         <div class="auth-links">
                             <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
                         </div>
                     </div>
 
-                    <!-- Register Panel -->
                     <div class="auth-panel" id="register-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
                         </button>
                         <form id="register-form">
-                            <div class="form-group">
-    <label><i class="fas fa-image"></i> Logo del negocio</label>
-    <input type="file" id="reg-logo" accept="image/*">
-    <div id="reg-logo-preview" class="image-preview" style="margin-top: 10px;"></div>
-</div>
                             <div class="form-row">
                                 <div class="form-group half">
                                     <label>Nombre del negocio *</label>
@@ -130,6 +111,11 @@
                             <div class="form-group">
                                 <label>Horario de atención</label>
                                 <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo del negocio</label>
+                                <input type="file" id="reg-logo" accept="image/*">
+                                <div id="reg-logo-preview" class="image-preview" style="margin-top: 10px;"></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group half">
@@ -155,7 +141,6 @@
                         </form>
                     </div>
 
-                    <!-- Recover Panel -->
                     <div class="auth-panel" id="recover-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login-recover">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -198,7 +183,6 @@
 
             <!-- Panel principal -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
-                <!-- Header con métricas -->
                 <div class="panel-header">
                     <div class="panel-header-left">
                         <h2 id="panel-nombre">Mi Negocio</h2>
@@ -214,7 +198,6 @@
                     </div>
                 </div>
 
-                <!-- Tarjetas de métricas -->
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
@@ -253,7 +236,6 @@
                     </div>
                 </div>
 
-                <!-- Tabs -->
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="pedidos">
                         <i class="fas fa-box"></i> Pedidos
@@ -268,14 +250,9 @@
                     </button>
                 </div>
 
-                <!-- Tab: Pedidos -->
                 <div class="tab-content active" id="tab-pedidos">
-                    <!-- Filtros de estado -->
                     <div class="filtros-pedidos">
-                        <button class="filtro-btn active" data-estado="todos">
-                            <i class="fas fa-list"></i> Todos <span id="count-todos">0</span>
-                        </button>
-                        <button class="filtro-btn" data-estado="preparando">
+                        <button class="filtro-btn active" data-estado="preparando">
                             <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
                         </button>
                         <button class="filtro-btn" data-estado="en preparacion">
@@ -288,13 +265,11 @@
                             <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
                         </button>
                     </div>
-                    
                     <div class="pedidos-container" id="pedidos-container">
                         <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
                     </div>
                 </div>
 
-                <!-- Tab: Productos -->
                 <div class="tab-content" id="tab-productos">
                     <div class="productos-header-actions">
                         <button class="btn-primary btn-add-producto" id="btn-agregar-producto">
@@ -306,13 +281,10 @@
                     </div>
                 </div>
 
-                <!-- Tab: Perfil -->
                 <div class="tab-content" id="tab-perfil">
                     <div class="perfil-container">
                         <div class="perfil-header">
-                            <div class="perfil-avatar">
-                                <i class="fas fa-store"></i>
-                            </div>
+                            <div class="perfil-avatar"><i class="fas fa-store"></i></div>
                             <div class="perfil-info">
                                 <h3 id="perfil-nombre-display"></h3>
                                 <p id="perfil-email-display"></p>
@@ -351,15 +323,56 @@
                                 <label>Cambiar contraseña</label>
                                 <input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar">
                             </div>
-                            <button type="submit" class="btn-primary btn-save">
-                                <i class="fas fa-save"></i> Guardar cambios
-                            </button>
+                            <button type="submit" class="btn-primary btn-save">Guardar cambios</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Modal para agregar/editar producto -->
+    <div class="modal" id="modal-producto">
+        <div class="modal-content modal-producto">
+            <div class="modal-header">
+                <h3 id="modal-producto-title">Nuevo producto</h3>
+                <button class="modal-close" onclick="cerrarModalProducto()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="producto-form">
+                    <input type="hidden" id="producto-id">
+                    <div class="form-group">
+                        <label>Nombre del producto *</label>
+                        <input type="text" id="producto-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="producto-descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio *</label>
+                        <input type="number" id="producto-precio" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Imagen del producto</label>
+                        <input type="file" id="producto-imagen" accept="image/*">
+                        <div id="producto-imagen-preview" class="image-preview"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Disponible</label>
+                        <select id="producto-disponible">
+                            <option value="SI">Sí</option>
+                            <option value="NO">No</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-guardar-producto">Guardar</button>
+                <button class="btn-outline" onclick="cerrarModalProducto()">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>

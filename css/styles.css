@@ -1243,13 +1243,16 @@ body {
 .tab-btn {
     background: none;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 24px;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    color: #666;
+    color: #888;
     transition: all 0.2s;
-    border-radius: 30px;
+    border-radius: 30px 30px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .tab-btn:hover {
@@ -1257,8 +1260,9 @@ body {
 }
 
 .tab-btn.active {
-    background: #FF5A00;
-    color: white;
+    color: #FF5A00;
+    border-bottom: 2px solid #FF5A00;
+    background: transparent;
 }
 
 .tab-content {

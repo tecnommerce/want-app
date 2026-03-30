@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor con mejoras
+// ADMIN - Panel de vendedor con gestión de productos
 // ===================================================
 
 // Configuración de Cloudinary
@@ -121,7 +121,6 @@ function calcularMetricas() {
         
         if (pedido.estado === 'entregado') {
             pedidosEntregados++;
-            
             if (fechaPedido >= hoy) ventasHoy += total;
             if (fechaPedido >= inicioSemana) ventasSemana += total;
             if (fechaPedido >= inicioMes) ventasMes += total;
@@ -162,14 +161,13 @@ function actualizarContadoresPedidos() {
 }
 
 // ===================================================
-// RENDERIZAR PEDIDOS (sin filtro "Todos")
+// RENDERIZAR PEDIDOS
 // ===================================================
 
 function renderizarPedidos() {
     const container = document.getElementById('pedidos-container');
     
     let pedidosFiltrados = pedidos.filter(p => p.estado === filtroActual);
-    
     pedidosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
     if (pedidosFiltrados.length === 0) {
@@ -179,13 +177,12 @@ function renderizarPedidos() {
     
     container.innerHTML = pedidosFiltrados.map(p => {
         const fecha = new Date(p.fecha);
-        const numeroPedido = p.id;
         const metodoPago = p.metodo_pago || 'efectivo';
         
         return `
             <div class="pedido-card">
                 <div class="pedido-header">
-                    <div class="pedido-id">Pedido #${numeroPedido}</div>
+                    <div class="pedido-id">Pedido #${p.id}</div>
                     <div class="pedido-fecha">${fecha.toLocaleString('es-AR')}</div>
                 </div>
                 <div class="pedido-cliente">
@@ -229,8 +226,13 @@ function renderizarPedidos() {
     }).join('');
 }
 
+function getEstadoTexto(estado) {
+    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
+    return textos[estado] || estado.toUpperCase();
+}
+
 // ===================================================
-// NOTIFICAR CLIENTE CON TIEMPO DE ENTREGA
+// NOTIFICAR CLIENTE
 // ===================================================
 
 async function notificarCliente(pedidoId, boton) {
@@ -241,7 +243,7 @@ async function notificarCliente(pedidoId, boton) {
     let mensaje = '';
     
     if (pedido.estado === 'preparando') {
-        tiempoEntrega = prompt('Ingrese el tiempo estimado de entrega (ej: 45 minutos, 1 hora, etc.):', '45 minutos');
+        tiempoEntrega = prompt('Ingrese el tiempo estimado de entrega (ej: 45 minutos, 1 hora):', '45 minutos');
         if (!tiempoEntrega) {
             mostrarToast('Debe ingresar un tiempo de entrega', 'error');
             return;
@@ -279,13 +281,8 @@ async function notificarCliente(pedidoId, boton) {
     }
 }
 
-function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
-    return textos[estado] || estado.toUpperCase();
-}
-
 // ===================================================
-// ACTUALIZAR ESTADO CON EFECTO DE CARGA
+// ACTUALIZAR ESTADO
 // ===================================================
 
 async function actualizarEstado(pedidoId, nuevoEstado, boton) {
@@ -297,7 +294,7 @@ async function actualizarEstado(pedidoId, nuevoEstado, boton) {
     try {
         const response = await postAPI('actualizarEstado', { pedidoId, estado: nuevoEstado });
         if (response && response.success) {
-            mostrarToast(`Pedido #${pedidoId} actualizado a "${nuevoEstado}"`, 'success');
+            mostrarToast(`Pedido #${pedidoId} actualizado`, 'success');
             const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
             if (pedido) pedido.estado = nuevoEstado;
             actualizarContadoresPedidos();
@@ -339,6 +336,182 @@ async function cancelarPedido(pedidoId, boton) {
 }
 
 // ===================================================
+// GESTIÓN DE PRODUCTOS
+// ===================================================
+
+async function cargarProductos(forceRefresh = false) {
+    if (!vendedorActual) return;
+    const container = document.getElementById('productos-admin-grid');
+    container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
+    
+    try {
+        const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
+        if (response.error) throw new Error(response.error);
+        productos = response.productos || [];
+        renderizarProductosAdmin();
+        document.getElementById('badge-productos').textContent = productos.length;
+    } catch (error) {
+        container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`;
+    }
+}
+
+function renderizarProductosAdmin() {
+    const container = document.getElementById('productos-admin-grid');
+    if (productos.length === 0) {
+        container.innerHTML = `<div class="sin-pedidos"><p>No tenés productos cargados</p><button class="btn-primary btn-add-producto" onclick="abrirModalProducto()">Agregar producto</button></div>`;
+        return;
+    }
+    
+    container.innerHTML = productos.map(p => `
+        <div class="producto-admin-card">
+            <div class="producto-admin-imagen">
+                ${p.imagen_url ? `<img src="${p.imagen_url}" alt="${escapeHTML(p.nombre)}">` : '<div class="placeholder-img">🍕</div>'}
+            </div>
+            <div class="producto-admin-info">
+                <div class="producto-admin-nombre">${escapeHTML(p.nombre)}</div>
+                <div class="producto-admin-precio">${formatearPrecio(p.precio)}</div>
+                <div class="producto-admin-descripcion">${escapeHTML(p.descripcion || 'Sin descripción')}</div>
+                <div class="producto-admin-actions">
+                    <button class="btn-editar" onclick="abrirModalProducto(${p.id})">Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarProducto(${p.id})">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function abrirModalProducto(productoId = null) {
+    const modal = document.getElementById('modal-producto');
+    const title = document.getElementById('modal-producto-title');
+    const idField = document.getElementById('producto-id');
+    const nombreField = document.getElementById('producto-nombre');
+    const descripcionField = document.getElementById('producto-descripcion');
+    const precioField = document.getElementById('producto-precio');
+    const disponibleField = document.getElementById('producto-disponible');
+    const previewDiv = document.getElementById('producto-imagen-preview');
+    const imagenInput = document.getElementById('producto-imagen');
+    
+    if (productoId) {
+        const producto = productos.find(p => p.id.toString() === productoId.toString());
+        if (producto) {
+            title.textContent = 'Editar producto';
+            idField.value = producto.id;
+            nombreField.value = producto.nombre || '';
+            descripcionField.value = producto.descripcion || '';
+            precioField.value = producto.precio || '';
+            disponibleField.value = producto.disponible || 'SI';
+            if (producto.imagen_url) {
+                previewDiv.innerHTML = `<img src="${producto.imagen_url}" style="max-width: 100%; max-height: 150px;">`;
+            } else {
+                previewDiv.innerHTML = '';
+            }
+        }
+    } else {
+        title.textContent = 'Nuevo producto';
+        idField.value = '';
+        nombreField.value = '';
+        descripcionField.value = '';
+        precioField.value = '';
+        disponibleField.value = 'SI';
+        previewDiv.innerHTML = '';
+        imagenInput.value = '';
+    }
+    
+    modal.classList.add('active');
+}
+
+function cerrarModalProducto() {
+    document.getElementById('modal-producto').classList.remove('active');
+    document.getElementById('producto-imagen').value = '';
+    document.getElementById('producto-imagen-preview').innerHTML = '';
+}
+
+async function guardarProducto() {
+    const productoId = document.getElementById('producto-id').value;
+    const nombre = document.getElementById('producto-nombre').value.trim();
+    const descripcion = document.getElementById('producto-descripcion').value.trim();
+    const precio = parseFloat(document.getElementById('producto-precio').value);
+    const disponible = document.getElementById('producto-disponible').value;
+    const imagenFile = document.getElementById('producto-imagen').files[0];
+    
+    if (!nombre || !precio) {
+        mostrarToast('Completá nombre y precio', 'error');
+        return;
+    }
+    
+    const btnGuardar = document.getElementById('btn-guardar-producto');
+    const originalText = btnGuardar.innerHTML;
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    try {
+        let imagenUrl = null;
+        
+        if (imagenFile) {
+            mostrarToast('Subiendo imagen...', 'info');
+            imagenUrl = await subirImagenACloudinary(imagenFile);
+            if (!imagenUrl) {
+                mostrarToast('Error al subir imagen', 'error');
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = originalText;
+                return;
+            }
+        } else if (productoId) {
+            const productoExistente = productos.find(p => p.id.toString() === productoId.toString());
+            if (productoExistente && productoExistente.imagen_url) {
+                imagenUrl = productoExistente.imagen_url;
+            }
+        }
+        
+        const productoData = {
+            nombre: nombre,
+            descripcion: descripcion,
+            precio: precio,
+            disponible: disponible,
+            imagen_url: imagenUrl,
+            vendedor_id: vendedorActual.id
+        };
+        
+        let response;
+        if (productoId) {
+            response = await postAPI('actualizarProducto', { ...productoData, id: parseInt(productoId) });
+        } else {
+            response = await postAPI('crearProducto', productoData);
+        }
+        
+        if (response && response.success) {
+            mostrarToast(`Producto ${productoId ? 'actualizado' : 'creado'} correctamente`, 'success');
+            cerrarModalProducto();
+            await cargarProductos(true);
+        } else {
+            throw new Error(response?.error || 'Error al guardar');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al guardar producto', 'error');
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = originalText;
+    }
+}
+
+async function eliminarProducto(productoId) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    
+    try {
+        const response = await postAPI('eliminarProducto', { productoId });
+        if (response && response.success) {
+            mostrarToast('Producto eliminado', 'success');
+            await cargarProductos(true);
+        } else {
+            throw new Error(response?.error || 'Error');
+        }
+    } catch (error) {
+        mostrarToast('Error al eliminar', 'error');
+    }
+}
+
+// ===================================================
 // REGISTRO CON LOGO
 // ===================================================
 
@@ -366,7 +539,90 @@ async function registrarVendedorConLogo(nombre, email, telefono, direccion, hora
 }
 
 // ===================================================
-// INICIALIZACIÓN Y AUTENTICACIÓN
+// PERFIL
+// ===================================================
+
+function cargarPerfil() {
+    if (!vendedorActual) return;
+    document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
+    document.getElementById('perfil-telefono').value = vendedorActual.telefono || '';
+    document.getElementById('perfil-direccion').value = vendedorActual.direccion || '';
+    document.getElementById('perfil-horario').value = vendedorActual.horario || '';
+    
+    if (vendedorActual.logo_url) {
+        document.getElementById('logo-preview').innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 100px; border-radius: 12px;">`;
+    }
+    
+    const btnUploadLogo = document.getElementById('btn-upload-logo');
+    const logoInput = document.getElementById('perfil-logo');
+    if (btnUploadLogo && logoInput) {
+        btnUploadLogo.addEventListener('click', () => logoInput.click());
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('logo-preview').innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    const form = document.getElementById('perfil-form');
+    if (form) {
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await actualizarPerfil();
+        };
+    }
+}
+
+async function actualizarPerfil() {
+    const nombre = document.getElementById('perfil-nombre').value.trim();
+    const telefono = document.getElementById('perfil-telefono').value.trim();
+    const direccion = document.getElementById('perfil-direccion').value.trim();
+    const horario = document.getElementById('perfil-horario').value.trim();
+    const newPassword = document.getElementById('perfil-new-password').value;
+    const logoFile = document.getElementById('perfil-logo')?.files[0];
+    
+    let logoUrl = vendedorActual.logo_url;
+    if (logoFile) {
+        mostrarToast('Subiendo logo...', 'info');
+        logoUrl = await subirImagenACloudinary(logoFile);
+        if (!logoUrl) {
+            mostrarToast('Error al subir logo', 'error');
+            return;
+        }
+    }
+    
+    const updateData = { id: vendedorActual.id, nombre, telefono, direccion, horario, logo_url: logoUrl };
+    if (newPassword) {
+        if (newPassword.length < 6) {
+            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        updateData.password_hash = await hashPassword(newPassword);
+    }
+    
+    try {
+        const response = await postAPI('actualizarVendedor', updateData);
+        if (response && response.success) {
+            mostrarToast('Perfil actualizado', 'success');
+            vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl };
+            document.getElementById('panel-nombre').textContent = nombre;
+            document.getElementById('perfil-nombre-display').textContent = nombre;
+            document.getElementById('perfil-new-password').value = '';
+        } else {
+            throw new Error(response?.error || 'Error');
+        }
+    } catch (error) {
+        mostrarToast('Error al actualizar perfil', 'error');
+    }
+}
+
+// ===================================================
+// INICIALIZACIÓN
 // ===================================================
 
 async function iniciarPanel(vendedor) {
@@ -390,19 +646,15 @@ async function iniciarPanel(vendedor) {
     }
     
     const btnLogout = document.getElementById('btn-logout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', cerrarSesion);
-    }
+    if (btnLogout) btnLogout.addEventListener('click', cerrarSesion);
     
     const mobileLogout = document.getElementById('mobile-logout-btn');
-    if (mobileLogout) {
-        mobileLogout.addEventListener('click', cerrarSesion);
-    }
+    if (mobileLogout) mobileLogout.addEventListener('click', cerrarSesion);
     
     const btnAgregar = document.getElementById('btn-agregar-producto');
-    if (btnAgregar) {
-        btnAgregar.addEventListener('click', () => mostrarModalProducto());
-    }
+    if (btnAgregar) btnAgregar.addEventListener('click', () => abrirModalProducto());
+    
+    document.getElementById('btn-guardar-producto')?.addEventListener('click', guardarProducto);
     
     inicializarTabs();
     inicializarFiltros();
@@ -499,143 +751,6 @@ async function cargarPedidos(forceRefresh = false) {
     }
 }
 
-async function cargarProductos(forceRefresh = false) {
-    if (!vendedorActual) return;
-    const container = document.getElementById('productos-admin-grid');
-    container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
-    
-    try {
-        const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
-        if (response.error) throw new Error(response.error);
-        productos = response.productos || [];
-        renderizarProductosAdmin();
-        document.getElementById('badge-productos').textContent = productos.length;
-    } catch (error) {
-        container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`;
-    }
-}
-
-function renderizarProductosAdmin() {
-    const container = document.getElementById('productos-admin-grid');
-    if (productos.length === 0) {
-        container.innerHTML = `<div class="sin-pedidos"><p>No tenés productos cargados</p><button class="btn-primary btn-add-producto" onclick="mostrarModalProducto()">Agregar producto</button></div>`;
-        return;
-    }
-    
-    container.innerHTML = productos.map(p => `
-        <div class="producto-admin-card">
-            <div class="producto-admin-imagen">
-                ${p.imagen_url ? `<img src="${p.imagen_url}" alt="${escapeHTML(p.nombre)}">` : '<div class="placeholder-img">🍕</div>'}
-            </div>
-            <div class="producto-admin-info">
-                <div class="producto-admin-nombre">${escapeHTML(p.nombre)}</div>
-                <div class="producto-admin-precio">${formatearPrecio(p.precio)}</div>
-                <div class="producto-admin-descripcion">${escapeHTML(p.descripcion || 'Sin descripción')}</div>
-                <div class="producto-admin-actions">
-                    <button class="btn-editar" onclick="mostrarModalProducto(${p.id})">Editar</button>
-                    <button class="btn-eliminar" onclick="eliminarProducto(${p.id})">Eliminar</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function mostrarModalProducto(productoId = null) {
-    mostrarToast('Funcionalidad en desarrollo', 'info');
-}
-
-async function eliminarProducto(productoId) {
-    if (!confirm('¿Eliminar este producto?')) return;
-    try {
-        const response = await postAPI('eliminarProducto', { productoId });
-        if (response.success) {
-            mostrarToast('Producto eliminado', 'success');
-            await cargarProductos(true);
-        }
-    } catch (error) {
-        mostrarToast('Error al eliminar', 'error');
-    }
-}
-
-function cargarPerfil() {
-    if (!vendedorActual) return;
-    document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
-    document.getElementById('perfil-telefono').value = vendedorActual.telefono || '';
-    document.getElementById('perfil-direccion').value = vendedorActual.direccion || '';
-    document.getElementById('perfil-horario').value = vendedorActual.horario || '';
-    
-    if (vendedorActual.logo_url) {
-        document.getElementById('logo-preview').innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 100px; border-radius: 12px;">`;
-    }
-    
-    const btnUploadLogo = document.getElementById('btn-upload-logo');
-    const logoInput = document.getElementById('perfil-logo');
-    if (btnUploadLogo && logoInput) {
-        btnUploadLogo.addEventListener('click', () => logoInput.click());
-        logoInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('logo-preview').innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    
-    const form = document.getElementById('perfil-form');
-    if (form) {
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            await actualizarPerfil();
-        };
-    }
-}
-
-async function actualizarPerfil() {
-    const nombre = document.getElementById('perfil-nombre').value.trim();
-    const telefono = document.getElementById('perfil-telefono').value.trim();
-    const direccion = document.getElementById('perfil-direccion').value.trim();
-    const horario = document.getElementById('perfil-horario').value.trim();
-    const newPassword = document.getElementById('perfil-new-password').value;
-    const logoFile = document.getElementById('perfil-logo')?.files[0];
-    
-    let logoUrl = vendedorActual.logo_url;
-    if (logoFile) {
-        mostrarToast('Subiendo logo...', 'info');
-        logoUrl = await subirImagenACloudinary(logoFile);
-        if (!logoUrl) {
-            mostrarToast('Error al subir logo', 'error');
-            return;
-        }
-    }
-    
-    const updateData = { id: vendedorActual.id, nombre, telefono, direccion, horario, logo_url: logoUrl };
-    if (newPassword) {
-        if (newPassword.length < 6) {
-            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
-            return;
-        }
-        updateData.password_hash = await hashPassword(newPassword);
-    }
-    
-    try {
-        const response = await postAPI('actualizarVendedor', updateData);
-        if (response && response.success) {
-            mostrarToast('Perfil actualizado', 'success');
-            vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl };
-            document.getElementById('panel-nombre').textContent = nombre;
-            document.getElementById('perfil-nombre-display').textContent = nombre;
-            document.getElementById('perfil-new-password').value = '';
-        } else {
-            throw new Error(response?.error || 'Error');
-        }
-    } catch (error) {
-        mostrarToast('Error al actualizar perfil', 'error');
-    }
-}
-
 async function cargarVendedorPorId(vendedorId) {
     try {
         const response = await callAPI('getVendedores', {}, true);
@@ -683,7 +798,7 @@ function mostrarToast(mensaje, tipo = 'info') {
 }
 
 // ===================================================
-// INICIALIZACIÓN DEL LOGIN Y REGISTRO
+// INICIALIZACIÓN DE AUTENTICACIÓN
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -730,7 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Register con logo
+    // Register
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -761,10 +876,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('register-panel').style.display = 'none';
                 document.getElementById('login-panel').style.display = 'block';
                 document.getElementById('register-form').reset();
+                document.getElementById('reg-logo-preview').innerHTML = '';
             } else {
                 alert(response?.error || 'Error al registrar');
             }
         });
+        
+        // Vista previa del logo en registro
+        const regLogo = document.getElementById('reg-logo');
+        if (regLogo) {
+            regLogo.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('reg-logo-preview').innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
     }
     
     // Recover
