@@ -5,7 +5,7 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
 
 // ===================================================
-// FUNCIONES DE API (TODAS USAN GET PARA EVITAR CORS)
+// FUNCIONES DE API
 // ===================================================
 
 async function callAPI(action, data = {}) {
@@ -84,7 +84,6 @@ function mostrarToast(mensaje, tipo = 'info') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Función para mostrar loading en un botón
 async function withLoading(button, callback) {
     if (!button) return await callback();
     
@@ -262,16 +261,28 @@ async function guardarEditarVendedor() {
     });
 }
 
+// 🔥 FUNCIÓN CORREGIDA: Envía TODOS los datos, no solo el estado
 async function toggleVendedorStatus(id, button) {
     const v = allVendedores.find(v => v.id.toString() === id.toString());
     if (!v) return;
     const nuevoEstado = v.activo === 'SI' ? 'NO' : 'SI';
-    const accion = nuevoEstado === 'SI' ? 'habilitando' : 'suspendiendo';
     
     await withLoading(button, async () => {
         try {
-            const res = await postAPI('actualizarVendedor', { id: parseInt(id), activo: nuevoEstado });
-            if (res && res.success) { mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success'); await actualizarDatosManual(); }
+            const data = {
+                id: parseInt(id),
+                nombre: v.nombre || '',
+                email: v.email || '',
+                telefono: v.telefono || '',
+                direccion: v.direccion || '',
+                horario: v.horario || '',
+                activo: nuevoEstado
+            };
+            const res = await postAPI('actualizarVendedor', data);
+            if (res && res.success) { 
+                mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al cambiar estado', 'error'); }
         } catch (error) { mostrarToast('Error al cambiar estado', 'error'); }
     });
@@ -534,13 +545,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
         tbody.innerHTML = filtered.map(v => `<tr>
-            <td>${v.id}</td><td><strong>${escapeHTML(v.nombre)}</strong></td><td>${escapeHTML(v.email || '-')}</td><td>${v.telefono || '-'}</td><td>${escapeHTML(v.direccion || '-')}</td>
+            <td>${v.id}</td><td><strong>${escapeHTML(v.nombre)}</strong></td>
+            <td>${escapeHTML(v.email || '-')}</td><td>${v.telefono || '-'}</td>
+            <td>${escapeHTML(v.direccion || '-')}</td>
             <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
             <td>${stats[v.id]?.pedidos || 0}</td><td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
-            <td><button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
+            <td>
+                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-              </td>
+               </td>
          `).join('');
     });
     
