@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - Funciones completas con efectos de carga
+// ADMIN GLOBAL - Funciones completas
 // ===================================================
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
@@ -23,24 +23,6 @@ async function callAPI(action, data = {}) {
     } catch (error) {
         console.error('❌ Error en callAPI:', error);
         return { error: error.message };
-    }
-}
-
-async function postAPI(action, data = {}) {
-    try {
-        let url = `${API_URL}?action=${action}`;
-        for (let key in data) {
-            if (data[key] !== undefined && data[key] !== null) {
-                url += `&${key}=${encodeURIComponent(data[key])}`;
-            }
-        }
-        console.log('📡 POST (via GET):', url);
-        const response = await fetch(url, { method: 'GET', mode: 'cors' });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error('❌ Error en postAPI:', error);
-        return { success: false, error: error.message };
     }
 }
 
@@ -86,11 +68,9 @@ function mostrarToast(mensaje, tipo = 'info') {
 
 async function withLoading(button, callback) {
     if (!button) return await callback();
-    
     const originalText = button.innerHTML;
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    
     try {
         return await callback();
     } finally {
@@ -226,7 +206,7 @@ function renderizarVendedores() {
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
              </td>
-        </tr>
+         </tr>
     `).join('');
 }
 
@@ -254,43 +234,56 @@ async function guardarEditarVendedor() {
             horario: document.getElementById('edit-vendedor-horario').value.trim()
         };
         try {
-            const res = await postAPI('actualizarVendedor', data);
+            const res = await callAPI('actualizarVendedor', data);
             if (res && res.success) { mostrarToast('Vendedor actualizado', 'success'); cerrarModal('modal-editar-vendedor'); await actualizarDatosManual(); }
             else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
     });
 }
 
-// 🔥 FUNCIÓN CORREGIDA: Envía TODOS los datos, no solo el estado
 async function toggleVendedorStatus(id, button) {
     const v = allVendedores.find(v => v.id.toString() === id.toString());
     if (!v) return;
     const nuevoEstado = v.activo === 'SI' ? 'NO' : 'SI';
     
-    await withLoading(button, async () => {
-        try {
-            const data = {
-                id: parseInt(id),
-                nombre: v.nombre || '',
-                email: v.email || '',
-                telefono: v.telefono || '',
-                direccion: v.direccion || '',
-                horario: v.horario || '',
-                activo: nuevoEstado
-            };
-            const res = await postAPI('actualizarVendedor', data);
-            if (res && res.success) { 
-                mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success'); 
-                await actualizarDatosManual(); 
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    }
+    
+    try {
+        const res = await callAPI('actualizarVendedor', {
+            id: id,
+            nombre: v.nombre || '',
+            email: v.email || '',
+            telefono: v.telefono || '',
+            direccion: v.direccion || '',
+            horario: v.horario || '',
+            activo: nuevoEstado
+        });
+        
+        if (res && res.success) {
+            mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success');
+            await actualizarDatosManual();
+        } else {
+            mostrarToast(res?.error || 'Error al cambiar estado', 'error');
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = `<i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}`;
             }
-            else { mostrarToast(res?.error || 'Error al cambiar estado', 'error'); }
-        } catch (error) { mostrarToast('Error al cambiar estado', 'error'); }
-    });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al cambiar estado', 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = `<i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}`;
+        }
+    }
 }
 
 function eliminarVendedor(id, button) {
     window.vendedorAEliminar = id;
-    window.vendedorButton = button;
     document.getElementById('modal-confirmar-vendedor').classList.add('active');
 }
 
@@ -299,12 +292,11 @@ async function confirmarEliminarVendedor() {
     const btn = document.getElementById('confirmar-eliminar-vendedor');
     await withLoading(btn, async () => {
         try {
-            const res = await postAPI('eliminarVendedor', { vendedorId: window.vendedorAEliminar });
+            const res = await callAPI('eliminarVendedor', { vendedorId: window.vendedorAEliminar });
             if (res && res.success) { mostrarToast('Vendedor eliminado', 'success'); cerrarModal('modal-confirmar-vendedor'); await actualizarDatosManual(); }
             else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.vendedorAEliminar = null;
-        window.vendedorButton = null;
     });
 }
 
@@ -331,7 +323,7 @@ function renderizarProductos() {
         <td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td>
         <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
         <td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-     `).join('');
+     </tr>`).join('');
 }
 
 function editarProducto(id) {
@@ -356,7 +348,7 @@ async function guardarEditarProducto() {
             disponible: document.getElementById('edit-producto-disponible').value
         };
         try {
-            const res = await postAPI('actualizarProducto', data);
+            const res = await callAPI('actualizarProducto', data);
             if (res && res.success) { mostrarToast('Producto actualizado', 'success'); cerrarModal('modal-editar-producto'); await actualizarDatosManual(); }
             else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
@@ -365,7 +357,6 @@ async function guardarEditarProducto() {
 
 function eliminarProducto(id, button) {
     window.productoAEliminar = id;
-    window.productoButton = button;
     document.getElementById('modal-confirmar-producto').classList.add('active');
 }
 
@@ -374,12 +365,11 @@ async function confirmarEliminarProducto() {
     const btn = document.getElementById('confirmar-eliminar-producto');
     await withLoading(btn, async () => {
         try {
-            const res = await postAPI('eliminarProducto', { productoId: window.productoAEliminar });
+            const res = await callAPI('eliminarProducto', { productoId: window.productoAEliminar });
             if (res && res.success) { mostrarToast('Producto eliminado', 'success'); cerrarModal('modal-confirmar-producto'); await actualizarDatosManual(); }
             else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.productoAEliminar = null;
-        window.productoButton = null;
     });
 }
 
@@ -407,7 +397,7 @@ function renderizarPedidos() {
         <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
         <td>${p.productos ? p.productos.length : 0} productos</td>
         <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-     `).join('');
+     </tr>`).join('');
 }
 
 function editarPedido(id) {
@@ -428,7 +418,7 @@ async function guardarEditarPedido() {
         const id = document.getElementById('edit-pedido-id').value;
         const nuevoEstado = document.getElementById('edit-pedido-estado').value;
         try {
-            const res = await postAPI('actualizarEstado', { pedidoId: parseInt(id), estado: nuevoEstado });
+            const res = await callAPI('actualizarEstado', { pedidoId: parseInt(id), estado: nuevoEstado });
             if (res && res.success) { mostrarToast('Pedido actualizado', 'success'); cerrarModal('modal-editar-pedido'); await actualizarDatosManual(); }
             else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
@@ -437,7 +427,6 @@ async function guardarEditarPedido() {
 
 function eliminarPedido(id, button) {
     window.pedidoAEliminar = id;
-    window.pedidoButton = button;
     document.getElementById('modal-confirmar-pedido').classList.add('active');
 }
 
@@ -446,12 +435,11 @@ async function confirmarEliminarPedido() {
     const btn = document.getElementById('confirmar-eliminar-pedido');
     await withLoading(btn, async () => {
         try {
-            const res = await postAPI('cancelarPedido', { pedidoId: window.pedidoAEliminar });
+            const res = await callAPI('cancelarPedido', { pedidoId: window.pedidoAEliminar });
             if (res && res.success) { mostrarToast('Pedido eliminado', 'success'); cerrarModal('modal-confirmar-pedido'); await actualizarDatosManual(); }
             else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.pedidoAEliminar = null;
-        window.pedidoButton = null;
     });
 }
 
@@ -541,21 +529,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
         const tbody = document.getElementById('vendedores-tbody');
         if (!tbody) return;
-        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td>'; return; }
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td></tr>'; return; }
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
         tbody.innerHTML = filtered.map(v => `<tr>
-            <td>${v.id}</td><td><strong>${escapeHTML(v.nombre)}</strong></td>
-            <td>${escapeHTML(v.email || '-')}</td><td>${v.telefono || '-'}</td>
+            <td>${v.id}</td>
+            <td><strong>${escapeHTML(v.nombre)}</strong></td>
+            <td>${escapeHTML(v.email || '-')}</td>
+            <td>${v.telefono || '-'}</td>
             <td>${escapeHTML(v.direccion || '-')}</td>
             <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
-            <td>${stats[v.id]?.pedidos || 0}</td><td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
+            <td>${stats[v.id]?.pedidos || 0}</td>
+            <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
             <td>
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-               </td>
-         `).join('');
+             </td>
+         </tr>`).join('');
     });
     
     document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
