@@ -42,14 +42,17 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="top-bar-info">
-                    <span id="admin-name">Administrador</span>
-                    <span class="badge">Global</span>
-                </div>
-            </header>
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="top-bar-info">
+        <span id="admin-name">Administrador</span>
+        <span class="badge">Global</span>
+    </div>
+    <button class="btn-refresh" id="btn-refresh-data" title="Actualizar datos">
+        <i class="fas fa-sync-alt"></i> Actualizar
+    </button>
+</header>
 
             <!-- Sección Dashboard -->
             <div class="section-content" id="section-dashboard">
@@ -88,10 +91,6 @@
 
                     <!-- Charts Row -->
                     <div class="charts-row">
-                        <div class="chart-card">
-                            <h3>Pedidos por estado</h3>
-                            <canvas id="estados-chart" width="400" height="300"></canvas>
-                        </div>
                         <div class="chart-card">
                             <h3>Ventas por día (últimos 7 días)</h3>
                             <canvas id="ventas-chart" width="400" height="300"></canvas>
@@ -260,6 +259,86 @@
             </div>
         </main>
     </div>
+
+    <!-- Modal Editar Vendedor -->
+<div class="modal" id="modal-editar-vendedor">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Vendedor</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-vendedor-id">
+            <div class="form-group"><label>Nombre</label><input type="text" id="edit-vendedor-nombre" class="form-control"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="edit-vendedor-email" class="form-control"></div>
+            <div class="form-group"><label>Teléfono</label><input type="tel" id="edit-vendedor-telefono" class="form-control"></div>
+            <div class="form-group"><label>Dirección</label><input type="text" id="edit-vendedor-direccion" class="form-control"></div>
+            <div class="form-group"><label>Horario</label><input type="text" id="edit-vendedor-horario" class="form-control"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" id="guardar-editar-vendedor">Guardar</button>
+            <button class="btn-secondary">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminar Vendedor -->
+<div class="modal" id="modal-confirmar-vendedor">
+    <div class="modal-content small">
+        <div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div>
+        <div class="modal-body"><p>¿Eliminar este vendedor? Se eliminarán todos sus productos y pedidos.</p></div>
+        <div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-vendedor">Eliminar</button><button class="btn-secondary">Cancelar</button></div>
+    </div>
+</div>
+
+<!-- Modal Editar Producto -->
+<div class="modal" id="modal-editar-producto">
+    <div class="modal-content">
+        <div class="modal-header"><h3>Editar Producto</h3><button class="modal-close">&times;</button></div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-producto-id">
+            <div class="form-group"><label>Nombre</label><input type="text" id="edit-producto-nombre" class="form-control"></div>
+            <div class="form-group"><label>Descripción</label><textarea id="edit-producto-descripcion" class="form-control"></textarea></div>
+            <div class="form-group"><label>Precio</label><input type="number" id="edit-producto-precio" class="form-control" step="100"></div>
+            <div class="form-group"><label>Disponible</label><select id="edit-producto-disponible" class="form-control"><option value="SI">Sí</option><option value="NO">No</option></select></div>
+        </div>
+        <div class="modal-footer"><button class="btn-primary" id="guardar-editar-producto">Guardar</button><button class="btn-secondary">Cancelar</button></div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminar Producto -->
+<div class="modal" id="modal-confirmar-producto">
+    <div class="modal-content small">
+        <div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div>
+        <div class="modal-body"><p>¿Eliminar este producto?</p></div>
+        <div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-producto">Eliminar</button><button class="btn-secondary">Cancelar</button></div>
+    </div>
+</div>
+
+<!-- Modal Editar Pedido -->
+<div class="modal" id="modal-editar-pedido">
+    <div class="modal-content">
+        <div class="modal-header"><h3>Editar Pedido</h3><button class="modal-close">&times;</button></div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-pedido-id">
+            <div class="form-group"><label>Cliente</label><input type="text" id="edit-pedido-cliente" class="form-control"></div>
+            <div class="form-group"><label>Teléfono</label><input type="tel" id="edit-pedido-telefono" class="form-control"></div>
+            <div class="form-group"><label>Dirección</label><input type="text" id="edit-pedido-direccion" class="form-control"></div>
+            <div class="form-group"><label>Total</label><input type="text" id="edit-pedido-total" class="form-control" readonly></div>
+            <div class="form-group"><label>Estado</label><select id="edit-pedido-estado" class="form-control"><option value="preparando">Nuevo</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregado</option></select></div>
+        </div>
+        <div class="modal-footer"><button class="btn-primary" id="guardar-editar-pedido">Guardar</button><button class="btn-secondary">Cancelar</button></div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminar Pedido -->
+<div class="modal" id="modal-confirmar-pedido">
+    <div class="modal-content small">
+        <div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div>
+        <div class="modal-body"><p>¿Eliminar este pedido?</p></div>
+        <div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-pedido">Eliminar</button><button class="btn-secondary">Cancelar</button></div>
+    </div>
+</div>
 
     <script src="js/auth.js"></script>
     <script src="js/admin-global.js"></script>

@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - SPA (Single Page Application)
+// ADMIN GLOBAL - SPA con funcionalidades completas
 // ===================================================
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
@@ -58,7 +58,7 @@ function formatearPrecio(precio) {
 function formatearFecha(fechaISO) {
     if (!fechaISO) return 'N/A';
     const fecha = new Date(fechaISO);
-    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function getEstadoTexto(estado) {
@@ -92,16 +92,9 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.color = 'white';
     toast.style.padding = '12px 24px';
     toast.style.borderRadius = '50px';
-    toast.style.fontSize = '0.9rem';
-    toast.style.fontWeight = '500';
     toast.style.zIndex = '9999';
-    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-    toast.style.animation = 'fadeInUp 0.3s ease';
     document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.animation = 'fadeOutDown 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    setTimeout(() => toast.remove(), 3000);
 }
 
 // ===================================================
@@ -112,9 +105,15 @@ let allVendedores = [];
 let allPedidos = [];
 let allProductos = [];
 let charts = {};
+let vendedorAEliminar = null;
+let productoAEliminar = null;
+let pedidoAEliminar = null;
+let vendedorAEditar = null;
+let productoAEditar = null;
+let pedidoAEditar = null;
 
 // ===================================================
-// CARGA DE DATOS (UNA SOLA VEZ)
+// CARGA DE DATOS
 // ===================================================
 
 async function cargarTodosLosDatos() {
@@ -152,10 +151,6 @@ async function cargarTodosLosDatos() {
     }
 }
 
-// ===================================================
-// ACTUALIZACIÓN MANUAL DE DATOS
-// ===================================================
-
 async function actualizarDatosManual() {
     const btnRefresh = document.getElementById('btn-refresh-data');
     if (btnRefresh) {
@@ -167,19 +162,13 @@ async function actualizarDatosManual() {
     
     try {
         const vendedoresRes = await callAPI('getVendedores');
-        if (vendedoresRes.success) {
-            allVendedores = vendedoresRes.vendedores || [];
-        }
+        if (vendedoresRes.success) allVendedores = vendedoresRes.vendedores || [];
         
         const pedidosRes = await callAPI('getAllPedidos');
-        if (pedidosRes.success) {
-            allPedidos = pedidosRes.pedidos || [];
-        }
+        if (pedidosRes.success) allPedidos = pedidosRes.pedidos || [];
         
         const productosRes = await callAPI('getAllProductos');
-        if (productosRes.success) {
-            allProductos = productosRes.productos || [];
-        }
+        if (productosRes.success) allProductos = productosRes.productos || [];
         
         actualizarDashboard();
         renderizarVendedores();
@@ -189,7 +178,6 @@ async function actualizarDatosManual() {
         
         mostrarToast('Datos actualizados correctamente', 'success');
     } catch (error) {
-        console.error('Error al actualizar:', error);
         mostrarToast('Error al actualizar datos', 'error');
     } finally {
         if (btnRefresh) {
@@ -200,7 +188,7 @@ async function actualizarDatosManual() {
 }
 
 // ===================================================
-// DASHBOARD
+// DASHBOARD (solo gráfico de ventas por día)
 // ===================================================
 
 function actualizarDashboard() {
@@ -219,35 +207,7 @@ function actualizarDashboard() {
     if (totalProductosEl) totalProductosEl.textContent = totalProductos;
     if (totalIngresosEl) totalIngresosEl.textContent = formatearPrecio(ingresosTotales);
     
-    const estados = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
-    allPedidos.forEach(p => {
-        const estado = p.estado || 'preparando';
-        if (estados[estado] !== undefined) estados[estado]++;
-    });
-    
-    const ctxEstados = document.getElementById('estados-chart');
-    if (ctxEstados && typeof Chart !== 'undefined') {
-        if (charts.estados) charts.estados.destroy();
-        charts.estados = new Chart(ctxEstados, {
-            type: 'doughnut',
-            data: {
-                labels: ['Nuevos', 'En preparación', 'En camino', 'Entregados'],
-                datasets: [{
-                    data: [estados.preparando, estados['en preparacion'], estados['en camino'], estados.entregado],
-                    backgroundColor: ['#FF9800', '#FFC107', '#2196F3', '#4CAF50'],
-                    borderWidth: 0
-                }]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
-    }
-    
+    // Gráfico de ventas por día (últimos 7 días)
     const ultimos7Dias = [];
     const ventasPorDia = {};
     for (let i = 6; i >= 0; i--) {
@@ -294,74 +254,10 @@ function actualizarDashboard() {
             }
         });
     }
-    
-    const ventasPorVendedor = {};
-    allPedidos.forEach(p => {
-        const nombre = p.vendedor_nombre || 'Desconocido';
-        ventasPorVendedor[nombre] = (ventasPorVendedor[nombre] || 0) + (parseFloat(p.total) || 0);
-    });
-    const topVendedores = Object.entries(ventasPorVendedor).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    
-    const topVendedoresDiv = document.getElementById('top-vendedores-list');
-    if (topVendedoresDiv) {
-        if (topVendedores.length === 0) {
-            topVendedoresDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
-        } else {
-            topVendedoresDiv.innerHTML = topVendedores.map(([nombre, total]) => `
-                <div class="top-item">
-                    <span class="top-item-name">${escapeHTML(nombre)}</span>
-                    <span class="top-item-value">${formatearPrecio(total)}</span>
-                </div>
-            `).join('');
-        }
-    }
-    
-    const ventasPorProducto = {};
-    allPedidos.forEach(p => {
-        if (p.productos) {
-            p.productos.forEach(prod => {
-                ventasPorProducto[prod.nombre] = (ventasPorProducto[prod.nombre] || 0) + prod.cantidad;
-            });
-        }
-    });
-    const topProductos = Object.entries(ventasPorProducto).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    
-    const topProductosDiv = document.getElementById('top-productos-list');
-    if (topProductosDiv) {
-        if (topProductos.length === 0) {
-            topProductosDiv.innerHTML = '<p class="loading-text">No hay datos</p>';
-        } else {
-            topProductosDiv.innerHTML = topProductos.map(([nombre, cantidad]) => `
-                <div class="top-item">
-                    <span class="top-item-name">${escapeHTML(nombre)}</span>
-                    <span class="top-item-value">${cantidad} unidades</span>
-                </div>
-            `).join('');
-        }
-    }
-    
-    const recentOrders = allPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
-    const tbody = document.getElementById('recent-orders-tbody');
-    if (tbody) {
-        if (recentOrders.length === 0) {
-            tbody.innerHTML = '}<tr><td colspan="6" class="loading-text">No hay pedidos</td></tr>';
-        } else {
-            tbody.innerHTML = recentOrders.map(p => `
-                <tr>
-                    <td>#${p.id}</td>
-                    <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-                    <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-                    <td>${formatearPrecio(p.total)}</td>
-                    <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-                    <td>${formatearFecha(p.fecha)}</td>
-                </tr>
-            `).join('');
-        }
-    }
 }
 
 // ===================================================
-// VENDEDORES
+// VENDEDORES - CRUD COMPLETO
 // ===================================================
 
 function renderizarVendedores() {
@@ -369,9 +265,17 @@ function renderizarVendedores() {
     if (!tbody) return;
     
     if (allVendedores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay vendedores registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay vendedores registrados</td></tr>';
         return;
     }
+    
+    const stats = {};
+    allPedidos.forEach(p => {
+        const id = p.vendedor_id;
+        if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 };
+        stats[id].pedidos++;
+        stats[id].ingresos += parseFloat(p.total) || 0;
+    });
     
     tbody.innerHTML = allVendedores.map(v => `
         <tr>
@@ -380,9 +284,19 @@ function renderizarVendedores() {
             <td>${escapeHTML(v.email || '-')}</td>
             <td>${v.telefono || '-'}</td>
             <td>${escapeHTML(v.direccion || '-')}</td>
-            <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+            <td>
+                <span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">
+                    ${v.activo === 'SI' ? 'Activo' : 'Inactivo'}
+                </span>
+            </td>
+            <td>${stats[v.id]?.pedidos || 0}</td>
+            <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
             <td>
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id})">
+                    <i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i>
+                    ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}
+                </button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button>
             </td>
         </tr>
@@ -393,30 +307,226 @@ function editarVendedor(id) {
     const vendedor = allVendedores.find(v => v.id.toString() === id.toString());
     if (!vendedor) return;
     
-    // Implementar modal de edición
-    mostrarToast('Funcionalidad en desarrollo', 'info');
+    document.getElementById('edit-vendedor-id').value = vendedor.id;
+    document.getElementById('edit-vendedor-nombre').value = vendedor.nombre || '';
+    document.getElementById('edit-vendedor-email').value = vendedor.email || '';
+    document.getElementById('edit-vendedor-telefono').value = vendedor.telefono || '';
+    document.getElementById('edit-vendedor-direccion').value = vendedor.direccion || '';
+    document.getElementById('edit-vendedor-horario').value = vendedor.horario || '';
+    
+    document.getElementById('modal-editar-vendedor').classList.add('active');
 }
 
-async function eliminarVendedor(id) {
-    const confirmar = confirm('¿Estás seguro que querés eliminar este vendedor? Se eliminarán todos sus productos y pedidos.');
-    if (!confirmar) return;
+async function guardarEditarVendedor() {
+    const id = document.getElementById('edit-vendedor-id').value;
+    const data = {
+        id: parseInt(id),
+        nombre: document.getElementById('edit-vendedor-nombre').value.trim(),
+        email: document.getElementById('edit-vendedor-email').value.trim(),
+        telefono: document.getElementById('edit-vendedor-telefono').value.trim(),
+        direccion: document.getElementById('edit-vendedor-direccion').value.trim(),
+        horario: document.getElementById('edit-vendedor-horario').value.trim()
+    };
     
     try {
-        const response = await postAPI('eliminarVendedor', { vendedorId: id });
+        const response = await postAPI('actualizarVendedor', data);
         if (response.success) {
-            mostrarToast('Vendedor eliminado correctamente', 'success');
+            mostrarToast('Vendedor actualizado correctamente', 'success');
+            cerrarModalEditarVendedor();
             await actualizarDatosManual();
         } else {
             throw new Error(response.error);
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarToast('Error al eliminar vendedor', 'error');
+        mostrarToast('Error al actualizar: ' + error.message, 'error');
     }
 }
 
+async function toggleVendedorStatus(id) {
+    const vendedor = allVendedores.find(v => v.id.toString() === id.toString());
+    if (!vendedor) return;
+    
+    const nuevoEstado = vendedor.activo === 'SI' ? 'NO' : 'SI';
+    const accion = nuevoEstado === 'SI' ? 'habilitado' : 'suspendido';
+    
+    try {
+        const response = await postAPI('actualizarVendedor', {
+            id: parseInt(id),
+            activo: nuevoEstado
+        });
+        if (response.success) {
+            mostrarToast(`Vendedor ${accion} correctamente`, 'success');
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        mostrarToast('Error al cambiar estado', 'error');
+    }
+}
+
+function eliminarVendedor(id) {
+    vendedorAEliminar = id;
+    document.getElementById('modal-confirmar-vendedor').classList.add('active');
+}
+
+async function confirmarEliminarVendedor() {
+    if (!vendedorAEliminar) return;
+    
+    try {
+        const response = await postAPI('eliminarVendedor', { vendedorId: vendedorAEliminar });
+        if (response.success) {
+            mostrarToast('Vendedor eliminado correctamente', 'success');
+            cerrarModalConfirmarVendedor();
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        mostrarToast('Error al eliminar: ' + error.message, 'error');
+    }
+    vendedorAEliminar = null;
+}
+
+function cerrarModalEditarVendedor() {
+    document.getElementById('modal-editar-vendedor').classList.remove('active');
+}
+
+function cerrarModalConfirmarVendedor() {
+    document.getElementById('modal-confirmar-vendedor').classList.remove('active');
+    vendedorAEliminar = null;
+}
+
 // ===================================================
-// PEDIDOS
+// PRODUCTOS - CRUD COMPLETO
+// ===================================================
+
+function renderizarProductos() {
+    const tbody = document.getElementById('productos-tbody');
+    if (!tbody) return;
+    
+    let productosFiltrados = [...allProductos];
+    
+    const filtroVendedor = document.getElementById('filtro-vendedor-prod')?.value;
+    if (filtroVendedor) {
+        productosFiltrados = productosFiltrados.filter(p => p.vendedor_id?.toString() === filtroVendedor);
+    }
+    
+    const searchTerm = document.getElementById('search-producto')?.value.toLowerCase();
+    if (searchTerm) {
+        productosFiltrados = productosFiltrados.filter(p => 
+            p.nombre?.toLowerCase().includes(searchTerm) || 
+            p.descripcion?.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (productosFiltrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay productos</td></tr>';
+        return;
+    }
+    
+    // Calcular ventas por producto
+    const ventasPorProducto = {};
+    allPedidos.forEach(p => {
+        if (p.productos) {
+            p.productos.forEach(prod => {
+                const key = `${prod.id}_${p.vendedor_id}`;
+                ventasPorProducto[key] = (ventasPorProducto[key] || 0) + prod.cantidad;
+            });
+        }
+    });
+    
+    tbody.innerHTML = productosFiltrados.map(p => {
+        const ventas = ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0;
+        return `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">` : '<span style="color:#ccc;">📷</span>'}</td>
+                <td><strong>${escapeHTML(p.nombre)}</strong></td>
+                <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+                <td>${formatearPrecio(p.precio)}</td>
+                <td>${ventas}</td>
+                <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i> Eliminar</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function editarProducto(id) {
+    const producto = allProductos.find(p => p.id.toString() === id.toString());
+    if (!producto) return;
+    
+    document.getElementById('edit-producto-id').value = producto.id;
+    document.getElementById('edit-producto-nombre').value = producto.nombre || '';
+    document.getElementById('edit-producto-descripcion').value = producto.descripcion || '';
+    document.getElementById('edit-producto-precio').value = producto.precio || '';
+    document.getElementById('edit-producto-disponible').value = producto.disponible || 'SI';
+    
+    document.getElementById('modal-editar-producto').classList.add('active');
+}
+
+async function guardarEditarProducto() {
+    const id = document.getElementById('edit-producto-id').value;
+    const data = {
+        id: parseInt(id),
+        nombre: document.getElementById('edit-producto-nombre').value.trim(),
+        descripcion: document.getElementById('edit-producto-descripcion').value.trim(),
+        precio: parseFloat(document.getElementById('edit-producto-precio').value),
+        disponible: document.getElementById('edit-producto-disponible').value
+    };
+    
+    try {
+        const response = await postAPI('actualizarProducto', data);
+        if (response.success) {
+            mostrarToast('Producto actualizado correctamente', 'success');
+            cerrarModalEditarProducto();
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        mostrarToast('Error al actualizar: ' + error.message, 'error');
+    }
+}
+
+function eliminarProducto(id) {
+    productoAEliminar = id;
+    document.getElementById('modal-confirmar-producto').classList.add('active');
+}
+
+async function confirmarEliminarProducto() {
+    if (!productoAEliminar) return;
+    
+    try {
+        const response = await postAPI('eliminarProducto', { productoId: productoAEliminar });
+        if (response.success) {
+            mostrarToast('Producto eliminado correctamente', 'success');
+            cerrarModalConfirmarProducto();
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        mostrarToast('Error al eliminar: ' + error.message, 'error');
+    }
+    productoAEliminar = null;
+}
+
+function cerrarModalEditarProducto() {
+    document.getElementById('modal-editar-producto').classList.remove('active');
+}
+
+function cerrarModalConfirmarProducto() {
+    document.getElementById('modal-confirmar-producto').classList.remove('active');
+    productoAEliminar = null;
+}
+
+// ===================================================
+// PEDIDOS - CRUD COMPLETO
 // ===================================================
 
 function renderizarPedidos() {
@@ -456,9 +566,81 @@ function renderizarPedidos() {
             <td>${formatearPrecio(p.total)}</td>
             <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
             <td>${p.productos ? p.productos.length : 0} productos</td>
+            <td>
+                <button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-delete" onclick="eliminarPedido(${p.id})"><i class="fas fa-trash"></i> Eliminar</button>
+            </td>
         </tr>
     `).join('');
 }
+
+function editarPedido(id) {
+    const pedido = allPedidos.find(p => p.id.toString() === id.toString());
+    if (!pedido) return;
+    
+    document.getElementById('edit-pedido-id').value = pedido.id;
+    document.getElementById('edit-pedido-cliente').value = pedido.cliente_nombre || '';
+    document.getElementById('edit-pedido-telefono').value = pedido.cliente_telefono || '';
+    document.getElementById('edit-pedido-direccion').value = pedido.direccion || '';
+    document.getElementById('edit-pedido-total').value = pedido.total || '';
+    document.getElementById('edit-pedido-estado').value = pedido.estado || 'preparando';
+    
+    document.getElementById('modal-editar-pedido').classList.add('active');
+}
+
+async function guardarEditarPedido() {
+    const id = document.getElementById('edit-pedido-id').value;
+    const nuevoEstado = document.getElementById('edit-pedido-estado').value;
+    
+    try {
+        const response = await postAPI('actualizarEstado', { pedidoId: parseInt(id), estado: nuevoEstado });
+        if (response.success) {
+            mostrarToast('Pedido actualizado correctamente', 'success');
+            cerrarModalEditarPedido();
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        mostrarToast('Error al actualizar: ' + error.message, 'error');
+    }
+}
+
+function eliminarPedido(id) {
+    pedidoAEliminar = id;
+    document.getElementById('modal-confirmar-pedido').classList.add('active');
+}
+
+async function confirmarEliminarPedido() {
+    if (!pedidoAEliminar) return;
+    
+    try {
+        const response = await postAPI('cancelarPedido', { pedidoId: pedidoAEliminar });
+        if (response.success) {
+            mostrarToast('Pedido eliminado correctamente', 'success');
+            cerrarModalConfirmarPedido();
+            await actualizarDatosManual();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        mostrarToast('Error al eliminar: ' + error.message, 'error');
+    }
+    pedidoAEliminar = null;
+}
+
+function cerrarModalEditarPedido() {
+    document.getElementById('modal-editar-pedido').classList.remove('active');
+}
+
+function cerrarModalConfirmarPedido() {
+    document.getElementById('modal-confirmar-pedido').classList.remove('active');
+    pedidoAEliminar = null;
+}
+
+// ===================================================
+// FILTROS
+// ===================================================
 
 function cargarFiltros() {
     const filtroVendedor = document.getElementById('filtro-vendedor');
@@ -471,12 +653,26 @@ function cargarFiltros() {
     if (filtroVendedorProd) filtroVendedorProd.innerHTML = options;
 }
 
+// ===================================================
+// EXPORTAR
+// ===================================================
+
+function exportarVendedores() {
+    const data = allVendedores.map(v => ({
+        ID: v.id,
+        Nombre: v.nombre,
+        Email: v.email,
+        Telefono: v.telefono,
+        Direccion: v.direccion,
+        Horario: v.horario,
+        Estado: v.activo === 'SI' ? 'Activo' : 'Inactivo'
+    }));
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'vendedores_want.csv');
+    mostrarToast('Exportando vendedores...', 'success');
+}
+
 function exportarPedidos() {
-    if (allPedidos.length === 0) {
-        mostrarToast('No hay datos para exportar', 'error');
-        return;
-    }
-    
     const data = allPedidos.map(p => ({
         ID: p.id,
         Fecha: p.fecha,
@@ -488,85 +684,12 @@ function exportarPedidos() {
         Total: p.total,
         Estado: p.estado
     }));
-    
     const csv = convertToCSV(data);
     downloadCSV(csv, 'pedidos_want.csv');
     mostrarToast('Exportando pedidos...', 'success');
 }
 
-// ===================================================
-// PRODUCTOS
-// ===================================================
-
-function renderizarProductos() {
-    const tbody = document.getElementById('productos-tbody');
-    if (!tbody) return;
-    
-    let productosFiltrados = [...allProductos];
-    
-    const filtroVendedor = document.getElementById('filtro-vendedor-prod')?.value;
-    if (filtroVendedor) {
-        productosFiltrados = productosFiltrados.filter(p => p.vendedor_id?.toString() === filtroVendedor);
-    }
-    
-    const searchTerm = document.getElementById('search-producto')?.value.toLowerCase();
-    if (searchTerm) {
-        productosFiltrados = productosFiltrados.filter(p => 
-            p.nombre?.toLowerCase().includes(searchTerm) || 
-            p.descripcion?.toLowerCase().includes(searchTerm)
-        );
-    }
-    
-    if (productosFiltrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay productos</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = productosFiltrados.map(p => `
-        <tr>
-            <td>${p.id}</td>
-            <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">` : '<span style="color:#ccc;">📷</span>'}</td>
-            <td><strong>${escapeHTML(p.nombre)}</strong></td>
-            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-            <td>${formatearPrecio(p.precio)}</td>
-            <td>0</td>
-            <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
-            <td>
-                <button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-delete" onclick="eliminarProducto(${p.id})"><i class="fas fa-trash"></i> Eliminar</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function editarProducto(id) {
-    mostrarToast('Funcionalidad en desarrollo', 'info');
-}
-
-async function eliminarProducto(id) {
-    const confirmar = confirm('¿Estás seguro que querés eliminar este producto?');
-    if (!confirmar) return;
-    
-    try {
-        const response = await postAPI('eliminarProducto', { productoId: id });
-        if (response.success) {
-            mostrarToast('Producto eliminado correctamente', 'success');
-            await actualizarDatosManual();
-        } else {
-            throw new Error(response.error);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarToast('Error al eliminar producto', 'error');
-    }
-}
-
 function exportarProductos() {
-    if (allProductos.length === 0) {
-        mostrarToast('No hay datos para exportar', 'error');
-        return;
-    }
-    
     const data = allProductos.map(p => ({
         ID: p.id,
         Nombre: p.nombre,
@@ -575,108 +698,10 @@ function exportarProductos() {
         Descripcion: p.descripcion,
         Disponible: p.disponible === 'SI' ? 'Sí' : 'No'
     }));
-    
     const csv = convertToCSV(data);
     downloadCSV(csv, 'productos_want.csv');
     mostrarToast('Exportando productos...', 'success');
 }
-
-function exportarVendedores() {
-    if (allVendedores.length === 0) {
-        mostrarToast('No hay datos para exportar', 'error');
-        return;
-    }
-    
-    const data = allVendedores.map(v => ({
-        ID: v.id,
-        Nombre: v.nombre,
-        Email: v.email,
-        Telefono: v.telefono,
-        Direccion: v.direccion,
-        Horario: v.horario,
-        Estado: v.activo === 'SI' ? 'Activo' : 'Inactivo'
-    }));
-    
-    const csv = convertToCSV(data);
-    downloadCSV(csv, 'vendedores_want.csv');
-    mostrarToast('Exportando vendedores...', 'success');
-}
-
-// ===================================================
-// CONFIGURACIÓN
-// ===================================================
-
-function cargarConfiguracion() {
-    const savedConfig = localStorage.getItem('admin_config');
-    if (savedConfig) {
-        const config = JSON.parse(savedConfig);
-        if (document.getElementById('config-email')) document.getElementById('config-email').value = config.admin_email || 'admin@want.com';
-        if (document.getElementById('config-comision')) document.getElementById('config-comision').value = config.comision || '5';
-        if (document.getElementById('config-soporte-email')) document.getElementById('config-soporte-email').value = config.soporte_email || 'soporte@want.com';
-        if (document.getElementById('config-soporte-whatsapp')) document.getElementById('config-soporte-whatsapp').value = config.soporte_whatsapp || '';
-    } else {
-        if (document.getElementById('config-email')) document.getElementById('config-email').value = 'admin@want.com';
-        if (document.getElementById('config-comision')) document.getElementById('config-comision').value = '5';
-        if (document.getElementById('config-soporte-email')) document.getElementById('config-soporte-email').value = 'soporte@want.com';
-    }
-}
-
-function initConfigForm() {
-    const adminForm = document.getElementById('config-admin-form');
-    if (adminForm) {
-        adminForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newEmail = document.getElementById('config-email').value.trim();
-            const newPassword = document.getElementById('config-password').value;
-            const newPassword2 = document.getElementById('config-password2').value;
-            
-            if (newPassword && newPassword !== newPassword2) {
-                mostrarToast('Las contraseñas no coinciden', 'error');
-                return;
-            }
-            
-            const config = {
-                admin_email: newEmail,
-                comision: document.getElementById('config-comision')?.value || '5',
-                soporte_email: document.getElementById('config-soporte-email')?.value || '',
-                soporte_whatsapp: document.getElementById('config-soporte-whatsapp')?.value || ''
-            };
-            localStorage.setItem('admin_config', JSON.stringify(config));
-            
-            mostrarToast('Configuración guardada', 'success');
-            if (newPassword) {
-                mostrarToast('La contraseña se actualizará al reiniciar sesión', 'info');
-            }
-        });
-    }
-    
-    const comisionForm = document.getElementById('config-comision-form');
-    if (comisionForm) {
-        comisionForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const config = JSON.parse(localStorage.getItem('admin_config') || '{}');
-            config.comision = document.getElementById('config-comision').value;
-            localStorage.setItem('admin_config', JSON.stringify(config));
-            mostrarToast('Comisión guardada', 'success');
-        });
-    }
-    
-    const contactoForm = document.getElementById('config-contacto-form');
-    if (contactoForm) {
-        contactoForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const config = JSON.parse(localStorage.getItem('admin_config') || '{}');
-            config.soporte_email = document.getElementById('config-soporte-email').value;
-            config.soporte_whatsapp = document.getElementById('config-soporte-whatsapp').value;
-            localStorage.setItem('admin_config', JSON.stringify(config));
-            mostrarToast('Contacto guardado', 'success');
-        });
-    }
-}
-
-// ===================================================
-// UTILITARIAS DE EXPORTACIÓN
-// ===================================================
 
 function convertToCSV(data) {
     if (!data || data.length === 0) return '';
@@ -699,7 +724,7 @@ function downloadCSV(csv, filename) {
 }
 
 // ===================================================
-// NAVEGACIÓN ENTRE SECCIONES (sin recargar)
+// NAVEGACIÓN ENTRE SECCIONES
 // ===================================================
 
 function cambiarSeccion(seccionId) {
@@ -719,45 +744,15 @@ function cambiarSeccion(seccionId) {
 }
 
 // ===================================================
-// ANIMACIONES CSS PARA TOAST
-// ===================================================
-
-const styleToast = document.createElement('style');
-styleToast.textContent = `
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-    }
-    @keyframes fadeOutDown {
-        from {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-        }
-    }
-`;
-document.head.appendChild(styleToast);
-
-// ===================================================
 // INICIALIZACIÓN
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Panel Administrativo Global iniciado');
     
-    // Cargar todos los datos una sola vez
     await cargarTodosLosDatos();
     
-    // Configurar navegación
+    // Navegación
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
@@ -766,73 +761,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
     
-    // Botón actualizar manual
+    // Botón actualizar
     const btnRefresh = document.getElementById('btn-refresh-data');
-    if (btnRefresh) {
-        btnRefresh.addEventListener('click', actualizarDatosManual);
-    }
+    if (btnRefresh) btnRefresh.addEventListener('click', actualizarDatosManual);
     
-    // Filtros de pedidos
-    const filtros = ['filtro-vendedor', 'filtro-estado', 'filtro-fecha'];
-    filtros.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', () => renderizarPedidos());
+    // Filtros
+    document.getElementById('filtro-vendedor')?.addEventListener('change', () => renderizarPedidos());
+    document.getElementById('filtro-estado')?.addEventListener('change', () => renderizarPedidos());
+    document.getElementById('filtro-fecha')?.addEventListener('change', () => renderizarPedidos());
+    document.getElementById('filtro-vendedor-prod')?.addEventListener('change', () => renderizarProductos());
+    document.getElementById('search-producto')?.addEventListener('input', () => renderizarProductos());
+    
+    // Exportar
+    document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
+    document.getElementById('export-pedidos')?.addEventListener('click', exportarPedidos);
+    document.getElementById('export-productos')?.addEventListener('click', exportarProductos);
+    
+    // Botones de confirmación de modales
+    document.getElementById('confirmar-eliminar-vendedor')?.addEventListener('click', confirmarEliminarVendedor);
+    document.getElementById('confirmar-eliminar-producto')?.addEventListener('click', confirmarEliminarProducto);
+    document.getElementById('confirmar-eliminar-pedido')?.addEventListener('click', confirmarEliminarPedido);
+    document.getElementById('guardar-editar-vendedor')?.addEventListener('click', guardarEditarVendedor);
+    document.getElementById('guardar-editar-producto')?.addEventListener('click', guardarEditarProducto);
+    document.getElementById('guardar-editar-pedido')?.addEventListener('click', guardarEditarPedido);
+    
+    // Cerrar modales
+    document.querySelectorAll('.modal-close, .btn-secondary').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+        });
     });
     
-    // Buscador de productos
-    const searchProducto = document.getElementById('search-producto');
-    if (searchProducto) searchProducto.addEventListener('input', () => renderizarProductos());
-    
-    // Buscador de vendedores
-    const searchVendedor = document.getElementById('search-vendedor');
-    if (searchVendedor) {
-        searchVendedor.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allVendedores.filter(v => 
-                v.nombre?.toLowerCase().includes(term) || 
-                v.email?.toLowerCase().includes(term)
-            );
-            const tbody = document.getElementById('vendedores-tbody');
-            if (tbody) {
-                if (filtered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay vendedores</td></tr>';
-                } else {
-                    tbody.innerHTML = filtered.map(v => `
-                        <tr>
-                            <td>${v.id}</td>
-                            <td><strong>${escapeHTML(v.nombre)}</strong></td>
-                            <td>${escapeHTML(v.email || '-')}</td>
-                            <td>${v.telefono || '-'}</td>
-                            <td>${escapeHTML(v.direccion || '-')}</td>
-                            <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
-                            <td>
-                                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
-                                <button class="btn-delete" onclick="eliminarVendedor(${v.id})"><i class="fas fa-trash"></i> Eliminar</button>
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            }
-        });
-    }
-    
-    // Botones de exportación
-    const exportVendedores = document.getElementById('export-vendedores');
-    if (exportVendedores) exportVendedores.addEventListener('click', exportarVendedores);
-    
-    const exportPedidos = document.getElementById('export-pedidos');
-    if (exportPedidos) exportPedidos.addEventListener('click', exportarPedidos);
-    
-    const exportProductos = document.getElementById('export-productos');
-    if (exportProductos) exportProductos.addEventListener('click', exportarProductos);
-    
-    // Configuración
-    if (document.getElementById('configuracion')) {
-        cargarConfiguracion();
-        initConfigForm();
-    }
-    
-    // Botón cerrar sesión
+    // Cerrar sesión
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
