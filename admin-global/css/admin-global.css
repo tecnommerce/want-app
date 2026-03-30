@@ -783,3 +783,47 @@ body {
         font-size: 0.7rem;
     }
 }
+
+/* Botones de acción en tablas */
+.btn-edit, .btn-toggle-status, .btn-delete {
+    padding: 6px 12px;
+    border-radius: 40px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 2px;
+    border: none;
+}
+
+.btn-edit {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-edit:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+.btn-toggle-status {
+    background: #FFF3E0;
+    color: #FF9800;
+}
+
+.btn-toggle-status:hover {
+    background: #FF9800;
+    color: white;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    color: white;
+}
