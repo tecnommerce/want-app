@@ -238,11 +238,13 @@ function mostrarFormularioCliente() {
     document.getElementById('cliente-modal').classList.add('active');
 }
 
+// Confirmar pedido (sin WhatsApp, solo guarda en Sheets)
 async function confirmarPedido() {
     const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
     const telefono = document.getElementById('cliente-telefono')?.value.trim() || '';
     const direccion = document.getElementById('cliente-direccion')?.value.trim() || '';
     const metodoPago = document.getElementById('metodo-pago')?.value || '';
+    const detalles = document.getElementById('pedido-detalles')?.value.trim() || '';
     
     if (!nombre || !telefono || !direccion || !metodoPago) {
         mostrarToast('Completá todos los campos', 'error');
@@ -261,20 +263,13 @@ async function confirmarPedido() {
     }
     
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-    const telefonoVendedor = vendedorActual?.telefono?.toString().replace(/\D/g, '');
-    
-    if (!telefonoVendedor) {
-        mostrarToast('El negocio no tiene número de WhatsApp configurado', 'error');
-        return;
-    }
-    
-    const mensaje = generarMensajeWhatsApp(nombre, telefonoLimpio, direccion, metodoPago, carrito, total, vendedorActual);
     
     const pedido = {
         cliente_nombre: nombre,
         cliente_telefono: telefonoLimpio,
         direccion: direccion,
         metodo_pago: metodoPago,
+        detalles: detalles,
         vendedor_id: vendedorActual.id,
         vendedor_nombre: vendedorActual.nombre,
         productos: carrito.map(item => ({
@@ -287,73 +282,68 @@ async function confirmarPedido() {
         fecha: new Date().toISOString()
     };
     
+    // Guardar en localStorage
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
     const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    await guardarPedidoEnSheets(pedido);
+    // Guardar en Google Sheets
+    const resultadoSheets = await guardarPedidoEnSheets(pedido);
     
+    // Limpiar carrito y formulario
     carrito = [];
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
+    document.getElementById('cliente-form').reset();
+    document.getElementById('pedido-detalles').value = '';
     
+    // Cerrar modales
     document.getElementById('cliente-modal').classList.remove('active');
     document.getElementById('carrito-modal').classList.remove('active');
-    document.getElementById('cliente-form').reset();
     
-    mostrarToast('¡Pedido listo! Redirigiendo a WhatsApp...', 'success');
-    
-    const urlWhatsApp = `https://wa.me/${telefonoVendedor}?text=${encodeURIComponent(mensaje)}`;
-    setTimeout(() => {
-        window.open(urlWhatsApp, '_blank');
-    }, 1000);
+    if (resultadoSheets && resultadoSheets.success) {
+        mostrarToast('¡Pedido enviado correctamente! El vendedor lo recibirá en su panel.', 'success');
+    } else {
+        mostrarToast('¡Pedido guardado localmente! Se sincronizará automáticamente.', 'success');
+    }
 }
 
+// Función para guardar en Google Sheets
 async function guardarPedidoEnSheets(pedido) {
     try {
+        console.log('📤 Intentando guardar en Google Sheets...');
+        
         const response = await postAPI('crearPedido', {
             cliente_nombre: pedido.cliente_nombre,
             cliente_telefono: pedido.cliente_telefono,
             direccion: pedido.direccion,
             metodo_pago: pedido.metodo_pago,
+            detalles: pedido.detalles || '',
             vendedor_id: pedido.vendedor_id,
             productos: pedido.productos,
             total: pedido.total
         });
+        
         if (response && response.success) {
-            console.log('✅ Pedido guardado en Google Sheets');
+            console.log('✅ Pedido guardado en Google Sheets. ID:', response.pedidoId);
+            
             let pedidos = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
             const ultimoPedido = pedidos[pedidos.length - 1];
             if (ultimoPedido && ultimoPedido.id === Date.now()) {
                 ultimoPedido.sheetsId = response.pedidoId;
+                ultimoPedido.sincronizado = true;
                 localStorage.setItem('want_pedidos', JSON.stringify(pedidos));
             }
+            return { success: true };
+        } else {
+            console.error('❌ Error al guardar en Sheets:', response?.error || 'Error desconocido');
+            return { success: false, error: response?.error };
         }
     } catch (error) {
-        console.error('Error guardar en Sheets:', error);
+        console.error('❌ Error en guardarPedidoEnSheets:', error);
+        return { success: false, error: error.message };
     }
-}
-
-function generarMensajeWhatsApp(clienteNombre, clienteTelefono, direccion, metodoPago, carrito, total, vendedor) {
-    let metodoPagoTexto = metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria';
-    
-    let mensaje = `🍕 *NUEVO PEDIDO - WANT* 🍕\n\n`;
-    mensaje += `*Cliente:* ${clienteNombre}\n`;
-    mensaje += `*Teléfono:* ${clienteTelefono}\n`;
-    mensaje += `*Dirección:* ${direccion}\n`;
-    mensaje += `*Método de pago:* ${metodoPagoTexto}\n`;
-    mensaje += `*Negocio:* ${vendedor.nombre}\n`;
-    mensaje += `\n*DETALLE DEL PEDIDO:*\n`;
-    
-    carrito.forEach(item => {
-        mensaje += `• ${item.cantidad}x ${item.nombre} - ${formatearPrecio(item.precio * item.cantidad)}\n`;
-    });
-    
-    mensaje += `\n*TOTAL:* ${formatearPrecio(total)}\n`;
-    mensaje += `\n_Estado: Preparando_`;
-    
-    return mensaje;
 }
 
 // Event listeners

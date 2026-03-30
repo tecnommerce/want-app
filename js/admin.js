@@ -198,6 +198,12 @@ function renderizarPedidos() {
                             <li>${pr.cantidad}x ${escapeHTML(pr.nombre)} - ${formatearPrecio(pr.precio * pr.cantidad)}</li>
                         `).join('') : '<li>No hay detalles</li>'}
                     </ul>
+                    ${p.detalles ? `
+                        <div class="pedido-detalles">
+                            <strong>Detalles del pedido:</strong>
+                            <p>${escapeHTML(p.detalles)}</p>
+                        </div>
+                    ` : ''}
                     <div class="pedido-total">Total: ${formatearPrecio(p.total)}</div>
                 </div>
                 <div class="pedido-actions">
@@ -211,11 +217,6 @@ function renderizarPedidos() {
                         ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">Entregar</button>` : ''}
                     </div>
                     <div class="botones-acciones">
-                        ${p.estado === 'preparando' || p.estado === 'en camino' ? `
-                            <button class="btn-notificar" onclick="notificarCliente(${p.id}, this)">
-                                <i class="fab fa-whatsapp"></i> Notificar
-                            </button>
-                        ` : ''}
                         <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
                             <i class="fas fa-trash-alt"></i> Cancelar
                         </button>

@@ -2341,3 +2341,24 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* Detalles del pedido */
+.pedido-detalles {
+    margin-top: 10px;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.pedido-detalles strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+}
+
+.pedido-detalles p {
+    font-size: 0.8rem;
+    color: #555;
+    margin: 0;
+    white-space: pre-wrap;
+}

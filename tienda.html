@@ -120,12 +120,17 @@
                         <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required>
                     </div>
                     <div class="form-group">
+    <label for="pedido-detalles">Detalles del pedido</label>
+    <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, etc."></textarea>
+    <small>Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
+</div>
+                    <div class="form-group">
                         <label for="metodo-pago">Método de pago *</label>
                         <select id="metodo-pago" required>
                             <option value="">Seleccioná una opción</option>
                             <option value="efectivo">Efectivo</option>
                             <option value="transferencia">Transferencia bancaria</option>
-                            <option value="mercado_pago">Mercado Pago</option>
+                            
                         </select>
                     </div>
                 </form>
