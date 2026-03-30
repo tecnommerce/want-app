@@ -42,22 +42,21 @@
 
         <main class="main-content">
             <header class="top-bar">
-    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
-    <div class="top-bar-info">
-        <span id="admin-name">Administrador</span>
-        <span class="badge">Global</span>
-    </div>
-    <button class="btn-refresh" id="btn-refresh-data" title="Actualizar datos">
-        <i class="fas fa-sync-alt"></i> Actualizar
-    </button>
-</header>
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="top-bar-info">
+                    <span id="admin-name">Administrador</span>
+                    <span class="badge">Global</span>
+                </div>
+                <button class="btn-refresh" id="btn-refresh-data" title="Actualizar datos">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </header>
 
             <!-- Sección Dashboard -->
             <div class="section-content" id="section-dashboard">
                 <div class="page-content">
-                    <!-- Stats Cards -->
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-store"></i></div>
@@ -89,7 +88,6 @@
                         </div>
                     </div>
 
-                    <!-- Charts Row -->
                     <div class="charts-row">
                         <div class="chart-card">
                             <h3>Ventas por día (últimos 7 días)</h3>
@@ -97,7 +95,6 @@
                         </div>
                     </div>
 
-                    <!-- Top Lists -->
                     <div class="lists-row">
                         <div class="list-card">
                             <h3>Top 5 Vendedores</h3>
@@ -109,17 +106,12 @@
                         </div>
                     </div>
 
-                    <!-- Recent Orders -->
                     <div class="recent-orders">
                         <h3>Últimos pedidos</h3>
                         <div class="table-responsive">
                             <table class="data-table">
-                                <thead>
-                                    <tr><th>ID</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Fecha</th></tr>
-                                </thead>
-                                <tbody id="recent-orders-tbody">
-                                    <tr><td colspan="6" class="loading-text">Cargando...</td></tr>
-                                </tbody>
+                                <thead><tr><th>ID</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
+                                <tbody id="recent-orders-tbody"><tr><td colspan="6" class="loading-text">Cargando...</td></tr></tbody>
                             </table>
                         </div>
                     </div>
@@ -132,23 +124,14 @@
                     <div class="page-header">
                         <h2>Gestión de Vendedores</h2>
                         <div class="header-actions">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="search-vendedor" placeholder="Buscar vendedor...">
-                            </div>
-                            <button class="btn-export" id="export-vendedores">
-                                <i class="fas fa-file-excel"></i> Exportar
-                            </button>
+                            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="search-vendedor" placeholder="Buscar vendedor..."></div>
+                            <button class="btn-export" id="export-vendedores"><i class="fas fa-file-excel"></i> Exportar</button>
                         </div>
                     </div>
                     <div class="table-responsive">
                         <table class="data-table">
-                            <thead>
-                                <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Estado</th><th>Acciones</th></tr>
-                            </thead>
-                            <tbody id="vendedores-tbody">
-                                <tr><td colspan="7" class="loading-text">Cargando vendedores...</td></tr>
-                            </tbody>
+                            <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Estado</th><th>Pedidos</th><th>Ingresos</th><th>Acciones</th></tr></thead>
+                            <tbody id="vendedores-tbody"><tr><td colspan="9" class="loading-text">Cargando vendedores...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -161,31 +144,17 @@
                         <h2>Todos los Pedidos</h2>
                         <div class="header-actions">
                             <div class="filtros">
-                                <select id="filtro-vendedor">
-                                    <option value="">Todos los vendedores</option>
-                                </select>
-                                <select id="filtro-estado">
-                                    <option value="">Todos los estados</option>
-                                    <option value="preparando">Nuevos</option>
-                                    <option value="en preparacion">En preparación</option>
-                                    <option value="en camino">En camino</option>
-                                    <option value="entregado">Entregados</option>
-                                </select>
+                                <select id="filtro-vendedor"><option value="">Todos los vendedores</option></select>
+                                <select id="filtro-estado"><option value="">Todos los estados</option><option value="preparando">Nuevos</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregados</option></select>
                                 <input type="date" id="filtro-fecha" placeholder="Fecha">
                             </div>
-                            <button class="btn-export" id="export-pedidos">
-                                <i class="fas fa-file-excel"></i> Exportar
-                            </button>
+                            <button class="btn-export" id="export-pedidos"><i class="fas fa-file-excel"></i> Exportar</button>
                         </div>
                     </div>
                     <div class="table-responsive">
                         <table class="data-table">
-                            <thead>
-                                <tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Productos</th></tr>
-                            </thead>
-                            <tbody id="pedidos-tbody">
-                                <tr><td colspan="7" class="loading-text">Cargando pedidos...</td></tr>
-                            </tbody>
+                            <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Productos</th><th>Acciones</th></tr></thead>
+                            <tbody id="pedidos-tbody"><tr><td colspan="8" class="loading-text">Cargando pedidos...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -197,26 +166,15 @@
                     <div class="page-header">
                         <h2>Todos los Productos</h2>
                         <div class="header-actions">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="search-producto" placeholder="Buscar producto...">
-                            </div>
-                            <select id="filtro-vendedor-prod">
-                                <option value="">Todos los vendedores</option>
-                            </select>
-                            <button class="btn-export" id="export-productos">
-                                <i class="fas fa-file-excel"></i> Exportar
-                            </button>
+                            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="search-producto" placeholder="Buscar producto..."></div>
+                            <select id="filtro-vendedor-prod"><option value="">Todos los vendedores</option></select>
+                            <button class="btn-export" id="export-productos"><i class="fas fa-file-excel"></i> Exportar</button>
                         </div>
                     </div>
                     <div class="table-responsive">
                         <table class="data-table">
-                            <thead>
-                                <tr><th>ID</th><th>Imagen</th><th>Nombre</th><th>Vendedor</th><th>Precio</th><th>Ventas</th><th>Disponible</th><th>Acciones</th></tr>
-                            </thead>
-                            <tbody id="productos-tbody">
-                                <tr><td colspan="8" class="loading-text">Cargando productos...</td></tr>
-                            </tbody>
+                            <thead><tr><th>ID</th><th>Imagen</th><th>Nombre</th><th>Vendedor</th><th>Precio</th><th>Ventas</th><th>Disponible</th><th>Acciones</th></tr></thead>
+                            <tbody id="productos-tbody"><tr><td colspan="8" class="loading-text">Cargando productos...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -229,28 +187,9 @@
                         <div class="config-card">
                             <h3>Credenciales de Administrador</h3>
                             <form id="config-admin-form">
-                                <div class="form-group">
-                                    <label>Email</label>
-                                    <input type="email" id="config-email" placeholder="admin@want.com">
-                                </div>
-                                <div class="form-group">
-                                    <label>Nueva contraseña</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="config-password" placeholder="Dejar vacío para no cambiar">
-                                        <button type="button" class="toggle-password" data-target="config-password">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Confirmar contraseña</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="config-password2" placeholder="Repetir nueva contraseña">
-                                        <button type="button" class="toggle-password" data-target="config-password2">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                                <div class="form-group"><label>Email</label><input type="email" id="config-email" placeholder="admin@want.com"></div>
+                                <div class="form-group"><label>Nueva contraseña</label><div class="password-wrapper"><input type="password" id="config-password" placeholder="Dejar vacío para no cambiar"><button type="button" class="toggle-password" data-target="config-password"><i class="fas fa-eye"></i></button></div></div>
+                                <div class="form-group"><label>Confirmar contraseña</label><div class="password-wrapper"><input type="password" id="config-password2" placeholder="Repetir nueva contraseña"><button type="button" class="toggle-password" data-target="config-password2"><i class="fas fa-eye"></i></button></div></div>
                                 <button type="submit" class="btn-primary">Actualizar credenciales</button>
                             </form>
                         </div>
@@ -260,85 +199,18 @@
         </main>
     </div>
 
-    <!-- Modal Editar Vendedor -->
-<div class="modal" id="modal-editar-vendedor">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Editar Vendedor</h3>
-            <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <input type="hidden" id="edit-vendedor-id">
-            <div class="form-group"><label>Nombre</label><input type="text" id="edit-vendedor-nombre" class="form-control"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="edit-vendedor-email" class="form-control"></div>
-            <div class="form-group"><label>Teléfono</label><input type="tel" id="edit-vendedor-telefono" class="form-control"></div>
-            <div class="form-group"><label>Dirección</label><input type="text" id="edit-vendedor-direccion" class="form-control"></div>
-            <div class="form-group"><label>Horario</label><input type="text" id="edit-vendedor-horario" class="form-control"></div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-primary" id="guardar-editar-vendedor">Guardar</button>
-            <button class="btn-secondary">Cancelar</button>
-        </div>
-    </div>
-</div>
+    <!-- MODALES -->
+    <div class="modal" id="modal-editar-vendedor"><div class="modal-content"><div class="modal-header"><h3>Editar Vendedor</h3><button class="modal-close">&times;</button></div><div class="modal-body"><input type="hidden" id="edit-vendedor-id"><div class="form-group"><label>Nombre</label><input type="text" id="edit-vendedor-nombre" class="form-control"></div><div class="form-group"><label>Email</label><input type="email" id="edit-vendedor-email" class="form-control"></div><div class="form-group"><label>Teléfono</label><input type="tel" id="edit-vendedor-telefono" class="form-control"></div><div class="form-group"><label>Dirección</label><input type="text" id="edit-vendedor-direccion" class="form-control"></div><div class="form-group"><label>Horario</label><input type="text" id="edit-vendedor-horario" class="form-control"></div></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-vendedor">Guardar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
-<!-- Modal Confirmar Eliminar Vendedor -->
-<div class="modal" id="modal-confirmar-vendedor">
-    <div class="modal-content small">
-        <div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div>
-        <div class="modal-body"><p>¿Eliminar este vendedor? Se eliminarán todos sus productos y pedidos.</p></div>
-        <div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-vendedor">Eliminar</button><button class="btn-secondary">Cancelar</button></div>
-    </div>
-</div>
+    <div class="modal" id="modal-confirmar-vendedor"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este vendedor? Se eliminarán todos sus productos y pedidos.</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-vendedor">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
-<!-- Modal Editar Producto -->
-<div class="modal" id="modal-editar-producto">
-    <div class="modal-content">
-        <div class="modal-header"><h3>Editar Producto</h3><button class="modal-close">&times;</button></div>
-        <div class="modal-body">
-            <input type="hidden" id="edit-producto-id">
-            <div class="form-group"><label>Nombre</label><input type="text" id="edit-producto-nombre" class="form-control"></div>
-            <div class="form-group"><label>Descripción</label><textarea id="edit-producto-descripcion" class="form-control"></textarea></div>
-            <div class="form-group"><label>Precio</label><input type="number" id="edit-producto-precio" class="form-control" step="100"></div>
-            <div class="form-group"><label>Disponible</label><select id="edit-producto-disponible" class="form-control"><option value="SI">Sí</option><option value="NO">No</option></select></div>
-        </div>
-        <div class="modal-footer"><button class="btn-primary" id="guardar-editar-producto">Guardar</button><button class="btn-secondary">Cancelar</button></div>
-    </div>
-</div>
+    <div class="modal" id="modal-editar-producto"><div class="modal-content"><div class="modal-header"><h3>Editar Producto</h3><button class="modal-close">&times;</button></div><div class="modal-body"><input type="hidden" id="edit-producto-id"><div class="form-group"><label>Nombre</label><input type="text" id="edit-producto-nombre" class="form-control"></div><div class="form-group"><label>Descripción</label><textarea id="edit-producto-descripcion" class="form-control"></textarea></div><div class="form-group"><label>Precio</label><input type="number" id="edit-producto-precio" class="form-control" step="100"></div><div class="form-group"><label>Disponible</label><select id="edit-producto-disponible" class="form-control"><option value="SI">Sí</option><option value="NO">No</option></select></div></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-producto">Guardar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
-<!-- Modal Confirmar Eliminar Producto -->
-<div class="modal" id="modal-confirmar-producto">
-    <div class="modal-content small">
-        <div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div>
-        <div class="modal-body"><p>¿Eliminar este producto?</p></div>
-        <div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-producto">Eliminar</button><button class="btn-secondary">Cancelar</button></div>
-    </div>
-</div>
+    <div class="modal" id="modal-confirmar-producto"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este producto?</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-producto">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
-<!-- Modal Editar Pedido -->
-<div class="modal" id="modal-editar-pedido">
-    <div class="modal-content">
-        <div class="modal-header"><h3>Editar Pedido</h3><button class="modal-close">&times;</button></div>
-        <div class="modal-body">
-            <input type="hidden" id="edit-pedido-id">
-            <div class="form-group"><label>Cliente</label><input type="text" id="edit-pedido-cliente" class="form-control"></div>
-            <div class="form-group"><label>Teléfono</label><input type="tel" id="edit-pedido-telefono" class="form-control"></div>
-            <div class="form-group"><label>Dirección</label><input type="text" id="edit-pedido-direccion" class="form-control"></div>
-            <div class="form-group"><label>Total</label><input type="text" id="edit-pedido-total" class="form-control" readonly></div>
-            <div class="form-group"><label>Estado</label><select id="edit-pedido-estado" class="form-control"><option value="preparando">Nuevo</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregado</option></select></div>
-        </div>
-        <div class="modal-footer"><button class="btn-primary" id="guardar-editar-pedido">Guardar</button><button class="btn-secondary">Cancelar</button></div>
-    </div>
-</div>
+    <div class="modal" id="modal-editar-pedido"><div class="modal-content"><div class="modal-header"><h3>Editar Pedido</h3><button class="modal-close">&times;</button></div><div class="modal-body"><input type="hidden" id="edit-pedido-id"><div class="form-group"><label>Cliente</label><input type="text" id="edit-pedido-cliente" class="form-control"></div><div class="form-group"><label>Teléfono</label><input type="tel" id="edit-pedido-telefono" class="form-control"></div><div class="form-group"><label>Dirección</label><input type="text" id="edit-pedido-direccion" class="form-control"></div><div class="form-group"><label>Total</label><input type="text" id="edit-pedido-total" class="form-control" readonly></div><div class="form-group"><label>Estado</label><select id="edit-pedido-estado" class="form-control"><option value="preparando">Nuevo</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregado</option></select></div></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-pedido">Guardar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
-<!-- Modal Confirmar Eliminar Pedido -->
-<div class="modal" id="modal-confirmar-pedido">
-    <div class="modal-content small">
-        <div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div>
-        <div class="modal-body"><p>¿Eliminar este pedido?</p></div>
-        <div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-pedido">Eliminar</button><button class="btn-secondary">Cancelar</button></div>
-    </div>
-</div>
+    <div class="modal" id="modal-confirmar-pedido"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este pedido?</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-pedido">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
     <script src="js/auth.js"></script>
     <script src="js/admin-global.js"></script>
