@@ -1,9 +1,8 @@
 // ===================================================
 // HOME - Lógica de la página principal
-// Con buscador mejorado
+// Con filtro de vendedores activos
 // ===================================================
 
-// Variables globales
 let todosLosNegocios = [];
 let timeoutBusqueda = null;
 let terminoBusquedaActual = '';
@@ -33,16 +32,15 @@ async function cargarNegocios() {
             throw new Error(response.error || 'Error al cargar negocios');
         }
 
-        todosLosNegocios = response.vendedores || [];
+        // Solo vendedores activos
+        todosLosNegocios = (response.vendedores || []).filter(v => v.activo === 'SI');
         
         if (todosLosNegocios.length === 0) {
             grid.innerHTML = `<div class="sin-negocios"><p>📭 No hay negocios disponibles</p></div>`;
             return;
         }
 
-        // Cargar productos para cada negocio (para búsqueda avanzada)
         await cargarProductosParaBusqueda(todosLosNegocios);
-        
         renderizarNegocios(todosLosNegocios);
         
     } catch (error) {
@@ -56,7 +54,6 @@ async function cargarNegocios() {
     }
 }
 
-// Cargar productos para todos los negocios (para búsqueda avanzada)
 async function cargarProductosParaBusqueda(negocios) {
     try {
         for (let negocio of negocios) {
@@ -89,12 +86,10 @@ function renderizarNegocios(vendedores) {
     }
     
     grid.innerHTML = vendedores.map(v => {
-        // Generar productos destacados para mostrar en la tarjeta
         const productosPreview = v.productos && v.productos.length > 0 
             ? v.productos.slice(0, 2).map(p => p.nombre).join(', ') 
             : '';
         
-        // Resaltar coincidencias en el nombre
         const nombreResaltado = resaltarCoincidencia(v.nombre || 'Sin nombre', terminoBusquedaActual);
         const direccionResaltada = resaltarCoincidencia(v.direccion || 'Sin dirección', terminoBusquedaActual);
         
@@ -117,7 +112,6 @@ function renderizarNegocios(vendedores) {
     }).join('');
 }
 
-// Función para resaltar coincidencias
 function resaltarCoincidencia(texto, busqueda) {
     if (!busqueda || !texto) return escapeHTML(texto);
     
@@ -134,7 +128,6 @@ function resaltarCoincidencia(texto, busqueda) {
     return `${antes}<span class="coincidencia">${coincidencia}</span>${despues}`;
 }
 
-// Buscador con debounce y búsqueda avanzada
 function inicializarBuscador() {
     const searchInput = document.getElementById('search-input');
     if (!searchInput) return;
@@ -143,7 +136,6 @@ function inicializarBuscador() {
         const termino = e.target.value.toLowerCase().trim();
         terminoBusquedaActual = termino;
         
-        // Debounce: esperar 300ms después de que el usuario deje de escribir
         if (timeoutBusqueda) clearTimeout(timeoutBusqueda);
         
         timeoutBusqueda = setTimeout(() => {
@@ -156,12 +148,10 @@ function realizarBusqueda(termino) {
     const grid = document.getElementById('negocios-grid');
     
     if (!termino) {
-        // Si no hay término, mostrar todos
         renderizarNegocios(todosLosNegocios);
         return;
     }
     
-    // Mostrar loading mientras busca
     grid.innerHTML = `
         <div class="loading">
             <div class="spinner"></div>
@@ -169,19 +159,12 @@ function realizarBusqueda(termino) {
         </div>
     `;
     
-    // Simular un pequeño delay para que se vea el loading
     setTimeout(() => {
         const resultados = todosLosNegocios.filter(negocio => {
-            // Buscar en nombre
             const nombreMatch = negocio.nombre?.toLowerCase().includes(termino) || false;
-            
-            // Buscar en dirección
             const direccionMatch = negocio.direccion?.toLowerCase().includes(termino) || false;
-            
-            // Buscar en horario
             const horarioMatch = negocio.horario?.toLowerCase().includes(termino) || false;
             
-            // BUSQUEDA AVANZADA: Buscar en productos
             let productosMatch = false;
             if (negocio.productos && negocio.productos.length > 0) {
                 productosMatch = negocio.productos.some(producto => 
@@ -206,11 +189,9 @@ function realizarBusqueda(termino) {
 function mostrarSinResultados(termino) {
     const grid = document.getElementById('negocios-grid');
     
-    // Buscar sugerencias cercanas
     const sugerencias = todosLosNegocios.filter(negocio => {
         const nombre = negocio.nombre?.toLowerCase() || '';
         const direccion = negocio.direccion?.toLowerCase() || '';
-        // Buscar palabras similares (si alguna palabra coincide parcialmente)
         const terminoPalabras = termino.split(' ');
         return terminoPalabras.some(palabra => 
             nombre.includes(palabra) || direccion.includes(palabra)
@@ -257,10 +238,6 @@ function limpiarBusqueda() {
         renderizarNegocios(todosLosNegocios);
     }
 }
-
-// ===================================================
-// MENÚ MÓVIL Y CONTACTO
-// ===================================================
 
 function inicializarMenu() {
     const menuToggle = document.getElementById('menu-toggle');

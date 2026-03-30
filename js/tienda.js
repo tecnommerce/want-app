@@ -516,7 +516,73 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Tienda de Want iniciada');
     
     // Cargar tienda (esto también carga el carrito del vendedor)
-    cargarTienda();
+    async function cargarTienda() {
+    const vendedorId = obtenerVendedorId();
+    
+    if (!vendedorId) {
+        mostrarToast('No se especificó un negocio', 'error');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        return;
+    }
+    
+    try {
+        const grid = document.getElementById('productos-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando productos...</p>
+                </div>
+            `;
+        }
+        
+        const vendedoresRes = await callAPI('getVendedores');
+        if (vendedoresRes.success) {
+            // Verificar que el vendedor existe y está ACTIVO
+            vendedorActual = vendedoresRes.vendedores.find(v => 
+                v.id.toString() === vendedorId && v.activo === 'SI'
+            );
+            
+            if (!vendedorActual) {
+                mostrarToast('Este negocio no está disponible actualmente', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
+            }
+            
+            const nombreNegocio = document.getElementById('negocio-nombre');
+            if (nombreNegocio) {
+                nombreNegocio.textContent = vendedorActual.nombre;
+            }
+            console.log('✅ Vendedor cargado:', vendedorActual);
+        }
+        
+        const response = await callAPI('getProductos', { vendedorId: vendedorId });
+        
+        if (response.error) {
+            throw new Error(response.error);
+        }
+        
+        productos = response.productos || [];
+        renderizarProductos();
+        
+    } catch (error) {
+        console.error('Error al cargar tienda:', error);
+        const grid = document.getElementById('productos-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div class="error-mensaje">
+                    <p>⚠️ Error al cargar los productos</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">${error.message}</p>
+                    <button onclick="location.reload()" class="btn btn-outline" style="margin-top: 15px;">Reintentar</button>
+                </div>
+            `;
+        }
+    }
+}
     
     // Inicializar menú móvil
     inicializarMenuTienda();
