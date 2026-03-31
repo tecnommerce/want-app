@@ -100,7 +100,7 @@
         </div>
     </section>
 
-<!-- Botón de instalación de la app (solo móvil) -->
+<!-- Botón de instalación de la app -->
 <div class="install-app" id="install-app">
     <div class="install-card">
         <div class="install-icon">
@@ -118,12 +118,12 @@
                 </button>
             </div>
             <div id="instrucciones-ios" class="instrucciones" style="display: none;">
-                <p>1. Presioná el botón <strong>Compartir</strong> <i class="fas fa-share-alt"></i></p>
-                <p>2. Luego seleccioná <strong>Agregar a pantalla de inicio</strong> <i class="fas fa-plus-circle"></i></p>
+                <p><i class="fas fa-share-alt"></i> Presioná el botón <strong>Compartir</strong></p>
+                <p><i class="fas fa-plus-circle"></i> Seleccioná <strong>Agregar a pantalla de inicio</strong></p>
             </div>
             <div id="instrucciones-android" class="instrucciones" style="display: none;">
-                <p>1. Presioná el menú <strong>...</strong> en la parte superior</p>
-                <p>2. Seleccioná <strong>Instalar aplicación</strong> <i class="fas fa-download"></i></p>
+                <p><i class="fas fa-ellipsis-v"></i> Presioná el menú <strong>...</strong></p>
+                <p><i class="fas fa-download"></i> Seleccioná <strong>Instalar aplicación</strong></p>
             </div>
         </div>
         <button class="install-close" id="install-close">&times;</button>
@@ -132,36 +132,35 @@
 
 <script>
 function mostrarInstruccionesIOS() {
-    document.getElementById('instrucciones-ios').style.display = 'block';
-    document.getElementById('instrucciones-android').style.display = 'none';
+    const iosDiv = document.getElementById('instrucciones-ios');
+    const androidDiv = document.getElementById('instrucciones-android');
+    if (iosDiv) iosDiv.style.display = 'block';
+    if (androidDiv) androidDiv.style.display = 'none';
 }
 
 function mostrarInstruccionesAndroid() {
-    document.getElementById('instrucciones-ios').style.display = 'none';
-    document.getElementById('instrucciones-android').style.display = 'block';
+    const iosDiv = document.getElementById('instrucciones-ios');
+    const androidDiv = document.getElementById('instrucciones-android');
+    if (iosDiv) iosDiv.style.display = 'none';
+    if (androidDiv) androidDiv.style.display = 'block';
 }
 
 // Cerrar banner
-document.getElementById('install-close').addEventListener('click', function() {
-    document.getElementById('install-app').style.display = 'none';
-    localStorage.setItem('want_install_banner_closed', 'true');
-});
+const closeBtn = document.getElementById('install-close');
+if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+        const installDiv = document.getElementById('install-app');
+        if (installDiv) installDiv.style.display = 'none';
+        localStorage.setItem('want_install_banner_closed', 'true');
+    });
+}
 
 // Si el usuario ya cerró el banner, ocultarlo
 if (localStorage.getItem('want_install_banner_closed') === 'true') {
-    document.getElementById('install-app').style.display = 'none';
+    const installDiv = document.getElementById('install-app');
+    if (installDiv) installDiv.style.display = 'none';
 }
 </script>
-
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
-        </div>
-    </footer>
-
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/home.js"></script>
 
     <!-- Registrar Service Worker para PWA -->
 <script>
