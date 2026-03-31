@@ -15,8 +15,6 @@ body {
     background-color: #f8f9fa;
     color: #1a1a1a;
     line-height: 1.5;
-    /* Mejorar experiencia en PWA */
-    -webkit-tap-highlight-color: transparent;
 }
 
 .container {
@@ -1781,97 +1779,7 @@ body {
 }
 
 /* ===================================================
-   BOTÓN NOTIFICAR EN CAMINO
-   =================================================== */
-.btn-notificar-camino {
-    background: #25D366;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-notificar-camino:hover {
-    background: #128C7E;
-    transform: scale(1.02);
-}
-
-.btn-notificar-camino:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* ===================================================
-   BOTONES DE INSTALACIÓN PWA
-   =================================================== */
-.install-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-}
-
-.btn-install-ios, .btn-install-android {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.btn-install-ios {
-    background: #000;
-    color: white;
-}
-
-.btn-install-ios:hover {
-    background: #333;
-}
-
-.btn-install-android {
-    background: #3DDC84;
-    color: #000;
-}
-
-.btn-install-android:hover {
-    background: #2bb673;
-}
-
-.instrucciones {
-    margin-top: 12px;
-    padding: 10px;
-    background: #f5f5f5;
-    border-radius: 12px;
-    font-size: 0.75rem;
-}
-
-.instrucciones p {
-    margin: 5px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.instrucciones i {
-    width: 24px;
-    color: #FF5A00;
-}
-
-/* ===================================================
-   RESPONSIVE - MÓVIL (con soporte para PWA)
+   RESPONSIVE
    =================================================== */
 @media (max-width: 768px) {
     .container {
@@ -2058,35 +1966,6 @@ body {
     }
 }
 
-/* ===================================================
-   SOPORTE PARA PWA (área segura en iOS)
-   =================================================== */
-@supports (padding: max(0px)) {
-    /* Para pantallas con notch (iPhone X y superiores) */
-    .header {
-        padding-top: max(12px, env(safe-area-inset-top));
-    }
-    
-    .mobile-menu {
-        padding-top: max(70px, env(safe-area-inset-top) + 20px);
-    }
-    
-    .mobile-menu-admin {
-        padding-top: max(70px, env(safe-area-inset-top) + 20px);
-    }
-    
-    .container {
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-    }
-    
-    .install-app {
-        bottom: max(16px, env(safe-area-inset-bottom));
-        left: max(16px, env(safe-area-inset-left));
-        right: max(16px, env(safe-area-inset-right));
-    }
-}
-
 @media (min-width: 769px) {
     .mobile-menu,
     .menu-overlay,
@@ -2096,4 +1975,90 @@ body {
     .menu-toggle-admin {
         display: none !important;
     }
+}
+
+/* Botón notificar en camino */
+.btn-notificar-camino {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-notificar-camino:hover {
+    background: #128C7E;
+    transform: scale(1.02);
+}
+
+.btn-notificar-camino:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Botones de instalación */
+.install-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.btn-install-ios, .btn-install-android {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-install-ios {
+    background: #000;
+    color: white;
+}
+
+.btn-install-ios:hover {
+    background: #333;
+}
+
+.btn-install-android {
+    background: #3DDC84;
+    color: #000;
+}
+
+.btn-install-android:hover {
+    background: #2bb673;
+}
+
+.instrucciones {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+.instrucciones p {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instrucciones i {
+    width: 24px;
+    color: #FF5A00;
 }
