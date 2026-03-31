@@ -32,7 +32,6 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .header-content {
@@ -986,17 +985,4 @@ body {
     .menu-overlay {
         display: none !important;
     }
-}
-
-/* Forzar que no haya línea debajo del header */
-.header {
-    border-bottom: none !important;
-}
-
-.header::after {
-    display: none !important;
-}
-
-.header-content {
-    border-bottom: none !important;
 }
