@@ -354,7 +354,7 @@ async function enviarConfirmacionWhatsApp() {
     
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `*WANT - Confirmacion de tu pedido*\n\n`;
+    let mensaje = `*Confirmacion de tu pedido*\n\n`;
     mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
     mensaje += `Recibimos tu pedido correctamente!\n\n`;
     mensaje += `DETALLE DE TU PEDIDO:\n`;
@@ -436,7 +436,7 @@ async function notificarEnCamino(pedidoId, boton) {
     
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `*WANT - Actualizacion de tu pedido*\n\n`;
+    let mensaje = `*Actualizacion de tu pedido*\n\n`;
     mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
     mensaje += `Tu pedido esta en camino!\n\n`;
     mensaje += `DETALLE DE TU PEDIDO:\n`;
