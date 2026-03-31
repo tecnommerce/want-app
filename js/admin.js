@@ -233,10 +233,27 @@ function renderizarPedidos() {
                         ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">En camino</button>` : ''}
                         ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">Entregar</button>` : ''}
                     </div>
-                    <div class="botones-acciones">
-                        <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
-                            <i class="fas fa-trash-alt"></i> Cancelar
-                        </button>
+                    <div class="pedido-actions">
+    <div class="estado-actual">
+        <span class="estado-badge estado-${p.estado.replace(' ', '-')}">${getEstadoTexto(p.estado)}</span>
+    </div>
+    <div class="botones-estado">
+        ${p.estado !== 'preparando' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">Nuevo</button>` : ''}
+        ${p.estado !== 'en preparacion' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">Preparar</button>` : ''}
+        ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">En camino</button>` : ''}
+        ${p.estado !== 'entregado' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'entregado', this)">Entregar</button>` : ''}
+    </div>
+    <div class="botones-acciones">
+        ${p.estado === 'en camino' ? `
+            <button class="btn-notificar-camino" onclick="notificarEnCamino(${p.id}, this)">
+                <i class="fab fa-whatsapp"></i> Notificar llegada
+            </button>
+        ` : ''}
+        <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
+            <i class="fas fa-trash-alt"></i> Cancelar
+        </button>
+    </div>
+</div>
                     </div>
                 </div>
             </div>
@@ -301,6 +318,52 @@ async function cancelarPedido(pedidoId, boton) {
         boton.innerHTML = textoOriginal;
         boton.disabled = false;
     }
+}
+
+// ===================================================
+// NOTIFICAR CLIENTE QUE EL PEDIDO ESTÁ EN CAMINO
+// ===================================================
+
+async function notificarEnCamino(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    const originalText = boton.innerHTML;
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    
+    let mensaje = `🍕 *WANT - Actualización de tu pedido* 🍕\n\n`;
+    mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
+    mensaje += `🚚 *Tu pedido está en camino!*\n\n`;
+    mensaje += `📦 *Detalle:*\n`;
+    pedido.productos.forEach(p => {
+        mensaje += `   • ${p.cantidad}x ${p.nombre}\n`;
+    });
+    mensaje += `\n💰 *Total:* $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `📍 *Dirección de entrega:* ${pedido.direccion}\n\n`;
+    
+    if (metodoPagoTexto === 'transferencia') {
+        mensaje += `💳 *Método de pago:* Transferencia bancaria\n`;
+    } else {
+        mensaje += `💵 *Método de pago:* Efectivo (pagás al recibir)\n`;
+    }
+    
+    if (pedido.detalles) {
+        mensaje += `\n📝 *Indicaciones especiales:* ${pedido.detalles}\n`;
+    }
+    
+    mensaje += `\n⏰ *Quedate atento al delivery!*\n`;
+    mensaje += `❤️ *¡Gracias por tu compra!*`;
+    
+    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    
+    setTimeout(() => {
+        boton.disabled = false;
+        boton.innerHTML = originalText;
+    }, 1500);
 }
 
 // ===================================================
@@ -1005,3 +1068,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// ===================================================
+// NOTIFICAR CLIENTE QUE EL PEDIDO ESTÁ EN CAMINO
+// ===================================================
+
+async function notificarEnCamino(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    const originalText = boton.innerHTML;
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    
+    let mensaje = `🍕 *WANT - Actualización de tu pedido* 🍕\n\n`;
+    mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
+    mensaje += `🚚 *Tu pedido está en camino!*\n\n`;
+    mensaje += `📦 *Detalle:*\n`;
+    pedido.productos.forEach(p => {
+        mensaje += `   • ${p.cantidad}x ${p.nombre}\n`;
+    });
+    mensaje += `\n💰 *Total:* $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `📍 *Dirección de entrega:* ${pedido.direccion}\n\n`;
+    
+    if (metodoPagoTexto === 'transferencia') {
+        mensaje += `💳 *Método de pago:* Transferencia bancaria\n`;
+    } else {
+        mensaje += `💵 *Método de pago:* Efectivo (pagás al recibir)\n`;
+    }
+    
+    if (pedido.detalles) {
+        mensaje += `\n📝 *Indicaciones especiales:* ${pedido.detalles}\n`;
+    }
+    
+    mensaje += `\n⏰ *Quedate atento al delivery!*\n`;
+    mensaje += `❤️ *¡Gracias por tu compra!*`;
+    
+    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    
+    setTimeout(() => {
+        boton.disabled = false;
+        boton.innerHTML = originalText;
+    }, 1500);
+}

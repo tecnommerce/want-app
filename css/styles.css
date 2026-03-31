@@ -1976,3 +1976,29 @@ body {
         display: none !important;
     }
 }
+
+/* Botón notificar en camino */
+.btn-notificar-camino {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-notificar-camino:hover {
+    background: #128C7E;
+    transform: scale(1.02);
+}
+
+.btn-notificar-camino:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
