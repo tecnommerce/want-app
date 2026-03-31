@@ -334,7 +334,7 @@ async function notificarEnCamino(pedidoId, boton) {
     
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `🍕 *WANT - Actualización de tu pedido* 🍕\n\n`;
+    let mensaje = `🍕 *Actualización de tu pedido* 🍕\n\n`;
     mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
     mensaje += `🚚 *Tu pedido está en camino!*\n\n`;
     mensaje += `📦 *Detalle:*\n`;
