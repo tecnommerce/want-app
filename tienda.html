@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Want | Tienda</title>
-    
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Want">
-    <link rel="apple-touch-icon" href="/icon-192.png">
-    
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -44,9 +36,6 @@
         <div class="mobile-nav">
             <a href="index.html" class="mobile-nav-link">Inicio</a>
             <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">Contacto</a>
-            <a href="#" class="mobile-nav-link" id="install-app-link" style="display: none;">
-                <i class="fas fa-download"></i> Instalar App
-            </a>
         </div>
         <div class="mobile-social">
             <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
@@ -183,40 +172,5 @@
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/tienda.js"></script>
-    
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('✅ Service Worker registrado'))
-                .catch(err => console.error('❌ Service Worker error:', err));
-        }
-        
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installLink = document.getElementById('install-app-link');
-            if (installLink) installLink.style.display = 'flex';
-        });
-        
-        window.installApp = function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('App instalada');
-                    }
-                    deferredPrompt = null;
-                    const installLink = document.getElementById('install-app-link');
-                    if (installLink) installLink.style.display = 'none';
-                });
-            }
-        };
-        
-        document.getElementById('install-app-link')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.installApp();
-        });
-    </script>
 </body>
 </html>
