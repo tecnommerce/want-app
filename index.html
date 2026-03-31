@@ -100,32 +100,58 @@
         </div>
     </section>
 
-    <!-- Botón de instalación de la app (solo móvil) -->
-<div class="install-app" id="install-app" style="display: none;">
+<!-- Botón de instalación de la app (solo móvil) -->
+<div class="install-app" id="install-app">
     <div class="install-card">
         <div class="install-icon">
             <i class="fas fa-mobile-alt"></i>
         </div>
         <div class="install-content">
             <h4>Instalá Want en tu celular</h4>
-            <p id="install-message">Hacé tu pedido más rápido desde tu pantalla de inicio</p>
-            <div id="install-instructions" style="display: none;">
-                <div id="ios-instruction" style="display: none;">
-                    <p><i class="fas fa-share-alt"></i> Presioná el botón <strong>Compartir</strong> <i class="fas fa-arrow-up"></i></p>
-                    <p><i class="fas fa-plus-circle"></i> Luego seleccioná <strong>Agregar a pantalla de inicio</strong></p>
-                </div>
-                <div id="android-instruction" style="display: none;">
-                    <p><i class="fas fa-ellipsis-v"></i> Presioná el menú <strong>...</strong> en la parte superior</p>
-                    <p><i class="fas fa-download"></i> Seleccioná <strong>Instalar aplicación</strong></p>
-                </div>
+            <p>Hacé tu pedido más rápido desde tu pantalla de inicio</p>
+            <div class="install-buttons">
+                <button class="btn-install-ios" onclick="mostrarInstruccionesIOS()">
+                    <i class="fab fa-apple"></i> iOS
+                </button>
+                <button class="btn-install-android" onclick="mostrarInstruccionesAndroid()">
+                    <i class="fab fa-android"></i> Android
+                </button>
             </div>
-            <button class="btn-install" id="btn-install-help">
-                <i class="fas fa-question-circle"></i> ¿Cómo instalar?
-            </button>
+            <div id="instrucciones-ios" class="instrucciones" style="display: none;">
+                <p>1. Presioná el botón <strong>Compartir</strong> <i class="fas fa-share-alt"></i></p>
+                <p>2. Luego seleccioná <strong>Agregar a pantalla de inicio</strong> <i class="fas fa-plus-circle"></i></p>
+            </div>
+            <div id="instrucciones-android" class="instrucciones" style="display: none;">
+                <p>1. Presioná el menú <strong>...</strong> en la parte superior</p>
+                <p>2. Seleccioná <strong>Instalar aplicación</strong> <i class="fas fa-download"></i></p>
+            </div>
         </div>
         <button class="install-close" id="install-close">&times;</button>
     </div>
 </div>
+
+<script>
+function mostrarInstruccionesIOS() {
+    document.getElementById('instrucciones-ios').style.display = 'block';
+    document.getElementById('instrucciones-android').style.display = 'none';
+}
+
+function mostrarInstruccionesAndroid() {
+    document.getElementById('instrucciones-ios').style.display = 'none';
+    document.getElementById('instrucciones-android').style.display = 'block';
+}
+
+// Cerrar banner
+document.getElementById('install-close').addEventListener('click', function() {
+    document.getElementById('install-app').style.display = 'none';
+    localStorage.setItem('want_install_banner_closed', 'true');
+});
+
+// Si el usuario ya cerró el banner, ocultarlo
+if (localStorage.getItem('want_install_banner_closed') === 'true') {
+    document.getElementById('install-app').style.display = 'none';
+}
+</script>
 
     <footer class="footer">
         <div class="container">
