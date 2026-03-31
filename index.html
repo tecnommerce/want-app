@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Conectamos compradores con vendedores 🤝 Simple. Rápido. Want.">
     <title>Want | Pedidos simples a tus negocios favoritos</title>
     
-    <!-- Favicon con W naranja -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Want">
+    <link rel="apple-touch-icon" href="/icon-192.png">
     
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="manifest" href="/manifest.json">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Want">
-<link rel="apple-touch-icon" href="/icon-192.png">
-
 </head>
 <body>
     <header class="header">
@@ -56,11 +52,14 @@
         </button>
         <div class="mobile-nav">
             <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">Contacto</a>
+            <a href="#" class="mobile-nav-link" id="install-app-link" style="display: none;">
+                <i class="fas fa-download"></i> Instalar App
+            </a>
         </div>
         <div class="mobile-social">
-            <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+            <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
             <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://wa.me/+543865747489" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
         </div>
     </div>
     <div class="menu-overlay" id="menu-overlay"></div>
@@ -69,7 +68,7 @@
         <section class="hero">
             <div class="container">
                 <h2>¿Qué querés pedir hoy?</h2>
-                <p>Elegí tu negocio favorito y hacé tu pedido en simples pasos</p>
+                <p>Conectamos compradores con vendedores 🤝 Simple. Rápido. Want.</p>
             </div>
         </section>
 
@@ -100,75 +99,49 @@
         </div>
     </section>
 
-<!-- Botón de instalación de la app -->
-<div class="install-app" id="install-app">
-    <div class="install-card">
-        <div class="install-icon">
-            <i class="fas fa-mobile-alt"></i>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
         </div>
-        <div class="install-content">
-            <h4>Instalá Want en tu celular</h4>
-            <p>Hacé tu pedido más rápido desde tu pantalla de inicio</p>
-            <div class="install-buttons">
-                <button class="btn-install-ios" onclick="mostrarInstruccionesIOS()">
-                    <i class="fab fa-apple"></i> iOS
-                </button>
-                <button class="btn-install-android" onclick="mostrarInstruccionesAndroid()">
-                    <i class="fab fa-android"></i> Android
-                </button>
-            </div>
-            <div id="instrucciones-ios" class="instrucciones" style="display: none;">
-                <p><i class="fas fa-share-alt"></i> Presioná el botón <strong>Compartir</strong></p>
-                <p><i class="fas fa-plus-circle"></i> Seleccioná <strong>Agregar a pantalla de inicio</strong></p>
-            </div>
-            <div id="instrucciones-android" class="instrucciones" style="display: none;">
-                <p><i class="fas fa-ellipsis-v"></i> Presioná el menú <strong>...</strong></p>
-                <p><i class="fas fa-download"></i> Seleccioná <strong>Instalar aplicación</strong></p>
-            </div>
-        </div>
-        <button class="install-close" id="install-close">&times;</button>
-    </div>
-</div>
+    </footer>
 
-<script>
-function mostrarInstruccionesIOS() {
-    const iosDiv = document.getElementById('instrucciones-ios');
-    const androidDiv = document.getElementById('instrucciones-android');
-    if (iosDiv) iosDiv.style.display = 'block';
-    if (androidDiv) androidDiv.style.display = 'none';
-}
-
-function mostrarInstruccionesAndroid() {
-    const iosDiv = document.getElementById('instrucciones-ios');
-    const androidDiv = document.getElementById('instrucciones-android');
-    if (iosDiv) iosDiv.style.display = 'none';
-    if (androidDiv) androidDiv.style.display = 'block';
-}
-
-// Cerrar banner
-const closeBtn = document.getElementById('install-close');
-if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-        const installDiv = document.getElementById('install-app');
-        if (installDiv) installDiv.style.display = 'none';
-        localStorage.setItem('want_install_banner_closed', 'true');
-    });
-}
-
-// Si el usuario ya cerró el banner, ocultarlo
-if (localStorage.getItem('want_install_banner_closed') === 'true') {
-    const installDiv = document.getElementById('install-app');
-    if (installDiv) installDiv.style.display = 'none';
-}
-</script>
-
-    <!-- Registrar Service Worker para PWA -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('✅ Service Worker registrado:', reg))
-      .catch(err => console.error('❌ Error al registrar Service Worker:', err));
-  }
-</script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/home.js"></script>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('✅ Service Worker registrado'))
+                .catch(err => console.error('❌ Service Worker error:', err));
+        }
+        
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installLink = document.getElementById('install-app-link');
+            if (installLink) installLink.style.display = 'flex';
+        });
+        
+        window.installApp = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('App instalada');
+                    }
+                    deferredPrompt = null;
+                    const installLink = document.getElementById('install-app-link');
+                    if (installLink) installLink.style.display = 'none';
+                });
+            }
+        };
+        
+        document.getElementById('install-app-link')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.installApp();
+        });
+    </script>
 </body>
 </html>
