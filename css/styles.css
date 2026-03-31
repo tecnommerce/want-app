@@ -1,5 +1,5 @@
 /* ===================================================
-   WANT - ESTILOS PRINCIPALES
+   WANT - ESTILOS PRINCIPALES (Solo para usuarios)
    Inspirado en PedidosYa - Diseño moderno y limpio
    =================================================== */
 
@@ -871,6 +871,95 @@ body {
 }
 
 /* ===================================================
+   TICKET DE CONFIRMACIÓN (tienda)
+   =================================================== */
+.ticket-modal {
+    max-width: 550px;
+    width: 95%;
+}
+
+.ticket-info {
+    background: #f9f9f9;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.ticket-info h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.ticket-section {
+    background: white;
+    border-radius: 16px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+}
+
+.ticket-section p {
+    margin: 8px 0;
+    font-size: 0.9rem;
+}
+
+.ticket-section strong {
+    color: #333;
+}
+
+.productos-lista {
+    margin: 10px 0;
+}
+
+.producto-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+}
+
+.producto-item:last-child {
+    border-bottom: none;
+}
+
+.ticket-total {
+    text-align: right;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    font-size: 1rem;
+}
+
+.ticket-warning {
+    background: #FFF3E0;
+    border-radius: 16px;
+    padding: 12px 15px;
+    font-size: 0.8rem;
+    color: #FF9800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.ticket-warning i {
+    font-size: 1.1rem;
+}
+
+.ticket-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.ticket-footer .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* ===================================================
    RESPONSIVE
    =================================================== */
 @media (max-width: 768px) {
@@ -978,6 +1067,10 @@ body {
         font-size: 0.75rem;
         padding: 6px;
     }
+
+    .ticket-footer {
+        flex-direction: column;
+    }
 }
 
 @media (min-width: 769px) {
@@ -988,7 +1081,7 @@ body {
 }
 
 /* ===================================================
-   ELIMINAR LÍNEA DEL LOGO (SOLUCIÓN FINAL)
+   ELIMINAR LÍNEA DEL LOGO
    =================================================== */
 .logo,
 .logo-link,
