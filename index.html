@@ -100,6 +100,33 @@
         </div>
     </section>
 
+    <!-- Botón de instalación de la app (solo móvil) -->
+<div class="install-app" id="install-app" style="display: none;">
+    <div class="install-card">
+        <div class="install-icon">
+            <i class="fas fa-mobile-alt"></i>
+        </div>
+        <div class="install-content">
+            <h4>Instalá Want en tu celular</h4>
+            <p id="install-message">Hacé tu pedido más rápido desde tu pantalla de inicio</p>
+            <div id="install-instructions" style="display: none;">
+                <div id="ios-instruction" style="display: none;">
+                    <p><i class="fas fa-share-alt"></i> Presioná el botón <strong>Compartir</strong> <i class="fas fa-arrow-up"></i></p>
+                    <p><i class="fas fa-plus-circle"></i> Luego seleccioná <strong>Agregar a pantalla de inicio</strong></p>
+                </div>
+                <div id="android-instruction" style="display: none;">
+                    <p><i class="fas fa-ellipsis-v"></i> Presioná el menú <strong>...</strong> en la parte superior</p>
+                    <p><i class="fas fa-download"></i> Seleccioná <strong>Instalar aplicación</strong></p>
+                </div>
+            </div>
+            <button class="btn-install" id="btn-install-help">
+                <i class="fas fa-question-circle"></i> ¿Cómo instalar?
+            </button>
+        </div>
+        <button class="install-close" id="install-close">&times;</button>
+    </div>
+</div>
+
     <footer class="footer">
         <div class="container">
             <p>&copy; 2026 Want - Pedidos simples y rápidos</p>

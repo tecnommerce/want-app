@@ -2002,3 +2002,148 @@ body {
     cursor: not-allowed;
     transform: none;
 }
+
+/* ===================================================
+   BOTÓN DE INSTALACIÓN DE APP
+   =================================================== */
+
+.install-app {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.install-card {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.install-icon {
+    width: 50px;
+    height: 50px;
+    background: #FF5A00;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.install-content {
+    flex: 1;
+}
+
+.install-content h4 {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.install-content p {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 0;
+}
+
+.btn-install {
+    background: #f5f5f5;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    color: #FF5A00;
+    font-weight: 500;
+}
+
+.btn-install:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+.install-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #999;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.install-close:hover {
+    background: #f0f0f0;
+    color: #666;
+}
+
+#install-instructions {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+}
+
+#install-instructions p {
+    font-size: 0.7rem;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#install-instructions i {
+    width: 20px;
+    color: #FF5A00;
+}
+
+@media (max-width: 480px) {
+    .install-card {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .install-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .install-content h4 {
+        font-size: 0.85rem;
+    }
+    
+    .install-content p {
+        font-size: 0.7rem;
+    }
+}
