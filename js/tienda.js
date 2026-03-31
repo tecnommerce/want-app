@@ -17,6 +17,16 @@ function obtenerVendedorId() {
 // Cargar datos del vendedor y productos
 async function cargarTienda() {
     const vendedorId = obtenerVendedorId();
+
+    // Después de obtener vendedorActual, agregar:
+if (vendedorActual && vendedorActual.logo_url) {
+    const logoHeader = document.getElementById('vendedor-logo-header');
+    const logoImg = document.getElementById('vendedor-logo-img');
+    if (logoHeader && logoImg) {
+        logoImg.src = vendedorActual.logo_url;
+        logoHeader.style.display = 'flex';
+    }
+}
     
     if (!vendedorId) {
         mostrarToast('No se especificó un negocio', 'error');
