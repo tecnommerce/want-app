@@ -1,6 +1,6 @@
 // ===================================================
 // HOME - Lógica de la página principal
-// Con filtro de vendedores activos y botón de instalación
+// Con filtro de vendedores activos
 // ===================================================
 
 let todosLosNegocios = [];
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarNegocios();
     inicializarMenu();
     inicializarBuscador();
-    initInstallApp();  // ← AGREGADO: Inicializar botón de instalación
 });
 
 async function cargarNegocios() {
@@ -276,4 +275,14 @@ function inicializarMenu() {
 
     if (contactoLink) contactoLink.addEventListener('click', mostrarContacto);
     if (contactoLinkMobile) contactoLinkMobile.addEventListener('click', mostrarContacto);
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }

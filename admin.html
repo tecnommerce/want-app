@@ -8,14 +8,6 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<link rel="manifest" href="/manifest.json">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Want">
-<link rel="apple-touch-icon" href="/icon-192.png">
-
 </head>
 <body>
     <header class="header">
@@ -381,40 +373,30 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal para tiempo de entrega -->
-    <div class="modal" id="modal-tiempo-entrega">
-        <div class="modal-content small">
-            <div class="modal-header">
-                <h3>Tiempo estimado de entrega</h3>
-                <button class="modal-close" id="cerrar-modal-tiempo">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
-                    <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora, 30 minutos" autocomplete="off">
-                    <small class="input-help">Ejemplos: 45 minutos, 1 hora, 30-40 minutos</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
-                <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y enviar</button>
+<!-- Modal para tiempo de entrega -->
+<div class="modal" id="modal-tiempo-entrega">
+    <div class="modal-content small">
+        <div class="modal-header">
+            <h3>Tiempo estimado de entrega</h3>
+            <button class="modal-close" id="cerrar-modal-tiempo">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
+                <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora, 30 minutos" autocomplete="off">
+                <small class="input-help">Ejemplos: 45 minutos, 1 hora, 30-40 minutos</small>
             </div>
         </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
+            <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y enviar</button>
+        </div>
     </div>
+</div>
+
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/admin.js"></script>
-
-<!-- Registrar Service Worker para PWA -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('✅ Service Worker registrado:', reg))
-      .catch(err => console.error('❌ Error al registrar Service Worker:', err));
-  }
-</script>
-
 </body>
 </html>
