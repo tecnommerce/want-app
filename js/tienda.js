@@ -46,13 +46,11 @@ async function cargarTienda() {
                 }
                 
                 // Mostrar logo del vendedor en el header
-                if (vendedorActual.logo_url) {
-                    const logoHeader = document.getElementById('vendedor-logo-header');
-                    const logoImg = document.getElementById('vendedor-logo-img');
-                    if (logoHeader && logoImg) {
-                        logoImg.src = vendedorActual.logo_url;
-                        logoHeader.style.display = 'flex';
-                    }
+                const logoHeader = document.getElementById('vendedor-logo-header');
+                const logoImg = document.getElementById('vendedor-logo-img');
+                if (logoHeader && logoImg && vendedorActual.logo_url) {
+                    logoImg.src = vendedorActual.logo_url;
+                    logoHeader.style.display = 'flex';
                 }
                 
                 console.log('✅ Vendedor cargado:', vendedorActual);
