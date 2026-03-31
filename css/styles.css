@@ -986,3 +986,27 @@ body {
         display: none !important;
     }
 }
+
+/* ===================================================
+   FORZAR ELIMINACIÓN DE LÍNEA DEL HEADER
+   =================================================== */
+.header,
+.header::before,
+.header::after,
+.header-content,
+.header-content::before,
+.header-content::after {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.header {
+    box-shadow: none !important;
+    border-bottom: none !important;
+}
+
+.header-content {
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
