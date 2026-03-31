@@ -6,6 +6,7 @@
 let vendedorActual = null;
 let productos = [];
 let carrito = [];
+let datosClienteTemp = null;
 
 // Obtener ID del vendedor desde la URL
 function obtenerVendedorId() {
@@ -238,38 +239,70 @@ function mostrarFormularioCliente() {
     document.getElementById('cliente-modal').classList.add('active');
 }
 
-// Confirmar pedido
-async function confirmarPedido() {
-    const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
-    const telefono = document.getElementById('cliente-telefono')?.value.trim() || '';
-    const direccion = document.getElementById('cliente-direccion')?.value.trim() || '';
-    const metodoPago = document.getElementById('metodo-pago')?.value || '';
-    const detalles = document.getElementById('pedido-detalles')?.value.trim() || '';
-    
-    if (!nombre || !telefono || !direccion || !metodoPago) {
-        mostrarToast('Completá todos los campos', 'error');
-        return;
-    }
-    
-    const telefonoLimpio = telefono.replace(/\D/g, '');
-    if (!telefonoLimpio.match(/^\d{10,15}$/)) {
-        mostrarToast('Ingresá un teléfono válido (solo números, 10 a 15 dígitos)', 'error');
-        return;
-    }
-    
-    if (carrito.length === 0) {
-        mostrarToast('El carrito está vacío', 'error');
-        return;
-    }
-    
+// Mostrar ticket de confirmación
+function mostrarTicketConfirmacion() {
+    const nombre = document.getElementById('cliente-nombre').value.trim();
+    const telefono = document.getElementById('cliente-telefono').value.trim();
+    const direccion = document.getElementById('cliente-direccion').value.trim();
+    const metodoPago = document.getElementById('metodo-pago').value;
+    const detalles = document.getElementById('pedido-detalles').value.trim();
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     
+    // Guardar datos temporalmente
+    datosClienteTemp = { nombre, telefono, direccion, metodoPago, detalles, total };
+    
+    // Mostrar en el ticket
+    document.getElementById('confirm-nombre').textContent = nombre;
+    document.getElementById('confirm-telefono').textContent = telefono;
+    document.getElementById('confirm-direccion').textContent = direccion;
+    document.getElementById('confirm-pago').textContent = metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria';
+    document.getElementById('confirm-total').textContent = formatearPrecio(total);
+    
+    // Mostrar productos
+    const productosContainer = document.getElementById('confirm-productos');
+    productosContainer.innerHTML = carrito.map(item => `
+        <div class="producto-item">
+            <span>${item.cantidad}x ${escapeHTML(item.nombre)}</span>
+            <span>${formatearPrecio(item.precio * item.cantidad)}</span>
+        </div>
+    `).join('');
+    
+    // Mostrar detalles si existen
+    const detallesSection = document.getElementById('confirm-detalles-section');
+    const detallesSpan = document.getElementById('confirm-detalles');
+    if (detalles) {
+        detallesSpan.textContent = detalles;
+        detallesSection.style.display = 'block';
+    } else {
+        detallesSection.style.display = 'none';
+    }
+    
+    // Cerrar modal de cliente y abrir ticket
+    document.getElementById('cliente-modal').classList.remove('active');
+    document.getElementById('confirmacion-modal').classList.add('active');
+}
+
+// Enviar pedido definitivamente
+async function enviarPedido() {
+    if (!datosClienteTemp) return;
+    
+    const btnEnviar = document.getElementById('btn-enviar-pedido');
+    const originalText = btnEnviar.innerHTML;
+    
+    // Mostrar carga
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    btnEnviar.classList.add('btn-loading');
+    
+    const total = datosClienteTemp.total;
+    const telefonoLimpio = datosClienteTemp.telefono.replace(/\D/g, '');
+    
     const pedido = {
-        cliente_nombre: nombre,
+        cliente_nombre: datosClienteTemp.nombre,
         cliente_telefono: telefonoLimpio,
-        direccion: direccion,
-        metodo_pago: metodoPago,
-        detalles: detalles,
+        direccion: datosClienteTemp.direccion,
+        metodo_pago: datosClienteTemp.metodoPago,
+        detalles: datosClienteTemp.detalles || '',
         vendedor_id: vendedorActual.id,
         vendedor_nombre: vendedorActual.nombre,
         productos: carrito.map(item => ({
@@ -291,22 +324,40 @@ async function confirmarPedido() {
     // Guardar en Google Sheets
     const resultadoSheets = await guardarPedidoEnSheets(pedido);
     
-    // Limpiar carrito y formulario
+    // Limpiar carrito y datos temporales
     carrito = [];
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
+    datosClienteTemp = null;
+    
+    // Cerrar ticket
+    document.getElementById('confirmacion-modal').classList.remove('active');
+    
+    // Restaurar botón
+    btnEnviar.disabled = false;
+    btnEnviar.innerHTML = originalText;
+    btnEnviar.classList.remove('btn-loading');
+    
+    // Mostrar mensaje de éxito
+    mostrarMensajeExito();
+}
+
+function mostrarMensajeExito() {
+    // Crear mensaje flotante
+    const mensaje = document.createElement('div');
+    mensaje.className = 'toast-success';
+    mensaje.innerHTML = '<i class="fas fa-check-circle"></i> ¡Tu pedido fue enviado correctamente! El vendedor te confirmará tu pedido por WhatsApp.';
+    document.body.appendChild(mensaje);
+    
+    // Limpiar formulario
     document.getElementById('cliente-form').reset();
     document.getElementById('pedido-detalles').value = '';
     
-    // Cerrar modales
-    document.getElementById('cliente-modal').classList.remove('active');
-    document.getElementById('carrito-modal').classList.remove('active');
-    
-    if (resultadoSheets && resultadoSheets.success) {
-        mostrarToast('¡Pedido enviado correctamente! El vendedor lo recibirá en su panel.', 'success');
-    } else {
-        mostrarToast('¡Pedido guardado localmente! Se sincronizará automáticamente.', 'success');
-    }
+    // Redirigir a la página principal después de 3 segundos
+    setTimeout(() => {
+        mensaje.remove();
+        window.location.href = 'index.html';
+    }, 3000);
 }
 
 async function guardarPedidoEnSheets(pedido) {
@@ -374,6 +425,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    const btnContinuar = document.getElementById('btn-continuar-pago');
+    if (btnContinuar) {
+        btnContinuar.addEventListener('click', () => {
+            // Validar campos del formulario
+            const nombre = document.getElementById('cliente-nombre').value.trim();
+            const telefono = document.getElementById('cliente-telefono').value.trim();
+            const direccion = document.getElementById('cliente-direccion').value.trim();
+            const metodoPago = document.getElementById('metodo-pago').value;
+            
+            if (!nombre || !telefono || !direccion || !metodoPago) {
+                mostrarToast('Completá todos los campos obligatorios', 'error');
+                return;
+            }
+            
+            const telefonoLimpio = telefono.replace(/\D/g, '');
+            if (!telefonoLimpio.match(/^\d{10,15}$/)) {
+                mostrarToast('Ingresá un teléfono válido (solo números, 10 a 15 dígitos)', 'error');
+                return;
+            }
+            
+            mostrarTicketConfirmacion();
+        });
+    }
+    
     const cerrarClienteModal = document.getElementById('cerrar-cliente-modal');
     if (cerrarClienteModal) {
         cerrarClienteModal.addEventListener('click', () => {
@@ -381,9 +456,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    const confirmarPedidoBtn = document.getElementById('confirmar-pedido');
-    if (confirmarPedidoBtn) {
-        confirmarPedidoBtn.addEventListener('click', confirmarPedido);
+    const cerrarConfirmacionModal = document.getElementById('cerrar-confirmacion-modal');
+    if (cerrarConfirmacionModal) {
+        cerrarConfirmacionModal.addEventListener('click', () => {
+            document.getElementById('confirmacion-modal').classList.remove('active');
+        });
+    }
+    
+    const btnEditar = document.getElementById('btn-editar-pedido');
+    if (btnEditar) {
+        btnEditar.addEventListener('click', () => {
+            document.getElementById('confirmacion-modal').classList.remove('active');
+            document.getElementById('cliente-modal').classList.add('active');
+        });
+    }
+    
+    const btnEnviar = document.getElementById('btn-enviar-pedido');
+    if (btnEnviar) {
+        btnEnviar.addEventListener('click', enviarPedido);
     }
     
     document.querySelectorAll('.modal').forEach(modal => {

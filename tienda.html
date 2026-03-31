@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <!-- Modal del formulario de cliente (con diseño mejorado) -->
+    <!-- Modal del formulario de cliente -->
     <div class="modal" id="cliente-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -77,6 +77,7 @@
                         <div class="form-group half">
                             <label for="cliente-telefono">Teléfono <span class="required">*</span></label>
                             <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
+                            <small class="input-help">Importante: Número de WhatsApp correcto para recibir la confirmación del vendedor</small>
                         </div>
                     </div>
                     <div class="form-group">
@@ -94,13 +95,50 @@
                             <option value="">Seleccioná una opción</option>
                             <option value="efectivo">Efectivo</option>
                             <option value="transferencia">Transferencia bancaria</option>
-                            
                         </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="confirmar-pedido">Confirmar y enviar</button>
+                <button class="btn btn-primary" id="btn-continuar-pago">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación (ticket) -->
+    <div class="modal" id="confirmacion-modal">
+        <div class="modal-content ticket-modal">
+            <div class="modal-header">
+                <h3>Confirmá tu pedido</h3>
+                <button class="modal-close" id="cerrar-confirmacion-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info">
+                    <h4>Resumen del pedido</h4>
+                    <div class="ticket-section">
+                        <p><strong>Nombre:</strong> <span id="confirm-nombre"></span></p>
+                        <p><strong>Teléfono:</strong> <span id="confirm-telefono"></span></p>
+                        <p><strong>Dirección:</strong> <span id="confirm-direccion"></span></p>
+                        <p><strong>Método de pago:</strong> <span id="confirm-pago"></span></p>
+                    </div>
+                    <div class="ticket-section">
+                        <strong>Productos:</strong>
+                        <div id="confirm-productos" class="productos-lista"></div>
+                        <p class="ticket-total"><strong>Total:</strong> <span id="confirm-total"></span></p>
+                    </div>
+                    <div class="ticket-section" id="confirm-detalles-section" style="display: none;">
+                        <strong>Detalles del pedido:</strong>
+                        <p id="confirm-detalles"></p>
+                    </div>
+                    <div class="ticket-warning">
+                        <i class="fas fa-info-circle"></i>
+                        Verificá que tu número de WhatsApp sea correcto. El vendedor te confirmará tu pedido por ese medio.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer ticket-footer">
+                <button class="btn btn-outline" id="btn-editar-pedido">Editar pedido</button>
+                <button class="btn btn-primary" id="btn-enviar-pedido">Confirmar y enviar</button>
             </div>
         </div>
     </div>

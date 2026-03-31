@@ -2445,3 +2445,150 @@ select:focus {
         font-size: 0.85rem;
     }
 }
+
+/* ===================================================
+   TICKET DE CONFIRMACIÓN
+   =================================================== */
+
+.ticket-modal {
+    max-width: 550px;
+    width: 95%;
+}
+
+.ticket-info {
+    background: #f9f9f9;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.ticket-info h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.ticket-section {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+}
+
+.ticket-section p {
+    margin: 8px 0;
+    font-size: 0.9rem;
+}
+
+.ticket-section strong {
+    color: #333;
+}
+
+.productos-lista {
+    margin: 10px 0;
+}
+
+.producto-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+}
+
+.producto-item:last-child {
+    border-bottom: none;
+}
+
+.ticket-total {
+    text-align: right;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    font-size: 1rem;
+}
+
+.ticket-warning {
+    background: #FFF3E0;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 0.8rem;
+    color: #FF9800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.ticket-warning i {
+    font-size: 1.2rem;
+}
+
+.ticket-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.ticket-footer .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* Efectos de carga en botones */
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Mensaje de éxito */
+.toast-success {
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ticket-footer {
+        flex-direction: column;
+    }
+    
+    .ticket-section p {
+        font-size: 0.8rem;
+    }
+    
+    .producto-item {
+        font-size: 0.75rem;
+    }
+}
