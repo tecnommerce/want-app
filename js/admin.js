@@ -366,27 +366,6 @@ async function notificarEnCamino(pedidoId, boton) {
     }, 1500);
 }
 
-// ===================================================
-// CONFIRMAR PEDIDO POR WHATSAPP
-// ===================================================
-
-async function confirmarPedidoWhatsApp(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    
-    pedidoPendienteConfirmar = pedido;
-    botonPendienteConfirmar = boton;
-    
-    const input = document.getElementById('tiempo-entrega-input');
-    if (input) {
-        input.value = '';
-        input.focus();
-    }
-    
-    const modal = document.getElementById('modal-tiempo-entrega');
-    if (modal) modal.classList.add('active');
-}
-
 async function enviarConfirmacionWhatsApp() {
     const input = document.getElementById('tiempo-entrega-input');
     const tiempoEntrega = input?.value.trim();
@@ -410,16 +389,40 @@ async function enviarConfirmacionWhatsApp() {
     boton.disabled = true;
     boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
     
-    const productosTexto = pedido.productos.map(p => `${p.cantidad}x ${p.nombre}`).join(', ');
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `Hola ${pedido.cliente_nombre}, como estas? Recibimos tu pedido: ${productosTexto}. Ahora lo estamos preparando y te lo enviamos en aproximadamente ${tiempoEntrega}. Numero de orden: #${pedido.id}. Total a pagar: ${formatearPrecio(pedido.total)}.`;
+    // Mensaje mejorado y ordenado
+    let mensaje = `🍕 *WANT - Confirmación de tu pedido* 🍕\n\n`;
+    mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
+    mensaje += `✅ *Recibimos tu pedido correctamente!*\n\n`;
+    mensaje += `📦 *Detalle de tu pedido:*\n`;
+    pedido.productos.forEach(p => {
+        mensaje += `   • ${p.cantidad}x ${p.nombre}\n`;
+    });
+    
+    if (pedido.detalles) {
+        mensaje += `\n📝 *Indicaciones especiales:*\n`;
+        mensaje += `   ${pedido.detalles}\n`;
+    }
+    
+    mensaje += `\n💰 *Total a pagar:* $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `🆔 *Número de orden:* #${pedido.id}\n\n`;
+    
+    mensaje += `⏱️ *Tiempo estimado de entrega:* ${tiempoEntrega}\n\n`;
     
     if (metodoPagoTexto === 'transferencia') {
-        mensaje += ` Te pasamos nuestro alias y CBU para que nos realices el pago.`;
+        mensaje += `💳 *Método de pago:* Transferencia bancaria\n`;
+        mensaje += `📌 Te pasaremos nuestro alias y CBU por este mismo medio para que realices el pago.\n\n`;
     } else {
-        mensaje += ` Nos indicaste que pagarias con efectivo. Debes pagarle a nuestro delivery cuando te entregue el pedido. Muchas gracias por tu compra. Te avisamos cuando el pedido este en camino.`;
+        mensaje += `💵 *Método de pago:* Efectivo\n`;
+        mensaje += `💰 Pagarás al recibir tu pedido.\n\n`;
     }
+    
+    mensaje += `📍 *Dirección de entrega:* ${pedido.direccion}\n\n`;
+    mensaje += `👨‍🍳 *Ahora estamos preparando tu pedido con mucho cuidado.*\n`;
+    mensaje += `🚚 Te avisaremos cuando esté en camino.\n\n`;
+    mensaje += `❤️ *¡Gracias por confiar en nosotros!*\n\n`;
+    mensaje += `_Cualquier consulta, respondé este mensaje._`;
     
     const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
@@ -444,15 +447,6 @@ async function enviarConfirmacionWhatsApp() {
         boton.innerHTML = originalText;
     }, 2000);
     
-    pedidoPendienteConfirmar = null;
-    botonPendienteConfirmar = null;
-}
-
-function cerrarModalTiempo() {
-    const modal = document.getElementById('modal-tiempo-entrega');
-    if (modal) modal.classList.remove('active');
-    const input = document.getElementById('tiempo-entrega-input');
-    if (input) input.value = '';
     pedidoPendienteConfirmar = null;
     botonPendienteConfirmar = null;
 }
