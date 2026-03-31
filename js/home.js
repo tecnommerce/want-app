@@ -1,6 +1,6 @@
 // ===================================================
 // HOME - Lógica de la página principal
-// Con filtro de vendedores activos
+// Con filtro de vendedores activos y botón de instalación
 // ===================================================
 
 let todosLosNegocios = [];
@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarNegocios();
     inicializarMenu();
     inicializarBuscador();
+    initInstallApp();  // ← AGREGADO: Inicializar botón de instalación
 });
 
 async function cargarNegocios() {
@@ -275,6 +276,70 @@ function inicializarMenu() {
 
     if (contactoLink) contactoLink.addEventListener('click', mostrarContacto);
     if (contactoLinkMobile) contactoLinkMobile.addEventListener('click', mostrarContacto);
+}
+
+// ===================================================
+// BOTÓN DE INSTALACIÓN DE APP (PWA)
+// ===================================================
+
+function initInstallApp() {
+    const installDiv = document.getElementById('install-app');
+    const closeBtn = document.getElementById('install-close');
+    const helpBtn = document.getElementById('btn-install-help');
+    const instructionsDiv = document.getElementById('install-instructions');
+    const iosInstruction = document.getElementById('ios-instruction');
+    const androidInstruction = document.getElementById('android-instruction');
+    
+    // Detectar si es dispositivo móvil
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (!isMobile) {
+        // Si no es móvil, no mostrar el botón
+        return;
+    }
+    
+    // Detectar si es iOS o Android
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    // Mostrar la instrucción correcta según el sistema operativo
+    if (isIOS) {
+        iosInstruction.style.display = 'block';
+        androidInstruction.style.display = 'none';
+    } else if (isAndroid) {
+        iosInstruction.style.display = 'none';
+        androidInstruction.style.display = 'block';
+    }
+    
+    // Mostrar el banner
+    if (installDiv) installDiv.style.display = 'block';
+    
+    // Verificar si el usuario ya cerró el banner antes
+    const bannerClosed = localStorage.getItem('want_install_banner_closed');
+    if (bannerClosed === 'true' && installDiv) {
+        installDiv.style.display = 'none';
+    }
+    
+    // Cerrar banner
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            if (installDiv) installDiv.style.display = 'none';
+            localStorage.setItem('want_install_banner_closed', 'true');
+        });
+    }
+    
+    // Mostrar instrucciones al hacer clic en "¿Cómo instalar?"
+    if (helpBtn && instructionsDiv) {
+        helpBtn.addEventListener('click', () => {
+            if (instructionsDiv.style.display === 'none' || instructionsDiv.style.display === '') {
+                instructionsDiv.style.display = 'block';
+                helpBtn.innerHTML = '<i class="fas fa-times"></i> Cerrar';
+            } else {
+                instructionsDiv.style.display = 'none';
+                helpBtn.innerHTML = '<i class="fas fa-question-circle"></i> ¿Cómo instalar?';
+            }
+        });
+    }
 }
 
 function escapeHTML(str) {
