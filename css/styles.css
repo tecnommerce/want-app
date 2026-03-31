@@ -2618,3 +2618,71 @@ select:focus {
     cursor: not-allowed;
     transform: none;
 }
+
+/* Modal de tiempo de entrega */
+#modal-tiempo-entrega .modal-content.small {
+    max-width: 450px;
+}
+
+#modal-tiempo-entrega .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+#modal-tiempo-entrega .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+#modal-tiempo-entrega .form-control:focus {
+    outline: none;
+    border-color: #FF5A00;
+    box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
+}
+
+#modal-tiempo-entrega .input-help {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.7rem;
+    color: #888;
+}
+
+#modal-tiempo-entrega .modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+#modal-tiempo-entrega .btn-secondary {
+    background: #f0f0f0;
+    color: #666;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#modal-tiempo-entrega .btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+#modal-tiempo-entrega .btn-primary {
+    background: #FF5A00;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#modal-tiempo-entrega .btn-primary:hover {
+    background: #e04e00;
+}
