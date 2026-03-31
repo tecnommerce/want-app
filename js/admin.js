@@ -178,6 +178,7 @@ function renderizarPedidos() {
     container.innerHTML = pedidosFiltrados.map(p => {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago || 'efectivo';
+        const esNuevo = p.estado === 'preparando';
         
         return `
             <div class="pedido-card">
@@ -211,6 +212,7 @@ function renderizarPedidos() {
                         <span class="estado-badge estado-${p.estado.replace(' ', '-')}">${getEstadoTexto(p.estado)}</span>
                     </div>
                     <div class="botones-estado">
+                        ${esNuevo ? `<button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar pedido</button>` : ''}
                         ${p.estado !== 'preparando' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">Nuevo</button>` : ''}
                         ${p.estado !== 'en preparacion' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">Preparar</button>` : ''}
                         ${p.estado !== 'en camino' ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en camino', this)">En camino</button>` : ''}
@@ -232,54 +234,60 @@ function getEstadoTexto(estado) {
     return textos[estado] || estado.toUpperCase();
 }
 
-// ===================================================
-// NOTIFICAR CLIENTE
-// ===================================================
-
-async function notificarCliente(pedidoId, boton) {
+// Confirmar pedido por WhatsApp (para pedidos nuevos)
+async function confirmarPedidoWhatsApp(pedidoId, boton) {
     const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
     if (!pedido) return;
     
-    let tiempoEntrega = '';
-    let mensaje = '';
-    
-    if (pedido.estado === 'preparando') {
-        tiempoEntrega = prompt('Ingrese el tiempo estimado de entrega (ej: 45 minutos, 1 hora):', '45 minutos');
-        if (!tiempoEntrega) {
-            mostrarToast('Debe ingresar un tiempo de entrega', 'error');
-            return;
-        }
-        
-        const productosTexto = pedido.productos.map(p => `${p.cantidad}x ${p.nombre}`).join(', ');
-        const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
-        
-        mensaje = `Hola ${pedido.cliente_nombre}, como estas? Recibimos tu pedido: ${productosTexto}. Ahora lo estamos preparando y te lo enviamos en aproximadamente ${tiempoEntrega}. Numero de orden: #${pedido.id}. Total a pagar: ${formatearPrecio(pedido.total)}.`;
-        
-        if (metodoPagoTexto === 'transferencia') {
-            mensaje += ` Te pasamos nuestro alias y CBU para que nos realices el pago.`;
-        } else {
-            mensaje += ` Nos indicaste que pagarias con efectivo. Debes pagarle a nuestro delivery cuando te entregue el pedido. Muchas gracias por tu compra. Te avisamos cuando el pedido este en camino.`;
-        }
-        
-    } else if (pedido.estado === 'en camino') {
-        mensaje = `Hola ${pedido.cliente_nombre}, tu pedido esta en camino. Quedate pendiente al delivery. Muchas gracias por tu compra.`;
-    } else {
-        mostrarToast('No se puede notificar en este estado', 'error');
+    // Solicitar tiempo de entrega
+    const tiempoEntrega = prompt('Ingrese el tiempo estimado de entrega (ej: 45 minutos, 1 hora):', '45 minutos');
+    if (!tiempoEntrega) {
+        mostrarToast('Debe ingresar un tiempo de entrega para continuar', 'error');
         return;
     }
     
-    if (boton) {
-        const originalText = boton.innerHTML;
-        boton.disabled = true;
-        boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-        
-        const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
-        setTimeout(() => {
-            window.open(url, '_blank');
-            boton.innerHTML = originalText;
-            boton.disabled = false;
-        }, 500);
+    // Preparar mensaje
+    const productosTexto = pedido.productos.map(p => `${p.cantidad}x ${p.nombre}`).join(', ');
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    
+    let mensaje = `Hola ${pedido.cliente_nombre}, como estas? Recibimos tu pedido: ${productosTexto}. Ahora lo estamos preparando y te lo enviamos en aproximadamente ${tiempoEntrega}. Numero de orden: #${pedido.id}. Total a pagar: ${formatearPrecio(pedido.total)}.`;
+    
+    if (metodoPagoTexto === 'transferencia') {
+        mensaje += ` Te pasamos nuestro alias y CBU para que nos realices el pago.`;
+    } else {
+        mensaje += ` Nos indicaste que pagarias con efectivo. Debes pagarle a nuestro delivery cuando te entregue el pedido. Muchas gracias por tu compra. Te avisamos cuando el pedido este en camino.`;
     }
+    
+    // Mostrar carga en el botón
+    const originalText = boton.innerHTML;
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    
+    // Abrir WhatsApp
+    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    
+    // Actualizar estado del pedido a "en preparacion"
+    try {
+        const response = await postAPI('actualizarEstado', { pedidoId: pedido.id, estado: 'en preparacion' });
+        if (response && response.success) {
+            mostrarToast(`Pedido #${pedido.id} confirmado y actualizado a "En preparación"`, 'success');
+            pedido.estado = 'en preparacion';
+            actualizarContadoresPedidos();
+            calcularMetricas();
+            renderizarPedidos();
+        } else {
+            console.error('Error al actualizar estado:', response?.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    
+    // Restaurar botón
+    setTimeout(() => {
+        boton.disabled = false;
+        boton.innerHTML = originalText;
+    }, 2000);
 }
 
 // ===================================================
