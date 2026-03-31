@@ -987,18 +987,18 @@ body {
     }
 }
 
-/* Eliminar cualquier borde o sombra de elementos alrededor */
-body,
-.container,
-.header-content,
-.header-content > * {
+/* ===================================================
+   ELIMINAR LÍNEA DEL LOGO (SOLUCIÓN FINAL)
+   =================================================== */
+.logo,
+.logo-link,
+.logo-link h1,
+.logo-link h1::after,
+.logo-link h1::before,
+h1.logo,
+a.logo-link {
     border-bottom: none !important;
+    text-decoration: none !important;
     box-shadow: none !important;
     outline: none !important;
-}
-
-.header,
-.header * {
-    border-bottom: none !important;
-    box-shadow: none !important;
 }
