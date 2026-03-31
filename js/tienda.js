@@ -6,7 +6,6 @@
 let vendedorActual = null;
 let productos = [];
 let carrito = [];
-let datosClienteTemp = null;
 
 // Obtener ID del vendedor desde la URL
 function obtenerVendedorId() {
@@ -14,6 +13,7 @@ function obtenerVendedorId() {
     return urlParams.get('vendedor');
 }
 
+// Cargar datos del vendedor y productos
 async function cargarTienda() {
     const vendedorId = obtenerVendedorId();
     
@@ -45,7 +45,7 @@ async function cargarTienda() {
                     nombreNegocio.textContent = vendedorActual.nombre;
                 }
                 
-                // MOSTRAR LOGO DEL VENDEDOR
+                // Mostrar logo del vendedor en el header
                 if (vendedorActual.logo_url) {
                     const logoHeader = document.getElementById('vendedor-logo-header');
                     const logoImg = document.getElementById('vendedor-logo-img');
@@ -249,70 +249,38 @@ function mostrarFormularioCliente() {
     document.getElementById('cliente-modal').classList.add('active');
 }
 
-// Mostrar ticket de confirmación
-function mostrarTicketConfirmacion() {
-    const nombre = document.getElementById('cliente-nombre').value.trim();
-    const telefono = document.getElementById('cliente-telefono').value.trim();
-    const direccion = document.getElementById('cliente-direccion').value.trim();
-    const metodoPago = document.getElementById('metodo-pago').value;
-    const detalles = document.getElementById('pedido-detalles').value.trim();
-    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+// Confirmar pedido
+async function confirmarPedido() {
+    const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
+    const telefono = document.getElementById('cliente-telefono')?.value.trim() || '';
+    const direccion = document.getElementById('cliente-direccion')?.value.trim() || '';
+    const metodoPago = document.getElementById('metodo-pago')?.value || '';
+    const detalles = document.getElementById('pedido-detalles')?.value.trim() || '';
     
-    // Guardar datos temporalmente
-    datosClienteTemp = { nombre, telefono, direccion, metodoPago, detalles, total };
-    
-    // Mostrar en el ticket
-    document.getElementById('confirm-nombre').textContent = nombre;
-    document.getElementById('confirm-telefono').textContent = telefono;
-    document.getElementById('confirm-direccion').textContent = direccion;
-    document.getElementById('confirm-pago').textContent = metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria';
-    document.getElementById('confirm-total').textContent = formatearPrecio(total);
-    
-    // Mostrar productos
-    const productosContainer = document.getElementById('confirm-productos');
-    productosContainer.innerHTML = carrito.map(item => `
-        <div class="producto-item">
-            <span>${item.cantidad}x ${escapeHTML(item.nombre)}</span>
-            <span>${formatearPrecio(item.precio * item.cantidad)}</span>
-        </div>
-    `).join('');
-    
-    // Mostrar detalles si existen
-    const detallesSection = document.getElementById('confirm-detalles-section');
-    const detallesSpan = document.getElementById('confirm-detalles');
-    if (detalles) {
-        detallesSpan.textContent = detalles;
-        detallesSection.style.display = 'block';
-    } else {
-        detallesSection.style.display = 'none';
+    if (!nombre || !telefono || !direccion || !metodoPago) {
+        mostrarToast('Completá todos los campos', 'error');
+        return;
     }
     
-    // Cerrar modal de cliente y abrir ticket
-    document.getElementById('cliente-modal').classList.remove('active');
-    document.getElementById('confirmacion-modal').classList.add('active');
-}
-
-// Enviar pedido definitivamente
-async function enviarPedido() {
-    if (!datosClienteTemp) return;
+    const telefonoLimpio = telefono.replace(/\D/g, '');
+    if (!telefonoLimpio.match(/^\d{10,15}$/)) {
+        mostrarToast('Ingresá un teléfono válido (solo números, 10 a 15 dígitos)', 'error');
+        return;
+    }
     
-    const btnEnviar = document.getElementById('btn-enviar-pedido');
-    const originalText = btnEnviar.innerHTML;
+    if (carrito.length === 0) {
+        mostrarToast('El carrito está vacío', 'error');
+        return;
+    }
     
-    // Mostrar carga
-    btnEnviar.disabled = true;
-    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    btnEnviar.classList.add('btn-loading');
-    
-    const total = datosClienteTemp.total;
-    const telefonoLimpio = datosClienteTemp.telefono.replace(/\D/g, '');
+    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     
     const pedido = {
-        cliente_nombre: datosClienteTemp.nombre,
+        cliente_nombre: nombre,
         cliente_telefono: telefonoLimpio,
-        direccion: datosClienteTemp.direccion,
-        metodo_pago: datosClienteTemp.metodoPago,
-        detalles: datosClienteTemp.detalles || '',
+        direccion: direccion,
+        metodo_pago: metodoPago,
+        detalles: detalles,
         vendedor_id: vendedorActual.id,
         vendedor_nombre: vendedorActual.nombre,
         productos: carrito.map(item => ({
@@ -334,40 +302,22 @@ async function enviarPedido() {
     // Guardar en Google Sheets
     const resultadoSheets = await guardarPedidoEnSheets(pedido);
     
-    // Limpiar carrito y datos temporales
+    // Limpiar carrito y formulario
     carrito = [];
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
-    datosClienteTemp = null;
-    
-    // Cerrar ticket
-    document.getElementById('confirmacion-modal').classList.remove('active');
-    
-    // Restaurar botón
-    btnEnviar.disabled = false;
-    btnEnviar.innerHTML = originalText;
-    btnEnviar.classList.remove('btn-loading');
-    
-    // Mostrar mensaje de éxito
-    mostrarMensajeExito();
-}
-
-function mostrarMensajeExito() {
-    // Crear mensaje flotante
-    const mensaje = document.createElement('div');
-    mensaje.className = 'toast-success';
-    mensaje.innerHTML = '<i class="fas fa-check-circle"></i> ¡Tu pedido fue enviado correctamente! El vendedor te confirmará tu pedido por WhatsApp.';
-    document.body.appendChild(mensaje);
-    
-    // Limpiar formulario
     document.getElementById('cliente-form').reset();
     document.getElementById('pedido-detalles').value = '';
     
-    // Redirigir a la página principal después de 3 segundos
-    setTimeout(() => {
-        mensaje.remove();
-        window.location.href = 'index.html';
-    }, 3000);
+    // Cerrar modales
+    document.getElementById('cliente-modal').classList.remove('active');
+    document.getElementById('carrito-modal').classList.remove('active');
+    
+    if (resultadoSheets && resultadoSheets.success) {
+        mostrarToast('¡Pedido enviado correctamente! El vendedor lo recibirá en su panel.', 'success');
+    } else {
+        mostrarToast('¡Pedido guardado localmente! Se sincronizará automáticamente.', 'success');
+    }
 }
 
 async function guardarPedidoEnSheets(pedido) {
@@ -406,7 +356,117 @@ async function guardarPedidoEnSheets(pedido) {
     }
 }
 
-// Event listeners
+// ===================================================
+// TICKET DE CONFIRMACIÓN
+// ===================================================
+
+let datosClienteTemp = null;
+
+function mostrarTicketConfirmacion() {
+    const nombre = document.getElementById('cliente-nombre').value.trim();
+    const telefono = document.getElementById('cliente-telefono').value.trim();
+    const direccion = document.getElementById('cliente-direccion').value.trim();
+    const metodoPago = document.getElementById('metodo-pago').value;
+    const detalles = document.getElementById('pedido-detalles').value.trim();
+    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    
+    datosClienteTemp = { nombre, telefono, direccion, metodoPago, detalles, total };
+    
+    document.getElementById('confirm-nombre').textContent = nombre;
+    document.getElementById('confirm-telefono').textContent = telefono;
+    document.getElementById('confirm-direccion').textContent = direccion;
+    document.getElementById('confirm-pago').textContent = metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria';
+    document.getElementById('confirm-total').textContent = formatearPrecio(total);
+    
+    const productosContainer = document.getElementById('confirm-productos');
+    productosContainer.innerHTML = carrito.map(item => `
+        <div class="producto-item">
+            <span>${item.cantidad}x ${escapeHTML(item.nombre)}</span>
+            <span>${formatearPrecio(item.precio * item.cantidad)}</span>
+        </div>
+    `).join('');
+    
+    const detallesSection = document.getElementById('confirm-detalles-section');
+    const detallesSpan = document.getElementById('confirm-detalles');
+    if (detalles) {
+        detallesSpan.textContent = detalles;
+        detallesSection.style.display = 'block';
+    } else {
+        detallesSection.style.display = 'none';
+    }
+    
+    document.getElementById('cliente-modal').classList.remove('active');
+    document.getElementById('confirmacion-modal').classList.add('active');
+}
+
+async function enviarPedido() {
+    if (!datosClienteTemp) return;
+    
+    const btnEnviar = document.getElementById('btn-enviar-pedido');
+    const originalText = btnEnviar.innerHTML;
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    
+    const total = datosClienteTemp.total;
+    const telefonoLimpio = datosClienteTemp.telefono.replace(/\D/g, '');
+    
+    const pedido = {
+        cliente_nombre: datosClienteTemp.nombre,
+        cliente_telefono: telefonoLimpio,
+        direccion: datosClienteTemp.direccion,
+        metodo_pago: datosClienteTemp.metodoPago,
+        detalles: datosClienteTemp.detalles || '',
+        vendedor_id: vendedorActual.id,
+        vendedor_nombre: vendedorActual.nombre,
+        productos: carrito.map(item => ({
+            id: item.id,
+            nombre: item.nombre,
+            precio: item.precio,
+            cantidad: item.cantidad
+        })),
+        total: total,
+        fecha: new Date().toISOString()
+    };
+    
+    let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
+    const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
+    pedidosGuardados.push(pedidoConId);
+    localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
+    
+    await guardarPedidoEnSheets(pedido);
+    
+    carrito = [];
+    guardarCarritoDelVendedor();
+    actualizarContadorCarrito();
+    datosClienteTemp = null;
+    
+    document.getElementById('confirmacion-modal').classList.remove('active');
+    
+    btnEnviar.disabled = false;
+    btnEnviar.innerHTML = originalText;
+    
+    mostrarMensajeExito();
+}
+
+function mostrarMensajeExito() {
+    const mensaje = document.createElement('div');
+    mensaje.className = 'toast-success';
+    mensaje.innerHTML = '<i class="fas fa-check-circle"></i> ¡Tu pedido fue enviado correctamente! El vendedor te confirmará tu pedido por WhatsApp.';
+    document.body.appendChild(mensaje);
+    
+    document.getElementById('cliente-form').reset();
+    document.getElementById('pedido-detalles').value = '';
+    
+    setTimeout(() => {
+        mensaje.remove();
+        window.location.href = 'index.html';
+    }, 3000);
+}
+
+// ===================================================
+// EVENT LISTENERS
+// ===================================================
+
 document.addEventListener('DOMContentLoaded', () => {
     cargarTienda();
     cargarCarritoDelVendedor();
@@ -435,10 +495,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    const cerrarClienteModal = document.getElementById('cerrar-cliente-modal');
+    if (cerrarClienteModal) {
+        cerrarClienteModal.addEventListener('click', () => {
+            document.getElementById('cliente-modal').classList.remove('active');
+        });
+    }
+    
     const btnContinuar = document.getElementById('btn-continuar-pago');
     if (btnContinuar) {
         btnContinuar.addEventListener('click', () => {
-            // Validar campos del formulario
             const nombre = document.getElementById('cliente-nombre').value.trim();
             const telefono = document.getElementById('cliente-telefono').value.trim();
             const direccion = document.getElementById('cliente-direccion').value.trim();
@@ -456,13 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             mostrarTicketConfirmacion();
-        });
-    }
-    
-    const cerrarClienteModal = document.getElementById('cerrar-cliente-modal');
-    if (cerrarClienteModal) {
-        cerrarClienteModal.addEventListener('click', () => {
-            document.getElementById('cliente-modal').classList.remove('active');
         });
     }
     
@@ -494,6 +553,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// ===================================================
+// FUNCIONES UTILITARIAS
+// ===================================================
 
 function escapeHTML(str) {
     if (!str) return '';
