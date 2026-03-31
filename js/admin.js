@@ -354,37 +354,37 @@ async function enviarConfirmacionWhatsApp() {
     
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `🍕 *WANT - Confirmación de tu pedido* 🍕\n\n`;
-    mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
-    mensaje += `✅ *Recibimos tu pedido correctamente!*\n\n`;
-    mensaje += `📦 *Detalle de tu pedido:*\n`;
+    let mensaje = `🍕 Confirmacion de tu pedido 🍕\n\n`;
+    mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
+    mensaje += `✅ Recibimos tu pedido correctamente!\n\n`;
+    mensaje += `📦 Detalle de tu pedido:\n`;
     pedido.productos.forEach(p => {
         mensaje += `   • ${p.cantidad}x ${p.nombre}\n`;
     });
     
     if (pedido.detalles) {
-        mensaje += `\n📝 *Indicaciones especiales:*\n`;
+        mensaje += `\n📝 Indicaciones especiales:\n`;
         mensaje += `   ${pedido.detalles}\n`;
     }
     
-    mensaje += `\n💰 *Total a pagar:* $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += `🆔 *Número de orden:* #${pedido.id}\n\n`;
+    mensaje += `\n💰 Total a pagar: $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `🆔 Numero de orden: #${pedido.id}\n\n`;
     
-    mensaje += `⏱️ *Tiempo estimado de entrega:* ${tiempoEntrega}\n\n`;
+    mensaje += `⏰ Tiempo estimado de entrega: ${tiempoEntrega}\n\n`;
     
     if (metodoPagoTexto === 'transferencia') {
-        mensaje += `💳 *Método de pago:* Transferencia bancaria\n`;
-        mensaje += `📌 Te pasaremos nuestro alias y CBU por este mismo medio para que realices el pago.\n\n`;
+        mensaje += `💳 Metodo de pago: Transferencia bancaria\n`;
+        mensaje += `Te pasaremos nuestro alias y CBU por este mismo medio para que realices el pago.\n\n`;
     } else {
-        mensaje += `💵 *Método de pago:* Efectivo\n`;
-        mensaje += `💰 Pagarás al recibir tu pedido.\n\n`;
+        mensaje += `💵 Metodo de pago: Efectivo\n`;
+        mensaje += `Pagaras al recibir tu pedido.\n\n`;
     }
     
-    mensaje += `📍 *Dirección de entrega:* ${pedido.direccion}\n\n`;
-    mensaje += `👨‍🍳 *Ahora estamos preparando tu pedido con mucho cuidado.*\n`;
-    mensaje += `🚚 Te avisaremos cuando esté en camino.\n\n`;
-    mensaje += `❤️ *¡Gracias por confiar en nosotros!*\n\n`;
-    mensaje += `_Cualquier consulta, respondé este mensaje._`;
+    mensaje += `📍 Direccion de entrega: ${pedido.direccion}\n\n`;
+    mensaje += `Ahora estamos preparando tu pedido con mucho cuidado.\n`;
+    mensaje += `🚚 Te avisaremos cuando este en camino.\n\n`;
+    mensaje += `❤️ Gracias por confiar en nosotros!\n\n`;
+    mensaje += `_Cualquier consulta, responde este mensaje._`;
     
     const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
@@ -413,15 +413,6 @@ async function enviarConfirmacionWhatsApp() {
     botonPendienteConfirmar = null;
 }
 
-function cerrarModalTiempo() {
-    const modal = document.getElementById('modal-tiempo-entrega');
-    if (modal) modal.classList.remove('active');
-    const input = document.getElementById('tiempo-entrega-input');
-    if (input) input.value = '';
-    pedidoPendienteConfirmar = null;
-    botonPendienteConfirmar = null;
-}
-
 // ===================================================
 // NOTIFICAR CLIENTE QUE EL PEDIDO ESTÁ EN CAMINO
 // ===================================================
@@ -436,30 +427,30 @@ async function notificarEnCamino(pedidoId, boton) {
     
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `🍕 *WANT - Actualización de tu pedido* 🍕\n\n`;
-    mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
-    mensaje += `🚚 *Tu pedido está en camino!*\n\n`;
-    mensaje += `📦 *Detalle de tu pedido:*\n`;
+    let mensaje = `🍕 Actualizacion de tu pedido 🍕\n\n`;
+    mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
+    mensaje += `🚚 Tu pedido esta en camino!\n\n`;
+    mensaje += `📦 Detalle de tu pedido:\n`;
     pedido.productos.forEach(p => {
         mensaje += `   • ${p.cantidad}x ${p.nombre}\n`;
     });
     
     if (pedido.detalles) {
-        mensaje += `\n📝 *Indicaciones especiales:*\n`;
+        mensaje += `\n📝 Indicaciones especiales:\n`;
         mensaje += `   ${pedido.detalles}\n`;
     }
     
-    mensaje += `\n💰 *Total a pagar:* $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += `📍 *Dirección de entrega:* ${pedido.direccion}\n\n`;
+    mensaje += `\n💰 Total a pagar: $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `📍 Direccion de entrega: ${pedido.direccion}\n\n`;
     
     if (metodoPagoTexto === 'transferencia') {
-        mensaje += `💳 *Método de pago:* Transferencia bancaria\n`;
+        mensaje += `💳 Metodo de pago: Transferencia bancaria\n`;
     } else {
-        mensaje += `💵 *Método de pago:* Efectivo (pagás al recibir)\n`;
+        mensaje += `💵 Metodo de pago: Efectivo (pagas al recibir)\n`;
     }
     
-    mensaje += `\n⏰ *Quedate atento al delivery!*\n`;
-    mensaje += `❤️ *¡Gracias por tu compra!*`;
+    mensaje += `\n⏰ Quedate atento al delivery!\n`;
+    mensaje += `❤️ Gracias por tu compra!`;
     
     const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
