@@ -392,7 +392,7 @@ async function enviarConfirmacionWhatsApp() {
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
     // Mensaje mejorado y ordenado
-    let mensaje = `🍕 *WANT - Confirmación de tu pedido* 🍕\n\n`;
+    let mensaje = `🍕 *Confirmación de tu pedido* 🍕\n\n`;
     mensaje += `Hola *${pedido.cliente_nombre}*,\n\n`;
     mensaje += `✅ *Recibimos tu pedido correctamente!*\n\n`;
     mensaje += `📦 *Detalle de tu pedido:*\n`;
