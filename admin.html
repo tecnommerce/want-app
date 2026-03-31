@@ -6,11 +6,12 @@
     <title>Want | Panel de Vendedor</title>
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/admin-login.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header solo visible después de login (inicialmente oculto) -->
+    <!-- Header solo visible después de login -->
     <header class="header-admin" id="header-admin" style="display: none;">
         <div class="container">
             <div class="header-content">
@@ -56,6 +57,13 @@
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+                        <button class="auth-tab" data-tab="register">Registrarse</button>
+                        <button class="auth-tab" data-tab="recover">Recuperar</button>
+                    </div>
+
+                    <!-- Login Panel -->
                     <div class="auth-panel active" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
@@ -85,6 +93,7 @@
                         </div>
                     </div>
 
+                    <!-- Register Panel -->
                     <div class="auth-panel" id="register-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -143,6 +152,7 @@
                         </form>
                     </div>
 
+                    <!-- Recover Panel -->
                     <div class="auth-panel" id="recover-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login-recover">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
