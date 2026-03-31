@@ -987,3 +987,16 @@ body {
         display: none !important;
     }
 }
+
+/* Forzar que no haya línea debajo del header */
+.header {
+    border-bottom: none !important;
+}
+
+.header::after {
+    display: none !important;
+}
+
+.header-content {
+    border-bottom: none !important;
+}
