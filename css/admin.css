@@ -1,6 +1,106 @@
 /* ===================================================
-   ADMIN PANEL - Estilos solo para el panel de vendedor
+   ADMIN PANEL - Estilos para el panel de vendedor
    =================================================== */
+
+/* Header admin (después del login) */
+.header-admin {
+    background: white;
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.header-admin .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.header-admin .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FF5A00;
+    text-decoration: none;
+}
+
+/* Menú móvil admin */
+.mobile-menu-admin {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+    z-index: 2000;
+    transition: right 0.3s ease;
+    padding: 70px 20px 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-menu-admin.active {
+    right: 0;
+}
+
+.mobile-nav-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mobile-tab-btn {
+    background: none;
+    border: none;
+    padding: 15px;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #333;
+}
+
+.mobile-tab-btn.active {
+    background: #FF5A00;
+    color: white;
+}
+
+.mobile-logout-btn {
+    background: #fee2e2;
+    border: none;
+    padding: 15px;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #dc2626;
+    margin-top: 20px;
+}
+
+.menu-overlay-admin {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1500;
+    display: none;
+}
+
+.menu-overlay-admin.active {
+    display: block;
+}
 
 /* Panel principal */
 .admin-panel {
@@ -38,7 +138,8 @@
     gap: 10px;
 }
 
-.btn-refresh, .btn-logout {
+.btn-refresh,
+.btn-logout {
     background: #f5f5f5;
     border: none;
     width: 40px;
@@ -50,7 +151,8 @@
     font-size: 1rem;
 }
 
-.btn-refresh:hover, .btn-logout:hover {
+.btn-refresh:hover,
+.btn-logout:hover {
     background: #FF5A00;
     color: white;
 }
@@ -295,6 +397,26 @@
     color: #FF5A00;
 }
 
+.pedido-detalles {
+    margin-top: 10px;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.pedido-detalles strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+}
+
+.pedido-detalles p {
+    font-size: 0.8rem;
+    color: #555;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
 .pedido-actions {
     display: flex;
     flex-wrap: wrap;
@@ -430,27 +552,6 @@
     border-radius: 20px;
 }
 
-/* Detalles del pedido */
-.pedido-detalles {
-    margin-top: 10px;
-    padding: 8px;
-    background: #f9f9f9;
-    border-radius: 8px;
-}
-
-.pedido-detalles strong {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 0.8rem;
-}
-
-.pedido-detalles p {
-    font-size: 0.8rem;
-    color: #555;
-    margin: 0;
-    white-space: pre-wrap;
-}
-
 /* Productos admin */
 .productos-admin-grid {
     display: grid;
@@ -512,7 +613,8 @@
     margin-top: 10px;
 }
 
-.btn-editar, .btn-eliminar {
+.btn-editar,
+.btn-eliminar {
     flex: 1;
     padding: 8px;
     border-radius: 30px;
@@ -794,103 +896,25 @@
     max-width: 600px;
 }
 
-/* Header admin (solo después de login) */
-.header-admin {
-    background: white;
-    padding: 12px 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+/* Loading */
+.loading {
+    text-align: center;
+    padding: 50px;
+    color: #888;
 }
 
-.header-admin .header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.spinner {
+    width: 35px;
+    height: 35px;
+    border: 3px solid #f0f0f0;
+    border-top-color: #FF5A00;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
 }
 
-.header-admin .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #FF5A00;
-    text-decoration: none;
-}
-
-/* Menú móvil admin */
-.mobile-menu-admin {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 280px;
-    height: 100vh;
-    background: white;
-    box-shadow: -5px 0 20px rgba(0,0,0,0.1);
-    z-index: 2000;
-    transition: right 0.3s ease;
-    padding: 70px 20px 30px;
-    display: flex;
-    flex-direction: column;
-}
-
-.mobile-menu-admin.active {
-    right: 0;
-}
-
-.mobile-nav-admin {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.mobile-tab-btn {
-    background: none;
-    border: none;
-    padding: 15px;
-    text-align: left;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 16px;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #333;
-}
-
-.mobile-tab-btn.active {
-    background: #FF5A00;
-    color: white;
-}
-
-.mobile-logout-btn {
-    background: #fee2e2;
-    border: none;
-    padding: 15px;
-    text-align: left;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #dc2626;
-    margin-top: 20px;
-}
-
-.menu-overlay-admin {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1500;
-    display: none;
-}
-
-.menu-overlay-admin.active {
-    display: block;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* Responsive */
@@ -899,80 +923,83 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
-    
+
     .metric-card {
         padding: 12px;
     }
-    
+
     .metric-icon {
         width: 40px;
         height: 40px;
         font-size: 1rem;
     }
-    
+
     .metric-info h3 {
         font-size: 1.1rem;
     }
-    
+
     .filtros-pedidos {
         gap: 8px;
     }
-    
+
     .filtro-btn {
         padding: 6px 12px;
         font-size: 0.75rem;
     }
-    
+
     .pedido-actions {
         flex-direction: column;
         align-items: stretch;
     }
-    
-    .botones-estado, .botones-acciones {
+
+    .botones-estado,
+    .botones-acciones {
         justify-content: center;
     }
-    
-    .btn-estado, .btn-cancelar, .btn-confirmar-whatsapp {
+
+    .btn-estado,
+    .btn-cancelar,
+    .btn-confirmar-whatsapp {
         padding: 6px 12px;
         font-size: 0.75rem;
     }
-    
+
     .pedido-cliente {
         flex-direction: column;
         gap: 6px;
     }
-    
+
     .admin-tabs {
         flex-wrap: wrap;
         border-bottom: none;
         gap: 5px;
     }
-    
+
     .tab-btn {
         padding: 8px 16px;
         font-size: 0.85rem;
         border-radius: 30px;
     }
-    
+
     .tab-btn.active {
         background: #FF5A00;
         color: white;
         border-bottom: none;
     }
-    
+
     .panel-header {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .productos-admin-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .perfil-container {
         padding: 20px;
     }
-    
+
     .perfil-form .form-row {
         flex-direction: column;
         gap: 15px;
