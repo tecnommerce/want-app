@@ -987,26 +987,18 @@ body {
     }
 }
 
-/* ===================================================
-   FORZAR ELIMINACIÓN DE LÍNEA DEL HEADER
-   =================================================== */
-.header,
-.header::before,
-.header::after,
+/* Eliminar cualquier borde o sombra de elementos alrededor */
+body,
+.container,
 .header-content,
-.header-content::before,
-.header-content::after {
+.header-content > * {
     border-bottom: none !important;
     box-shadow: none !important;
     outline: none !important;
 }
 
-.header {
-    box-shadow: none !important;
-    border-bottom: none !important;
-}
-
-.header-content {
+.header,
+.header * {
     border-bottom: none !important;
     box-shadow: none !important;
 }
