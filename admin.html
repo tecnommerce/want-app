@@ -56,8 +56,8 @@
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
-                    <!-- Login Panel -->
-                    <div class="auth-panel" id="login-panel">
+                    <!-- Panel de Login (visible por defecto) -->
+                    <div class="auth-panel active" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
                                 <label><i class="fas fa-envelope"></i> Email</label>
@@ -86,7 +86,7 @@
                         </div>
                     </div>
 
-                    <!-- Register Panel (oculto) -->
+                    <!-- Panel de Registro (oculto inicialmente) -->
                     <div class="auth-panel" id="register-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -119,7 +119,7 @@
                             <div class="form-group">
                                 <label>Logo del negocio</label>
                                 <input type="file" id="reg-logo" accept="image/*">
-                                <div id="reg-logo-preview" class="image-preview"></div>
+                                <div id="reg-logo-preview" class="image-preview" style="margin-top: 10px;"></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group half">
@@ -145,7 +145,7 @@
                         </form>
                     </div>
 
-                    <!-- Recover Panel (oculto) -->
+                    <!-- Panel de Recuperación (oculto inicialmente) -->
                     <div class="auth-panel" id="recover-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login-recover">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -352,7 +352,7 @@
                     </div>
                     <div class="form-group">
                         <label>Descripción</label>
-                        <textarea id="producto-descripcion" rows="3" placeholder="Descripción del producto"></textarea>
+                        <textarea id="producto-descripcion" rows="3"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Precio *</label>
@@ -362,7 +362,6 @@
                         <label>Imagen del producto</label>
                         <input type="file" id="producto-imagen" accept="image/*">
                         <div id="producto-imagen-preview" class="image-preview"></div>
-                        <small class="input-help">Subí una imagen para el producto (opcional)</small>
                     </div>
                     <div class="form-group">
                         <label>Disponible</label>
