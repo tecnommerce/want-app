@@ -467,29 +467,67 @@ function cerrarModalTiempo() {
 }
 
 // ===================================================
-// GESTIÓN DE PRODUCTOS
+// GESTIÓN DE PRODUCTOS - Versión corregida con filtro por vendedor
 // ===================================================
 
 async function cargarProductos(forceRefresh = false) {
-    if (!vendedorActual) return;
+    if (!vendedorActual) {
+        console.warn('⚠️ No hay vendedor actual');
+        return;
+    }
+    
     const container = document.getElementById('productos-admin-grid');
-    if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
+    if (container) {
+        container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
+    }
     
     try {
+        console.log(`📦 Cargando productos para vendedor ID: ${vendedorActual.id}`);
+        
         const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
-        if (response.error) throw new Error(response.error);
-        productos = response.productos || [];
+        
+        if (response.error) {
+            throw new Error(response.error);
+        }
+        
+        // Asegurar que solo se muestran productos del vendedor actual
+        let productosRecibidos = response.productos || [];
+        
+        // Filtro de seguridad en frontend (por si la API devuelve todo)
+        productosRecibidos = productosRecibidos.filter(p => {
+            const productoVendedorId = p.vendedor_id ? p.vendedor_id.toString() : null;
+            const vendedorActualId = vendedorActual.id.toString();
+            const coincide = productoVendedorId === vendedorActualId;
+            
+            if (!coincide && productoVendedorId) {
+                console.warn(`⚠️ Producto ${p.id} (${p.nombre}) pertenece a vendedor ${productoVendedorId}, no a ${vendedorActualId}. Filtrado.`);
+            }
+            return coincide;
+        });
+        
+        productos = productosRecibidos;
+        
+        console.log(`✅ Productos cargados: ${productos.length} (filtrados para vendedor ${vendedorActual.id})`);
+        
         renderizarProductosAdmin();
+        
         const badgeProductos = document.getElementById('badge-productos');
-        if (badgeProductos) badgeProductos.textContent = productos.length;
+        if (badgeProductos) {
+            badgeProductos.textContent = productos.length;
+        }
+        
     } catch (error) {
-        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`;
+        console.error('❌ Error al cargar productos:', error);
+        if (container) {
+            container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos: ${error.message}</p></div>`;
+        }
     }
 }
 
 function renderizarProductosAdmin() {
     const container = document.getElementById('productos-admin-grid');
     if (!container) return;
+    
     if (productos.length === 0) {
         container.innerHTML = `<div class="sin-pedidos"><p>No tenés productos cargados</p><button class="btn-primary btn-add-producto" onclick="abrirModalProducto()">Agregar producto</button></div>`;
         return;
@@ -549,6 +587,12 @@ function cerrarModalProducto() {
 }
 
 async function guardarProducto() {
+    // Verificar que hay un vendedor actual
+    if (!vendedorActual || !vendedorActual.id) {
+        mostrarToast('Error: No se identificó el vendedor', 'error');
+        return;
+    }
+    
     const productoId = document.getElementById('producto-id').value;
     const nombre = document.getElementById('producto-nombre').value.trim();
     const descripcion = document.getElementById('producto-descripcion').value.trim();
@@ -571,6 +615,7 @@ async function guardarProducto() {
         }
     }
     
+    // Asegurar que el vendedor_id es el correcto
     const data = {
         vendedor_id: vendedorActual.id,
         nombre: nombre,
@@ -584,6 +629,8 @@ async function guardarProducto() {
     
     const action = productoId ? 'actualizarProducto' : 'crearProducto';
     
+    console.log(`📝 ${action === 'crearProducto' ? 'Creando' : 'Actualizando'} producto para vendedor ${vendedorActual.id}:`, data);
+    
     try {
         const response = await postAPI(action, data);
         if (response && response.success) {
@@ -594,19 +641,38 @@ async function guardarProducto() {
             throw new Error(response?.error || 'Error al guardar');
         }
     } catch (error) {
+        console.error('Error guardar producto:', error);
         mostrarToast(error.message, 'error');
     }
 }
 
 async function eliminarProducto(productoId) {
-    if (!confirm('¿Eliminar este producto?')) return;
+    // Verificar que el producto pertenece al vendedor actual
+    const producto = productos.find(p => p.id === productoId);
+    
+    if (!producto) {
+        mostrarToast('Producto no encontrado', 'error');
+        return;
+    }
+    
+    if (producto.vendedor_id && producto.vendedor_id.toString() !== vendedorActual.id.toString()) {
+        mostrarToast('No puedes eliminar productos de otro vendedor', 'error');
+        console.warn(`⚠️ Intento de eliminar producto ${productoId} por vendedor ${vendedorActual.id}, pero pertenece a ${producto.vendedor_id}`);
+        return;
+    }
+    
+    if (!confirm(`¿Eliminar el producto "${producto.nombre}"?`)) return;
+    
     try {
         const response = await postAPI('eliminarProducto', { productoId });
         if (response.success) {
             mostrarToast('Producto eliminado', 'success');
             await cargarProductos(true);
+        } else {
+            throw new Error(response?.error || 'Error al eliminar');
         }
     } catch (error) {
+        console.error('Error eliminar producto:', error);
         mostrarToast('Error al eliminar', 'error');
     }
 }
