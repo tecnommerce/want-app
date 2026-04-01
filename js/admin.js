@@ -13,7 +13,6 @@ let productos = [];
 let filtroActual = 'preparando';
 let pedidoPendienteConfirmar = null;
 let botonPendienteConfirmar = null;
-let productoEditandoId = null;
 
 // ===================================================
 // UTILIDADES DE AUTENTICACIÓN
@@ -310,7 +309,7 @@ async function cancelarPedido(pedidoId, boton) {
 }
 
 // ===================================================
-// CONFIRMAR PEDIDO POR WHATSAPP (SIN EMOJIS)
+// CONFIRMAR PEDIDO POR WHATSAPP
 // ===================================================
 
 async function confirmarPedidoWhatsApp(pedidoId, boton) {
@@ -355,7 +354,7 @@ async function enviarConfirmacionWhatsApp() {
     
     const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     
-    let mensaje = `*Confirmacion de tu pedido*\n\n`;
+    let mensaje = `*Confirmación de tu pedido*\n\n`;
     mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
     mensaje += `Recibimos tu pedido correctamente!\n\n`;
     mensaje += `DETALLE DE TU PEDIDO:\n`;
@@ -414,19 +413,6 @@ async function enviarConfirmacionWhatsApp() {
     botonPendienteConfirmar = null;
 }
 
-function cerrarModalTiempo() {
-    const modal = document.getElementById('modal-tiempo-entrega');
-    if (modal) modal.classList.remove('active');
-    const input = document.getElementById('tiempo-entrega-input');
-    if (input) input.value = '';
-    pedidoPendienteConfirmar = null;
-    botonPendienteConfirmar = null;
-}
-
-// ===================================================
-// NOTIFICAR CLIENTE QUE EL PEDIDO ESTÁ EN CAMINO (SIN EMOJIS)
-// ===================================================
-
 async function notificarEnCamino(pedidoId, boton) {
     const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
     if (!pedido) return;
@@ -471,8 +457,17 @@ async function notificarEnCamino(pedidoId, boton) {
     }, 1500);
 }
 
+function cerrarModalTiempo() {
+    const modal = document.getElementById('modal-tiempo-entrega');
+    if (modal) modal.classList.remove('active');
+    const input = document.getElementById('tiempo-entrega-input');
+    if (input) input.value = '';
+    pedidoPendienteConfirmar = null;
+    botonPendienteConfirmar = null;
+}
+
 // ===================================================
-// GESTIÓN DE PRODUCTOS (COMPLETO CON CRUD)
+// GESTIÓN DE PRODUCTOS
 // ===================================================
 
 async function cargarProductos(forceRefresh = false) {
@@ -518,6 +513,10 @@ function renderizarProductosAdmin() {
     `).join('');
 }
 
+function abrirModalProducto(productoId = null) {
+    mostrarToast('Funcionalidad en desarrollo', 'info');
+}
+
 async function eliminarProducto(productoId) {
     if (!confirm('¿Eliminar este producto?')) return;
     try {
@@ -525,138 +524,9 @@ async function eliminarProducto(productoId) {
         if (response.success) {
             mostrarToast('Producto eliminado', 'success');
             await cargarProductos(true);
-        } else {
-            throw new Error(response.error);
         }
     } catch (error) {
-        mostrarToast('Error al eliminar: ' + error.message, 'error');
-    }
-}
-
-// ===================================================
-// MODAL PRODUCTO - Crear y Editar
-// ===================================================
-
-function abrirModalProducto(productoId = null) {
-    productoEditandoId = productoId;
-    const modal = document.getElementById('modal-producto');
-    const title = document.getElementById('modal-producto-title');
-    const idField = document.getElementById('producto-id');
-    const nombreField = document.getElementById('producto-nombre');
-    const descripcionField = document.getElementById('producto-descripcion');
-    const precioField = document.getElementById('producto-precio');
-    const disponibleField = document.getElementById('producto-disponible');
-    const previewDiv = document.getElementById('producto-imagen-preview');
-    const imagenInput = document.getElementById('producto-imagen');
-    
-    // Limpiar formulario
-    idField.value = '';
-    nombreField.value = '';
-    descripcionField.value = '';
-    precioField.value = '';
-    disponibleField.value = 'SI';
-    previewDiv.innerHTML = '';
-    if (imagenInput) imagenInput.value = '';
-    
-    if (productoId) {
-        const producto = productos.find(p => p.id.toString() === productoId.toString());
-        if (producto) {
-            title.textContent = 'Editar producto';
-            idField.value = producto.id;
-            nombreField.value = producto.nombre || '';
-            descripcionField.value = producto.descripcion || '';
-            precioField.value = producto.precio || '';
-            disponibleField.value = producto.disponible || 'SI';
-            if (producto.imagen_url) {
-                previewDiv.innerHTML = `<img src="${producto.imagen_url}" style="max-width: 100%; max-height: 120px; object-fit: contain;">`;
-            }
-        } else {
-            title.textContent = 'Nuevo producto';
-        }
-    } else {
-        title.textContent = 'Nuevo producto';
-    }
-    
-    modal.classList.add('active');
-}
-
-function cerrarModalProducto() {
-    document.getElementById('modal-producto').classList.remove('active');
-    productoEditandoId = null;
-    const imagenInput = document.getElementById('producto-imagen');
-    if (imagenInput) imagenInput.value = '';
-    const previewDiv = document.getElementById('producto-imagen-preview');
-    if (previewDiv) previewDiv.innerHTML = '';
-}
-
-async function guardarProducto() {
-    const productoId = document.getElementById('producto-id').value;
-    const nombre = document.getElementById('producto-nombre').value.trim();
-    const descripcion = document.getElementById('producto-descripcion').value.trim();
-    const precio = parseFloat(document.getElementById('producto-precio').value);
-    const disponible = document.getElementById('producto-disponible').value;
-    const imagenFile = document.getElementById('producto-imagen').files[0];
-    
-    if (!nombre || !precio) {
-        mostrarToast('Completá nombre y precio', 'error');
-        return;
-    }
-    
-    const btnGuardar = document.getElementById('btn-guardar-producto');
-    if (!btnGuardar) return;
-    
-    const originalText = btnGuardar.innerHTML;
-    btnGuardar.disabled = true;
-    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
-    try {
-        let imagenUrl = null;
-        
-        if (imagenFile) {
-            mostrarToast('Subiendo imagen...', 'info');
-            imagenUrl = await subirImagenACloudinary(imagenFile);
-            if (!imagenUrl) {
-                mostrarToast('Error al subir imagen', 'error');
-                btnGuardar.disabled = false;
-                btnGuardar.innerHTML = originalText;
-                return;
-            }
-        } else if (productoId) {
-            const productoExistente = productos.find(p => p.id.toString() === productoId.toString());
-            if (productoExistente && productoExistente.imagen_url) {
-                imagenUrl = productoExistente.imagen_url;
-            }
-        }
-        
-        const productoData = {
-            nombre: nombre,
-            descripcion: descripcion,
-            precio: precio,
-            disponible: disponible,
-            imagen_url: imagenUrl,
-            vendedor_id: vendedorActual.id
-        };
-        
-        let response;
-        if (productoId) {
-            response = await postAPI('actualizarProducto', { ...productoData, id: parseInt(productoId) });
-        } else {
-            response = await postAPI('crearProducto', productoData);
-        }
-        
-        if (response && response.success) {
-            mostrarToast(`Producto ${productoId ? 'actualizado' : 'creado'} correctamente`, 'success');
-            cerrarModalProducto();
-            await cargarProductos(true);
-        } else {
-            throw new Error(response?.error || 'Error al guardar');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarToast('Error al guardar producto: ' + error.message, 'error');
-    } finally {
-        btnGuardar.disabled = false;
-        btnGuardar.innerHTML = originalText;
+        mostrarToast('Error al eliminar', 'error');
     }
 }
 
@@ -678,7 +548,7 @@ function cargarPerfil() {
     if (perfilHorario) perfilHorario.value = vendedorActual.horario || '';
     
     if (logoPreview && vendedorActual.logo_url) {
-        logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 80px; border-radius: 12px;">`;
+        logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`;
     }
     
     const btnUploadLogo = document.getElementById('btn-upload-logo');
@@ -690,7 +560,7 @@ function cargarPerfil() {
             if (file && logoPreview) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    logoPreview.innerHTML = `<img src="${e.target.result}" style="max-width: 80px; border-radius: 12px;">`;
+                    logoPreview.innerHTML = `<img src="${e.target.result}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -818,11 +688,6 @@ async function iniciarPanel(vendedor) {
     
     const btnAgregar = document.getElementById('btn-agregar-producto');
     if (btnAgregar) btnAgregar.addEventListener('click', () => abrirModalProducto());
-    
-    const btnGuardarProducto = document.getElementById('btn-guardar-producto');
-    if (btnGuardarProducto) {
-        btnGuardarProducto.addEventListener('click', guardarProducto);
-    }
     
     inicializarTabs();
     inicializarFiltros();
@@ -1028,9 +893,12 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.transform = 'translateX(-50%)';
     toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
     toast.style.color = 'white';
-    toast.style.padding = '12px 24px';
-    toast.style.borderRadius = '50px';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '40px';
+    toast.style.fontSize = '0.8rem';
+    toast.style.fontWeight = '500';
     toast.style.zIndex = '9999';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
@@ -1099,14 +967,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (response && response.success) {
                 alert('Registro exitoso. Ahora podés iniciar sesión.');
-                const loginPanel = document.getElementById('login-panel');
-                const registerPanel = document.getElementById('register-panel');
-                if (loginPanel) loginPanel.style.display = 'block';
-                if (registerPanel) registerPanel.style.display = 'none';
-                const regForm = document.getElementById('register-form');
-                if (regForm) regForm.reset();
-                const regLogoPreview = document.getElementById('reg-logo-preview');
-                if (regLogoPreview) regLogoPreview.innerHTML = '';
+                // Cambiar a login panel
+                document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
+                document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
+                document.getElementById('login-panel').classList.add('active');
+                document.getElementById('register-form').reset();
+                document.getElementById('reg-logo-preview').innerHTML = '';
+                document.getElementById('login-email').value = email;
             } else {
                 alert(response?.error || 'Error al registrar');
             }
@@ -1121,7 +989,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const preview = document.getElementById('reg-logo-preview');
-                        if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
+                        if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width: 80px; border-radius: 12px;">`;
                     };
                     reader.readAsDataURL(file);
                 }
@@ -1140,6 +1008,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Código enviado a tu email');
                 const recoverCodeSection = document.getElementById('recover-code-section');
                 if (recoverCodeSection) recoverCodeSection.style.display = 'block';
+                if (response.codigo) {
+                    console.log('Código de recuperación (demo):', response.codigo);
+                }
             } else {
                 alert(response.error);
             }
@@ -1163,10 +1034,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await postAPI('resetearPassword', { email, codigo, new_password_hash: await hashPassword(newPassword) });
             if (response.success) {
                 alert('Contraseña restablecida. Iniciá sesión.');
-                const recoverPanel = document.getElementById('recover-panel');
-                const loginPanel = document.getElementById('login-panel');
-                if (recoverPanel) recoverPanel.style.display = 'none';
-                if (loginPanel) loginPanel.style.display = 'block';
+                // Cambiar a login panel
+                document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
+                document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
+                document.getElementById('login-panel').classList.add('active');
+                document.getElementById('recover-code-section').style.display = 'none';
+                document.getElementById('recover-form').reset();
             } else {
                 alert(response.error);
             }
@@ -1174,6 +1048,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Tabs de autenticación
+    const authTabs = document.querySelectorAll('.auth-tab');
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            authTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(`${tabId}-panel`).classList.add('active');
+        });
+    });
+    
+    // Botones de navegación entre paneles
     const showRegister = document.getElementById('btn-show-register');
     const showRecover = document.getElementById('btn-show-recover');
     const backToLogin = document.getElementById('back-to-login');
@@ -1181,34 +1067,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (showRegister) {
         showRegister.addEventListener('click', () => {
-            const loginPanel = document.getElementById('login-panel');
-            const registerPanel = document.getElementById('register-panel');
-            if (loginPanel) loginPanel.style.display = 'none';
-            if (registerPanel) registerPanel.style.display = 'block';
+            document.querySelector('.auth-tab[data-tab="register"]').click();
         });
     }
     if (showRecover) {
         showRecover.addEventListener('click', () => {
-            const loginPanel = document.getElementById('login-panel');
-            const recoverPanel = document.getElementById('recover-panel');
-            if (loginPanel) loginPanel.style.display = 'none';
-            if (recoverPanel) recoverPanel.style.display = 'block';
+            document.querySelector('.auth-tab[data-tab="recover"]').click();
         });
     }
     if (backToLogin) {
         backToLogin.addEventListener('click', () => {
-            const loginPanel = document.getElementById('login-panel');
-            const registerPanel = document.getElementById('register-panel');
-            if (loginPanel) loginPanel.style.display = 'block';
-            if (registerPanel) registerPanel.style.display = 'none';
+            document.querySelector('.auth-tab[data-tab="login"]').click();
         });
     }
     if (backToLoginRecover) {
         backToLoginRecover.addEventListener('click', () => {
-            const loginPanel = document.getElementById('login-panel');
-            const recoverPanel = document.getElementById('recover-panel');
-            if (loginPanel) loginPanel.style.display = 'block';
-            if (recoverPanel) recoverPanel.style.display = 'none';
+            document.querySelector('.auth-tab[data-tab="login"]').click();
         });
     }
 });
