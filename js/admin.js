@@ -16,6 +16,20 @@ let terminoBusqueda = '';
 let pedidoPendienteConfirmar = null;
 let botonPendienteConfirmar = null;
 
+// ===================================================
+// FUNCIONES AUXILIARES
+// ===================================================
+
+function getEstadoTexto(estado) {
+    const textos = { 
+        'preparando': 'NUEVO PEDIDO', 
+        'en preparacion': 'EN PREPARACIÓN', 
+        'en camino': 'EN CAMINO', 
+        'entregado': 'ENTREGADO' 
+    };
+    return textos[estado] || estado.toUpperCase();
+}
+
 // Variables para editar/nuevo pedido
 let productosTemp = [];
 let modoEdicionPedido = null; // 'editar' o 'nuevo'
