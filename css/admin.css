@@ -683,156 +683,157 @@ body {
 }
 
 /* ===================================================
-   TARJETA DE PEDIDO - TAMAÑO ADECUADO
+   TARJETA DE PEDIDO - ALTURA CONSISTENTE Y LEGIBLE
    =================================================== */
 .pedido-card {
     background: white;
-    border-radius: var(--radius-lg);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 14px;
     transition: all 0.2s;
 }
 
 .pedido-card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--gray-300);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+/* Header compacto */
 .pedido-header {
-    background: var(--gray-50);
-    padding: 12px 16px;
+    background: #f8fafc;
+    padding: 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .pedido-id {
     font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--primary);
+    font-size: 0.85rem;
+    color: #FF5A00;
     background: #FFF5EB;
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
+    padding: 3px 10px;
+    border-radius: 20px;
 }
 
 .pedido-fecha {
-    font-size: 0.7rem;
-    color: var(--gray-500);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    font-size: 0.65rem;
+    color: #64748b;
 }
 
+/* Información del cliente - 2 líneas máximo */
 .pedido-cliente {
-    padding: 12px 16px;
-    background: var(--gray-50);
+    padding: 8px 14px;
+    background: #fafbfc;
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
-    font-size: 0.8rem;
-    color: var(--gray-700);
-    border-bottom: 1px solid var(--gray-200);
+    gap: 12px;
+    font-size: 0.75rem;
+    color: #334155;
+    border-bottom: 1px solid #eef2f6;
+    align-items: center;
 }
 
 .pedido-cliente strong,
 .pedido-cliente span {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
 }
 
 .pedido-cliente i {
-    color: var(--primary);
-    width: 14px;
-    font-size: 0.75rem;
+    color: #FF5A00;
+    width: 12px;
+    font-size: 0.7rem;
 }
 
+/* Productos - altura limitada */
 .pedido-productos {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--gray-100);
+    padding: 8px 14px;
+    border-bottom: 1px solid #eef2f6;
 }
 
 .pedido-productos strong {
     display: block;
-    margin-bottom: 8px;
-    font-size: 0.7rem;
-    color: var(--gray-600);
+    margin-bottom: 6px;
+    font-size: 0.65rem;
+    color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .pedido-productos ul {
     list-style: none;
-    margin-bottom: 8px;
+    max-height: 70px;
+    overflow-y: auto;
+    margin-bottom: 6px;
 }
 
 .pedido-productos li {
-    padding: 6px 0;
-    border-bottom: 1px solid var(--gray-100);
+    padding: 4px 0;
     display: flex;
     justify-content: space-between;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .pedido-productos li:last-child {
     border-bottom: none;
 }
 
-.mas-productos {
-    color: var(--gray-500);
-    font-style: italic;
-    font-size: 0.7rem;
-    text-align: center;
-    padding: 4px 0;
-}
-
+/* Total compacto */
 .pedido-total {
     text-align: right;
     font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--primary);
-    padding-top: 8px;
+    font-size: 0.8rem;
+    color: #FF5A00;
+    padding-top: 4px;
     margin-top: 4px;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid #eef2f6;
 }
 
+/* Detalles - compacto */
 .pedido-detalles {
-    margin-top: 10px;
-    padding: 8px 12px;
+    margin-top: 6px;
+    padding: 5px 8px;
     background: #FFFBEB;
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--warning);
+    border-radius: 6px;
+    border-left: 2px solid #f59e0b;
 }
 
 .pedido-detalles strong {
     display: block;
-    margin-bottom: 4px;
-    font-size: 0.65rem;
-    color: var(--warning);
+    margin-bottom: 2px;
+    font-size: 0.55rem;
+    color: #f59e0b;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
 }
 
 .pedido-detalles p {
-    font-size: 0.75rem;
-    color: var(--gray-700);
+    font-size: 0.65rem;
+    color: #334155;
     margin: 0;
-    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Acciones - botones alineados */
 .pedido-actions {
-    padding: 12px 16px;
-    background: var(--gray-50);
+    padding: 8px 14px;
+    background: #fafbfc;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    border-top: 1px solid var(--gray-200);
+    gap: 8px;
+    border-top: 1px solid #eef2f6;
 }
 
 .estado-actual {
@@ -841,12 +842,12 @@ body {
 }
 
 .estado-badge {
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
-    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.6rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
     text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .estado-preparando {
@@ -869,16 +870,16 @@ body {
     color: #059669;
 }
 
-/* Botones de pedidos */
+/* Botones compactos pero legibles */
 .botones-estado {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .botones-acciones {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
@@ -887,104 +888,53 @@ body {
 .btn-pedido-listo,
 .btn-notificar-camino,
 .btn-confirmar-entrega {
-    padding: 8px 16px;
-    font-size: 0.75rem;
+    padding: 5px 12px;
+    font-size: 0.65rem;
     font-weight: 600;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     cursor: pointer;
-    transition: all 0.2s;
+    border: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    border: none;
+    gap: 5px;
 }
 
 .btn-editar-pedido,
 .btn-cancelar {
-    padding: 8px 14px;
-    font-size: 0.7rem;
+    padding: 5px 10px;
+    font-size: 0.6rem;
     font-weight: 600;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     cursor: pointer;
-    transition: all 0.2s;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     border: none;
 }
 
-.btn-confirmar-whatsapp {
-    background: #25D366;
-    color: white;
-}
+/* Colores de botones */
+.btn-confirmar-whatsapp { background: #25D366; color: white; }
+.btn-confirmar-whatsapp:hover { background: #128C7E; }
 
-.btn-confirmar-whatsapp:hover:not(:disabled) {
-    background: #128C7E;
-    transform: scale(1.02);
-}
+.btn-preparar-pedido { background: #FF5A00; color: white; }
+.btn-preparar-pedido:hover { background: #e04e00; }
 
-.btn-preparar-pedido {
-    background: var(--primary);
-    color: white;
-}
+.btn-pedido-listo { background: #10b981; color: white; }
+.btn-pedido-listo:hover { background: #059669; }
 
-.btn-preparar-pedido:hover:not(:disabled) {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-}
+.btn-notificar-camino { background: #f59e0b; color: white; }
+.btn-notificar-camino:hover { background: #d97706; }
 
-.btn-pedido-listo {
-    background: var(--success);
-    color: white;
-}
+.btn-confirmar-entrega { background: #10b981; color: white; }
+.btn-confirmar-entrega:hover { background: #059669; }
 
-.btn-pedido-listo:hover:not(:disabled) {
-    background: #059669;
-    transform: translateY(-1px);
-}
+.btn-editar-pedido { background: #3b82f6; color: white; }
+.btn-editar-pedido:hover { background: #2563eb; }
 
-.btn-notificar-camino {
-    background: var(--warning);
-    color: white;
-}
+.btn-cancelar { background: #FEF2F2; color: #ef4444; border: 1px solid #fee2e2; }
+.btn-cancelar:hover { background: #ef4444; color: white; }
 
-.btn-notificar-camino:hover:not(:disabled) {
-    background: #d97706;
-    transform: translateY(-1px);
-}
-
-.btn-confirmar-entrega {
-    background: var(--success);
-    color: white;
-}
-
-.btn-confirmar-entrega:hover:not(:disabled) {
-    background: #059669;
-    transform: translateY(-1px);
-}
-
-.btn-editar-pedido {
-    background: var(--info);
-    color: white;
-}
-
-.btn-editar-pedido:hover:not(:disabled) {
-    background: #2563eb;
-    transform: translateY(-1px);
-}
-
-.btn-cancelar {
-    background: #FEF2F2;
-    color: var(--danger);
-    border: 1px solid #fee2e2;
-}
-
-.btn-cancelar:hover:not(:disabled) {
-    background: var(--danger);
-    color: white;
-    border-color: var(--danger);
-}
-
+/* Estado deshabilitado */
 .btn-confirmar-whatsapp:disabled,
 .btn-preparar-pedido:disabled,
 .btn-pedido-listo:disabled,
@@ -992,18 +942,32 @@ body {
 .btn-confirmar-entrega:disabled,
 .btn-editar-pedido:disabled,
 .btn-cancelar:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
 }
 
 .sin-pedidos {
     text-align: center;
-    padding: 48px;
-    color: var(--gray-400);
+    padding: 40px;
+    color: #94a3b8;
     background: white;
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Scroll suave para productos largos */
+.pedido-productos ul::-webkit-scrollbar {
+    width: 3px;
+}
+
+.pedido-productos ul::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.pedido-productos ul::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
 }
 
 /* ===================================================
