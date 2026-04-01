@@ -48,30 +48,23 @@
 
     <main>
         <div class="container">
-            <!-- Panel de autenticación -->
+                        <!-- Panel de autenticación -->
             <div class="admin-auth" id="admin-auth">
                 <div class="auth-card">
                     <div class="auth-logo">
-                        <h1 class="auth-logo-text">Want<span class="logo-dot">.</span></h1>
+                        <h1 class="auth-logo-text">Want</h1>
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
-                    <!-- TABS de autenticación -->
-                    <div class="auth-tabs">
-                        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
-                        <button class="auth-tab" data-tab="register">Registrarse</button>
-                        <button class="auth-tab" data-tab="recover">Recuperar contraseña</button>
-                    </div>
-                    
-                    <!-- Panel de Login -->
+                    <!-- Panel de Login (visible por defecto) -->
                     <div class="auth-panel active" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
-                                <label><i class="fas fa-envelope"></i> Email</label>
+                                <label>Email</label>
                                 <input type="email" id="login-email" placeholder="tu@email.com" required>
                             </div>
                             <div class="form-group">
-                                <label><i class="fas fa-lock"></i> Contraseña</label>
+                                <label>Contraseña</label>
                                 <div class="password-wrapper">
                                     <input type="password" id="login-password" placeholder="••••••••" required>
                                     <button type="button" class="toggle-password" data-target="login-password">
@@ -85,13 +78,28 @@
                                 </label>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block" id="btn-login-submit">
-                                <i class="fas fa-sign-in-alt"></i> Ingresar
+                                Ingresar
                             </button>
                         </form>
+                        
+                        <div class="auth-divider">
+                            <span>¿No tenés cuenta?</span>
+                        </div>
+                        
+                        <button class="btn btn-outline btn-block" id="btn-show-register">
+                            Registrarse
+                        </button>
+                        
+                        <div class="auth-links">
+                            <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
+                        </div>
                     </div>
 
-                    <!-- Panel de Registro -->
+                    <!-- Panel de Registro (oculto inicialmente) -->
                     <div class="auth-panel" id="register-panel">
+                        <button class="back-to-login" id="back-to-login">
+                            <i class="fas fa-arrow-left"></i> Volver al inicio
+                        </button>
                         <form id="register-form">
                             <div class="form-row">
                                 <div class="form-group half">
@@ -143,25 +151,28 @@
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block" id="btn-register-submit">
-                                <i class="fas fa-user-plus"></i> Registrarse
+                                Registrarse
                             </button>
                         </form>
                     </div>
 
-                    <!-- Panel de Recuperación -->
+                    <!-- Panel de Recuperación (oculto inicialmente) -->
                     <div class="auth-panel" id="recover-panel">
+                        <button class="back-to-login" id="back-to-login-recover">
+                            <i class="fas fa-arrow-left"></i> Volver al inicio
+                        </button>
                         <form id="recover-form">
                             <div class="form-group">
-                                <label><i class="fas fa-envelope"></i> Email</label>
+                                <label>Email</label>
                                 <input type="email" id="recover-email" required>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block" id="btn-recover-submit">
-                                <i class="fas fa-paper-plane"></i> Enviar código
+                                Enviar código
                             </button>
                         </form>
                         <div id="recover-code-section" style="display: none;">
                             <div class="form-group">
-                                <label><i class="fas fa-key"></i> Código de recuperación</label>
+                                <label>Código de recuperación</label>
                                 <input type="text" id="recover-code" placeholder="Ingresa el código de 6 dígitos">
                             </div>
                             <div class="form-row">
@@ -185,7 +196,7 @@
                                 </div>
                             </div>
                             <button class="btn btn-primary btn-block" id="btn-reset-password">
-                                <i class="fas fa-sync-alt"></i> Restablecer contraseña
+                                Restablecer contraseña
                             </button>
                         </div>
                     </div>
