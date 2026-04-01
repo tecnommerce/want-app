@@ -10,12 +10,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header solo visible después de login -->
+    <!-- Header rediseñado con perfil -->
     <header class="header-admin" id="header-admin" style="display: none;">
         <div class="container">
             <div class="header-content">
                 <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
                 <div class="header-actions">
+                    <button class="header-btn" id="btn-open-profile" title="Mi perfil">
+                        <i class="fas fa-user-circle"></i> Perfil
+                    </button>
+                    <button class="btn-icon" id="btn-refresh" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-icon" id="btn-logout" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                     <button class="menu-toggle-admin" id="menu-toggle-admin">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -38,9 +47,6 @@
             </button>
             <button class="mobile-tab-btn" data-tab="delivery">
                 <i class="fas fa-truck"></i> Delivery
-            </button>
-            <button class="mobile-tab-btn" data-tab="perfil">
-                <i class="fas fa-user-circle"></i> Perfil
             </button>
             <button class="mobile-logout-btn" id="mobile-logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -194,21 +200,7 @@
 
             <!-- Panel principal (oculto inicialmente) -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
-                <div class="panel-header">
-                    <div class="panel-header-left">
-                        <h2 id="panel-nombre">Mi Negocio</h2>
-                        <p id="panel-email" class="panel-email"></p>
-                    </div>
-                    <div class="panel-header-right">
-                        <button class="btn-icon" id="btn-refresh" title="Actualizar datos">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                        <button class="btn-icon" id="btn-logout" title="Cerrar sesión">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </div>
-                </div>
-
+                <!-- Métricas -->
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
@@ -247,6 +239,7 @@
                     </div>
                 </div>
 
+                <!-- Tabs (sin perfil) -->
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="pedidos">
                         <i class="fas fa-box"></i> Pedidos
@@ -260,44 +253,52 @@
                         <i class="fas fa-truck"></i> Delivery
                         <span class="tab-badge" id="badge-delivery">0</span>
                     </button>
-                    <button class="tab-btn" data-tab="perfil">
-                        <i class="fas fa-user-circle"></i> Perfil
-                    </button>
                 </div>
 
-                <!-- Tab Pedidos -->
+                <!-- Tab Pedidos con filtros y buscador -->
                 <div class="tab-content active" id="tab-pedidos">
-                    <div class="productos-header-actions" style="justify-content: space-between;">
-                        <div class="buscador-pedidos">
+                    <div class="filtros-buscador">
+                        <div class="filtros-pedidos">
+                            <button class="filtro-btn active" data-estado="preparando">
+                                <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
+                            </button>
+                            <button class="filtro-btn" data-estado="en preparacion">
+                                <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
+                            </button>
+                            <button class="filtro-btn" data-estado="en camino">
+                                <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
+                            </button>
+                            <button class="filtro-btn" data-estado="entregado">
+                                <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
+                            </button>
+                        </div>
+                        <div class="buscador-container">
                             <div class="buscador-input">
                                 <i class="fas fa-search"></i>
                                 <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
                             </div>
-                            <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
-                                <i class="fas fa-times"></i> Limpiar
+                            <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda" title="Limpiar búsqueda">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
+                                <i class="fas fa-plus-circle"></i> Nuevo pedido
                             </button>
                         </div>
-                        <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
-                            <i class="fas fa-plus-circle"></i> Crear pedido
-                        </button>
                     </div>
                     
-                    <div class="filtros-pedidos">
-                        <button class="filtro-btn active" data-estado="preparando">
-                            <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
-                        </button>
-                        <button class="filtro-btn" data-estado="en preparacion">
-                            <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
-                        </button>
-                        <button class="filtro-btn" data-estado="en camino">
-                            <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
-                        </button>
-                        <button class="filtro-btn" data-estado="entregado">
-                            <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
-                        </button>
-                    </div>
                     <div class="pedidos-container" id="pedidos-container">
                         <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
+                    </div>
+                    
+                    <!-- Paginación -->
+                    <div class="paginacion-container" id="paginacion-container" style="display: none;">
+                        <button class="btn-paginacion" id="btn-pagina-anterior" disabled>
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <span class="info-pagina" id="info-pagina">Página 1 de 1</span>
+                        <button class="btn-paginacion" id="btn-pagina-siguiente" disabled>
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -324,57 +325,63 @@
                         <div class="loading"><div class="spinner"></div><p>Cargando deliveries...</p></div>
                     </div>
                 </div>
-
-                <!-- Tab Perfil -->
-                <div class="tab-content" id="tab-perfil">
-                    <div class="perfil-container">
-                        <div class="perfil-header">
-                            <div class="perfil-avatar"><i class="fas fa-store"></i></div>
-                            <div class="perfil-info">
-                                <h3 id="perfil-nombre-display"></h3>
-                                <p id="perfil-email-display"></p>
-                            </div>
-                        </div>
-                        <form id="perfil-form" class="perfil-form">
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Nombre del negocio</label>
-                                    <input type="text" id="perfil-nombre" class="form-control">
-                                </div>
-                                <div class="form-group half">
-                                    <label>Teléfono (WhatsApp)</label>
-                                    <input type="tel" id="perfil-telefono" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Dirección</label>
-                                <input type="text" id="perfil-direccion" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label>Horario de atención</label>
-                                <input type="text" id="perfil-horario" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label>Logo del negocio</label>
-                                <div class="logo-upload-area">
-                                    <input type="file" id="perfil-logo" accept="image/*" style="display: none;">
-                                    <button type="button" class="btn-outline" id="btn-upload-logo">
-                                        <i class="fas fa-cloud-upload-alt"></i> Subir logo
-                                    </button>
-                                    <div id="logo-preview" class="logo-preview"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Cambiar contraseña</label>
-                                <input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar">
-                            </div>
-                            <button type="submit" class="btn-primary btn-save">Guardar cambios</button>
-                        </form>
-                    </div>
-                </div>
             </div>
         </div>
     </main>
+
+    <!-- Modal de Perfil (nuevo) -->
+    <div class="modal" id="modal-perfil">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-circle"></i> Mi perfil</h3>
+                <button class="modal-close" onclick="cerrarModalPerfil()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="perfil-header">
+                    <div class="perfil-avatar"><i class="fas fa-store"></i></div>
+                    <div class="perfil-info">
+                        <h3 id="perfil-nombre-display"></h3>
+                        <p id="perfil-email-display"></p>
+                    </div>
+                </div>
+                <form id="perfil-form" class="perfil-form">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Nombre del negocio</label>
+                            <input type="text" id="perfil-nombre" class="form-control">
+                        </div>
+                        <div class="form-group half">
+                            <label>Teléfono (WhatsApp)</label>
+                            <input type="tel" id="perfil-telefono" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" id="perfil-direccion" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Horario de atención</label>
+                        <input type="text" id="perfil-horario" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Logo del negocio</label>
+                        <div class="logo-upload-area">
+                            <input type="file" id="perfil-logo" accept="image/*" style="display: none;">
+                            <button type="button" class="btn-outline" id="btn-upload-logo">
+                                <i class="fas fa-cloud-upload-alt"></i> Subir logo
+                            </button>
+                            <div id="logo-preview" class="logo-preview"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cambiar contraseña</label>
+                        <input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar">
+                    </div>
+                    <button type="submit" class="btn-primary btn-save">Guardar cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal para agregar/editar producto -->
     <div class="modal" id="modal-producto">
@@ -565,7 +572,7 @@
         </div>
     </div>
 
-    <!-- Modal para seleccionar producto (agregar a pedido) -->
+    <!-- Modal para seleccionar producto -->
     <div class="modal" id="modal-seleccionar-producto">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">

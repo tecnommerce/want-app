@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (versión completa con Delivery, Editar pedido, Nuevo pedido)
+// ADMIN - Panel de vendedor (versión completa con paginación y número de orden)
 // ===================================================
 
 // Configuración de Cloudinary
@@ -16,23 +16,14 @@ let terminoBusqueda = '';
 let pedidoPendienteConfirmar = null;
 let botonPendienteConfirmar = null;
 
-// ===================================================
-// FUNCIONES AUXILIARES
-// ===================================================
-
-function getEstadoTexto(estado) {
-    const textos = { 
-        'preparando': 'NUEVO PEDIDO', 
-        'en preparacion': 'EN PREPARACIÓN', 
-        'en camino': 'EN CAMINO', 
-        'entregado': 'ENTREGADO' 
-    };
-    return textos[estado] || estado.toUpperCase();
-}
+// Variables de paginación
+let paginaActual = 1;
+let pedidosPorPagina = 10;
+let pedidosFiltrados = [];
 
 // Variables para editar/nuevo pedido
 let productosTemp = [];
-let modoEdicionPedido = null; // 'editar' o 'nuevo'
+let modoEdicionPedido = null;
 let pedidoEditandoId = null;
 
 // ===================================================
@@ -105,7 +96,30 @@ async function subirImagenACloudinary(file) {
 }
 
 // ===================================================
-// NORMALIZACIÓN DE ESTADOS
+// FUNCIÓN PARA EFECTO DE CARGA EN BOTONES
+// ===================================================
+
+async function withLoading(button, callback) {
+    if (!button) return await callback();
+    
+    const originalText = button.innerHTML;
+    const originalDisabled = button.disabled;
+    
+    button.disabled = true;
+    button.classList.add('btn-loading');
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + button.innerHTML.replace(/<i class="[^"]*"><\/i>\s*/, '');
+    
+    try {
+        return await callback();
+    } finally {
+        button.disabled = originalDisabled;
+        button.classList.remove('btn-loading');
+        button.innerHTML = originalText;
+    }
+}
+
+// ===================================================
+// NORMALIZACIÓN DE ESTADOS Y FUNCIONES AUXILIARES
 // ===================================================
 
 function normalizarEstado(estado) {
@@ -116,6 +130,16 @@ function normalizarEstado(estado) {
     if (estadoLower === 'en camino') return 'en camino';
     if (estadoLower === 'entregado') return 'entregado';
     return estadoLower;
+}
+
+function getEstadoTexto(estado) {
+    const textos = { 
+        'preparando': 'NUEVO PEDIDO', 
+        'en preparacion': 'EN PREPARACIÓN', 
+        'en camino': 'EN CAMINO', 
+        'entregado': 'ENTREGADO' 
+    };
+    return textos[estado] || estado.toUpperCase();
 }
 
 // ===================================================
@@ -196,18 +220,88 @@ function actualizarContadoresPedidos() {
 }
 
 // ===================================================
-// BUSCADOR DE PEDIDOS
+// BUSCADOR Y PAGINACIÓN
 // ===================================================
 
-function filtrarPedidosPorBusqueda(pedidosLista) {
-    if (!terminoBusqueda.trim()) return pedidosLista;
+function filtrarPedidos() {
+    let filtrados = pedidos.filter(p => p.estado === filtroActual);
     
-    const termino = terminoBusqueda.toLowerCase().trim();
-    return pedidosLista.filter(p => {
-        return p.id.toString().includes(termino) ||
-               (p.cliente_nombre && p.cliente_nombre.toLowerCase().includes(termino)) ||
-               (p.cliente_telefono && p.cliente_telefono.includes(termino));
-    });
+    if (terminoBusqueda.trim()) {
+        const termino = terminoBusqueda.toLowerCase().trim();
+        filtrados = filtrados.filter(p => {
+            return p.numero_orden?.toString().includes(termino) ||
+                   p.id?.toString().includes(termino) ||
+                   (p.cliente_nombre && p.cliente_nombre.toLowerCase().includes(termino)) ||
+                   (p.cliente_telefono && p.cliente_telefono.includes(termino));
+        });
+    }
+    
+    filtrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    return filtrados;
+}
+
+function actualizarPaginacion() {
+    pedidosFiltrados = filtrarPedidos();
+    const totalPaginas = Math.ceil(pedidosFiltrados.length / pedidosPorPagina);
+    
+    if (paginaActual > totalPaginas && totalPaginas > 0) {
+        paginaActual = totalPaginas;
+    }
+    if (paginaActual < 1) paginaActual = 1;
+    
+    const inicio = (paginaActual - 1) * pedidosPorPagina;
+    const fin = inicio + pedidosPorPagina;
+    const pedidosPagina = pedidosFiltrados.slice(inicio, fin);
+    
+    renderizarPedidos(pedidosPagina);
+    renderizarPaginacion(totalPaginas);
+}
+
+function renderizarPaginacion(totalPaginas) {
+    const container = document.getElementById('paginacion-container');
+    const btnAnterior = document.getElementById('btn-pagina-anterior');
+    const btnSiguiente = document.getElementById('btn-pagina-siguiente');
+    const infoPagina = document.getElementById('info-pagina');
+    
+    if (!container) return;
+    
+    if (totalPaginas <= 1) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'flex';
+    infoPagina.textContent = `Página ${paginaActual} de ${totalPaginas}`;
+    
+    btnAnterior.disabled = paginaActual <= 1;
+    btnSiguiente.disabled = paginaActual >= totalPaginas;
+}
+
+function cambiarPagina(direccion) {
+    const totalPaginas = Math.ceil(filtrarPedidos().length / pedidosPorPagina);
+    const nuevaPagina = paginaActual + direccion;
+    
+    if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+        paginaActual = nuevaPagina;
+        actualizarPaginacion();
+    }
+}
+
+function resetearPaginacion() {
+    paginaActual = 1;
+    actualizarPaginacion();
+}
+
+function inicializarPaginacion() {
+    const btnAnterior = document.getElementById('btn-pagina-anterior');
+    const btnSiguiente = document.getElementById('btn-pagina-siguiente');
+    
+    if (btnAnterior) {
+        btnAnterior.addEventListener('click', () => cambiarPagina(-1));
+    }
+    if (btnSiguiente) {
+        btnSiguiente.addEventListener('click', () => cambiarPagina(1));
+    }
 }
 
 function inicializarBuscador() {
@@ -217,7 +311,7 @@ function inicializarBuscador() {
     if (buscadorInput) {
         buscadorInput.addEventListener('input', (e) => {
             terminoBusqueda = e.target.value;
-            renderizarPedidos();
+            resetearPaginacion();
         });
     }
     
@@ -225,45 +319,40 @@ function inicializarBuscador() {
         limpiarBtn.addEventListener('click', () => {
             if (buscadorInput) buscadorInput.value = '';
             terminoBusqueda = '';
-            renderizarPedidos();
+            resetearPaginacion();
         });
     }
 }
 
 // ===================================================
-// RENDERIZAR PEDIDOS (con botones por estado)
+// RENDERIZAR PEDIDOS (con número de orden)
 // ===================================================
 
-function renderizarPedidos() {
+function renderizarPedidos(pedidosMostrar) {
     const container = document.getElementById('pedidos-container');
     if (!container) return;
     
-    let pedidosFiltrados = pedidos.filter(p => p.estado === filtroActual);
-    pedidosFiltrados = filtrarPedidosPorBusqueda(pedidosFiltrados);
-    pedidosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    
-    if (pedidosFiltrados.length === 0) {
+    if (pedidosMostrar.length === 0) {
         container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
     
-    container.innerHTML = pedidosFiltrados.map(p => {
+    container.innerHTML = pedidosMostrar.map(p => {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago || 'efectivo';
         const estado = p.estado;
+        const numeroMostrar = p.numero_orden || p.id;
         
-        // Determinar qué botones mostrar según el estado
         let botonesHTML = '';
         
         if (estado === 'preparando') {
-            // NUEVO: confirmar pedido, preparar pedido, editar, cancelar
             botonesHTML = `
                 <div class="botones-estado">
                     <button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)">
-                        <i class="fab fa-whatsapp"></i> Confirmar pedido
+                        <i class="fab fa-whatsapp"></i> Confirmar
                     </button>
                     <button class="btn-preparar-pedido" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">
-                        <i class="fas fa-utensils"></i> Preparar pedido
+                        <i class="fas fa-utensils"></i> Preparar
                     </button>
                 </div>
                 <div class="botones-acciones">
@@ -277,7 +366,6 @@ function renderizarPedidos() {
             `;
         } 
         else if (estado === 'en preparacion') {
-            // PREPARACIÓN: Pedido listo (verde), editar, cancelar
             botonesHTML = `
                 <div class="botones-estado">
                     <button class="btn-pedido-listo" onclick="abrirModalAsignarDelivery(${p.id})">
@@ -295,7 +383,6 @@ function renderizarPedidos() {
             `;
         }
         else if (estado === 'en camino') {
-            // EN CAMINO: Notificar Envío, Confirmar entrega, editar, cancelar
             botonesHTML = `
                 <div class="botones-estado">
                     <button class="btn-notificar-camino" onclick="notificarEnCamino(${p.id}, this)">
@@ -316,7 +403,6 @@ function renderizarPedidos() {
             `;
         }
         else if (estado === 'entregado') {
-            // ENTREGADO: solo editar y cancelar
             botonesHTML = `
                 <div class="botones-acciones">
                     <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
@@ -332,26 +418,27 @@ function renderizarPedidos() {
         return `
             <div class="pedido-card">
                 <div class="pedido-header">
-                    <div class="pedido-id">Pedido #${p.id}</div>
+                    <div class="pedido-id">Pedido #${numeroMostrar}</div>
                     <div class="pedido-fecha">${fecha.toLocaleString('es-AR')}</div>
                 </div>
                 <div class="pedido-cliente">
                     <strong><i class="fas fa-user"></i> ${escapeHTML(p.cliente_nombre)}</strong>
                     <span><i class="fas fa-phone"></i> ${p.cliente_telefono}</span>
-                    <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(p.direccion || 'Sin dirección')}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(p.direccion?.substring(0, 30) || 'Sin dirección')}${p.direccion?.length > 30 ? '...' : ''}</span>
                     <span><i class="fas fa-money-bill-wave"></i> ${metodoPago === 'transferencia' ? 'Transferencia' : 'Efectivo'}</span>
                 </div>
                 <div class="pedido-productos">
                     <strong>Productos:</strong>
                     <ul>
-                        ${p.productos ? p.productos.map(pr => `
+                        ${p.productos ? p.productos.slice(0, 2).map(pr => `
                             <li>${pr.cantidad}x ${escapeHTML(pr.nombre)} - ${formatearPrecio(pr.precio * pr.cantidad)}</li>
-                        `).join('') : '<li>No hay detalles</li>'}
+                        `).join('') : '<li>No hay productos</li>'}
+                        ${p.productos && p.productos.length > 2 ? `<li class="mas-productos">+ ${p.productos.length - 2} más</li>` : ''}
                     </ul>
                     ${p.detalles ? `
                         <div class="pedido-detalles">
-                            <strong>Detalles del pedido:</strong>
-                            <p>${escapeHTML(p.detalles)}</p>
+                            <strong><i class="fas fa-pen"></i> Detalles:</strong>
+                            <p>${escapeHTML(p.detalles.substring(0, 50))}${p.detalles.length > 50 ? '...' : ''}</p>
                         </div>
                     ` : ''}
                     <div class="pedido-total">Total: ${formatearPrecio(p.total)}</div>
@@ -366,62 +453,59 @@ function renderizarPedidos() {
         `;
     }).join('');
 }
+
 // ===================================================
 // ACTUALIZAR ESTADO
 // ===================================================
 
 async function actualizarEstado(pedidoId, nuevoEstado, boton) {
     if (!boton) return;
-    const textoOriginal = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
-    try {
-        const response = await postAPI('actualizarEstado', { pedidoId, estado: nuevoEstado });
-        if (response && response.success) {
-            mostrarToast(`Pedido #${pedidoId} actualizado a ${getEstadoTexto(nuevoEstado)}`, 'success');
-            const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-            if (pedido) pedido.estado = nuevoEstado;
-            actualizarContadoresPedidos();
-            calcularMetricas();
-            renderizarPedidos();
-        } else {
-            throw new Error(response?.error || 'Error');
+    await withLoading(boton, async () => {
+        try {
+            const response = await postAPI('actualizarEstado', { pedidoId, estado: nuevoEstado });
+            if (response && response.success) {
+                mostrarToast(`Pedido #${pedidoId} actualizado a ${getEstadoTexto(nuevoEstado)}`, 'success');
+                const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+                if (pedido) pedido.estado = nuevoEstado;
+                actualizarContadoresPedidos();
+                calcularMetricas();
+                resetearPaginacion();
+            } else {
+                throw new Error(response?.error || 'Error');
+            }
+        } catch (error) {
+            mostrarToast('Error al actualizar', 'error');
+            throw error;
         }
-    } catch (error) {
-        mostrarToast('Error al actualizar', 'error');
-        boton.innerHTML = textoOriginal;
-        boton.disabled = false;
-    }
+    });
 }
 
 async function cancelarPedido(pedidoId, boton) {
     if (!confirm('¿Cancelar este pedido? Se eliminará permanentemente.')) return;
     if (!boton) return;
-    const textoOriginal = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
-    try {
-        const response = await postAPI('cancelarPedido', { pedidoId });
-        if (response && response.success) {
-            mostrarToast(`Pedido #${pedidoId} cancelado`, 'success');
-            pedidos = pedidos.filter(p => p.id.toString() !== pedidoId.toString());
-            actualizarContadoresPedidos();
-            calcularMetricas();
-            renderizarPedidos();
-        } else {
-            throw new Error(response?.error || 'Error');
+    await withLoading(boton, async () => {
+        try {
+            const response = await postAPI('cancelarPedido', { pedidoId });
+            if (response && response.success) {
+                mostrarToast(`Pedido #${pedidoId} cancelado`, 'success');
+                pedidos = pedidos.filter(p => p.id.toString() !== pedidoId.toString());
+                actualizarContadoresPedidos();
+                calcularMetricas();
+                resetearPaginacion();
+            } else {
+                throw new Error(response?.error || 'Error');
+            }
+        } catch (error) {
+            mostrarToast('Error al cancelar', 'error');
+            throw error;
         }
-    } catch (error) {
-        mostrarToast('Error al cancelar', 'error');
-        boton.innerHTML = textoOriginal;
-        boton.disabled = false;
-    }
+    });
 }
 
 // ===================================================
-// CONFIRMAR PEDIDO POR WHATSAPP (sin cambiar estado)
+// CONFIRMAR PEDIDO POR WHATSAPP
 // ===================================================
 
 async function confirmarPedidoWhatsApp(pedidoId, boton) {
@@ -483,7 +567,7 @@ async function enviarConfirmacionWhatsApp() {
     
     mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
     mensaje += `*TOTAL:* $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += `*NUMERO DE ORDEN:* #${pedido.id}\n`;
+    mensaje += `*NUMERO DE ORDEN:* #${pedido.numero_orden || pedido.id}\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
     
     mensaje += `*TIEMPO ESTIMADO DE ENTREGA:* ${tiempoEntrega}\n\n`;
@@ -517,54 +601,47 @@ async function enviarConfirmacionWhatsApp() {
 }
 
 // ===================================================
-// NOTIFICAR EN CAMINO (mensaje mejorado)
+// NOTIFICAR EN CAMINO
 // ===================================================
 
 async function notificarEnCamino(pedidoId, boton) {
     const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
     if (!pedido) return;
     
-    const originalText = boton.innerHTML;
-    boton.disabled = true;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
-    
-    let mensaje = `*ACTUALIZACIÓN DE TU PEDIDO*\n\n`;
-    mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
-    mensaje += `*¡Tu pedido está en camino!*\n\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*DETALLE DE TU PEDIDO:*\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
-    pedido.productos.forEach(p => {
-        mensaje += `• ${p.cantidad}x ${p.nombre}\n`;
+    await withLoading(boton, async () => {
+        const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+        
+        let mensaje = `*ACTUALIZACIÓN DE TU PEDIDO*\n\n`;
+        mensaje += `Hola ${pedido.cliente_nombre},\n\n`;
+        mensaje += `*¡Tu pedido está en camino!*\n\n`;
+        mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
+        mensaje += `*DETALLE DE TU PEDIDO:*\n`;
+        mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
+        pedido.productos.forEach(p => {
+            mensaje += `• ${p.cantidad}x ${p.nombre}\n`;
+        });
+        
+        if (pedido.detalles) {
+            mensaje += `\n*INDICACIONES ESPECIALES:*\n`;
+            mensaje += `${pedido.detalles}\n`;
+        }
+        
+        mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+        mensaje += `*DIRECCIÓN DE ENTREGA:* ${pedido.direccion}\n`;
+        mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        if (metodoPagoTexto === 'transferencia') {
+            mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)\n\n`;
+        } else {
+            mensaje += `*PAGO:* Efectivo - *DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY*\n\n`;
+        }
+        
+        mensaje += `Quedate atento al delivery!\n`;
+        mensaje += `*Gracias por tu compra!*`;
+        
+        const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
     });
-    
-    if (pedido.detalles) {
-        mensaje += `\n*INDICACIONES ESPECIALES:*\n`;
-        mensaje += `${pedido.detalles}\n`;
-    }
-    
-    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*DIRECCIÓN DE ENTREGA:* ${pedido.direccion}\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-    
-    if (metodoPagoTexto === 'transferencia') {
-        mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)\n\n`;
-    } else {
-        mensaje += `*PAGO:* Efectivo - *DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY*\n\n`;
-    }
-    
-    mensaje += `Quedate atento al delivery!\n`;
-    mensaje += `*Gracias por tu compra!*`;
-    
-    const url = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-    
-    setTimeout(() => {
-        boton.disabled = false;
-        boton.innerHTML = originalText;
-    }, 1500);
 }
 
 function cerrarModalTiempo() {
@@ -577,7 +654,7 @@ function cerrarModalTiempo() {
 }
 
 // ===================================================
-// ASIGNAR DELIVERY (Pedido listo)
+// ASIGNAR DELIVERY
 // ===================================================
 
 let pedidoParaAsignar = null;
@@ -588,7 +665,7 @@ function abrirModalAsignarDelivery(pedidoId) {
     
     pedidoParaAsignar = pedido;
     
-    document.getElementById('asignar-pedido-id').textContent = pedido.id;
+    document.getElementById('asignar-pedido-id').textContent = pedido.numero_orden || pedido.id;
     document.getElementById('asignar-cliente-nombre').textContent = pedido.cliente_nombre;
     document.getElementById('asignar-total').textContent = formatearPrecio(pedido.total);
     
@@ -620,46 +697,51 @@ async function enviarPedidoADelivery() {
         return;
     }
     
-    const pedido = pedidoParaAsignar;
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    const btnEnviar = document.getElementById('btn-enviar-delivery');
     
-    let mensaje = `*NUEVO PEDIDO PARA ENTREGAR*\n\n`;
-    mensaje += `Hola ${deliveryNombre},\n\n`;
-    mensaje += `Tienes un nuevo pedido para entregar:\n\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*PEDIDO #${pedido.id}*\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*Cliente:* ${pedido.cliente_nombre}\n`;
-    mensaje += `*Teléfono:* ${pedido.cliente_telefono}\n`;
-    mensaje += `*Dirección:* ${pedido.direccion}\n\n`;
-    mensaje += `*Productos:*\n`;
-    pedido.productos.forEach(p => {
-        mensaje += `• ${p.cantidad}x ${p.nombre}\n`;
+    await withLoading(btnEnviar, async () => {
+        const pedido = pedidoParaAsignar;
+        const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+        
+        let mensaje = `*NUEVO PEDIDO PARA ENTREGAR*\n\n`;
+        mensaje += `Hola ${deliveryNombre},\n\n`;
+        mensaje += `Tienes un nuevo pedido para entregar:\n\n`;
+        mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
+        mensaje += `*PEDIDO #${pedido.numero_orden || pedido.id}*\n`;
+        mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
+        mensaje += `*Cliente:* ${pedido.cliente_nombre}\n`;
+        mensaje += `*Teléfono:* ${pedido.cliente_telefono}\n`;
+        mensaje += `*Dirección:* ${pedido.direccion}\n\n`;
+        mensaje += `*Productos:*\n`;
+        pedido.productos.forEach(p => {
+            mensaje += `• ${p.cantidad}x ${p.nombre}\n`;
+        });
+        
+        if (pedido.detalles) {
+            mensaje += `\n*Indicaciones:* ${pedido.detalles}\n`;
+        }
+        
+        mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+        mensaje += `*Total:* $${pedido.total.toLocaleString('es-AR')}\n`;
+        
+        if (metodoPagoTexto === 'transferencia') {
+            mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)\n`;
+        } else {
+            mensaje += `*PAGO:* Efectivo - *DEBES COBRAR $${pedido.total.toLocaleString('es-AR')}*\n`;
+        }
+        mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        mensaje += `Por favor, confirma que recibiste este pedido.`;
+        
+        const url = `https://wa.me/${deliveryTelefono}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+        
+        const botonTemp = { disabled: false, innerHTML: '' };
+        await actualizarEstado(pedido.id, 'en camino', botonTemp);
+        
+        mostrarToast(`Pedido #${pedido.numero_orden || pedido.id} asignado a ${deliveryNombre}`, 'success');
+        cerrarModalAsignarDelivery();
+        resetearPaginacion();
     });
-    
-    if (pedido.detalles) {
-        mensaje += `\n*Indicaciones:* ${pedido.detalles}\n`;
-    }
-    
-    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*Total:* $${pedido.total.toLocaleString('es-AR')}\n`;
-    
-    if (metodoPagoTexto === 'transferencia') {
-        mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)\n`;
-    } else {
-        mensaje += `*PAGO:* Efectivo - *DEBES COBRAR $${pedido.total.toLocaleString('es-AR')}*\n`;
-    }
-    mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-    mensaje += `Por favor, confirma que recibiste este pedido.`;
-    
-    const url = `https://wa.me/${deliveryTelefono}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-    
-    // Cambiar estado del pedido a "en camino"
-    await actualizarEstado(pedido.id, 'en camino', { disabled: false, innerHTML: '' });
-    
-    mostrarToast(`Pedido #${pedido.id} asignado a ${deliveryNombre}`, 'success');
-    cerrarModalAsignarDelivery();
 }
 
 // ===================================================
@@ -817,7 +899,7 @@ function abrirModalEditarPedido(pedidoId) {
     productosTempEdit = JSON.parse(JSON.stringify(pedido.productos || []));
     
     document.getElementById('edit-pedido-id').value = pedido.id;
-    document.getElementById('edit-pedido-id-display').textContent = pedido.id;
+    document.getElementById('edit-pedido-id-display').textContent = pedido.numero_orden || pedido.id;
     document.getElementById('edit-cliente-nombre').value = pedido.cliente_nombre || '';
     document.getElementById('edit-cliente-telefono').value = pedido.cliente_telefono || '';
     document.getElementById('edit-direccion').value = pedido.direccion || '';
@@ -1049,7 +1131,7 @@ async function guardarNuevoPedido() {
 }
 
 // ===================================================
-// MODAL PARA SELECCIONAR PRODUCTO (AGREGAR A PEDIDO)
+// MODAL PARA SELECCIONAR PRODUCTO
 // ===================================================
 
 let currentProductosList = null;
@@ -1129,7 +1211,7 @@ function verificarProductosPropios() {
         const productoVendedorId = producto.vendedor_id ? producto.vendedor_id.toString() : null;
         const vendedorActualId = vendedorActual.id.toString();
         if (productoVendedorId !== vendedorActualId) {
-            console.warn(`⚠️ Producto inválido: ${producto.id} (${producto.nombre}) - Vendedor: ${productoVendedorId}, Esperado: ${vendedorActualId}`);
+            console.warn(`⚠️ Producto inválido: ${producto.id} (${producto.nombre})`);
             productosInvalidos++;
         }
     });
@@ -1297,7 +1379,7 @@ function inicializarModalProducto() {
 }
 
 // ===================================================
-// PERFIL
+// PERFIL MODAL
 // ===================================================
 
 function cargarPerfil() {
@@ -1307,11 +1389,15 @@ function cargarPerfil() {
     const perfilDireccion = document.getElementById('perfil-direccion');
     const perfilHorario = document.getElementById('perfil-horario');
     const logoPreview = document.getElementById('logo-preview');
+    const perfilNombreDisplay = document.getElementById('perfil-nombre-display');
+    const perfilEmailDisplay = document.getElementById('perfil-email-display');
     
     if (perfilNombre) perfilNombre.value = vendedorActual.nombre || '';
     if (perfilTelefono) perfilTelefono.value = vendedorActual.telefono || '';
     if (perfilDireccion) perfilDireccion.value = vendedorActual.direccion || '';
     if (perfilHorario) perfilHorario.value = vendedorActual.horario || '';
+    if (perfilNombreDisplay) perfilNombreDisplay.textContent = vendedorActual.nombre || '';
+    if (perfilEmailDisplay) perfilEmailDisplay.textContent = vendedorActual.email || '';
     if (logoPreview && vendedorActual.logo_url) logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`;
     
     const btnUploadLogo = document.getElementById('btn-upload-logo');
@@ -1363,8 +1449,18 @@ async function actualizarPerfil() {
             if (panelNombre) panelNombre.textContent = nombre;
             if (perfilNombreDisplay) perfilNombreDisplay.textContent = nombre;
             document.getElementById('perfil-new-password').value = '';
+            cerrarModalPerfil();
         } else throw new Error(response?.error || 'Error');
     } catch (error) { mostrarToast('Error al actualizar perfil', 'error'); }
+}
+
+function abrirModalPerfil() {
+    cargarPerfil();
+    document.getElementById('modal-perfil').classList.add('active');
+}
+
+function cerrarModalPerfil() {
+    document.getElementById('modal-perfil').classList.remove('active');
 }
 
 // ===================================================
@@ -1391,39 +1487,35 @@ async function iniciarPanel(vendedor) {
     const adminPanel = document.getElementById('admin-panel');
     const panelNombre = document.getElementById('panel-nombre');
     const panelEmail = document.getElementById('panel-email');
-    const perfilNombreDisplay = document.getElementById('perfil-nombre-display');
-    const perfilEmailDisplay = document.getElementById('perfil-email-display');
+    const headerAdmin = document.getElementById('header-admin');
     
     if (adminAuth) adminAuth.style.display = 'none';
     if (adminPanel) adminPanel.style.display = 'block';
+    if (headerAdmin) headerAdmin.style.display = 'block';
     if (panelNombre) panelNombre.textContent = vendedor.nombre;
     if (panelEmail) panelEmail.textContent = vendedor.email;
-    if (perfilNombreDisplay) perfilNombreDisplay.textContent = vendedor.nombre;
-    if (perfilEmailDisplay) perfilEmailDisplay.textContent = vendedor.email;
     
     await cargarPedidos();
     await cargarProductos();
     await cargarDeliveries();
-    cargarPerfil();
     
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) btnRefresh.addEventListener('click', async () => {
-        const btn = btnRefresh;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-        await cargarPedidos(true);
-        await cargarProductos(true);
-        await cargarDeliveries(true);
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        mostrarToast('Datos actualizados', 'success');
+        await withLoading(btnRefresh, async () => {
+            await cargarPedidos(true);
+            await cargarProductos(true);
+            await cargarDeliveries(true);
+            mostrarToast('Datos actualizados', 'success');
+        });
     });
     
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) btnLogout.addEventListener('click', cerrarSesion);
     const mobileLogout = document.getElementById('mobile-logout-btn');
     if (mobileLogout) mobileLogout.addEventListener('click', cerrarSesion);
+    
+    const btnOpenProfile = document.getElementById('btn-open-profile');
+    if (btnOpenProfile) btnOpenProfile.addEventListener('click', abrirModalPerfil);
     
     const btnAgregarProducto = document.getElementById('btn-agregar-producto');
     if (btnAgregarProducto) btnAgregarProducto.addEventListener('click', () => abrirModalProducto());
@@ -1440,6 +1532,7 @@ async function iniciarPanel(vendedor) {
     inicializarModalTiempo();
     inicializarModalProducto();
     inicializarBuscador();
+    inicializarPaginacion();
     
     const btnGuardarProducto = document.getElementById('guardar-producto');
     if (btnGuardarProducto) btnGuardarProducto.addEventListener('click', guardarProducto);
@@ -1509,7 +1602,7 @@ function inicializarFiltros() {
             filtros.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             filtroActual = btn.getAttribute('data-estado');
-            renderizarPedidos();
+            resetearPaginacion();
         });
     });
 }
@@ -1561,7 +1654,7 @@ async function cargarPedidos(forceRefresh = false) {
         pedidos = (response.pedidos || []).map(p => ({ ...p, estado: normalizarEstado(p.estado) }));
         actualizarContadoresPedidos();
         calcularMetricas();
-        renderizarPedidos();
+        resetearPaginacion();
         if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
     } catch (error) { if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar pedidos</p></div>`; }
 }
