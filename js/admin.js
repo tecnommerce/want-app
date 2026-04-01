@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (versión completa sin emojis)
+// ADMIN - Panel de vendedor (versión completa funcional)
 // ===================================================
 
 // Configuración de Cloudinary
@@ -13,6 +13,7 @@ let productos = [];
 let filtroActual = 'preparando';
 let pedidoPendienteConfirmar = null;
 let botonPendienteConfirmar = null;
+let productoEditandoId = null;
 
 // ===================================================
 // UTILIDADES DE AUTENTICACIÓN
@@ -471,7 +472,7 @@ async function notificarEnCamino(pedidoId, boton) {
 }
 
 // ===================================================
-// GESTIÓN DE PRODUCTOS
+// GESTIÓN DE PRODUCTOS (COMPLETO CON CRUD)
 // ===================================================
 
 async function cargarProductos(forceRefresh = false) {
@@ -517,10 +518,6 @@ function renderizarProductosAdmin() {
     `).join('');
 }
 
-function abrirModalProducto(productoId = null) {
-    mostrarToast('Funcionalidad en desarrollo', 'info');
-}
-
 async function eliminarProducto(productoId) {
     if (!confirm('¿Eliminar este producto?')) return;
     try {
@@ -528,9 +525,138 @@ async function eliminarProducto(productoId) {
         if (response.success) {
             mostrarToast('Producto eliminado', 'success');
             await cargarProductos(true);
+        } else {
+            throw new Error(response.error);
         }
     } catch (error) {
-        mostrarToast('Error al eliminar', 'error');
+        mostrarToast('Error al eliminar: ' + error.message, 'error');
+    }
+}
+
+// ===================================================
+// MODAL PRODUCTO - Crear y Editar
+// ===================================================
+
+function abrirModalProducto(productoId = null) {
+    productoEditandoId = productoId;
+    const modal = document.getElementById('modal-producto');
+    const title = document.getElementById('modal-producto-title');
+    const idField = document.getElementById('producto-id');
+    const nombreField = document.getElementById('producto-nombre');
+    const descripcionField = document.getElementById('producto-descripcion');
+    const precioField = document.getElementById('producto-precio');
+    const disponibleField = document.getElementById('producto-disponible');
+    const previewDiv = document.getElementById('producto-imagen-preview');
+    const imagenInput = document.getElementById('producto-imagen');
+    
+    // Limpiar formulario
+    idField.value = '';
+    nombreField.value = '';
+    descripcionField.value = '';
+    precioField.value = '';
+    disponibleField.value = 'SI';
+    previewDiv.innerHTML = '';
+    if (imagenInput) imagenInput.value = '';
+    
+    if (productoId) {
+        const producto = productos.find(p => p.id.toString() === productoId.toString());
+        if (producto) {
+            title.textContent = 'Editar producto';
+            idField.value = producto.id;
+            nombreField.value = producto.nombre || '';
+            descripcionField.value = producto.descripcion || '';
+            precioField.value = producto.precio || '';
+            disponibleField.value = producto.disponible || 'SI';
+            if (producto.imagen_url) {
+                previewDiv.innerHTML = `<img src="${producto.imagen_url}" style="max-width: 100%; max-height: 120px; object-fit: contain;">`;
+            }
+        } else {
+            title.textContent = 'Nuevo producto';
+        }
+    } else {
+        title.textContent = 'Nuevo producto';
+    }
+    
+    modal.classList.add('active');
+}
+
+function cerrarModalProducto() {
+    document.getElementById('modal-producto').classList.remove('active');
+    productoEditandoId = null;
+    const imagenInput = document.getElementById('producto-imagen');
+    if (imagenInput) imagenInput.value = '';
+    const previewDiv = document.getElementById('producto-imagen-preview');
+    if (previewDiv) previewDiv.innerHTML = '';
+}
+
+async function guardarProducto() {
+    const productoId = document.getElementById('producto-id').value;
+    const nombre = document.getElementById('producto-nombre').value.trim();
+    const descripcion = document.getElementById('producto-descripcion').value.trim();
+    const precio = parseFloat(document.getElementById('producto-precio').value);
+    const disponible = document.getElementById('producto-disponible').value;
+    const imagenFile = document.getElementById('producto-imagen').files[0];
+    
+    if (!nombre || !precio) {
+        mostrarToast('Completá nombre y precio', 'error');
+        return;
+    }
+    
+    const btnGuardar = document.getElementById('btn-guardar-producto');
+    if (!btnGuardar) return;
+    
+    const originalText = btnGuardar.innerHTML;
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    try {
+        let imagenUrl = null;
+        
+        if (imagenFile) {
+            mostrarToast('Subiendo imagen...', 'info');
+            imagenUrl = await subirImagenACloudinary(imagenFile);
+            if (!imagenUrl) {
+                mostrarToast('Error al subir imagen', 'error');
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = originalText;
+                return;
+            }
+        } else if (productoId) {
+            const productoExistente = productos.find(p => p.id.toString() === productoId.toString());
+            if (productoExistente && productoExistente.imagen_url) {
+                imagenUrl = productoExistente.imagen_url;
+            }
+        }
+        
+        const productoData = {
+            nombre: nombre,
+            descripcion: descripcion,
+            precio: precio,
+            disponible: disponible,
+            imagen_url: imagenUrl,
+            vendedor_id: vendedorActual.id
+        };
+        
+        let response;
+        if (productoId) {
+            response = await postAPI('actualizarProducto', { ...productoData, id: parseInt(productoId) });
+        } else {
+            response = await postAPI('crearProducto', productoData);
+        }
+        
+        if (response && response.success) {
+            mostrarToast(`Producto ${productoId ? 'actualizado' : 'creado'} correctamente`, 'success');
+            cerrarModalProducto();
+            await cargarProductos(true);
+        } else {
+            throw new Error(response?.error || 'Error al guardar');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al guardar producto: ' + error.message, 'error');
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = originalText;
     }
 }
 
@@ -552,7 +678,7 @@ function cargarPerfil() {
     if (perfilHorario) perfilHorario.value = vendedorActual.horario || '';
     
     if (logoPreview && vendedorActual.logo_url) {
-        logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 100px; border-radius: 12px;">`;
+        logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="max-width: 80px; border-radius: 12px;">`;
     }
     
     const btnUploadLogo = document.getElementById('btn-upload-logo');
@@ -564,7 +690,7 @@ function cargarPerfil() {
             if (file && logoPreview) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    logoPreview.innerHTML = `<img src="${e.target.result}" style="max-width: 100px; border-radius: 12px;">`;
+                    logoPreview.innerHTML = `<img src="${e.target.result}" style="max-width: 80px; border-radius: 12px;">`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -692,6 +818,11 @@ async function iniciarPanel(vendedor) {
     
     const btnAgregar = document.getElementById('btn-agregar-producto');
     if (btnAgregar) btnAgregar.addEventListener('click', () => abrirModalProducto());
+    
+    const btnGuardarProducto = document.getElementById('btn-guardar-producto');
+    if (btnGuardarProducto) {
+        btnGuardarProducto.addEventListener('click', guardarProducto);
+    }
     
     inicializarTabs();
     inicializarFiltros();
