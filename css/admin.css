@@ -1648,3 +1648,556 @@ body {
         display: flex;
     }
 }
+
+/* ===================================================
+   BOTONES DE LOGIN - REDISEÑADOS
+   =================================================== */
+
+.btn, .btn-primary, .btn-outline, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 90, 0, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 90, 0, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Botones de los pedidos - MÁS GRANDES */
+.btn-confirmar-whatsapp,
+.btn-preparar-pedido,
+.btn-pedido-listo,
+.btn-notificar-camino,
+.btn-confirmar-entrega,
+.btn-editar-pedido,
+.btn-cancelar {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+/* Para móvil, botones más grandes */
+@media (max-width: 768px) {
+    .btn-confirmar-whatsapp,
+    .btn-preparar-pedido,
+    .btn-pedido-listo,
+    .btn-notificar-camino,
+    .btn-confirmar-entrega,
+    .btn-editar-pedido,
+    .btn-cancelar {
+        padding: 10px 18px;
+        font-size: 0.8rem;
+    }
+}
+
+.btn-confirmar-whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.btn-confirmar-whatsapp:hover:not(:disabled) {
+    background: #128C7E;
+    transform: scale(1.02);
+}
+
+.btn-preparar-pedido {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-preparar-pedido:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-pedido-listo {
+    background: var(--success);
+    color: white;
+}
+
+.btn-pedido-listo:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.btn-notificar-camino {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-notificar-camino:hover:not(:disabled) {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+.btn-confirmar-entrega {
+    background: var(--success);
+    color: white;
+}
+
+.btn-confirmar-entrega:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.btn-editar-pedido {
+    background: var(--info);
+    color: white;
+}
+
+.btn-editar-pedido:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-cancelar {
+    background: #FEF2F2;
+    color: var(--danger);
+    border: 1px solid #fee2e2;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+/* ===================================================
+   TARJETA DE LOGIN - MEJORADA
+   =================================================== */
+
+.admin-auth {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #FFF5EB 0%, #FFFFFF 100%);
+}
+
+.auth-card {
+    background: white;
+    border-radius: var(--radius-2xl);
+    padding: 48px 40px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--gray-100);
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.auth-logo-text {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+    color: var(--gray-500);
+    font-size: 0.9rem;
+}
+
+/* Formularios de login */
+.auth-card .form-group {
+    margin-bottom: 24px;
+}
+
+.auth-card .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+}
+
+.auth-card .form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background: white;
+}
+
+.auth-card .form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 90, 0, 0.1);
+}
+
+.auth-card .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.auth-card .checkbox-label input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.auth-divider {
+    text-align: center;
+    margin: 28px 0;
+    position: relative;
+}
+
+.auth-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gray-200);
+}
+
+.auth-divider span {
+    background: white;
+    padding: 0 16px;
+    position: relative;
+    color: var(--gray-500);
+    font-size: 0.8rem;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 500;
+}
+
+.link-btn:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.back-to-login {
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 8px 0;
+    transition: color 0.2s;
+}
+
+.back-to-login:hover {
+    color: var(--primary);
+}
+
+/* Password wrapper para login */
+.auth-card .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-card .password-wrapper input {
+    flex: 1;
+    padding-right: 45px;
+}
+
+.auth-card .toggle-password {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    padding: 8px;
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+}
+
+.auth-card .toggle-password:hover {
+    color: var(--primary);
+}
+
+/* ===================================================
+   BOTONES DE PEDIDOS - VERSIÓN GRANDE Y NOTABLE
+   =================================================== */
+
+.botones-estado {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.botones-acciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Botones de estado - Grandes y notables */
+.btn-confirmar-whatsapp {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-confirmar-whatsapp:hover:not(:disabled) {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-preparar-pedido {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-preparar-pedido:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-pedido-listo {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-pedido-listo:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-notificar-camino {
+    background: var(--warning);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-notificar-camino:hover:not(:disabled) {
+    background: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-confirmar-entrega {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-confirmar-entrega:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Botones de acciones - Medianos */
+.btn-editar-pedido {
+    background: var(--info);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-editar-pedido:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-cancelar {
+    background: #FEF2F2;
+    color: var(--danger);
+    border: 1px solid #fee2e2;
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+    transform: translateY(-1px);
+}
+
+/* Desktop - botones aún más grandes */
+@media (min-width: 1024px) {
+    .btn-confirmar-whatsapp,
+    .btn-preparar-pedido,
+    .btn-pedido-listo,
+    .btn-notificar-camino,
+    .btn-confirmar-entrega {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-editar-pedido,
+    .btn-cancelar {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Móvil - botones adaptados */
+@media (max-width: 768px) {
+    .botones-estado {
+        justify-content: center;
+    }
+    
+    .botones-acciones {
+        justify-content: center;
+    }
+    
+    .btn-confirmar-whatsapp,
+    .btn-preparar-pedido,
+    .btn-pedido-listo,
+    .btn-notificar-camino,
+    .btn-confirmar-entrega {
+        padding: 10px 16px;
+        font-size: 0.75rem;
+    }
+    
+    .btn-editar-pedido,
+    .btn-cancelar {
+        padding: 8px 14px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Estado deshabilitado */
+.btn-confirmar-whatsapp:disabled,
+.btn-preparar-pedido:disabled,
+.btn-pedido-listo:disabled,
+.btn-notificar-camino:disabled,
+.btn-confirmar-entrega:disabled,
+.btn-editar-pedido:disabled,
+.btn-cancelar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
