@@ -36,6 +36,9 @@
             <button class="mobile-tab-btn" data-tab="productos">
                 <i class="fas fa-pizza-slice"></i> Productos
             </button>
+            <button class="mobile-tab-btn" data-tab="delivery">
+                <i class="fas fa-truck"></i> Delivery
+            </button>
             <button class="mobile-tab-btn" data-tab="perfil">
                 <i class="fas fa-user-circle"></i> Perfil
             </button>
@@ -56,7 +59,7 @@
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
-                    <!-- Panel de Login (visible por defecto) -->
+                    <!-- Panel de Login -->
                     <div class="auth-panel active" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
@@ -77,25 +80,17 @@
                                     <input type="checkbox" id="remember-me"> Recordarme
                                 </label>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block" id="btn-login-submit">
-                                Ingresar
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
                         </form>
                         
-                        <div class="auth-divider">
-                            <span>¿No tenés cuenta?</span>
-                        </div>
-                        
-                        <button class="btn btn-outline btn-block" id="btn-show-register">
-                            Registrarse
-                        </button>
-                        
+                        <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
+                        <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
                         <div class="auth-links">
                             <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
                         </div>
                     </div>
 
-                    <!-- Panel de Registro (oculto inicialmente) -->
+                    <!-- Panel de Registro -->
                     <div class="auth-panel" id="register-panel">
                         <button class="back-to-login" id="back-to-login">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -150,13 +145,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block" id="btn-register-submit">
-                                Registrarse
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
                         </form>
                     </div>
 
-                    <!-- Panel de Recuperación (oculto inicialmente) -->
+                    <!-- Panel de Recuperación -->
                     <div class="auth-panel" id="recover-panel">
                         <button class="back-to-login" id="back-to-login-recover">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -166,9 +159,7 @@
                                 <label>Email</label>
                                 <input type="email" id="recover-email" required>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block" id="btn-recover-submit">
-                                Enviar código
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Enviar código</button>
                         </form>
                         <div id="recover-code-section" style="display: none;">
                             <div class="form-group">
@@ -195,9 +186,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button class="btn btn-primary btn-block" id="btn-reset-password">
-                                Restablecer contraseña
-                            </button>
+                            <button class="btn btn-primary btn-block" id="btn-reset-password">Restablecer contraseña</button>
                         </div>
                     </div>
                 </div>
@@ -267,12 +256,32 @@
                         <i class="fas fa-pizza-slice"></i> Productos
                         <span class="tab-badge" id="badge-productos">0</span>
                     </button>
+                    <button class="tab-btn" data-tab="delivery">
+                        <i class="fas fa-truck"></i> Delivery
+                        <span class="tab-badge" id="badge-delivery">0</span>
+                    </button>
                     <button class="tab-btn" data-tab="perfil">
                         <i class="fas fa-user-circle"></i> Perfil
                     </button>
                 </div>
 
+                <!-- Tab Pedidos -->
                 <div class="tab-content active" id="tab-pedidos">
+                    <div class="productos-header-actions" style="justify-content: space-between;">
+                        <div class="buscador-pedidos">
+                            <div class="buscador-input">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
+                            </div>
+                            <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                        <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
+                            <i class="fas fa-plus-circle"></i> Crear pedido
+                        </button>
+                    </div>
+                    
                     <div class="filtros-pedidos">
                         <button class="filtro-btn active" data-estado="preparando">
                             <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
@@ -292,6 +301,7 @@
                     </div>
                 </div>
 
+                <!-- Tab Productos -->
                 <div class="tab-content" id="tab-productos">
                     <div class="productos-header-actions">
                         <button class="btn-primary" id="btn-agregar-producto">
@@ -303,6 +313,19 @@
                     </div>
                 </div>
 
+                <!-- Tab Delivery -->
+                <div class="tab-content" id="tab-delivery">
+                    <div class="delivery-header-actions">
+                        <button class="btn-primary" id="btn-agregar-delivery">
+                            <i class="fas fa-plus"></i> Agregar delivery
+                        </button>
+                    </div>
+                    <div class="delivery-grid" id="delivery-grid">
+                        <div class="loading"><div class="spinner"></div><p>Cargando deliveries...</p></div>
+                    </div>
+                </div>
+
+                <!-- Tab Perfil -->
                 <div class="tab-content" id="tab-perfil">
                     <div class="perfil-container">
                         <div class="perfil-header">
@@ -345,9 +368,7 @@
                                 <label>Cambiar contraseña</label>
                                 <input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar">
                             </div>
-                            <button type="submit" class="btn-primary btn-save" id="btn-save-profile">
-                                <i class="fas fa-save"></i> Guardar cambios
-                            </button>
+                            <button type="submit" class="btn-primary btn-save">Guardar cambios</button>
                         </form>
                     </div>
                 </div>
@@ -398,6 +419,178 @@
         </div>
     </div>
 
+    <!-- Modal para agregar/editar delivery -->
+    <div class="modal" id="modal-delivery">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-delivery-title">Nuevo delivery</h3>
+                <button class="modal-close" onclick="cerrarModalDelivery()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="delivery-form">
+                    <input type="hidden" id="delivery-id">
+                    <div class="form-group">
+                        <label>Nombre del delivery *</label>
+                        <input type="text" id="delivery-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp *</label>
+                        <input type="tel" id="delivery-telefono" placeholder="5491112345678" required>
+                        <small class="input-help">Ejemplo: 5491112345678 (código país + número)</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-delivery">Guardar delivery</button>
+                <button class="btn-outline" onclick="cerrarModalDelivery()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar pedido -->
+    <div class="modal" id="modal-editar-pedido">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Editar pedido #<span id="edit-pedido-id-display"></span></h3>
+                <button class="modal-close" onclick="cerrarModalEditarPedido()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editar-pedido-form">
+                    <input type="hidden" id="edit-pedido-id">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Nombre del cliente *</label>
+                            <input type="text" id="edit-cliente-nombre" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>Teléfono *</label>
+                            <input type="tel" id="edit-cliente-telefono" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección de entrega *</label>
+                        <input type="text" id="edit-direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Detalles del pedido</label>
+                        <textarea id="edit-detalles" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Método de pago</label>
+                        <select id="edit-metodo-pago">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado del pedido</label>
+                        <select id="edit-estado">
+                            <option value="preparando">Nuevo</option>
+                            <option value="en preparacion">En preparación</option>
+                            <option value="en camino">En camino</option>
+                            <option value="entregado">Entregado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Productos</label>
+                        <div id="productos-editar-container" class="productos-seleccion"></div>
+                        <button type="button" class="btn-outline" id="btn-agregar-producto-editar" style="width: 100%; margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Agregar producto
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="text" id="edit-total" readonly style="background: var(--gray-50); font-weight: bold; color: var(--primary);">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-editar-pedido">Guardar cambios</button>
+                <button class="btn-outline" onclick="cerrarModalEditarPedido()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear nuevo pedido -->
+    <div class="modal" id="modal-nuevo-pedido">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Crear nuevo pedido</h3>
+                <button class="modal-close" onclick="cerrarModalNuevoPedido()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="nuevo-pedido-form">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Nombre del cliente *</label>
+                            <input type="text" id="nuevo-cliente-nombre" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>Teléfono *</label>
+                            <input type="tel" id="nuevo-cliente-telefono" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección de entrega *</label>
+                        <input type="text" id="nuevo-direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Detalles del pedido</label>
+                        <textarea id="nuevo-detalles" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Método de pago</label>
+                        <select id="nuevo-metodo-pago">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Productos</label>
+                        <div id="productos-nuevo-container" class="productos-seleccion"></div>
+                        <button type="button" class="btn-outline" id="btn-agregar-producto-nuevo" style="width: 100%; margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Agregar producto
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="text" id="nuevo-total" readonly style="background: var(--gray-50); font-weight: bold; color: var(--primary);">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-nuevo-pedido">Crear pedido</button>
+                <button class="btn-outline" onclick="cerrarModalNuevoPedido()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para seleccionar producto (agregar a pedido) -->
+    <div class="modal" id="modal-seleccionar-producto">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Seleccionar producto</h3>
+                <button class="modal-close" onclick="cerrarModalSeleccionarProducto()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Producto</label>
+                    <select id="select-producto" class="form-control">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="select-cantidad" value="1" min="1" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-confirmar-agregar-producto">Agregar</button>
+                <button class="btn-outline" onclick="cerrarModalSeleccionarProducto()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para tiempo de entrega -->
     <div class="modal" id="modal-tiempo-entrega">
         <div class="modal-content small">
@@ -414,6 +607,33 @@
             <div class="modal-footer">
                 <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
                 <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para asignar delivery -->
+    <div class="modal" id="modal-asignar-delivery">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Asignar delivery</h3>
+                <button class="modal-close" onclick="cerrarModalAsignarDelivery()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Seleccionar delivery</label>
+                    <select id="select-delivery" class="form-control">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div id="info-pedido-asignar" style="margin-top: 16px; padding: 12px; background: var(--gray-50); border-radius: var(--radius-md);">
+                    <p><strong>Pedido #<span id="asignar-pedido-id"></span></strong></p>
+                    <p>Cliente: <span id="asignar-cliente-nombre"></span></p>
+                    <p>Total: <span id="asignar-total"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-enviar-delivery">Enviar al delivery</button>
+                <button class="btn-outline" onclick="cerrarModalAsignarDelivery()">Cancelar</button>
             </div>
         </div>
     </div>
