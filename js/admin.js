@@ -470,6 +470,55 @@ function cerrarModalTiempo() {
 // GESTIÓN DE PRODUCTOS - Versión corregida con filtro por vendedor
 // ===================================================
 
+function limpiarCacheProductos() {
+    console.log('🧹 Limpiando caché de productos...');
+    
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('getProductos') || key.includes('productos'))) {
+            keysToRemove.push(key);
+        }
+    }
+    
+    keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`🗑️ Eliminado caché: ${key}`);
+    });
+    
+    if (keysToRemove.length > 0) {
+        console.log(`✅ Caché limpiado: ${keysToRemove.length} items eliminados`);
+    }
+}
+
+function verificarProductosPropios() {
+    if (!vendedorActual || !productos.length) return;
+    
+    console.log('🔍 Verificando integridad de productos...');
+    let productosInvalidos = 0;
+    
+    productos.forEach(producto => {
+        const productoVendedorId = producto.vendedor_id ? producto.vendedor_id.toString() : null;
+        const vendedorActualId = vendedorActual.id.toString();
+        
+        if (productoVendedorId !== vendedorActualId) {
+            console.warn(`⚠️ Producto inválido detectado: ID ${producto.id} (${producto.nombre}) - Vendedor: ${productoVendedorId}, Esperado: ${vendedorActualId}`);
+            productosInvalidos++;
+        }
+    });
+    
+    if (productosInvalidos > 0) {
+        console.warn(`⚠️ Se encontraron ${productosInvalidos} productos que no pertenecen a este vendedor. Forzando limpieza...`);
+        productos = productos.filter(p => {
+            const pid = p.vendedor_id ? p.vendedor_id.toString() : null;
+            return pid === vendedorActual.id.toString();
+        });
+        renderizarProductosAdmin();
+    } else {
+        console.log('✅ Todos los productos son válidos para este vendedor');
+    }
+}
+
 async function cargarProductos(forceRefresh = false) {
     if (!vendedorActual) {
         console.warn('⚠️ No hay vendedor actual');
@@ -484,17 +533,19 @@ async function cargarProductos(forceRefresh = false) {
     try {
         console.log(`📦 Cargando productos para vendedor ID: ${vendedorActual.id}`);
         
+        if (forceRefresh) {
+            limpiarCacheProductos();
+        }
+        
         const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
         
         if (response.error) {
             throw new Error(response.error);
         }
         
-        // Asegurar que solo se muestran productos del vendedor actual
         let productosRecibidos = response.productos || [];
         
-        // Filtro de seguridad en frontend (por si la API devuelve todo)
-        productosRecibidos = productosRecibidos.filter(p => {
+        const productosFiltrados = productosRecibidos.filter(p => {
             const productoVendedorId = p.vendedor_id ? p.vendedor_id.toString() : null;
             const vendedorActualId = vendedorActual.id.toString();
             const coincide = productoVendedorId === vendedorActualId;
@@ -505,7 +556,7 @@ async function cargarProductos(forceRefresh = false) {
             return coincide;
         });
         
-        productos = productosRecibidos;
+        productos = productosFiltrados;
         
         console.log(`✅ Productos cargados: ${productos.length} (filtrados para vendedor ${vendedorActual.id})`);
         
@@ -587,7 +638,6 @@ function cerrarModalProducto() {
 }
 
 async function guardarProducto() {
-    // Verificar que hay un vendedor actual
     if (!vendedorActual || !vendedorActual.id) {
         mostrarToast('Error: No se identificó el vendedor', 'error');
         return;
@@ -615,7 +665,6 @@ async function guardarProducto() {
         }
     }
     
-    // Asegurar que el vendedor_id es el correcto
     const data = {
         vendedor_id: vendedorActual.id,
         nombre: nombre,
@@ -647,7 +696,6 @@ async function guardarProducto() {
 }
 
 async function eliminarProducto(productoId) {
-    // Verificar que el producto pertenece al vendedor actual
     const producto = productos.find(p => p.id === productoId);
     
     if (!producto) {
@@ -1030,6 +1078,8 @@ async function login() {
         if (response.success && response.vendedor) {
             vendedorActual = response.vendedor;
             
+            limpiarCacheProductos();
+            
             const rememberMe = document.getElementById('remember-me')?.checked || false;
             if (rememberMe) {
                 localStorage.setItem('want_sesion', JSON.stringify({ id: vendedorActual.id, email: vendedorActual.email, nombre: vendedorActual.nombre }));
@@ -1039,6 +1089,9 @@ async function login() {
             
             await iniciarPanel(vendedorActual);
             mostrarToast(`Bienvenido ${vendedorActual.nombre}`, 'success');
+            
+            setTimeout(() => verificarProductosPropios(), 1000);
+            
         } else {
             throw new Error(response.error || 'Email o contraseña incorrectos');
         }
@@ -1118,7 +1171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (adminAuth) adminAuth.style.display = 'flex';
     }
     
-    // Toggle password
     document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.getAttribute('data-target');
@@ -1132,7 +1184,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Login
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -1141,7 +1192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Register
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -1194,7 +1244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Recover
     const recoverForm = document.getElementById('recover-form');
     if (recoverForm) {
         recoverForm.addEventListener('submit', async (e) => {
@@ -1214,7 +1263,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Reset password
     const btnReset = document.getElementById('btn-reset-password');
     if (btnReset) {
         btnReset.addEventListener('click', async () => {
@@ -1240,11 +1288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // ===================================================
-    // NAVEGACIÓN ENTRE PANELES DE AUTENTICACIÓN
-    // ===================================================
-    
-    // Botón "Registrarse" en login
+    // Navegación entre paneles de autenticación
     const showRegister = document.getElementById('btn-show-register');
     if (showRegister) {
         showRegister.addEventListener('click', (e) => {
@@ -1253,7 +1297,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Botón "¿Olvidaste tu contraseña?" en login
     const showRecover = document.getElementById('btn-show-recover');
     if (showRecover) {
         showRecover.addEventListener('click', (e) => {
@@ -1262,7 +1305,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Botón "Volver al inicio" en registro
     const backToLogin = document.getElementById('back-to-login');
     if (backToLogin) {
         backToLogin.addEventListener('click', (e) => {
@@ -1271,7 +1313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Botón "Volver al inicio" en recuperación
     const backToLoginRecover = document.getElementById('back-to-login-recover');
     if (backToLoginRecover) {
         backToLoginRecover.addEventListener('click', (e) => {
