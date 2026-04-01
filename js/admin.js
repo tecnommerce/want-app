@@ -514,7 +514,88 @@ function renderizarProductosAdmin() {
 }
 
 function abrirModalProducto(productoId = null) {
-    mostrarToast('Funcionalidad en desarrollo', 'info');
+    if (productoId) {
+        const producto = productos.find(p => p.id === productoId);
+        if (producto) {
+            document.getElementById('producto-id').value = producto.id;
+            document.getElementById('producto-nombre').value = producto.nombre;
+            document.getElementById('producto-descripcion').value = producto.descripcion || '';
+            document.getElementById('producto-precio').value = producto.precio;
+            document.getElementById('producto-disponible').value = producto.disponible || 'SI';
+            const preview = document.getElementById('producto-imagen-preview');
+            if (preview && producto.imagen_url) {
+                preview.innerHTML = `<img src="${producto.imagen_url}" style="max-width: 100px; border-radius: 8px;">`;
+            }
+            document.getElementById('modal-producto-title').textContent = 'Editar producto';
+        }
+    } else {
+        document.getElementById('producto-form').reset();
+        document.getElementById('producto-id').value = '';
+        document.getElementById('producto-imagen-preview').innerHTML = '';
+        document.getElementById('producto-disponible').value = 'SI';
+        document.getElementById('modal-producto-title').textContent = 'Nuevo producto';
+    }
+    document.getElementById('modal-producto').classList.add('active');
+}
+
+function cerrarModalProducto() {
+    const modal = document.getElementById('modal-producto');
+    if (modal) modal.classList.remove('active');
+    const form = document.getElementById('producto-form');
+    if (form) form.reset();
+    const preview = document.getElementById('producto-imagen-preview');
+    if (preview) preview.innerHTML = '';
+    document.getElementById('producto-id').value = '';
+}
+
+async function guardarProducto() {
+    const productoId = document.getElementById('producto-id').value;
+    const nombre = document.getElementById('producto-nombre').value.trim();
+    const descripcion = document.getElementById('producto-descripcion').value.trim();
+    const precio = parseFloat(document.getElementById('producto-precio').value);
+    const disponible = document.getElementById('producto-disponible')?.value || 'SI';
+    const imagenFile = document.getElementById('producto-imagen').files[0];
+    
+    if (!nombre || !precio) {
+        mostrarToast('Nombre y precio son obligatorios', 'error');
+        return;
+    }
+    
+    let imagenUrl = null;
+    if (imagenFile) {
+        mostrarToast('Subiendo imagen...', 'info');
+        imagenUrl = await subirImagenACloudinary(imagenFile);
+        if (!imagenUrl) {
+            mostrarToast('Error al subir imagen', 'error');
+            return;
+        }
+    }
+    
+    const data = {
+        vendedor_id: vendedorActual.id,
+        nombre: nombre,
+        descripcion: descripcion,
+        precio: precio,
+        disponible: disponible
+    };
+    
+    if (imagenUrl) data.imagen_url = imagenUrl;
+    if (productoId) data.id = parseInt(productoId);
+    
+    const action = productoId ? 'actualizarProducto' : 'crearProducto';
+    
+    try {
+        const response = await postAPI(action, data);
+        if (response && response.success) {
+            mostrarToast(productoId ? 'Producto actualizado' : 'Producto creado', 'success');
+            cerrarModalProducto();
+            await cargarProductos(true);
+        } else {
+            throw new Error(response?.error || 'Error al guardar');
+        }
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+    }
 }
 
 async function eliminarProducto(productoId) {
@@ -527,6 +608,30 @@ async function eliminarProducto(productoId) {
         }
     } catch (error) {
         mostrarToast('Error al eliminar', 'error');
+    }
+}
+
+function inicializarModalProducto() {
+    const modal = document.getElementById('modal-producto');
+    if (!modal) return;
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrarModalProducto();
+    });
+    
+    const imagenInput = document.getElementById('producto-imagen');
+    if (imagenInput) {
+        imagenInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const preview = document.getElementById('producto-imagen-preview');
+            if (file && preview) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.innerHTML = `<img src="${ev.target.result}" style="max-width: 100px; border-radius: 8px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
 }
 
@@ -693,6 +798,12 @@ async function iniciarPanel(vendedor) {
     inicializarFiltros();
     inicializarMenuAdmin();
     inicializarModalTiempo();
+    inicializarModalProducto();
+    
+    const btnGuardarProducto = document.getElementById('guardar-producto');
+    if (btnGuardarProducto) {
+        btnGuardarProducto.addEventListener('click', guardarProducto);
+    }
 }
 
 function inicializarTabs() {
@@ -967,7 +1078,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (response && response.success) {
                 alert('Registro exitoso. Ahora podés iniciar sesión.');
-                // Cambiar a login panel
                 document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
                 document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
                 document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
@@ -980,7 +1090,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Vista previa del logo en registro
         const regLogo = document.getElementById('reg-logo');
         if (regLogo) {
             regLogo.addEventListener('change', (e) => {
@@ -1034,7 +1143,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await postAPI('resetearPassword', { email, codigo, new_password_hash: await hashPassword(newPassword) });
             if (response.success) {
                 alert('Contraseña restablecida. Iniciá sesión.');
-                // Cambiar a login panel
                 document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
                 document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
                 document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
