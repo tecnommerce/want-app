@@ -6,7 +6,6 @@
     <title>Want | Panel de Vendedor</title>
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="css/admin-login.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -57,14 +56,8 @@
                         <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
                     
-                    <div class="auth-tabs">
-                        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
-                        <button class="auth-tab" data-tab="register">Registrarse</button>
-                        <button class="auth-tab" data-tab="recover">Recuperar</button>
-                    </div>
-
                     <!-- Login Panel -->
-                    <div class="auth-panel active" id="login-panel">
+                    <div class="auth-panel" id="login-panel">
                         <form id="login-form">
                             <div class="form-group">
                                 <label><i class="fas fa-envelope"></i> Email</label>
@@ -93,7 +86,7 @@
                         </div>
                     </div>
 
-                    <!-- Register Panel -->
+                    <!-- Register Panel (oculto) -->
                     <div class="auth-panel" id="register-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -126,7 +119,7 @@
                             <div class="form-group">
                                 <label>Logo del negocio</label>
                                 <input type="file" id="reg-logo" accept="image/*">
-                                <div id="reg-logo-preview" class="image-preview" style="margin-top: 10px;"></div>
+                                <div id="reg-logo-preview" class="image-preview"></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group half">
@@ -152,7 +145,7 @@
                         </form>
                     </div>
 
-                    <!-- Recover Panel -->
+                    <!-- Recover Panel (oculto) -->
                     <div class="auth-panel" id="recover-panel" style="display: none;">
                         <button class="back-to-login" id="back-to-login-recover">
                             <i class="fas fa-arrow-left"></i> Volver al inicio
@@ -195,7 +188,6 @@
 
             <!-- Panel principal (oculto inicialmente) -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
-                <!-- Aquí va todo el contenido del panel (igual que antes) -->
                 <div class="panel-header">
                     <div class="panel-header-left">
                         <h2 id="panel-nombre">Mi Negocio</h2>
@@ -360,7 +352,7 @@
                     </div>
                     <div class="form-group">
                         <label>Descripción</label>
-                        <textarea id="producto-descripcion" rows="3"></textarea>
+                        <textarea id="producto-descripcion" rows="3" placeholder="Descripción del producto"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Precio *</label>
@@ -370,6 +362,7 @@
                         <label>Imagen del producto</label>
                         <input type="file" id="producto-imagen" accept="image/*">
                         <div id="producto-imagen-preview" class="image-preview"></div>
+                        <small class="input-help">Subí una imagen para el producto (opcional)</small>
                     </div>
                     <div class="form-group">
                         <label>Disponible</label>
