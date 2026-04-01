@@ -983,6 +983,31 @@ async function login() {
 }
 
 // ===================================================
+// FUNCIONES PARA CAMBIAR PANELES DE AUTENTICACIÓN
+// ===================================================
+
+function mostrarPanelLogin() {
+    document.querySelectorAll('.auth-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    document.getElementById('login-panel').classList.add('active');
+}
+
+function mostrarPanelRegistro() {
+    document.querySelectorAll('.auth-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    document.getElementById('register-panel').classList.add('active');
+}
+
+function mostrarPanelRecuperacion() {
+    document.querySelectorAll('.auth-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    document.getElementById('recover-panel').classList.add('active');
+}
+
+// ===================================================
 // FUNCIONES UTILITARIAS
 // ===================================================
 
@@ -1078,10 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (response && response.success) {
                 alert('Registro exitoso. Ahora podés iniciar sesión.');
-                document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
-                document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
-                document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
-                document.getElementById('login-panel').classList.add('active');
+                mostrarPanelLogin();
                 document.getElementById('register-form').reset();
                 document.getElementById('reg-logo-preview').innerHTML = '';
                 document.getElementById('login-email').value = email;
@@ -1143,10 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await postAPI('resetearPassword', { email, codigo, new_password_hash: await hashPassword(newPassword) });
             if (response.success) {
                 alert('Contraseña restablecida. Iniciá sesión.');
-                document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
-                document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
-                document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
-                document.getElementById('login-panel').classList.add('active');
+                mostrarPanelLogin();
                 document.getElementById('recover-code-section').style.display = 'none';
                 document.getElementById('recover-form').reset();
             } else {
@@ -1155,42 +1174,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Tabs de autenticación
-    const authTabs = document.querySelectorAll('.auth-tab');
-    authTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            authTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            document.querySelectorAll('.auth-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById(`${tabId}-panel`).classList.add('active');
-        });
-    });
+    // ===================================================
+    // NAVEGACIÓN ENTRE PANELES DE AUTENTICACIÓN
+    // ===================================================
     
-    // Botones de navegación entre paneles
+    // Botón "Registrarse" en login
     const showRegister = document.getElementById('btn-show-register');
-    const showRecover = document.getElementById('btn-show-recover');
-    const backToLogin = document.getElementById('back-to-login');
-    const backToLoginRecover = document.getElementById('back-to-login-recover');
-    
     if (showRegister) {
-        showRegister.addEventListener('click', () => {
-            document.querySelector('.auth-tab[data-tab="register"]').click();
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarPanelRegistro();
         });
     }
+    
+    // Botón "¿Olvidaste tu contraseña?" en login
+    const showRecover = document.getElementById('btn-show-recover');
     if (showRecover) {
-        showRecover.addEventListener('click', () => {
-            document.querySelector('.auth-tab[data-tab="recover"]').click();
+        showRecover.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarPanelRecuperacion();
         });
     }
+    
+    // Botón "Volver al inicio" en registro
+    const backToLogin = document.getElementById('back-to-login');
     if (backToLogin) {
-        backToLogin.addEventListener('click', () => {
-            document.querySelector('.auth-tab[data-tab="login"]').click();
+        backToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarPanelLogin();
         });
     }
+    
+    // Botón "Volver al inicio" en recuperación
+    const backToLoginRecover = document.getElementById('back-to-login-recover');
     if (backToLoginRecover) {
-        backToLoginRecover.addEventListener('click', () => {
-            document.querySelector('.auth-tab[data-tab="login"]').click();
+        backToLoginRecover.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarPanelLogin();
         });
     }
 });
