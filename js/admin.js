@@ -217,7 +217,7 @@ function inicializarBuscador() {
 }
 
 // ===================================================
-// RENDERIZAR PEDIDOS (con buscador y nuevos botones)
+// RENDERIZAR PEDIDOS (con botones por estado)
 // ===================================================
 
 function renderizarPedidos() {
@@ -236,10 +236,81 @@ function renderizarPedidos() {
     container.innerHTML = pedidosFiltrados.map(p => {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago || 'efectivo';
-        const esNuevo = p.estado === 'preparando';
-        const esPreparacion = p.estado === 'en preparacion';
-        const esEnCamino = p.estado === 'en camino';
-        const esEntregado = p.estado === 'entregado';
+        const estado = p.estado;
+        
+        // Determinar qué botones mostrar según el estado
+        let botonesHTML = '';
+        
+        if (estado === 'preparando') {
+            // NUEVO: solo confirmar pedido y cancelar
+            botonesHTML = `
+                <div class="botones-estado">
+                    <button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)">
+                        <i class="fab fa-whatsapp"></i> Confirmar pedido
+                    </button>
+                </div>
+                <div class="botones-acciones">
+                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
+                        <i class="fas fa-trash-alt"></i> Cancelar
+                    </button>
+                </div>
+            `;
+        } 
+        else if (estado === 'en preparacion') {
+            // PREPARACIÓN: Pedido listo (verde), editar, cancelar
+            botonesHTML = `
+                <div class="botones-estado">
+                    <button class="btn-pedido-listo" onclick="abrirModalAsignarDelivery(${p.id})">
+                        <i class="fas fa-check-circle"></i> Pedido listo
+                    </button>
+                </div>
+                <div class="botones-acciones">
+                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
+                        <i class="fas fa-trash-alt"></i> Cancelar
+                    </button>
+                </div>
+            `;
+        }
+        else if (estado === 'en camino') {
+            // EN CAMINO: Notificar Envío, Confirmar entrega, editar, cancelar
+            botonesHTML = `
+                <div class="botones-estado">
+                    <button class="btn-notificar-camino" onclick="notificarEnCamino(${p.id}, this)">
+                        <i class="fab fa-whatsapp"></i> Notificar Envío
+                    </button>
+                    <button class="btn-confirmar-entrega" onclick="actualizarEstado(${p.id}, 'entregado', this)">
+                        <i class="fas fa-check-double"></i> Confirmar entrega
+                    </button>
+                </div>
+                <div class="botones-acciones">
+                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
+                        <i class="fas fa-trash-alt"></i> Cancelar
+                    </button>
+                </div>
+            `;
+        }
+        else if (estado === 'entregado') {
+            // ENTREGADO: solo editar y cancelar
+            botonesHTML = `
+                <div class="botones-acciones">
+                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
+                        <i class="fas fa-trash-alt"></i> Cancelar
+                    </button>
+                </div>
+            `;
+        }
         
         return `
             <div class="pedido-card">
@@ -270,26 +341,9 @@ function renderizarPedidos() {
                 </div>
                 <div class="pedido-actions">
                     <div class="estado-actual">
-                        <span class="estado-badge estado-${p.estado.replace(' ', '-')}">${getEstadoTexto(p.estado)}</span>
+                        <span class="estado-badge estado-${estado.replace(' ', '-')}">${getEstadoTexto(estado)}</span>
                     </div>
-                    <div class="botones-estado">
-                        ${esNuevo ? `<button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar pedido</button>` : ''}
-                        ${!esNuevo ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">Volver a Nuevo</button>` : ''}
-                        ${esNuevo || esPreparacion ? `<button class="btn-asignar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Asignar delivery</button>` : ''}
-                        ${esPreparacion && !esEnCamino ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">Volver a Nuevo</button>` : ''}
-                        ${esEnCamino ? `<button class="btn-notificar-camino" onclick="notificarEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar Envío</button>` : ''}
-                        ${esEnCamino ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'preparando', this)">Volver a Nuevo</button>` : ''}
-                        ${esEnCamino ? `<button class="btn-estado" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">Volver a Preparar</button>` : ''}
-                        ${!esEntregado ? `<button class="btn-entregar" onclick="actualizarEstado(${p.id}, 'entregado', this)"><i class="fas fa-check-circle"></i> Pedido entregado</button>` : ''}
-                    </div>
-                    <div class="botones-acciones">
-                        <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)">
-                            <i class="fas fa-trash-alt"></i> Cancelar
-                        </button>
-                    </div>
+                    ${botonesHTML}
                 </div>
             </div>
         `;
@@ -512,7 +566,7 @@ function cerrarModalTiempo() {
 }
 
 // ===================================================
-// ASIGNAR DELIVERY (nueva funcionalidad)
+// ASIGNAR DELIVERY (Pedido listo)
 // ===================================================
 
 let pedidoParaAsignar = null;

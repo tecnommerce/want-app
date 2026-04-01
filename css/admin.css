@@ -1638,3 +1638,127 @@ body {
         width: 100%;
     }
 }
+
+/* ===================================================
+   BOTONES POR ESTADO - MEJORADOS
+   =================================================== */
+
+.btn-pedido-listo {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-pedido-listo:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.btn-confirmar-entrega {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-confirmar-entrega:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.btn-notificar-camino {
+    background: var(--warning);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-notificar-camino:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+.btn-confirmar-whatsapp {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-confirmar-whatsapp:hover {
+    background: #128C7E;
+    transform: scale(1.02);
+}
+
+.btn-editar-pedido {
+    background: var(--info);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-editar-pedido:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-cancelar {
+    background: #FEF2F2;
+    color: var(--danger);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-cancelar:hover {
+    background: var(--danger);
+    color: white;
+}
