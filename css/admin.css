@@ -363,7 +363,9 @@ body {
     min-height: calc(100vh - 70px);
 }
 
-/* Métricas */
+/* ===================================================
+   MÉTRICAS - MEJOR VISUALIZACIÓN
+   =================================================== */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -377,7 +379,7 @@ body {
     padding: 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
     transition: all 0.2s;
@@ -389,14 +391,14 @@ body {
 }
 
 .metric-icon {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     background: #FFF5EB;
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: var(--primary);
 }
 
@@ -404,7 +406,7 @@ body {
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--gray-800);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .metric-info p {
@@ -413,68 +415,9 @@ body {
     font-weight: 500;
 }
 
-/* Tabs */
-.admin-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    background: white;
-    padding: 6px;
-    border-radius: var(--radius-full);
-    display: inline-flex;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
-}
-
-.tab-btn {
-    background: none;
-    border: none;
-    padding: 8px 24px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--gray-600);
-    transition: all 0.2s;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.tab-btn:hover {
-    color: var(--primary);
-    background: #FFF5EB;
-}
-
-.tab-btn.active {
-    background: var(--primary);
-    color: white;
-}
-
-.tab-badge {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    border-radius: var(--radius-full);
-    margin-left: 4px;
-}
-
-.tab-btn:not(.active) .tab-badge {
-    background: var(--gray-100);
-    color: var(--gray-600);
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-/* Filtros y buscador */
+/* ===================================================
+   FILTROS Y BUSCADOR - MEJOR ALINEACIÓN
+   =================================================== */
 .filtros-buscador {
     display: flex;
     justify-content: space-between;
@@ -486,7 +429,7 @@ body {
 
 .filtros-pedidos {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
     background: white;
     padding: 8px 16px;
@@ -535,6 +478,7 @@ body {
     background: rgba(255,255,255,0.2);
 }
 
+/* Buscador */
 .buscador-container {
     display: flex;
     align-items: center;
@@ -636,7 +580,37 @@ body {
 }
 
 /* ===================================================
-   TARJETA DE PEDIDO - VERSIÓN ULTRA COMPACTA
+   CONTENEDOR DE PEDIDOS CON SCROLL
+   =================================================== */
+.pedidos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.pedidos-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pedidos-container::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: 10px;
+}
+
+.pedidos-container::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: 10px;
+}
+
+.pedidos-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* ===================================================
+   TARJETA DE PEDIDO - TAMAÑO ADECUADO Y LEGIBLE
    =================================================== */
 .pedido-card {
     background: white;
@@ -645,7 +619,7 @@ body {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
     transition: all 0.2s;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
 }
 
 .pedido-card:hover {
@@ -653,41 +627,43 @@ body {
     border-color: var(--gray-300);
 }
 
+/* Header del pedido */
 .pedido-header {
     background: var(--gray-50);
-    padding: 8px 12px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
     border-bottom: 1px solid var(--gray-200);
 }
 
 .pedido-id {
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--primary);
     background: #FFF5EB;
-    padding: 2px 8px;
+    padding: 4px 12px;
     border-radius: var(--radius-full);
 }
 
 .pedido-fecha {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     color: var(--gray-500);
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
+/* Información del cliente */
 .pedido-cliente {
-    padding: 8px 12px;
+    padding: 12px 16px;
     background: var(--gray-50);
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    font-size: 0.7rem;
+    gap: 16px;
+    font-size: 0.8rem;
     color: var(--gray-700);
     border-bottom: 1px solid var(--gray-200);
 }
@@ -696,86 +672,99 @@ body {
 .pedido-cliente span {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
 .pedido-cliente i {
     color: var(--primary);
-    width: 12px;
-    font-size: 0.65rem;
+    width: 14px;
+    font-size: 0.75rem;
 }
 
+/* Productos del pedido */
 .pedido-productos {
-    padding: 8px 12px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--gray-100);
 }
 
 .pedido-productos strong {
     display: block;
-    margin-bottom: 4px;
-    font-size: 0.65rem;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
     color: var(--gray-600);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
 }
 
 .pedido-productos ul {
     list-style: none;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .pedido-productos li {
-    padding: 3px 0;
+    padding: 6px 0;
     border-bottom: 1px solid var(--gray-100);
     display: flex;
     justify-content: space-between;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
 }
 
 .pedido-productos li:last-child {
     border-bottom: none;
 }
 
+.mas-productos {
+    color: var(--gray-500);
+    font-style: italic;
+    font-size: 0.7rem;
+    text-align: center;
+    padding: 4px 0;
+}
+
 .pedido-total {
     text-align: right;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: var(--primary);
-    padding-top: 4px;
-    margin-top: 2px;
+    padding-top: 8px;
+    margin-top: 4px;
     border-top: 1px solid var(--gray-200);
 }
 
+/* Detalles del pedido */
 .pedido-detalles {
-    margin-top: 6px;
-    padding: 6px;
+    margin-top: 10px;
+    padding: 8px 12px;
     background: #FFFBEB;
     border-radius: var(--radius-sm);
-    border-left: 2px solid var(--warning);
+    border-left: 3px solid var(--warning);
 }
 
 .pedido-detalles strong {
     display: block;
-    margin-bottom: 2px;
-    font-size: 0.55rem;
+    margin-bottom: 4px;
+    font-size: 0.65rem;
     color: var(--warning);
     text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .pedido-detalles p {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: var(--gray-700);
     margin: 0;
+    line-height: 1.4;
 }
 
+/* Acciones del pedido */
 .pedido-actions {
-    padding: 8px 12px;
+    padding: 12px 16px;
     background: var(--gray-50);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     border-top: 1px solid var(--gray-200);
 }
 
@@ -785,11 +774,11 @@ body {
 }
 
 .estado-badge {
-    padding: 3px 8px;
+    padding: 4px 12px;
     border-radius: var(--radius-full);
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
@@ -813,37 +802,53 @@ body {
     color: #059669;
 }
 
+/* Contenedores de botones */
 .botones-estado {
     display: flex;
-    gap: 6px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .botones-acciones {
     display: flex;
-    gap: 6px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
+/* Botones de estado - Tamaño adecuado */
 .btn-confirmar-whatsapp,
 .btn-preparar-pedido,
 .btn-pedido-listo,
 .btn-notificar-camino,
-.btn-confirmar-entrega,
-.btn-editar-pedido,
-.btn-cancelar {
-    padding: 5px 10px;
-    font-size: 0.65rem;
+.btn-confirmar-entrega {
+    padding: 8px 16px;
+    font-size: 0.75rem;
     font-weight: 600;
     border-radius: var(--radius-full);
     cursor: pointer;
     transition: all 0.2s;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     border: none;
 }
 
+/* Botones de acciones */
+.btn-editar-pedido,
+.btn-cancelar {
+    padding: 8px 14px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+}
+
+/* Colores de botones */
 .btn-confirmar-whatsapp {
     background: #25D366;
     color: white;
@@ -907,13 +912,16 @@ body {
 .btn-cancelar {
     background: #FEF2F2;
     color: var(--danger);
+    border: 1px solid #fee2e2;
 }
 
 .btn-cancelar:hover:not(:disabled) {
     background: var(--danger);
     color: white;
+    border-color: var(--danger);
 }
 
+/* Estado deshabilitado */
 .btn-confirmar-whatsapp:disabled,
 .btn-preparar-pedido:disabled,
 .btn-pedido-listo:disabled,
@@ -921,14 +929,15 @@ body {
 .btn-confirmar-entrega:disabled,
 .btn-editar-pedido:disabled,
 .btn-cancelar:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
+/* Sin pedidos */
 .sin-pedidos {
     text-align: center;
-    padding: 40px;
+    padding: 48px;
     color: var(--gray-400);
     background: white;
     border-radius: var(--radius-xl);
@@ -2200,4 +2209,115 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+
+/* ===================================================
+   RESPONSIVE - MÓVIL
+   =================================================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .metric-card {
+        padding: 12px;
+    }
+    
+    .metric-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+    
+    .metric-info h3 {
+        font-size: 1.1rem;
+    }
+    
+    .admin-tabs {
+        flex-wrap: wrap;
+        width: 100%;
+        border-radius: var(--radius-xl);
+    }
+    
+    .tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .filtros-buscador {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filtros-pedidos {
+        justify-content: center;
+    }
+    
+    .buscador-container {
+        justify-content: center;
+    }
+    
+    .buscador-input input {
+        width: 100%;
+    }
+    
+    .pedidos-container {
+        max-height: 55vh;
+    }
+    
+    .pedido-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .pedido-cliente {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .pedido-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .botones-estado,
+    .botones-acciones {
+        justify-content: center;
+    }
+    
+    .btn-confirmar-whatsapp,
+    .btn-preparar-pedido,
+    .btn-pedido-listo,
+    .btn-notificar-camino,
+    .btn-confirmar-entrega {
+        padding: 8px 14px;
+        font-size: 0.7rem;
+    }
+    
+    .btn-editar-pedido,
+    .btn-cancelar {
+        padding: 6px 12px;
+        font-size: 0.65rem;
+    }
+    
+    .paginacion-container {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-paginacion {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+    
+    .info-pagina {
+        font-size: 0.7rem;
+    }
 }
