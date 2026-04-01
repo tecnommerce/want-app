@@ -242,11 +242,14 @@ function renderizarPedidos() {
         let botonesHTML = '';
         
         if (estado === 'preparando') {
-            // NUEVO: solo confirmar pedido y cancelar
+            // NUEVO: confirmar pedido, preparar pedido, editar, cancelar
             botonesHTML = `
                 <div class="botones-estado">
                     <button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)">
                         <i class="fab fa-whatsapp"></i> Confirmar pedido
+                    </button>
+                    <button class="btn-preparar-pedido" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">
+                        <i class="fas fa-utensils"></i> Preparar pedido
                     </button>
                 </div>
                 <div class="botones-acciones">
@@ -349,12 +352,6 @@ function renderizarPedidos() {
         `;
     }).join('');
 }
-
-function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
-    return textos[estado] || estado.toUpperCase();
-}
-
 // ===================================================
 // ACTUALIZAR ESTADO
 // ===================================================

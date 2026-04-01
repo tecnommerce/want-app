@@ -1762,3 +1762,24 @@ body {
     background: var(--danger);
     color: white;
 }
+
+/* Botón Preparar pedido */
+.btn-preparar-pedido {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-preparar-pedido:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
