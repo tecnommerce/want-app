@@ -200,7 +200,6 @@
 
             <!-- Panel principal (oculto inicialmente) -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
-                <!-- Métricas -->
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
@@ -239,7 +238,6 @@
                     </div>
                 </div>
 
-                <!-- Tabs (sin perfil) -->
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="pedidos">
                         <i class="fas fa-box"></i> Pedidos
@@ -255,7 +253,7 @@
                     </button>
                 </div>
 
-                <!-- Tab Pedidos con filtros y buscador -->
+                <!-- Tab Pedidos -->
                 <div class="tab-content active" id="tab-pedidos">
                     <div class="filtros-buscador">
                         <div class="filtros-pedidos">
@@ -277,8 +275,8 @@
                                 <i class="fas fa-search"></i>
                                 <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
                             </div>
-                            <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda" title="Limpiar búsqueda">
-                                <i class="fas fa-times"></i>
+                            <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
+                                <i class="fas fa-times"></i> Limpiar
                             </button>
                             <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
                                 <i class="fas fa-plus-circle"></i> Nuevo pedido
@@ -288,17 +286,6 @@
                     
                     <div class="pedidos-container" id="pedidos-container">
                         <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
-                    </div>
-                    
-                    <!-- Paginación -->
-                    <div class="paginacion-container" id="paginacion-container" style="display: none;">
-                        <button class="btn-paginacion" id="btn-pagina-anterior" disabled>
-                            <i class="fas fa-chevron-left"></i> Anterior
-                        </button>
-                        <span class="info-pagina" id="info-pagina">Página 1 de 1</span>
-                        <button class="btn-paginacion" id="btn-pagina-siguiente" disabled>
-                            Siguiente <i class="fas fa-chevron-right"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -329,7 +316,7 @@
         </div>
     </main>
 
-    <!-- Modal de Perfil (nuevo) -->
+    <!-- Modal de Perfil -->
     <div class="modal" id="modal-perfil">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header">
