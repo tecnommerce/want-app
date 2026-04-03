@@ -349,14 +349,21 @@ function renderizarPedidos(pedidosMostrar) {
         let botonesHTML = '';
         
         if (estado === 'preparando') {
+<<<<<<< HEAD
+=======
+            // NUEVO: solo confirmar pedido y cancelar
+>>>>>>> parent of 1beea95 (fix: agregar botón Preparar pedido en estado Nuevo)
             botonesHTML = `
                 <div class="botones-estado">
                     <button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)">
                         <i class="fab fa-whatsapp"></i> Confirmar
                     </button>
+<<<<<<< HEAD
                     <button class="btn-preparar-pedido" onclick="actualizarEstado(${p.id}, 'en preparacion', this)">
                         <i class="fas fa-utensils"></i> Preparar
                     </button>
+=======
+>>>>>>> parent of 1beea95 (fix: agregar botón Preparar pedido en estado Nuevo)
                 </div>
                 <div class="botones-acciones">
                     <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})">
@@ -457,6 +464,14 @@ function renderizarPedidos(pedidosMostrar) {
     }).join('');
 }
 
+<<<<<<< HEAD
+=======
+function getEstadoTexto(estado) {
+    const textos = { 'preparando': 'NUEVO PEDIDO', 'en preparacion': 'EN PREPARACIÓN', 'en camino': 'EN CAMINO', 'entregado': 'ENTREGADO' };
+    return textos[estado] || estado.toUpperCase();
+}
+
+>>>>>>> parent of 1beea95 (fix: agregar botón Preparar pedido en estado Nuevo)
 // ===================================================
 // ACTUALIZAR ESTADO
 // ===================================================
