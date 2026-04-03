@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (versión completa sin paginación)
+// ADMIN - Panel de vendedor (versión completa)
 // ===================================================
 
 const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
@@ -79,6 +79,7 @@ async function subirImagenACloudinary(file) {
         const data = await response.json();
         return data.secure_url || null;
     } catch (error) {
+        console.error('Error subir imagen:', error);
         return null;
     }
 }
@@ -87,7 +88,7 @@ async function withLoading(button, callback) {
     if (!button) return await callback();
     const originalText = button.innerHTML;
     button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + button.innerHTML.replace(/<i class="[^"]*"><\/i>\s*/, '');
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + originalText.replace(/<i class="[^"]*"><\/i>\s*/, '');
     try {
         return await callback();
     } finally {
@@ -139,6 +140,7 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.fontSize = '0.8rem';
     toast.style.fontWeight = '500';
     toast.style.zIndex = '9999';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
@@ -213,7 +215,7 @@ function renderizarPedidos() {
     
     const pedidosFiltrados = filtrarPedidos();
     
-    if (pedidosFiltrados.length === 0) {
+    if (!pedidosFiltrados || pedidosFiltrados.length === 0) {
         container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
@@ -477,7 +479,10 @@ async function cargarDeliveries(forceRefresh = false) {
         deliveries = response.deliveries || [];
         renderizarDeliveries();
         document.getElementById('badge-delivery') && (document.getElementById('badge-delivery').textContent = deliveries.length);
-    } catch (error) { if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar deliveries</p></div>`; }
+    } catch (error) { 
+        console.error('Error cargar deliveries:', error);
+        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar deliveries: ${error.message}</p></div>`; 
+    }
 }
 
 function renderizarDeliveries() {
@@ -532,7 +537,10 @@ async function cargarProductos(forceRefresh = false) {
         productos = (response.productos || []).filter(p => p.vendedor_id?.toString() === vendedorActual.id.toString());
         renderizarProductosAdmin();
         document.getElementById('badge-productos') && (document.getElementById('badge-productos').textContent = productos.length);
-    } catch (error) { if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`; }
+    } catch (error) { 
+        console.error('Error cargar productos:', error);
+        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos: ${error.message}</p></div>`; 
+    }
 }
 
 function renderizarProductosAdmin() {
@@ -764,15 +772,25 @@ async function login() {
         mostrarToast('Validando credenciales...', 'info');
         const passwordHash = await hashPassword(password);
         const response = await callAPI('loginVendedor', { email, password: passwordHash }, true);
+        console.log('Login response:', response);
+        
         if (response.success && response.vendedor) {
             vendedorActual = response.vendedor;
+            console.log('Vendedor logueado:', vendedorActual);
+            
             const rememberMe = document.getElementById('remember-me')?.checked || false;
             if (rememberMe) localStorage.setItem('want_sesion', JSON.stringify({ id: vendedorActual.id, email: vendedorActual.email, nombre: vendedorActual.nombre }));
             else guardarSesion(vendedorActual);
+            
             await iniciarPanel(vendedorActual);
             mostrarToast(`Bienvenido ${vendedorActual.nombre}`, 'success');
-        } else throw new Error(response.error || 'Email o contraseña incorrectos');
-    } catch (error) { mostrarToast(error.message, 'error'); }
+        } else {
+            throw new Error(response.error || 'Email o contraseña incorrectos');
+        }
+    } catch (error) { 
+        console.error('Error login:', error);
+        mostrarToast(error.message, 'error'); 
+    }
 }
 
 // ===================================================
@@ -780,33 +798,108 @@ async function login() {
 // ===================================================
 
 async function iniciarPanel(vendedor) {
-    document.getElementById('admin-auth').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
-    document.getElementById('header-admin').style.display = 'block';
-    document.getElementById('panel-nombre').textContent = vendedor.nombre;
-    document.getElementById('panel-email').textContent = vendedor.email;
+    console.log('Iniciando panel para:', vendedor.nombre);
+    
+    const adminAuth = document.getElementById('admin-auth');
+    const adminPanel = document.getElementById('admin-panel');
+    const headerAdmin = document.getElementById('header-admin');
+    
+    if (adminAuth) adminAuth.style.display = 'none';
+    if (adminPanel) adminPanel.style.display = 'block';
+    if (headerAdmin) headerAdmin.style.display = 'block';
+    
+    const panelNombre = document.getElementById('panel-nombre');
+    const panelEmail = document.getElementById('panel-email');
+    if (panelNombre) panelNombre.textContent = vendedor.nombre;
+    if (panelEmail) panelEmail.textContent = vendedor.email;
+    
     await cargarPedidos();
     await cargarProductos();
     await cargarDeliveries();
     
-    document.getElementById('btn-refresh')?.addEventListener('click', async () => { await withLoading(document.getElementById('btn-refresh'), async () => { await cargarPedidos(true); await cargarProductos(true); await cargarDeliveries(true); mostrarToast('Datos actualizados', 'success'); }); });
-    document.getElementById('btn-logout')?.addEventListener('click', cerrarSesion);
-    document.getElementById('mobile-logout-btn')?.addEventListener('click', cerrarSesion);
-    document.getElementById('btn-open-profile')?.addEventListener('click', abrirModalPerfil);
-    document.getElementById('btn-agregar-producto')?.addEventListener('click', () => abrirModalProducto());
-    document.getElementById('btn-agregar-delivery')?.addEventListener('click', () => abrirModalDelivery());
-    document.getElementById('btn-nuevo-pedido')?.addEventListener('click', () => abrirModalNuevoPedido());
-    document.getElementById('guardar-producto')?.addEventListener('click', guardarProducto);
-    document.getElementById('guardar-delivery')?.addEventListener('click', guardarDelivery);
-    document.getElementById('guardar-editar-pedido')?.addEventListener('click', guardarEditarPedido);
-    document.getElementById('guardar-nuevo-pedido')?.addEventListener('click', guardarNuevoPedido);
-    document.getElementById('btn-confirmar-agregar-producto')?.addEventListener('click', confirmarAgregarProducto);
-    document.getElementById('btn-enviar-delivery')?.addEventListener('click', enviarPedidoADelivery);
-    document.getElementById('btn-confirmar-tiempo')?.addEventListener('click', enviarConfirmacionWhatsApp);
-    document.getElementById('btn-cancelar-tiempo')?.addEventListener('click', cerrarModalTiempo);
-    document.getElementById('cerrar-modal-tiempo')?.addEventListener('click', cerrarModalTiempo);
-    document.getElementById('btn-agregar-producto-editar')?.addEventListener('click', () => abrirModalSeleccionarProducto(productosTempEdit, (prod) => { const existente = productosTempEdit.find(p => p.id === prod.id); if (existente) existente.cantidad += prod.cantidad; else productosTempEdit.push(prod); renderizarProductosEditar(); actualizarTotalEdit(); }));
-    document.getElementById('btn-agregar-producto-nuevo')?.addEventListener('click', () => abrirModalSeleccionarProducto(productosTempNuevo, (prod) => { const existente = productosTempNuevo.find(p => p.id === prod.id); if (existente) existente.cantidad += prod.cantidad; else productosTempNuevo.push(prod); renderizarProductosNuevo(); actualizarTotalNuevo(); }));
+    // Event listeners
+    const btnRefresh = document.getElementById('btn-refresh');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', async () => {
+            await withLoading(btnRefresh, async () => {
+                await cargarPedidos(true);
+                await cargarProductos(true);
+                await cargarDeliveries(true);
+                mostrarToast('Datos actualizados', 'success');
+            });
+        });
+    }
+    
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) btnLogout.addEventListener('click', cerrarSesion);
+    
+    const mobileLogout = document.getElementById('mobile-logout-btn');
+    if (mobileLogout) mobileLogout.addEventListener('click', cerrarSesion);
+    
+    const btnOpenProfile = document.getElementById('btn-open-profile');
+    if (btnOpenProfile) btnOpenProfile.addEventListener('click', abrirModalPerfil);
+    
+    const btnAgregarProducto = document.getElementById('btn-agregar-producto');
+    if (btnAgregarProducto) btnAgregarProducto.addEventListener('click', () => abrirModalProducto());
+    
+    const btnAgregarDelivery = document.getElementById('btn-agregar-delivery');
+    if (btnAgregarDelivery) btnAgregarDelivery.addEventListener('click', () => abrirModalDelivery());
+    
+    const btnNuevoPedido = document.getElementById('btn-nuevo-pedido');
+    if (btnNuevoPedido) btnNuevoPedido.addEventListener('click', () => abrirModalNuevoPedido());
+    
+    const btnGuardarProducto = document.getElementById('guardar-producto');
+    if (btnGuardarProducto) btnGuardarProducto.addEventListener('click', guardarProducto);
+    
+    const btnGuardarDelivery = document.getElementById('guardar-delivery');
+    if (btnGuardarDelivery) btnGuardarDelivery.addEventListener('click', guardarDelivery);
+    
+    const btnGuardarEditarPedido = document.getElementById('guardar-editar-pedido');
+    if (btnGuardarEditarPedido) btnGuardarEditarPedido.addEventListener('click', guardarEditarPedido);
+    
+    const btnGuardarNuevoPedido = document.getElementById('guardar-nuevo-pedido');
+    if (btnGuardarNuevoPedido) btnGuardarNuevoPedido.addEventListener('click', guardarNuevoPedido);
+    
+    const btnConfirmarAgregarProducto = document.getElementById('btn-confirmar-agregar-producto');
+    if (btnConfirmarAgregarProducto) btnConfirmarAgregarProducto.addEventListener('click', confirmarAgregarProducto);
+    
+    const btnEnviarDelivery = document.getElementById('btn-enviar-delivery');
+    if (btnEnviarDelivery) btnEnviarDelivery.addEventListener('click', enviarPedidoADelivery);
+    
+    const btnConfirmarTiempo = document.getElementById('btn-confirmar-tiempo');
+    if (btnConfirmarTiempo) btnConfirmarTiempo.addEventListener('click', enviarConfirmacionWhatsApp);
+    
+    const btnCancelarTiempo = document.getElementById('btn-cancelar-tiempo');
+    if (btnCancelarTiempo) btnCancelarTiempo.addEventListener('click', cerrarModalTiempo);
+    
+    const cerrarModalTiempoBtn = document.getElementById('cerrar-modal-tiempo');
+    if (cerrarModalTiempoBtn) cerrarModalTiempoBtn.addEventListener('click', cerrarModalTiempo);
+    
+    const btnAgregarProductoEditar = document.getElementById('btn-agregar-producto-editar');
+    if (btnAgregarProductoEditar) {
+        btnAgregarProductoEditar.addEventListener('click', () => {
+            abrirModalSeleccionarProducto(productosTempEdit, (prod) => {
+                const existente = productosTempEdit.find(p => p.id === prod.id);
+                if (existente) existente.cantidad += prod.cantidad;
+                else productosTempEdit.push(prod);
+                renderizarProductosEditar();
+                actualizarTotalEdit();
+            });
+        });
+    }
+    
+    const btnAgregarProductoNuevo = document.getElementById('btn-agregar-producto-nuevo');
+    if (btnAgregarProductoNuevo) {
+        btnAgregarProductoNuevo.addEventListener('click', () => {
+            abrirModalSeleccionarProducto(productosTempNuevo, (prod) => {
+                const existente = productosTempNuevo.find(p => p.id === prod.id);
+                if (existente) existente.cantidad += prod.cantidad;
+                else productosTempNuevo.push(prod);
+                renderizarProductosNuevo();
+                actualizarTotalNuevo();
+            });
+        });
+    }
     
     inicializarTabs();
     inicializarFiltros();
@@ -815,13 +908,15 @@ async function iniciarPanel(vendedor) {
 }
 
 function inicializarTabs() {
-    document.querySelectorAll('.tab-btn').forEach(tab => {
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
-            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const tabContent = document.getElementById(`tab-${tabId}`);
+            if (tabContent) tabContent.classList.add('active');
             if (tabId === 'productos') cargarProductos();
             if (tabId === 'delivery') cargarDeliveries();
         });
@@ -829,9 +924,10 @@ function inicializarTabs() {
 }
 
 function inicializarFiltros() {
-    document.querySelectorAll('.filtro-btn').forEach(btn => {
+    const filtros = document.querySelectorAll('.filtro-btn');
+    filtros.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            filtros.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             filtroActual = btn.getAttribute('data-estado');
             renderizarPedidos();
@@ -844,17 +940,42 @@ function inicializarMenuAdmin() {
     const menu = document.getElementById('mobile-menu-admin');
     const overlay = document.getElementById('menu-overlay-admin');
     const close = document.getElementById('menu-close-admin');
-    if (toggle) toggle.onclick = () => { menu.classList.add('active'); overlay.classList.add('active'); document.body.style.overflow = 'hidden'; };
-    if (close) close.onclick = () => { menu.classList.remove('active'); overlay.classList.remove('active'); document.body.style.overflow = ''; };
-    if (overlay) overlay.onclick = () => { menu.classList.remove('active'); overlay.classList.remove('active'); document.body.style.overflow = ''; };
-    document.querySelectorAll('.mobile-tab-btn').forEach(tab => {
+    
+    if (toggle) {
+        toggle.onclick = () => {
+            if (menu) menu.classList.add('active');
+            if (overlay) overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+    }
+    if (close) {
+        close.onclick = () => {
+            if (menu) menu.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+    }
+    if (overlay) {
+        overlay.onclick = () => {
+            if (menu) menu.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+    }
+    
+    const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
+    mobileTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
-            document.querySelectorAll('.tab-btn').forEach(t => { t.classList.remove('active'); if (t.getAttribute('data-tab') === tabId) t.classList.add('active'); });
+            document.querySelectorAll('.tab-btn').forEach(t => {
+                t.classList.remove('active');
+                if (t.getAttribute('data-tab') === tabId) t.classList.add('active');
+            });
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            menu.classList.remove('active');
-            overlay.classList.remove('active');
+            const tabContent = document.getElementById(`tab-${tabId}`);
+            if (tabContent) tabContent.classList.add('active');
+            if (menu) menu.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
             document.body.style.overflow = '';
             if (tabId === 'productos') cargarProductos();
             if (tabId === 'delivery') cargarDeliveries();
@@ -863,38 +984,75 @@ function inicializarMenuAdmin() {
 }
 
 async function cargarPedidos(forceRefresh = false) {
-    if (!vendedorActual) return;
+    if (!vendedorActual) {
+        console.warn('No hay vendedor actual para cargar pedidos');
+        return;
+    }
+    
     const container = document.getElementById('pedidos-container');
     if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>`;
+    
     try {
+        console.log('Cargando pedidos para vendedor:', vendedorActual.id);
         const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
+        console.log('Respuesta pedidos:', response);
+        
         if (response.error) throw new Error(response.error);
+        
         pedidos = (response.pedidos || []).map(p => ({ ...p, estado: normalizarEstado(p.estado) }));
+        console.log('Pedidos cargados:', pedidos.length);
+        
         actualizarContadoresPedidos();
         calcularMetricas();
         renderizarPedidos();
+        
         if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
-    } catch (error) { if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar pedidos</p></div>`; }
+    } catch (error) { 
+        console.error('Error al cargar pedidos:', error);
+        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar pedidos: ${error.message}</p></div>`; 
+    }
 }
 
 async function cargarVendedorPorId(vendedorId) {
     try {
+        console.log('Cargando vendedor por ID:', vendedorId);
         const response = await callAPI('getVendedores', {}, true);
+        console.log('Vendedores response:', response);
+        
         if (response.success) {
             const vendedor = response.vendedores.find(v => v.id.toString() === vendedorId.toString());
-            if (vendedor && vendedor.activo === 'SI') { vendedorActual = vendedor; await iniciarPanel(vendedorActual); }
-            else cerrarSesion();
+            console.log('Vendedor encontrado:', vendedor);
+            
+            if (vendedor && vendedor.activo === 'SI') { 
+                vendedorActual = vendedor; 
+                await iniciarPanel(vendedorActual); 
+            } else { 
+                console.warn('Vendedor no encontrado o inactivo');
+                cerrarSesion(); 
+            }
         }
-    } catch (error) { cerrarSesion(); }
+    } catch (error) { 
+        console.error('Error cargar vendedor:', error);
+        cerrarSesion(); 
+    }
 }
 
 // ===================================================
 // CAMBIAR PANELES DE AUTENTICACIÓN
 // ===================================================
 
-function mostrarPanelLogin() { document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); document.getElementById('login-panel').classList.add('active'); }
-function mostrarPanelRegistro() { document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); document.getElementById('register-panel').classList.add('active'); }
-function mostrarPanelRecuperacion() { document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); document.getElementById('recover-panel').classList.add('active'); }
+function mostrarPanelLogin() { 
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById('login-panel').classList.add('active'); 
+}
+function mostrarPanelRegistro() { 
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById('register-panel').classList.add('active'); 
+}
+function mostrarPanelRecuperacion() { 
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById('recover-panel').classList.add('active'); 
+}
 
 // ===================================================
 // INICIALIZACIÓN
@@ -902,55 +1060,134 @@ function mostrarPanelRecuperacion() { document.querySelectorAll('.auth-panel').f
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Panel de Vendedor iniciado');
-    const sesion = cargarSesionGuardada();
-    if (!sesion) { document.getElementById('admin-auth').style.display = 'flex'; }
     
+    const sesion = cargarSesionGuardada();
+    if (!sesion) { 
+        const adminAuth = document.getElementById('admin-auth');
+        if (adminAuth) adminAuth.style.display = 'flex'; 
+    }
+    
+    // Toggle password
     document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = document.getElementById(btn.getAttribute('data-target'));
-            if (input) { const type = input.type === 'password' ? 'text' : 'password'; input.type = type; btn.querySelector('i').classList.toggle('fa-eye'); btn.querySelector('i').classList.toggle('fa-eye-slash'); }
+            if (input) { 
+                const type = input.type === 'password' ? 'text' : 'password'; 
+                input.type = type; 
+                btn.querySelector('i').classList.toggle('fa-eye'); 
+                btn.querySelector('i').classList.toggle('fa-eye-slash'); 
+            }
         });
     });
     
-    document.getElementById('login-form')?.addEventListener('submit', async (e) => { e.preventDefault(); await login(); });
-    document.getElementById('register-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const nombre = document.getElementById('reg-nombre')?.value.trim() || '';
-        const email = document.getElementById('reg-email')?.value.trim() || '';
-        const telefono = document.getElementById('reg-telefono')?.value.trim() || '';
-        const direccion = document.getElementById('reg-direccion')?.value.trim() || '';
-        const horario = document.getElementById('reg-horario')?.value.trim() || '';
-        const password = document.getElementById('reg-password')?.value || '';
-        const password2 = document.getElementById('reg-password2')?.value || '';
-        const logoFile = document.getElementById('reg-logo')?.files[0];
-        if (password !== password2) { alert('Las contraseñas no coinciden'); return; }
-        if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
-        const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile);
-        if (response && response.success) { alert('Registro exitoso. Ahora podés iniciar sesión.'); mostrarPanelLogin(); document.getElementById('register-form').reset(); document.getElementById('reg-logo-preview').innerHTML = ''; document.getElementById('login-email').value = email; }
-        else alert(response?.error || 'Error al registrar');
-    });
-    document.getElementById('reg-logo')?.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { const preview = document.getElementById('reg-logo-preview'); if (preview) preview.innerHTML = `<img src="${ev.target.result}" style="max-width: 80px; border-radius: 12px;">`; }; reader.readAsDataURL(file); } });
+    // Login form
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            await login(); 
+        });
+    }
     
-    document.getElementById('recover-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('recover-email')?.value.trim() || '';
-        const response = await postAPI('solicitarRecuperacion', { email });
-        if (response.success) { alert('Código enviado a tu email'); document.getElementById('recover-code-section').style.display = 'block'; if (response.codigo) console.log('Código de recuperación (demo):', response.codigo); }
-        else alert(response.error);
-    });
-    document.getElementById('btn-reset-password')?.addEventListener('click', async () => {
-        const email = document.getElementById('recover-email')?.value.trim() || '';
-        const codigo = document.getElementById('recover-code')?.value.trim() || '';
-        const newPassword = document.getElementById('recover-new-password')?.value || '';
-        const newPassword2 = document.getElementById('recover-new-password2')?.value || '';
-        if (newPassword !== newPassword2) { alert('Las contraseñas no coinciden'); return; }
-        const response = await postAPI('resetearPassword', { email, codigo, new_password_hash: await hashPassword(newPassword) });
-        if (response.success) { alert('Contraseña restablecida. Iniciá sesión.'); mostrarPanelLogin(); document.getElementById('recover-code-section').style.display = 'none'; document.getElementById('recover-form').reset(); }
-        else alert(response.error);
-    });
+    // Register form
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('reg-nombre')?.value.trim() || '';
+            const email = document.getElementById('reg-email')?.value.trim() || '';
+            const telefono = document.getElementById('reg-telefono')?.value.trim() || '';
+            const direccion = document.getElementById('reg-direccion')?.value.trim() || '';
+            const horario = document.getElementById('reg-horario')?.value.trim() || '';
+            const password = document.getElementById('reg-password')?.value || '';
+            const password2 = document.getElementById('reg-password2')?.value || '';
+            const logoFile = document.getElementById('reg-logo')?.files[0];
+            
+            if (password !== password2) { alert('Las contraseñas no coinciden'); return; }
+            if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
+            
+            const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile);
+            if (response && response.success) { 
+                alert('Registro exitoso. Ahora podés iniciar sesión.'); 
+                mostrarPanelLogin(); 
+                document.getElementById('register-form').reset(); 
+                const preview = document.getElementById('reg-logo-preview');
+                if (preview) preview.innerHTML = '';
+                const loginEmail = document.getElementById('login-email');
+                if (loginEmail) loginEmail.value = email;
+            } else { 
+                alert(response?.error || 'Error al registrar'); 
+            }
+        });
+        
+        const regLogo = document.getElementById('reg-logo');
+        if (regLogo) {
+            regLogo.addEventListener('change', (e) => { 
+                const file = e.target.files[0]; 
+                if (file) { 
+                    const reader = new FileReader(); 
+                    reader.onload = (ev) => { 
+                        const preview = document.getElementById('reg-logo-preview'); 
+                        if (preview) preview.innerHTML = `<img src="${ev.target.result}" style="max-width: 80px; border-radius: 12px;">`; 
+                    }; 
+                    reader.readAsDataURL(file); 
+                } 
+            });
+        }
+    }
     
-    document.getElementById('btn-show-register')?.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelRegistro(); });
-    document.getElementById('btn-show-recover')?.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelRecuperacion(); });
-    document.getElementById('back-to-login')?.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
-    document.getElementById('back-to-login-recover')?.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
+    // Recover form
+    const recoverForm = document.getElementById('recover-form');
+    if (recoverForm) {
+        recoverForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('recover-email')?.value.trim() || '';
+            const response = await postAPI('solicitarRecuperacion', { email });
+            if (response.success) { 
+                alert('Código enviado a tu email'); 
+                const recoverSection = document.getElementById('recover-code-section');
+                if (recoverSection) recoverSection.style.display = 'block';
+                if (response.codigo) console.log('Código de recuperación (demo):', response.codigo);
+            } else { 
+                alert(response.error); 
+            }
+        });
+    }
+    
+    // Reset password
+    const btnReset = document.getElementById('btn-reset-password');
+    if (btnReset) {
+        btnReset.addEventListener('click', async () => {
+            const email = document.getElementById('recover-email')?.value.trim() || '';
+            const codigo = document.getElementById('recover-code')?.value.trim() || '';
+            const newPassword = document.getElementById('recover-new-password')?.value || '';
+            const newPassword2 = document.getElementById('recover-new-password2')?.value || '';
+            
+            if (newPassword !== newPassword2) { alert('Las contraseñas no coinciden'); return; }
+            
+            const response = await postAPI('resetearPassword', { email, codigo, new_password_hash: await hashPassword(newPassword) });
+            if (response.success) { 
+                alert('Contraseña restablecida. Iniciá sesión.'); 
+                mostrarPanelLogin(); 
+                const recoverSection = document.getElementById('recover-code-section');
+                if (recoverSection) recoverSection.style.display = 'none';
+                document.getElementById('recover-form')?.reset();
+            } else { 
+                alert(response.error); 
+            }
+        });
+    }
+    
+    // Navegación entre paneles
+    const showRegister = document.getElementById('btn-show-register');
+    if (showRegister) showRegister.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelRegistro(); });
+    
+    const showRecover = document.getElementById('btn-show-recover');
+    if (showRecover) showRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelRecuperacion(); });
+    
+    const backToLogin = document.getElementById('back-to-login');
+    if (backToLogin) backToLogin.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
+    
+    const backToLoginRecover = document.getElementById('back-to-login-recover');
+    if (backToLoginRecover) backToLoginRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
 });
