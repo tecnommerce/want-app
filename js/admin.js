@@ -16,11 +16,14 @@ let terminoBusqueda = '';
 let pedidoPendienteConfirmar = null;
 let botonPendienteConfirmar = null;
 
+<<<<<<< HEAD
 // Variables de paginación
 let paginaActual = 1;
 let pedidosPorPagina = 10;
 let pedidosFiltrados = [];
 
+=======
+>>>>>>> parent of cd32339 (fix: agregar función getEstadoTexto faltante y corregir renderizado de pedidos)
 // Variables para editar/nuevo pedido
 let productosTemp = [];
 let modoEdicionPedido = null;
