@@ -1228,3 +1228,66 @@ body {
     .header-btn, .header-actions .btn-icon { display: none; }
     .header-actions .menu-toggle-admin { display: flex; }
 }
+
+/* ===================================================
+   MODAL PEDIDO COMPLETO
+   =================================================== */
+
+.detalle-seccion {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detalle-seccion strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detalle-seccion p {
+    font-size: 0.9rem;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.productos-detalle {
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    padding: 8px;
+}
+
+.producto-detalle {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 0.85rem;
+}
+
+.producto-detalle:last-child {
+    border-bottom: none;
+}
+
+.detalle-seccion.total {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.total-monto {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.pedidos-tabla tr {
+    transition: background 0.2s;
+}
+
+.pedidos-tabla tr:hover {
+    background: #FFF5EB;
+}
