@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (versión completa)
+// ADMIN - Panel de vendedor (versión completa y corregida)
 // ===================================================
 
 const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
@@ -79,7 +79,6 @@ async function subirImagenACloudinary(file) {
         const data = await response.json();
         return data.secure_url || null;
     } catch (error) {
-        console.error('Error subir imagen:', error);
         return null;
     }
 }
@@ -140,7 +139,6 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.fontSize = '0.8rem';
     toast.style.fontWeight = '500';
     toast.style.zIndex = '9999';
-    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
@@ -172,26 +170,38 @@ function calcularMetricas() {
         }
     });
     
-    document.getElementById('ventas-hoy') && (document.getElementById('ventas-hoy').textContent = formatearPrecio(ventasHoy));
-    document.getElementById('ventas-semana') && (document.getElementById('ventas-semana').textContent = formatearPrecio(ventasSemana));
-    document.getElementById('ventas-mes') && (document.getElementById('ventas-mes').textContent = formatearPrecio(ventasMes));
-    document.getElementById('pedidos-entregados') && (document.getElementById('pedidos-entregados').textContent = pedidosEntregados);
-    document.getElementById('pedidos-pendientes') && (document.getElementById('pedidos-pendientes').textContent = pedidosPendientes);
+    const vh = document.getElementById('ventas-hoy');
+    const vs = document.getElementById('ventas-semana');
+    const vm = document.getElementById('ventas-mes');
+    const pe = document.getElementById('pedidos-entregados');
+    const pp = document.getElementById('pedidos-pendientes');
+    
+    if (vh) vh.textContent = formatearPrecio(ventasHoy);
+    if (vs) vs.textContent = formatearPrecio(ventasSemana);
+    if (vm) vm.textContent = formatearPrecio(ventasMes);
+    if (pe) pe.textContent = pedidosEntregados;
+    if (pp) pp.textContent = pedidosPendientes;
 }
 
 function actualizarContadoresPedidos() {
     const contarPorEstado = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
     pedidos.forEach(p => { const estado = p.estado || 'preparando'; if (contarPorEstado[estado] !== undefined) contarPorEstado[estado]++; });
     
-    document.getElementById('count-preparando') && (document.getElementById('count-preparando').textContent = contarPorEstado.preparando);
-    document.getElementById('count-preparacion') && (document.getElementById('count-preparacion').textContent = contarPorEstado['en preparacion']);
-    document.getElementById('count-camino') && (document.getElementById('count-camino').textContent = contarPorEstado['en camino']);
-    document.getElementById('count-entregado') && (document.getElementById('count-entregado').textContent = contarPorEstado.entregado);
-    document.getElementById('badge-pedidos') && (document.getElementById('badge-pedidos').textContent = contarPorEstado.preparando);
+    const cp = document.getElementById('count-preparando');
+    const cpr = document.getElementById('count-preparacion');
+    const cc = document.getElementById('count-camino');
+    const ce = document.getElementById('count-entregado');
+    const bp = document.getElementById('badge-pedidos');
+    
+    if (cp) cp.textContent = contarPorEstado.preparando;
+    if (cpr) cpr.textContent = contarPorEstado['en preparacion'];
+    if (cc) cc.textContent = contarPorEstado['en camino'];
+    if (ce) ce.textContent = contarPorEstado.entregado;
+    if (bp) bp.textContent = contarPorEstado.preparando;
 }
 
 // ===================================================
-// FILTROS Y BUSCADOR
+// FILTROS Y RENDERIZADO DE PEDIDOS
 // ===================================================
 
 function filtrarPedidos() {
@@ -220,15 +230,18 @@ function renderizarPedidos() {
         return;
     }
     
-    container.innerHTML = pedidosFiltrados.map(p => {
+    let html = '';
+    
+    for (const p of pedidosFiltrados) {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago === 'transferencia' ? 'Transferencia' : 'Efectivo';
         const estado = p.estado || 'preparando';
         const numeroMostrar = p.numero_orden || p.id;
         
+        // Productos
         let productosHTML = '';
         if (p.productos && Array.isArray(p.productos) && p.productos.length > 0) {
-            p.productos.forEach(pr => {
+            for (const pr of p.productos) {
                 if (pr && pr.nombre) {
                     productosHTML += `
                         <li>
@@ -237,13 +250,13 @@ function renderizarPedidos() {
                         </li>
                     `;
                 }
-            });
+            }
         }
-        
         if (!productosHTML) {
             productosHTML = '<li>No hay productos</li>';
         }
         
+        // Detalles
         let detallesHTML = '';
         if (p.detalles && p.detalles.trim()) {
             detallesHTML = `
@@ -254,7 +267,9 @@ function renderizarPedidos() {
             `;
         }
         
+        // Botones según estado
         let botonesHTML = '';
+        
         if (estado === 'preparando') {
             botonesHTML = `
                 <div class="botones-estado">
@@ -296,7 +311,7 @@ function renderizarPedidos() {
             `;
         }
         
-        return `
+        html += `
             <div class="pedido-card">
                 <div class="pedido-header">
                     <div class="pedido-id">Pedido #${numeroMostrar}</div>
@@ -322,7 +337,9 @@ function renderizarPedidos() {
                 </div>
             </div>
         `;
-    }).join('');
+    }
+    
+    container.innerHTML = html;
 }
 
 function inicializarBuscador() {
@@ -478,10 +495,10 @@ async function cargarDeliveries(forceRefresh = false) {
         if (response.error) throw new Error(response.error);
         deliveries = response.deliveries || [];
         renderizarDeliveries();
-        document.getElementById('badge-delivery') && (document.getElementById('badge-delivery').textContent = deliveries.length);
+        const badge = document.getElementById('badge-delivery');
+        if (badge) badge.textContent = deliveries.length;
     } catch (error) { 
-        console.error('Error cargar deliveries:', error);
-        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar deliveries: ${error.message}</p></div>`; 
+        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar deliveries</p></div>`; 
     }
 }
 
@@ -536,10 +553,10 @@ async function cargarProductos(forceRefresh = false) {
         if (response.error) throw new Error(response.error);
         productos = (response.productos || []).filter(p => p.vendedor_id?.toString() === vendedorActual.id.toString());
         renderizarProductosAdmin();
-        document.getElementById('badge-productos') && (document.getElementById('badge-productos').textContent = productos.length);
+        const badge = document.getElementById('badge-productos');
+        if (badge) badge.textContent = productos.length;
     } catch (error) { 
-        console.error('Error cargar productos:', error);
-        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos: ${error.message}</p></div>`; 
+        if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`; 
     }
 }
 
@@ -599,12 +616,18 @@ function abrirModalPerfil() { cargarPerfil(); document.getElementById('modal-per
 function cerrarModalPerfil() { document.getElementById('modal-perfil').classList.remove('active'); }
 function cargarPerfil() {
     if (!vendedorActual) return;
-    document.getElementById('perfil-nombre') && (document.getElementById('perfil-nombre').value = vendedorActual.nombre || '');
-    document.getElementById('perfil-telefono') && (document.getElementById('perfil-telefono').value = vendedorActual.telefono || '');
-    document.getElementById('perfil-direccion') && (document.getElementById('perfil-direccion').value = vendedorActual.direccion || '');
-    document.getElementById('perfil-horario') && (document.getElementById('perfil-horario').value = vendedorActual.horario || '');
-    document.getElementById('perfil-nombre-display') && (document.getElementById('perfil-nombre-display').textContent = vendedorActual.nombre || '');
-    document.getElementById('perfil-email-display') && (document.getElementById('perfil-email-display').textContent = vendedorActual.email || '');
+    const pn = document.getElementById('perfil-nombre');
+    const pt = document.getElementById('perfil-telefono');
+    const pd = document.getElementById('perfil-direccion');
+    const ph = document.getElementById('perfil-horario');
+    const pnd = document.getElementById('perfil-nombre-display');
+    const ped = document.getElementById('perfil-email-display');
+    if (pn) pn.value = vendedorActual.nombre || '';
+    if (pt) pt.value = vendedorActual.telefono || '';
+    if (pd) pd.value = vendedorActual.direccion || '';
+    if (ph) ph.value = vendedorActual.horario || '';
+    if (pnd) pnd.textContent = vendedorActual.nombre || '';
+    if (ped) ped.textContent = vendedorActual.email || '';
     const logoPreview = document.getElementById('logo-preview');
     if (logoPreview && vendedorActual.logo_url) logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`;
     const btnUpload = document.getElementById('btn-upload-logo');
@@ -629,13 +652,13 @@ async function actualizarPerfil() {
     if (newPassword) { if (newPassword.length < 6) { mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error'); return; } updateData.password_hash = await hashPassword(newPassword); }
     try {
         const response = await postAPI('actualizarVendedor', updateData);
-        if (response && response.success) { mostrarToast('Perfil actualizado', 'success'); vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl }; document.getElementById('panel-nombre') && (document.getElementById('panel-nombre').textContent = nombre); document.getElementById('perfil-nombre-display') && (document.getElementById('perfil-nombre-display').textContent = nombre); document.getElementById('perfil-new-password').value = ''; cerrarModalPerfil(); }
+        if (response && response.success) { mostrarToast('Perfil actualizado', 'success'); vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl }; const pn = document.getElementById('panel-nombre'); if (pn) pn.textContent = nombre; const pnd = document.getElementById('perfil-nombre-display'); if (pnd) pnd.textContent = nombre; const pnp = document.getElementById('perfil-new-password'); if (pnp) pnp.value = ''; cerrarModalPerfil(); }
         else throw new Error(response?.error || 'Error');
     } catch (error) { mostrarToast('Error al actualizar perfil', 'error'); }
 }
 
 // ===================================================
-// EDICIÓN DE PEDIDO
+// EDICIÓN DE PEDIDO (simplificado)
 // ===================================================
 
 function abrirModalEditarPedido(pedidoId) {
@@ -685,7 +708,7 @@ async function guardarEditarPedido() {
 }
 
 // ===================================================
-// CREAR NUEVO PEDIDO
+// CREAR NUEVO PEDIDO (simplificado)
 // ===================================================
 
 function abrirModalNuevoPedido() {
@@ -772,23 +795,18 @@ async function login() {
         mostrarToast('Validando credenciales...', 'info');
         const passwordHash = await hashPassword(password);
         const response = await callAPI('loginVendedor', { email, password: passwordHash }, true);
-        console.log('Login response:', response);
         
         if (response.success && response.vendedor) {
             vendedorActual = response.vendedor;
-            console.log('Vendedor logueado:', vendedorActual);
-            
             const rememberMe = document.getElementById('remember-me')?.checked || false;
             if (rememberMe) localStorage.setItem('want_sesion', JSON.stringify({ id: vendedorActual.id, email: vendedorActual.email, nombre: vendedorActual.nombre }));
             else guardarSesion(vendedorActual);
-            
             await iniciarPanel(vendedorActual);
             mostrarToast(`Bienvenido ${vendedorActual.nombre}`, 'success');
         } else {
             throw new Error(response.error || 'Email o contraseña incorrectos');
         }
     } catch (error) { 
-        console.error('Error login:', error);
         mostrarToast(error.message, 'error'); 
     }
 }
@@ -798,8 +816,6 @@ async function login() {
 // ===================================================
 
 async function iniciarPanel(vendedor) {
-    console.log('Iniciando panel para:', vendedor.nombre);
-    
     const adminAuth = document.getElementById('admin-auth');
     const adminPanel = document.getElementById('admin-panel');
     const headerAdmin = document.getElementById('header-admin');
@@ -985,7 +1001,6 @@ function inicializarMenuAdmin() {
 
 async function cargarPedidos(forceRefresh = false) {
     if (!vendedorActual) {
-        console.warn('No hay vendedor actual para cargar pedidos');
         return;
     }
     
@@ -993,14 +1008,11 @@ async function cargarPedidos(forceRefresh = false) {
     if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>`;
     
     try {
-        console.log('Cargando pedidos para vendedor:', vendedorActual.id);
         const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
-        console.log('Respuesta pedidos:', response);
         
         if (response.error) throw new Error(response.error);
         
         pedidos = (response.pedidos || []).map(p => ({ ...p, estado: normalizarEstado(p.estado) }));
-        console.log('Pedidos cargados:', pedidos.length);
         
         actualizarContadoresPedidos();
         calcularMetricas();
@@ -1008,31 +1020,25 @@ async function cargarPedidos(forceRefresh = false) {
         
         if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
     } catch (error) { 
-        console.error('Error al cargar pedidos:', error);
         if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar pedidos: ${error.message}</p></div>`; 
     }
 }
 
 async function cargarVendedorPorId(vendedorId) {
     try {
-        console.log('Cargando vendedor por ID:', vendedorId);
         const response = await callAPI('getVendedores', {}, true);
-        console.log('Vendedores response:', response);
         
         if (response.success) {
             const vendedor = response.vendedores.find(v => v.id.toString() === vendedorId.toString());
-            console.log('Vendedor encontrado:', vendedor);
             
             if (vendedor && vendedor.activo === 'SI') { 
                 vendedorActual = vendedor; 
                 await iniciarPanel(vendedorActual); 
             } else { 
-                console.warn('Vendedor no encontrado o inactivo');
                 cerrarSesion(); 
             }
         }
     } catch (error) { 
-        console.error('Error cargar vendedor:', error);
         cerrarSesion(); 
     }
 }

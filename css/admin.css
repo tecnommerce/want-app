@@ -1,5 +1,5 @@
 /* ===================================================
-   ADMIN - ESTILOS COMPLETOS - VERSIÓN ORIGINAL SIN PAGINACIÓN
+   ADMIN - ESTILOS COMPLETOS
    =================================================== */
 
 :root {
@@ -28,7 +28,6 @@
     --radius-full: 9999px;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
 
 * {
@@ -50,9 +49,7 @@ body {
     padding: 0 24px;
 }
 
-/* ===================================================
-   HEADER
-   =================================================== */
+/* HEADER */
 .header-admin {
     background: white;
     padding: 12px 0;
@@ -133,9 +130,7 @@ body {
     color: var(--gray-600);
 }
 
-/* ===================================================
-   AUTENTICACIÓN
-   =================================================== */
+/* AUTENTICACIÓN */
 .admin-auth {
     display: flex;
     justify-content: center;
@@ -389,9 +384,7 @@ body {
     width: 100%;
 }
 
-/* ===================================================
-   PANEL PRINCIPAL
-   =================================================== */
+/* PANEL PRINCIPAL */
 .admin-panel {
     padding: 24px 0 48px;
     min-height: calc(100vh - 70px);
@@ -498,7 +491,7 @@ body {
     animation: fadeIn 0.3s ease;
 }
 
-/* Filtros */
+/* FILTROS */
 .filtros-buscador {
     display: flex;
     justify-content: space-between;
@@ -618,9 +611,7 @@ body {
     background: var(--primary-dark);
 }
 
-/* ===================================================
-   CONTENEDOR DE PEDIDOS - SCROLL INFINITO
-   =================================================== */
+/* CONTENEDOR DE PEDIDOS - SCROLL INFINITO */
 .pedidos-container {
     display: flex;
     flex-direction: column;
@@ -648,9 +639,7 @@ body {
     background: var(--primary);
 }
 
-/* ===================================================
-   TARJETA DE PEDIDO - TAMAÑO ORIGINAL
-   =================================================== */
+/* TARJETA DE PEDIDO */
 .pedido-card {
     background: white;
     border-radius: 16px;
@@ -801,7 +790,6 @@ body {
 .estado-en-camino { background: #DBEAFE; color: #2563EB; }
 .estado-entregado { background: #D1FAE5; color: #059669; }
 
-/* Botones NOTABLES */
 .botones-estado {
     display: flex;
     gap: 8px;
@@ -843,39 +831,20 @@ body {
     border: none;
 }
 
-/* Colores de botones */
 .btn-confirmar-whatsapp { background: #25D366; color: white; }
 .btn-confirmar-whatsapp:hover { background: #128C7E; transform: scale(1.02); }
-
 .btn-preparar-pedido { background: #FF5A00; color: white; }
 .btn-preparar-pedido:hover { background: #e04e00; transform: translateY(-1px); }
-
 .btn-pedido-listo { background: #10b981; color: white; }
 .btn-pedido-listo:hover { background: #059669; transform: translateY(-1px); }
-
 .btn-notificar-camino { background: #f59e0b; color: white; }
 .btn-notificar-camino:hover { background: #d97706; transform: translateY(-1px); }
-
 .btn-confirmar-entrega { background: #10b981; color: white; }
 .btn-confirmar-entrega:hover { background: #059669; transform: translateY(-1px); }
-
 .btn-editar-pedido { background: #3b82f6; color: white; }
 .btn-editar-pedido:hover { background: #2563eb; transform: translateY(-1px); }
-
 .btn-cancelar { background: #FEF2F2; color: #ef4444; border: 1px solid #fee2e2; }
 .btn-cancelar:hover { background: #ef4444; color: white; }
-
-.btn-confirmar-whatsapp:disabled,
-.btn-preparar-pedido:disabled,
-.btn-pedido-listo:disabled,
-.btn-notificar-camino:disabled,
-.btn-confirmar-entrega:disabled,
-.btn-editar-pedido:disabled,
-.btn-cancelar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
 
 .sin-pedidos {
     text-align: center;
@@ -886,9 +855,7 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-/* ===================================================
-   PRODUCTOS ADMIN
-   =================================================== */
+/* PRODUCTOS ADMIN */
 .productos-header-actions {
     display: flex;
     justify-content: flex-end;
@@ -981,9 +948,7 @@ body {
 .btn-eliminar { background: #FEF2F2; color: var(--danger); }
 .btn-eliminar:hover { background: var(--danger); color: white; }
 
-/* ===================================================
-   DELIVERY
-   =================================================== */
+/* DELIVERY */
 .delivery-header-actions {
     display: flex;
     justify-content: flex-end;
@@ -1038,9 +1003,7 @@ body {
 .btn-delete-delivery { background: #FEF2F2; color: var(--danger); }
 .btn-delete-delivery:hover { background: var(--danger); color: white; }
 
-/* ===================================================
-   PERFIL MODAL
-   =================================================== */
+/* PERFIL MODAL */
 .perfil-header {
     display: flex;
     align-items: center;
@@ -1101,9 +1064,7 @@ body {
     cursor: pointer;
 }
 
-/* ===================================================
-   MODALES
-   =================================================== */
+/* MODALES */
 .modal {
     display: none;
     position: fixed;
@@ -1300,9 +1261,7 @@ body {
 
 .menu-overlay-admin.active { display: block; }
 
-/* ===================================================
-   RESPONSIVE
-   =================================================== */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .container { padding: 0 16px; }
     .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
