@@ -1,11 +1,10 @@
 /* ===================================================
-   ADMIN - ESTILOS COMPLETOS
+   ADMIN - NUEVO DISEÑO EN TABLA PARA PEDIDOS
    =================================================== */
 
 :root {
     --primary: #FF5A00;
     --primary-dark: #e04e00;
-    --primary-light: #FF7A00;
     --success: #10b981;
     --danger: #ef4444;
     --warning: #f59e0b;
@@ -19,12 +18,10 @@
     --gray-600: #475569;
     --gray-700: #334155;
     --gray-800: #1e293b;
-    --gray-900: #0f172a;
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 20px;
-    --radius-2xl: 24px;
     --radius-full: 9999px;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -40,11 +37,11 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background: var(--gray-50);
     color: var(--gray-800);
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 0 24px;
 }
@@ -612,184 +609,112 @@ body {
 }
 
 /* ===================================================
-   CONTENEDOR DE PEDIDOS - SCROLL INFINITO
+   CONTENEDOR DE PEDIDOS - TABLA HORIZONTAL
    =================================================== */
 .pedidos-container {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    max-height: 70vh;
+    max-height: 65vh;
     overflow-y: auto;
-    padding-right: 6px;
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
 }
 
-.pedidos-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.pedidos-container::-webkit-scrollbar-track {
-    background: var(--gray-100);
-    border-radius: 10px;
-}
-
-.pedidos-container::-webkit-scrollbar-thumb {
-    background: var(--gray-400);
-    border-radius: 10px;
-}
-
-.pedidos-container::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
-}
-
-/* ===================================================
-   TARJETA DE PEDIDO - TAMAÑO NORMAL
-   =================================================== */
-.pedido-card {
+/* Tabla de pedidos */
+.pedidos-tabla {
+    width: 100%;
+    border-collapse: collapse;
     background: white;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s;
-    margin-bottom: 0;
+    box-shadow: var(--shadow-sm);
 }
 
-.pedido-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.pedidos-tabla thead {
+    background: var(--gray-100);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.pedido-header {
-    background: #f8fafc;
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.pedido-id {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #FF5A00;
-    background: #FFF5EB;
-    padding: 4px 12px;
-    border-radius: 20px;
-}
-
-.pedido-fecha {
-    font-size: 0.7rem;
-    color: #64748b;
-}
-
-.pedido-cliente {
-    padding: 12px 16px;
-    background: #fafbfc;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    font-size: 0.85rem;
-    color: #334155;
-    border-bottom: 1px solid #eef2f6;
-}
-
-.pedido-cliente strong,
-.pedido-cliente span {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.pedido-cliente i {
-    color: #FF5A00;
-    width: 14px;
+.pedidos-tabla th {
+    padding: 14px 12px;
+    text-align: left;
     font-size: 0.75rem;
-}
-
-.pedido-productos {
-    padding: 12px 16px;
-    border-bottom: 1px solid #eef2f6;
-}
-
-.pedido-productos strong {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 0.7rem;
-    color: #475569;
+    font-weight: 600;
+    color: var(--gray-600);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--gray-200);
 }
 
-.pedido-productos ul {
-    list-style: none;
-}
-
-.pedido-productos li {
-    padding: 6px 0;
-    display: flex;
-    justify-content: space-between;
+.pedidos-tabla td {
+    padding: 12px;
     font-size: 0.8rem;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
 }
 
-.pedido-productos li:last-child {
-    border-bottom: none;
+.pedidos-tabla tr:hover {
+    background: var(--gray-50);
 }
 
-.pedido-total {
-    text-align: right;
+/* Columnas específicas */
+.col-id {
+    width: 80px;
     font-weight: 700;
-    font-size: 0.9rem;
-    color: #FF5A00;
-    padding-top: 8px;
-    margin-top: 6px;
-    border-top: 1px solid #eef2f6;
+    color: var(--primary);
 }
 
-.pedido-detalles {
-    margin-top: 10px;
-    padding: 8px 12px;
-    background: #FFFBEB;
-    border-radius: 8px;
-    border-left: 3px solid #f59e0b;
+.col-fecha {
+    width: 140px;
+    font-size: 0.7rem;
+    color: var(--gray-500);
 }
 
-.pedido-detalles strong {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 0.65rem;
-    color: #f59e0b;
-    text-transform: uppercase;
+.col-cliente {
+    min-width: 150px;
 }
 
-.pedido-detalles p {
-    font-size: 0.75rem;
-    color: #334155;
-    margin: 0;
+.col-telefono {
+    width: 110px;
 }
 
-.pedido-actions {
-    padding: 12px 16px;
-    background: #fafbfc;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    border-top: 1px solid #eef2f6;
+.col-direccion {
+    min-width: 180px;
 }
 
-.estado-actual {
-    display: flex;
-    align-items: center;
+.col-pago {
+    width: 100px;
 }
 
+.col-productos {
+    min-width: 200px;
+}
+
+.col-total {
+    width: 100px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.col-estado {
+    width: 110px;
+}
+
+.col-acciones {
+    width: 280px;
+    white-space: nowrap;
+}
+
+/* Badge de estado */
 .estado-badge {
-    padding: 5px 12px;
+    display: inline-block;
+    padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .estado-preparando { background: #FEF3C7; color: #D97706; }
@@ -797,92 +722,72 @@ body {
 .estado-en-camino { background: #DBEAFE; color: #2563EB; }
 .estado-entregado { background: #D1FAE5; color: #059669; }
 
-/* Botones MÁS GRANDES Y NOTABLES */
-.botones-estado {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.botones-acciones {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.btn-confirmar-whatsapp,
-.btn-preparar-pedido,
-.btn-pedido-listo,
-.btn-notificar-camino,
-.btn-confirmar-entrega {
-    padding: 8px 18px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: 9999px;
+/* Detalles expandibles */
+.detalles-preview {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--gray-500);
+    font-size: 0.7rem;
     cursor: pointer;
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
 }
 
-.btn-editar-pedido,
-.btn-cancelar {
-    padding: 8px 16px;
+.detalles-preview:hover {
+    color: var(--primary);
+    white-space: normal;
+    background: var(--gray-50);
+    position: absolute;
+    padding: 4px 8px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 20;
+}
+
+/* Productos preview */
+.productos-preview {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.75rem;
+}
+
+/* Botones de acción en tabla */
+.btn-tabla {
+    padding: 6px 12px;
+    font-size: 0.7rem;
     font-weight: 600;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     cursor: pointer;
+    border: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    border: none;
+    gap: 5px;
+    margin: 2px;
     transition: all 0.2s;
 }
 
-/* Colores de botones */
-.btn-confirmar-whatsapp { background: #25D366; color: white; }
-.btn-confirmar-whatsapp:hover { background: #128C7E; transform: scale(1.02); }
+.btn-whatsapp { background: #25D366; color: white; }
+.btn-whatsapp:hover { background: #128C7E; transform: scale(1.02); }
 
-.btn-preparar-pedido { background: #FF5A00; color: white; }
-.btn-preparar-pedido:hover { background: #e04e00; transform: translateY(-1px); }
+.btn-preparar { background: var(--primary); color: white; }
+.btn-preparar:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
-.btn-pedido-listo { background: #10b981; color: white; }
+.btn-pedido-listo { background: var(--success); color: white; }
 .btn-pedido-listo:hover { background: #059669; transform: translateY(-1px); }
 
-.btn-notificar-camino { background: #f59e0b; color: white; }
-.btn-notificar-camino:hover { background: #d97706; transform: translateY(-1px); }
+.btn-notificar { background: var(--warning); color: white; }
+.btn-notificar:hover { background: #d97706; transform: translateY(-1px); }
 
-.btn-confirmar-entrega { background: #10b981; color: white; }
-.btn-confirmar-entrega:hover { background: #059669; transform: translateY(-1px); }
+.btn-entregar { background: var(--success); color: white; }
+.btn-entregar:hover { background: #059669; transform: translateY(-1px); }
 
-.btn-editar-pedido { background: #3b82f6; color: white; }
-.btn-editar-pedido:hover { background: #2563eb; transform: translateY(-1px); }
+.btn-editar { background: var(--info); color: white; }
+.btn-editar:hover { background: #2563eb; transform: translateY(-1px); }
 
-.btn-cancelar { background: #FEF2F2; color: #ef4444; border: 1px solid #fee2e2; }
-.btn-cancelar:hover { background: #ef4444; color: white; }
-
-.btn-confirmar-whatsapp:disabled,
-.btn-preparar-pedido:disabled,
-.btn-pedido-listo:disabled,
-.btn-notificar-camino:disabled,
-.btn-confirmar-entrega:disabled,
-.btn-editar-pedido:disabled,
-.btn-cancelar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.sin-pedidos {
-    text-align: center;
-    padding: 60px;
-    color: #94a3b8;
-    background: white;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-}
+.btn-cancelar-tabla { background: #FEF2F2; color: var(--danger); border: 1px solid #fee2e2; }
+.btn-cancelar-tabla:hover { background: var(--danger); color: white; }
 
 /* PRODUCTOS ADMIN */
 .productos-header-actions {
@@ -1210,6 +1115,15 @@ body {
     to { transform: rotate(360deg); }
 }
 
+.sin-pedidos {
+    text-align: center;
+    padding: 60px;
+    color: #94a3b8;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
 .mobile-menu-admin {
     position: fixed;
     top: 0;
@@ -1291,6 +1205,12 @@ body {
 .menu-overlay-admin.active { display: block; }
 
 /* RESPONSIVE */
+@media (max-width: 1024px) {
+    .pedidos-tabla {
+        min-width: 900px;
+    }
+}
+
 @media (max-width: 768px) {
     .container { padding: 0 16px; }
     .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -1304,10 +1224,6 @@ body {
     .buscador-container { justify-content: center; }
     .buscador-input input { width: 100%; }
     .pedidos-container { max-height: 55vh; }
-    .pedido-header { flex-direction: column; align-items: flex-start; }
-    .pedido-cliente { flex-direction: column; gap: 6px; }
-    .pedido-actions { flex-direction: column; align-items: stretch; }
-    .botones-estado, .botones-acciones { justify-content: center; }
     .menu-toggle-admin { display: flex; align-items: center; justify-content: center; }
     .header-btn, .header-actions .btn-icon { display: none; }
     .header-actions .menu-toggle-admin { display: flex; }

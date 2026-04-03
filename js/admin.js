@@ -201,23 +201,8 @@ function actualizarContadoresPedidos() {
 }
 
 // ===================================================
-// FILTROS Y RENDERIZADO DE PEDIDOS
+// RENDERIZAR PEDIDOS - NUEVO DISEÑO EN TABLA
 // ===================================================
-
-function filtrarPedidos() {
-    let filtrados = pedidos.filter(p => p.estado === filtroActual);
-    if (terminoBusqueda.trim()) {
-        const termino = terminoBusqueda.toLowerCase().trim();
-        filtrados = filtrados.filter(p => {
-            return (p.numero_orden?.toString().includes(termino)) ||
-                   (p.id?.toString().includes(termino)) ||
-                   (p.cliente_nombre && p.cliente_nombre.toLowerCase().includes(termino)) ||
-                   (p.cliente_telefono && p.cliente_telefono.includes(termino));
-        });
-    }
-    filtrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    return filtrados;
-}
 
 function renderizarPedidos() {
     const container = document.getElementById('pedidos-container');
@@ -230,7 +215,24 @@ function renderizarPedidos() {
         return;
     }
     
-    let html = '';
+    let html = `
+        <table class="pedidos-tabla">
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-fecha">Fecha</th>
+                    <th class="col-cliente">Cliente</th>
+                    <th class="col-telefono">Teléfono</th>
+                    <th class="col-direccion">Dirección</th>
+                    <th class="col-pago">Pago</th>
+                    <th class="col-productos">Productos</th>
+                    <th class="col-total">Total</th>
+                    <th class="col-estado">Estado</th>
+                    <th class="col-acciones">Acciones</th>
+                 </tr>
+            </thead>
+            <tbody>
+    `;
     
     for (const p of pedidosFiltrados) {
         const fecha = new Date(p.fecha);
@@ -238,106 +240,77 @@ function renderizarPedidos() {
         const estado = p.estado || 'preparando';
         const numeroMostrar = p.numero_orden || p.id;
         
-        // Productos
-        let productosHTML = '';
+        // Productos resumidos
+        let productosResumen = '';
         if (p.productos && Array.isArray(p.productos) && p.productos.length > 0) {
-            for (const pr of p.productos) {
-                if (pr && pr.nombre) {
-                    productosHTML += `
-                        <li>
-                            <span>${pr.cantidad}x ${escapeHTML(pr.nombre)}</span>
-                            <span>${formatearPrecio(pr.precio * pr.cantidad)}</span>
-                        </li>
-                    `;
-                }
+            const primeros = p.productos.slice(0, 2);
+            productosResumen = primeros.map(pr => `${pr.cantidad}x ${pr.nombre}`).join(', ');
+            if (p.productos.length > 2) {
+                productosResumen += ` +${p.productos.length - 2} más`;
             }
-        }
-        if (!productosHTML) {
-            productosHTML = '<li>No hay productos</li>';
+        } else {
+            productosResumen = 'Sin productos';
         }
         
-        // Detalles
-        let detallesHTML = '';
+        // Detalles (tooltip)
+        let detallesAttr = '';
         if (p.detalles && p.detalles.trim()) {
-            detallesHTML = `
-                <div class="pedido-detalles">
-                    <strong><i class="fas fa-pen"></i> Detalles:</strong>
-                    <p>${escapeHTML(p.detalles)}</p>
-                </div>
-            `;
+            detallesAttr = `title="${escapeHTML(p.detalles)}" style="cursor: help;"`;
         }
+        
+        // Total
+        const total = formatearPrecio(p.total || 0);
         
         // Botones según estado
         let botonesHTML = '';
         
         if (estado === 'preparando') {
             botonesHTML = `
-                <div class="botones-estado">
-                    <button class="btn-confirmar-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
-                    <button class="btn-preparar-pedido" onclick="actualizarEstado(${p.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
-                </div>
-                <div class="botones-acciones">
-                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-                </div>
+                <button class="btn-tabla btn-whatsapp" onclick="confirmarPedidoWhatsApp(${p.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
+                <button class="btn-tabla btn-preparar" onclick="actualizarEstado(${p.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'en preparacion') {
             botonesHTML = `
-                <div class="botones-estado">
-                    <button class="btn-pedido-listo" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-check-circle"></i> Pedido listo</button>
-                </div>
-                <div class="botones-acciones">
-                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-                </div>
+                <button class="btn-tabla btn-pedido-listo" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-check-circle"></i> Listo</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'en camino') {
             botonesHTML = `
-                <div class="botones-estado">
-                    <button class="btn-notificar-camino" onclick="notificarEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar Envío</button>
-                    <button class="btn-confirmar-entrega" onclick="actualizarEstado(${p.id}, 'entregado', this)"><i class="fas fa-check-double"></i> Confirmar entrega</button>
-                </div>
-                <div class="botones-acciones">
-                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-                </div>
+                <button class="btn-tabla btn-notificar" onclick="notificarEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
+                <button class="btn-tabla btn-entregar" onclick="actualizarEstado(${p.id}, 'entregado', this)"><i class="fas fa-check-double"></i> Entregar</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'entregado') {
             botonesHTML = `
-                <div class="botones-acciones">
-                    <button class="btn-editar-pedido" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-cancelar" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-                </div>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         }
         
         html += `
-            <div class="pedido-card">
-                <div class="pedido-header">
-                    <div class="pedido-id">Pedido #${numeroMostrar}</div>
-                    <div class="pedido-fecha">${fecha.toLocaleString('es-AR')}</div>
-                </div>
-                <div class="pedido-cliente">
-                    <strong><i class="fas fa-user"></i> ${escapeHTML(p.cliente_nombre || 'Sin nombre')}</strong>
-                    <span><i class="fas fa-phone"></i> ${p.cliente_telefono || 'Sin teléfono'}</span>
-                    <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(p.direccion || 'Sin dirección')}</span>
-                    <span><i class="fas fa-money-bill-wave"></i> ${metodoPago}</span>
-                </div>
-                <div class="pedido-productos">
-                    <strong>Productos:</strong>
-                    <ul>${productosHTML}</ul>
-                    ${detallesHTML}
-                    <div class="pedido-total">Total: ${formatearPrecio(p.total || 0)}</div>
-                </div>
-                <div class="pedido-actions">
-                    <div class="estado-actual">
-                        <span class="estado-badge estado-${estado.replace(' ', '-')}">${getEstadoTexto(estado)}</span>
-                    </div>
-                    ${botonesHTML}
-                </div>
-            </div>
+            <tr>
+                <td class="col-id">#${numeroMostrar}</td>
+                <td class="col-fecha">${fecha.toLocaleString('es-AR')}</td>
+                <td class="col-cliente">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</td>
+                <td class="col-telefono">${p.cliente_telefono || '-'}</td>
+                <td class="col-direccion">${escapeHTML(p.direccion || '-')}</td>
+                <td class="col-pago">${metodoPago}</td>
+                <td class="col-productos"><span class="productos-preview" ${detallesAttr}>${escapeHTML(productosResumen)}</span></td>
+                <td class="col-total">${total}</td>
+                <td class="col-estado"><span class="estado-badge estado-${estado.replace(' ', '-')}">${getEstadoTexto(estado)}</span></td>
+                <td class="col-acciones">${botonesHTML}</td>
+            </tr>
         `;
     }
+    
+    html += `
+            </tbody>
+        </table>
+    `;
     
     container.innerHTML = html;
 }
