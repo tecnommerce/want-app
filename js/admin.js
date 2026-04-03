@@ -201,6 +201,25 @@ function actualizarContadoresPedidos() {
 }
 
 // ===================================================
+// FILTRAR PEDIDOS
+// ===================================================
+
+function filtrarPedidos() {
+    let filtrados = pedidos.filter(p => p.estado === filtroActual);
+    if (terminoBusqueda.trim()) {
+        const termino = terminoBusqueda.toLowerCase().trim();
+        filtrados = filtrados.filter(p => {
+            return (p.numero_orden?.toString().includes(termino)) ||
+                   (p.id?.toString().includes(termino)) ||
+                   (p.cliente_nombre && p.cliente_nombre.toLowerCase().includes(termino)) ||
+                   (p.cliente_telefono && p.cliente_telefono.includes(termino));
+        });
+    }
+    filtrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    return filtrados;
+}
+
+// ===================================================
 // RENDERIZAR PEDIDOS - NUEVO DISEÑO EN TABLA
 // ===================================================
 
@@ -313,24 +332,6 @@ function renderizarPedidos() {
     `;
     
     container.innerHTML = html;
-}
-
-function inicializarBuscador() {
-    const buscadorInput = document.getElementById('buscador-pedidos');
-    const limpiarBtn = document.getElementById('btn-limpiar-busqueda');
-    if (buscadorInput) {
-        buscadorInput.addEventListener('input', (e) => {
-            terminoBusqueda = e.target.value;
-            renderizarPedidos();
-        });
-    }
-    if (limpiarBtn) {
-        limpiarBtn.addEventListener('click', () => {
-            if (buscadorInput) buscadorInput.value = '';
-            terminoBusqueda = '';
-            renderizarPedidos();
-        });
-    }
 }
 
 // ===================================================
