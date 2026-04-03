@@ -611,12 +611,14 @@ body {
     background: var(--primary-dark);
 }
 
-/* CONTENEDOR DE PEDIDOS - SCROLL INFINITO */
+/* ===================================================
+   CONTENEDOR DE PEDIDOS - SCROLL INFINITO
+   =================================================== */
 .pedidos-container {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    max-height: 65vh;
+    max-height: 70vh;
     overflow-y: auto;
     padding-right: 6px;
 }
@@ -639,7 +641,9 @@ body {
     background: var(--primary);
 }
 
-/* TARJETA DE PEDIDO */
+/* ===================================================
+   TARJETA DE PEDIDO - TAMAÑO NORMAL
+   =================================================== */
 .pedido-card {
     background: white;
     border-radius: 16px;
@@ -647,6 +651,7 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     border: 1px solid #e2e8f0;
     transition: all 0.2s;
+    margin-bottom: 0;
 }
 
 .pedido-card:hover {
@@ -655,7 +660,7 @@ body {
 
 .pedido-header {
     background: #f8fafc;
-    padding: 10px 14px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -664,25 +669,25 @@ body {
 
 .pedido-id {
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #FF5A00;
     background: #FFF5EB;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
 }
 
 .pedido-fecha {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     color: #64748b;
 }
 
 .pedido-cliente {
-    padding: 8px 14px;
+    padding: 12px 16px;
     background: #fafbfc;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    font-size: 0.75rem;
+    gap: 16px;
+    font-size: 0.85rem;
     color: #334155;
     border-bottom: 1px solid #eef2f6;
 }
@@ -691,26 +696,27 @@ body {
 .pedido-cliente span {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
 }
 
 .pedido-cliente i {
     color: #FF5A00;
-    width: 12px;
-    font-size: 0.7rem;
+    width: 14px;
+    font-size: 0.75rem;
 }
 
 .pedido-productos {
-    padding: 8px 14px;
+    padding: 12px 16px;
     border-bottom: 1px solid #eef2f6;
 }
 
 .pedido-productos strong {
     display: block;
-    margin-bottom: 6px;
-    font-size: 0.65rem;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
     color: #475569;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .pedido-productos ul {
@@ -718,10 +724,10 @@ body {
 }
 
 .pedido-productos li {
-    padding: 4px 0;
+    padding: 6px 0;
     display: flex;
     justify-content: space-between;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     border-bottom: 1px solid #f1f5f9;
 }
 
@@ -732,43 +738,43 @@ body {
 .pedido-total {
     text-align: right;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #FF5A00;
-    padding-top: 6px;
-    margin-top: 4px;
+    padding-top: 8px;
+    margin-top: 6px;
     border-top: 1px solid #eef2f6;
 }
 
 .pedido-detalles {
-    margin-top: 6px;
-    padding: 5px 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
     background: #FFFBEB;
-    border-radius: 6px;
-    border-left: 2px solid #f59e0b;
+    border-radius: 8px;
+    border-left: 3px solid #f59e0b;
 }
 
 .pedido-detalles strong {
     display: block;
-    margin-bottom: 2px;
-    font-size: 0.55rem;
+    margin-bottom: 4px;
+    font-size: 0.65rem;
     color: #f59e0b;
     text-transform: uppercase;
 }
 
 .pedido-detalles p {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: #334155;
     margin: 0;
 }
 
 .pedido-actions {
-    padding: 8px 14px;
+    padding: 12px 16px;
     background: #fafbfc;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     border-top: 1px solid #eef2f6;
 }
 
@@ -778,11 +784,12 @@ body {
 }
 
 .estado-badge {
-    padding: 3px 10px;
+    padding: 5px 12px;
     border-radius: 20px;
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .estado-preparando { background: #FEF3C7; color: #D97706; }
@@ -790,15 +797,16 @@ body {
 .estado-en-camino { background: #DBEAFE; color: #2563EB; }
 .estado-entregado { background: #D1FAE5; color: #059669; }
 
+/* Botones MÁS GRANDES Y NOTABLES */
 .botones-estado {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .botones-acciones {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -807,48 +815,69 @@ body {
 .btn-pedido-listo,
 .btn-notificar-camino,
 .btn-confirmar-entrega {
-    padding: 6px 14px;
-    font-size: 0.7rem;
+    padding: 8px 18px;
+    font-size: 0.8rem;
     font-weight: 600;
     border-radius: 9999px;
     cursor: pointer;
     border: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    transition: all 0.2s;
 }
 
 .btn-editar-pedido,
 .btn-cancelar {
-    padding: 6px 12px;
-    font-size: 0.65rem;
+    padding: 8px 16px;
+    font-size: 0.75rem;
     font-weight: 600;
     border-radius: 9999px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     border: none;
+    transition: all 0.2s;
 }
 
+/* Colores de botones */
 .btn-confirmar-whatsapp { background: #25D366; color: white; }
 .btn-confirmar-whatsapp:hover { background: #128C7E; transform: scale(1.02); }
+
 .btn-preparar-pedido { background: #FF5A00; color: white; }
 .btn-preparar-pedido:hover { background: #e04e00; transform: translateY(-1px); }
+
 .btn-pedido-listo { background: #10b981; color: white; }
 .btn-pedido-listo:hover { background: #059669; transform: translateY(-1px); }
+
 .btn-notificar-camino { background: #f59e0b; color: white; }
 .btn-notificar-camino:hover { background: #d97706; transform: translateY(-1px); }
+
 .btn-confirmar-entrega { background: #10b981; color: white; }
 .btn-confirmar-entrega:hover { background: #059669; transform: translateY(-1px); }
+
 .btn-editar-pedido { background: #3b82f6; color: white; }
 .btn-editar-pedido:hover { background: #2563eb; transform: translateY(-1px); }
+
 .btn-cancelar { background: #FEF2F2; color: #ef4444; border: 1px solid #fee2e2; }
 .btn-cancelar:hover { background: #ef4444; color: white; }
 
+.btn-confirmar-whatsapp:disabled,
+.btn-preparar-pedido:disabled,
+.btn-pedido-listo:disabled,
+.btn-notificar-camino:disabled,
+.btn-confirmar-entrega:disabled,
+.btn-editar-pedido:disabled,
+.btn-cancelar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .sin-pedidos {
     text-align: center;
-    padding: 40px;
+    padding: 60px;
     color: #94a3b8;
     background: white;
     border-radius: 16px;
