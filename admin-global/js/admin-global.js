@@ -497,6 +497,31 @@ async function confirmarEliminarPedido() {
 // WEB - BANNERS
 // ===================================================
 
+async function eliminarBanner(bannerId, button) {
+    if (!confirm('¿Eliminar este banner?')) return;
+    
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    try {
+        const response = await postAPI('eliminarBanner', { bannerId });
+        if (response.success) {
+            mostrarToast('Banner eliminado', 'success');
+            await cargarBanners();
+        } else {
+            throw new Error(response?.error || 'Error al eliminar');
+        }
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        }
+    }
+}
+
 async function cargarBanners() {
     const tbody = document.getElementById('banners-tbody');
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>';
@@ -613,7 +638,7 @@ async function guardarBanner() {
     const action = id ? 'actualizarBanner' : 'crearBanner';
     
     try {
-        const response = await callAPI(action, data);
+        const response = await postAPI(action, data);
         if (response && response.success) {
             mostrarToast(id ? 'Banner actualizado' : 'Banner creado', 'success');
             cerrarModalBanner();
@@ -624,35 +649,6 @@ async function guardarBanner() {
     } catch (error) {
         mostrarToast(error.message, 'error');
     }
-}
-
-async function eliminarBanner(bannerId, button) {
-    if (!confirm('¿Eliminar este banner?')) return;
-    
-    if (button) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    }
-    
-    try {
-        const response = await callAPI('eliminarBanner', { bannerId });
-        if (response.success) {
-            mostrarToast('Banner eliminado', 'success');
-            await cargarBanners();
-        } else {
-            throw new Error(response?.error || 'Error al eliminar');
-        }
-    } catch (error) {
-        mostrarToast(error.message, 'error');
-        if (button) {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
-        }
-    }
-}
-
-function editarBanner(id) {
-    abrirModalBanner(id);
 }
 
 // ===================================================
