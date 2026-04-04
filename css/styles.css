@@ -131,15 +131,18 @@ body {
     color: #FF5A00;
 }
 
-/* Botón menú hamburguesa (solo móvil) */
+/* Botón menú hamburguesa */
 .menu-toggle {
     display: none;
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     color: #FF5A00;
     cursor: pointer;
-    padding: 8px;
+    padding: 8px 12px;
+    margin-left: auto;
+    z-index: 1001;
+    position: relative;
 }
 
 /* Menú móvil (desplegable) */
@@ -960,170 +963,40 @@ body {
 }
 
 /* ===================================================
-   RESPONSIVE
-   =================================================== */
-@media (max-width: 768px) {
-    .container {
-        padding: 0 16px;
-    }
-
-    .hero {
-        padding: 35px 0 30px;
-    }
-
-    .hero h2 {
-        font-size: 1.5rem;
-    }
-
-    .hero p {
-        font-size: 0.9rem;
-    }
-
-    /* Header móvil */
-    .nav-desktop {
-        display: none;
-    }
-
-    .menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .search-container {
-        max-width: none;
-        margin: 0 10px;
-    }
-
-    .search-box {
-        padding: 6px 12px;
-    }
-
-    .search-box input {
-        font-size: 0.85rem;
-    }
-
-    .logo {
-        font-size: 1.4rem;
-    }
-
-    .vendedor-logo-header {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .tagline {
-        font-size: 0.85rem;
-    }
-
-    /* Tarjetas más compactas */
-    .negocios-grid {
-        gap: 16px;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-
-    .negocio-logo {
-        height: 100px;
-    }
-
-    .negocio-logo img {
-        padding: 8px;
-    }
-
-    .negocio-info {
-        padding: 10px;
-    }
-
-    .negocio-nombre {
-        font-size: 0.9rem;
-    }
-
-    .productos-grid {
-        gap: 16px;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-
-    .producto-imagen {
-        height: 120px;
-    }
-
-    .producto-imagen img {
-        padding: 10px;
-    }
-
-    .producto-info {
-        padding: 10px;
-    }
-
-    .producto-nombre {
-        font-size: 0.85rem;
-    }
-
-    .producto-precio {
-        font-size: 0.9rem;
-    }
-
-    .btn-agregar {
-        font-size: 0.75rem;
-        padding: 6px;
-    }
-
-    .ticket-footer {
-        flex-direction: column;
-    }
-}
-
-@media (min-width: 769px) {
-    .mobile-menu,
-    .menu-overlay {
-        display: none !important;
-    }
-}
-
-/* ===================================================
-   ELIMINAR LÍNEA DEL LOGO
-   =================================================== */
-.logo,
-.logo-link,
-.logo-link h1,
-.logo-link h1::after,
-.logo-link h1::before,
-h1.logo,
-a.logo-link {
-    border-bottom: none !important;
-    text-decoration: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-/* ===================================================
-   BANNERS CARRUSEL - RESPONSIVE
+   BANNERS CARRUSEL - COMPATIBLE CON iOS
    =================================================== */
 .banners-section {
     margin: 20px 0 30px;
     width: 100%;
+    display: block;
 }
 
 .banner-carousel {
     position: relative;
+    width: 100%;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     background: #f0f0f0;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .carousel-container {
     position: relative;
     width: 100%;
     overflow: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .carousel-track {
+    display: -webkit-flex;
     display: flex;
+    -webkit-transition: -webkit-transform 0.5s ease-in-out;
     transition: transform 0.5s ease-in-out;
 }
 
 .banner-slide {
+    -webkit-flex: 0 0 100%;
     flex: 0 0 100%;
     position: relative;
     cursor: pointer;
@@ -1133,7 +1006,24 @@ a.logo-link {
     width: 100%;
     height: auto;
     display: block;
-    object-fit: cover;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.banner-titulo {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    max-width: 80%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Botones de navegación */
@@ -1198,9 +1088,121 @@ a.logo-link {
 }
 
 /* ===================================================
-   RESPONSIVE - MÓVILES
+   RESPONSIVE MÓVIL - MEJORADO
    =================================================== */
 @media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .hero {
+        padding: 35px 0 30px;
+    }
+
+    .hero h2 {
+        font-size: 1.5rem;
+    }
+
+    .hero p {
+        font-size: 0.9rem;
+    }
+
+    /* Header móvil */
+    .nav-desktop {
+        display: none;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    .logo {
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    
+    .search-container {
+        flex: 1;
+        margin: 0 8px;
+        min-width: 0;
+    }
+    
+    .search-box {
+        padding: 6px 10px;
+    }
+    
+    .search-box input {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+    }
+    
+    .menu-toggle {
+        display: flex !important;
+        flex-shrink: 0;
+        font-size: 1.6rem;
+    }
+
+    /* Tarjetas más compactas */
+    .negocios-grid {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .negocio-logo {
+        height: 100px;
+    }
+
+    .negocio-logo img {
+        padding: 8px;
+    }
+
+    .negocio-info {
+        padding: 10px;
+    }
+
+    .negocio-nombre {
+        font-size: 0.9rem;
+    }
+
+    .productos-grid {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .producto-imagen {
+        height: 120px;
+    }
+
+    .producto-imagen img {
+        padding: 10px;
+    }
+
+    .producto-info {
+        padding: 10px;
+    }
+
+    .producto-nombre {
+        font-size: 0.85rem;
+    }
+
+    .producto-precio {
+        font-size: 0.9rem;
+    }
+
+    .btn-agregar {
+        font-size: 0.75rem;
+        padding: 6px;
+    }
+
+    .ticket-footer {
+        flex-direction: column;
+    }
+
+    /* Banners móvil */
     .banners-section {
         margin: 10px 0 20px;
     }
@@ -1212,7 +1214,7 @@ a.logo-link {
     .carousel-btn {
         width: 32px;
         height: 32px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
     
     .carousel-btn.prev {
@@ -1221,6 +1223,21 @@ a.logo-link {
     
     .carousel-btn.next {
         right: 8px;
+    }
+    
+    .banner-slide img {
+        min-height: 100px;
+        max-height: 180px;
+        object-fit: cover;
+    }
+    
+    .banner-titulo {
+        font-size: 0.7rem;
+        bottom: 10px;
+        left: 10px;
+        padding: 4px 10px;
+        white-space: normal;
+        max-width: 70%;
     }
     
     .dot {
@@ -1238,11 +1255,24 @@ a.logo-link {
     }
 }
 
+/* Para iPhone SE y pantallas muy pequeñas */
 @media (max-width: 480px) {
     .carousel-btn {
         width: 28px;
         height: 28px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+    }
+    
+    .banner-slide img {
+        min-height: 80px;
+        max-height: 140px;
+    }
+    
+    .banner-titulo {
+        font-size: 0.6rem;
+        bottom: 8px;
+        left: 8px;
+        padding: 3px 8px;
     }
     
     .dot {
@@ -1255,58 +1285,25 @@ a.logo-link {
     }
 }
 
+@media (min-width: 769px) {
+    .mobile-menu,
+    .menu-overlay {
+        display: none !important;
+    }
+}
+
 /* ===================================================
-   BANNERS - FIX PARA MÓVIL (NO ROMPE NADA)
+   ELIMINAR LÍNEA DEL LOGO
    =================================================== */
-@media (max-width: 768px) {
-    .banners-section {
-        margin: 10px 0 20px !important;
-        display: block !important;
-    }
-    
-    .banner-carousel {
-        border-radius: 12px !important;
-        overflow: hidden !important;
-    }
-    
-    .banner-slide img {
-        width: 100% !important;
-        height: auto !important;
-        min-height: 100px !important;
-        max-height: 180px !important;
-        object-fit: cover !important;
-    }
-    
-    .carousel-btn {
-        width: 32px !important;
-        height: 32px !important;
-        font-size: 0.9rem !important;
-        background: rgba(0, 0, 0, 0.5) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    .carousel-btn.prev {
-        left: 8px !important;
-    }
-    
-    .carousel-btn.next {
-        right: 8px !important;
-    }
-    
-    .carousel-dots {
-        display: flex !important;
-        gap: 8px !important;
-        padding: 8px !important;
-    }
-    
-    .dot {
-        width: 8px !important;
-        height: 8px !important;
-    }
-    
-    .dot.active {
-        width: 20px !important;
-    }
+.logo,
+.logo-link,
+.logo-link h1,
+.logo-link h1::after,
+.logo-link h1::before,
+h1.logo,
+a.logo-link {
+    border-bottom: none !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }

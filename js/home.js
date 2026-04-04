@@ -298,22 +298,39 @@ function inicializarMenu() {
 
 async function cargarBanners() {
     try {
-        const response = await callAPI('getBanners');
+        console.log('🔄 Cargando banners...');
         
-        if (response.success && response.banners && response.banners.length > 0) {
+        if (typeof callAPI === 'undefined') {
+            console.error('❌ callAPI no está definida');
+            return;
+        }
+        
+        const response = await callAPI('getBanners');
+        console.log('📦 Respuesta banners:', response);
+        
+        if (response && response.success && response.banners && response.banners.length > 0) {
             banners = response.banners;
+            console.log('✅ Banners cargados:', banners.length);
             renderizarBanners();
             iniciarCarrusel();
             const bannersSection = document.getElementById('banners-section');
-            if (bannersSection) bannersSection.style.display = 'block';
+            if (bannersSection) {
+                bannersSection.style.display = 'block';
+                console.log('✅ Sección de banners visible');
+            }
         } else {
+            console.log('⚠️ No hay banners para mostrar');
             const bannersSection = document.getElementById('banners-section');
-            if (bannersSection) bannersSection.style.display = 'none';
+            if (bannersSection) {
+                bannersSection.style.display = 'none';
+            }
         }
     } catch (error) {
-        console.error('Error al cargar banners:', error);
+        console.error('❌ Error al cargar banners:', error);
         const bannersSection = document.getElementById('banners-section');
-        if (bannersSection) bannersSection.style.display = 'none';
+        if (bannersSection) {
+            bannersSection.style.display = 'none';
+        }
     }
 }
 
@@ -323,7 +340,11 @@ function renderizarBanners() {
     
     if (!track) return;
     
-    // Renderizar slides
+    if (banners.length === 0) {
+        track.innerHTML = '';
+        return;
+    }
+    
     track.innerHTML = banners.map((banner, index) => `
         <div class="banner-slide" onclick="window.open('${banner.link || '#'}', '_blank')">
             <img src="${banner.imagen_url}" alt="${escapeHTML(banner.titulo || 'Banner')}" loading="lazy">
@@ -331,12 +352,10 @@ function renderizarBanners() {
         </div>
     `).join('');
     
-    // Renderizar dots
     dotsContainer.innerHTML = banners.map((_, index) => `
         <div class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>
     `).join('');
     
-    // Agregar eventos a los dots
     document.querySelectorAll('.dot').forEach(dot => {
         dot.addEventListener('click', () => {
             const index = parseInt(dot.getAttribute('data-index'));
@@ -348,20 +367,23 @@ function renderizarBanners() {
 function iniciarCarrusel() {
     if (autoPlayInterval) clearInterval(autoPlayInterval);
     
+    if (banners.length <= 1) return;
+    
     autoPlayInterval = setInterval(() => {
         siguienteSlide();
     }, AUTO_PLAY_DELAY);
     
-    // Pausar autoplay al pasar el mouse
     const carousel = document.querySelector('.banner-carousel');
     if (carousel) {
         carousel.addEventListener('mouseenter', () => {
             if (autoPlayInterval) clearInterval(autoPlayInterval);
         });
         carousel.addEventListener('mouseleave', () => {
-            autoPlayInterval = setInterval(() => {
-                siguienteSlide();
-            }, AUTO_PLAY_DELAY);
+            if (banners.length > 1) {
+                autoPlayInterval = setInterval(() => {
+                    siguienteSlide();
+                }, AUTO_PLAY_DELAY);
+            }
         });
     }
 }
@@ -376,7 +398,6 @@ function irAlSlide(index) {
         track.style.transform = `translateX(-${currentIndex * 100}%)`;
     }
     
-    // Actualizar dots activos
     document.querySelectorAll('.dot').forEach((dot, i) => {
         dot.classList.toggle('active', i === currentIndex);
     });
