@@ -1254,3 +1254,59 @@ a.logo-link {
         width: 16px;
     }
 }
+
+/* ===================================================
+   BANNERS - FIX PARA MÓVIL (NO ROMPE NADA)
+   =================================================== */
+@media (max-width: 768px) {
+    .banners-section {
+        margin: 10px 0 20px !important;
+        display: block !important;
+    }
+    
+    .banner-carousel {
+        border-radius: 12px !important;
+        overflow: hidden !important;
+    }
+    
+    .banner-slide img {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100px !important;
+        max-height: 180px !important;
+        object-fit: cover !important;
+    }
+    
+    .carousel-btn {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.9rem !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .carousel-btn.prev {
+        left: 8px !important;
+    }
+    
+    .carousel-btn.next {
+        right: 8px !important;
+    }
+    
+    .carousel-dots {
+        display: flex !important;
+        gap: 8px !important;
+        padding: 8px !important;
+    }
+    
+    .dot {
+        width: 8px !important;
+        height: 8px !important;
+    }
+    
+    .dot.active {
+        width: 20px !important;
+    }
+}
