@@ -102,7 +102,7 @@ async function withLoading(button, callback) {
 // ===================================================
 
 const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
-const CLOUDINARY_UPLOAD_PRESET = 'want_banners';
+const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
 
 async function subirImagenACloudinary(file) {
     const formData = new FormData();
