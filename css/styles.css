@@ -1097,24 +1097,25 @@ a.logo-link {
 }
 
 /* ===================================================
-   BANNERS CARRUSEL
+   BANNERS CARRUSEL - RESPONSIVE
    =================================================== */
 .banners-section {
     margin: 20px 0 30px;
+    width: 100%;
 }
 
 .banner-carousel {
     position: relative;
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #f0f0f0;
 }
 
 .carousel-container {
     position: relative;
     width: 100%;
     overflow: hidden;
-    border-radius: 20px;
 }
 
 .carousel-track {
@@ -1131,22 +1132,8 @@ a.logo-link {
 .banner-slide img {
     width: 100%;
     height: auto;
-    min-height: 150px;
-    max-height: 400px;
-    object-fit: cover;
     display: block;
-}
-
-.banner-titulo {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    object-fit: cover;
 }
 
 /* Botones de navegación */
@@ -1170,7 +1157,7 @@ a.logo-link {
 }
 
 .carousel-btn:hover {
-    background: var(--primary);
+    background: #FF5A00;
 }
 
 .carousel-btn.prev {
@@ -1186,7 +1173,7 @@ a.logo-link {
     display: flex;
     justify-content: center;
     gap: 10px;
-    padding: 12px 0;
+    padding: 12px;
     background: rgba(0, 0, 0, 0.3);
     position: absolute;
     bottom: 0;
@@ -1205,13 +1192,23 @@ a.logo-link {
 }
 
 .dot.active {
-    background: var(--primary);
+    background: #FF5A00;
     width: 24px;
     border-radius: 10px;
 }
 
-/* Responsive */
+/* ===================================================
+   RESPONSIVE - MÓVILES
+   =================================================== */
 @media (max-width: 768px) {
+    .banners-section {
+        margin: 10px 0 20px;
+    }
+    
+    .banner-carousel {
+        border-radius: 12px;
+    }
+    
     .carousel-btn {
         width: 32px;
         height: 32px;
@@ -1226,13 +1223,6 @@ a.logo-link {
         right: 8px;
     }
     
-    .banner-titulo {
-        font-size: 0.7rem;
-        bottom: 10px;
-        left: 10px;
-        padding: 4px 10px;
-    }
-    
     .dot {
         width: 8px;
         height: 8px;
@@ -1240,5 +1230,27 @@ a.logo-link {
     
     .dot.active {
         width: 20px;
+    }
+    
+    .carousel-dots {
+        gap: 8px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
+    .dot {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .dot.active {
+        width: 16px;
     }
 }
