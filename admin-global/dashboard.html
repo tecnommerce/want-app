@@ -29,6 +29,9 @@
                 <button class="nav-item" data-section="productos">
                     <i class="fas fa-pizza-slice"></i> Productos
                 </button>
+                <button class="nav-item" data-section="web">
+                    <i class="fas fa-globe"></i> Web
+                </button>
                 <button class="nav-item" data-section="configuracion">
                     <i class="fas fa-cog"></i> Configuración
                 </button>
@@ -180,6 +183,51 @@
                 </div>
             </div>
 
+            <!-- Sección Web -->
+            <div class="section-content" id="section-web" style="display: none;">
+                <div class="page-content">
+                    <div class="page-header">
+                        <h2>Configuración Web</h2>
+                    </div>
+                    
+                    <!-- Submenú de Web -->
+                    <div class="web-submenu">
+                        <button class="submenu-btn active" data-sub="banners">
+                            <i class="fas fa-image"></i> Banners
+                        </button>
+                    </div>
+                    
+                    <!-- Subsección Banners -->
+                    <div id="sub-banners" class="web-subcontent active">
+                        <div class="page-header" style="margin-top: 20px;">
+                            <h3>Gestión de Banners</h3>
+                            <div class="header-actions">
+                                <button class="btn-primary" id="btn-agregar-banner">
+                                    <i class="fas fa-plus"></i> Agregar banner
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Imagen</th>
+                                        <th>Título</th>
+                                        <th>Orden</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="banners-tbody">
+                                    <tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Sección Configuración -->
             <div class="section-content" id="section-configuracion" style="display: none;">
                 <div class="page-content">
@@ -211,6 +259,59 @@
     <div class="modal" id="modal-editar-pedido"><div class="modal-content"><div class="modal-header"><h3>Editar Pedido</h3><button class="modal-close">&times;</button></div><div class="modal-body"><input type="hidden" id="edit-pedido-id"><div class="form-group"><label>Cliente</label><input type="text" id="edit-pedido-cliente" class="form-control"></div><div class="form-group"><label>Teléfono</label><input type="tel" id="edit-pedido-telefono" class="form-control"></div><div class="form-group"><label>Dirección</label><input type="text" id="edit-pedido-direccion" class="form-control"></div><div class="form-group"><label>Total</label><input type="text" id="edit-pedido-total" class="form-control" readonly></div><div class="form-group"><label>Estado</label><select id="edit-pedido-estado" class="form-control"><option value="preparando">Nuevo</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregado</option></select></div></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-pedido">Guardar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
     <div class="modal" id="modal-confirmar-pedido"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este pedido?</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-pedido">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
+
+    <!-- Modal para banner -->
+    <div class="modal" id="modal-banner">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-banner-title">Nuevo banner</h3>
+                <button class="modal-close" onclick="cerrarModalBanner()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="banner-form">
+                    <input type="hidden" id="banner-id">
+                    <div class="form-group">
+                        <label>Título (opcional)</label>
+                        <input type="text" id="banner-titulo" class="form-control" placeholder="Ej: Ofertas especiales">
+                    </div>
+                    <div class="form-group">
+                        <label>Imagen *</label>
+                        <input type="file" id="banner-imagen" accept="image/*" class="form-control">
+                        <div id="banner-imagen-preview" class="image-preview" style="margin-top: 10px;"></div>
+                        <small class="input-help">Recomendado: 1200x400px para mejor visualización</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Enlace (opcional)</label>
+                        <input type="url" id="banner-link" class="form-control" placeholder="https://...">
+                        <small class="input-help">URL a donde irá el usuario al hacer clic</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Orden</label>
+                        <input type="number" id="banner-orden" class="form-control" value="999">
+                        <small class="input-help">Número menor = aparece primero</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="banner-activo" class="form-control">
+                            <option value="SI">Activo</option>
+                            <option value="NO">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Vendedor específico (opcional)</label>
+                        <select id="banner-vendedor" class="form-control">
+                            <option value="">Todos los vendedores</option>
+                        </select>
+                        <small class="input-help">Si seleccionas un vendedor, el banner solo se mostrará en su tienda</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-banner">Guardar banner</button>
+                <button class="btn-secondary" onclick="cerrarModalBanner()">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/auth.js"></script>
     <script src="js/admin-global.js"></script>

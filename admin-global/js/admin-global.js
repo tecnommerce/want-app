@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - Funciones completas
+// ADMIN GLOBAL - Funciones completas con gestión de banners
 // ===================================================
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
@@ -23,6 +23,24 @@ async function callAPI(action, data = {}) {
     } catch (error) {
         console.error('❌ Error en callAPI:', error);
         return { error: error.message };
+    }
+}
+
+async function postAPI(action, data = {}) {
+    try {
+        const url = API_URL;
+        const jsonData = JSON.stringify({ action, ...data });
+        const response = await fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: jsonData
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error('❌ Error en postAPI:', error);
+        return { success: false, error: error.message };
     }
 }
 
@@ -80,12 +98,38 @@ async function withLoading(button, callback) {
 }
 
 // ===================================================
+// CLOUDINARY
+// ===================================================
+
+const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
+const CLOUDINARY_UPLOAD_PRESET = 'want_banners';
+
+async function subirImagenACloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        return data.secure_url || null;
+    } catch (error) {
+        console.error('Error subir imagen:', error);
+        return null;
+    }
+}
+
+// ===================================================
 // VARIABLES GLOBALES
 // ===================================================
 
 let allVendedores = [];
 let allPedidos = [];
 let allProductos = [];
+let banners = [];
 let charts = {};
 
 // ===================================================
@@ -172,14 +216,16 @@ function actualizarDashboard() {
     document.getElementById('top-productos-list').innerHTML = topProductos.map(([nombre, cantidad]) => `<div class="top-item"><span>${escapeHTML(nombre)}</span><span>${cantidad} unidades</span></div>`).join('') || '<p class="loading-text">No hay datos</p>';
     
     const recentOrders = allPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
-    document.getElementById('recent-orders-tbody').innerHTML = recentOrders.map(p => `<tr>
-        <td>#${p.id}</td>
-        <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-        <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-        <td>${formatearPrecio(p.total)}</td>
-        <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-        <td>${formatearFecha(p.fecha)}</td>
-     `).join('') || '<tr><td colspan="6" class="loading-text">No hay pedidos</td>';
+    document.getElementById('recent-orders-tbody').innerHTML = recentOrders.map(p => `
+        <tr>
+            <td>#${p.id}</td>
+            <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
+            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+            <td>${formatearPrecio(p.total)}</td>
+            <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
+            <td>${formatearFecha(p.fecha)}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" class="loading-text">No hay pedidos</td>';
 }
 
 // ===================================================
@@ -205,8 +251,8 @@ function renderizarVendedores() {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-             </td>
-         </tr>
+              </td>
+          </tr>
     `).join('');
 }
 
@@ -314,16 +360,18 @@ function renderizarProductos() {
     if (searchTerm) filtered = filtered.filter(p => p.nombre?.toLowerCase().includes(searchTerm) || p.descripcion?.toLowerCase().includes(searchTerm));
     const ventasPorProducto = {};
     allPedidos.forEach(p => { if (p.productos) p.productos.forEach(prod => { const key = `${prod.id}_${p.vendedor_id}`; ventasPorProducto[key] = (ventasPorProducto[key] || 0) + prod.cantidad; }); });
-    tbody.innerHTML = filtered.map(p => `<tr>
-        <td>${p.id}</td>
-        <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '<span>📷</span>'}</td>
-        <td><strong>${escapeHTML(p.nombre)}</strong></td>
-        <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-        <td>${formatearPrecio(p.precio)}</td>
-        <td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td>
-        <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
-        <td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-     </tr>`).join('');
+    tbody.innerHTML = filtered.map(p => `
+        <tr>
+            <td>${p.id}</td>
+            <td>${p.imagen_url ? `<img src="${p.imagen_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '<span>📷</span>'}</td>
+            <td><strong>${escapeHTML(p.nombre)}</strong></td>
+            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+            <td>${formatearPrecio(p.precio)}</td>
+            <td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td>
+            <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
+            <td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
+         </tr>
+    `).join('');
 }
 
 function editarProducto(id) {
@@ -388,16 +436,18 @@ function renderizarPedidos() {
     if (filtroEstado) filtered = filtered.filter(p => p.estado === filtroEstado);
     if (filtroFecha) filtered = filtered.filter(p => p.fecha && p.fecha.split('T')[0] === filtroFecha);
     filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    tbody.innerHTML = filtered.slice(0, 100).map(p => `<tr>
-        <td>#${p.id}</td>
-        <td>${formatearFecha(p.fecha)}</td>
-        <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-        <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-        <td>${formatearPrecio(p.total)}</td>
-        <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-        <td>${p.productos ? p.productos.length : 0} productos</td>
-        <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-     </tr>`).join('');
+    tbody.innerHTML = filtered.slice(0, 100).map(p => `
+        <tr>
+            <td>#${p.id}</td>
+            <td>${formatearFecha(p.fecha)}</td>
+            <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
+            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
+            <td>${formatearPrecio(p.total)}</td>
+            <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
+            <td>${p.productos ? p.productos.length : 0} productos</td>
+            <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
+         </tr>
+    `).join('');
 }
 
 function editarPedido(id) {
@@ -441,6 +491,168 @@ async function confirmarEliminarPedido() {
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.pedidoAEliminar = null;
     });
+}
+
+// ===================================================
+// WEB - BANNERS
+// ===================================================
+
+async function cargarBanners() {
+    const tbody = document.getElementById('banners-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>';
+    
+    try {
+        const response = await callAPI('getAllBanners');
+        if (response.success) {
+            banners = response.banners || [];
+            renderizarBanners();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${error.message}</td></tr>`;
+    }
+}
+
+function renderizarBanners() {
+    const tbody = document.getElementById('banners-tbody');
+    if (!tbody) return;
+    
+    if (banners.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay banners registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = banners.map(b => `
+        <tr>
+            <td>${b.id}</td>
+            <td><img src="${b.imagen_url}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 8px;"></td>
+            <td>${escapeHTML(b.titulo || '-')}</td>
+            <td>${b.orden || 999}</td>
+            <td><span class="status-badge ${b.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${b.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editarBanner(${b.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-delete" onclick="eliminarBanner(${b.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
+            </td>
+         </tr>
+    `).join('');
+}
+
+function abrirModalBanner(bannerId = null) {
+    if (bannerId) {
+        const banner = banners.find(b => b.id.toString() === bannerId.toString());
+        if (banner) {
+            document.getElementById('banner-id').value = banner.id;
+            document.getElementById('banner-titulo').value = banner.titulo || '';
+            document.getElementById('banner-link').value = banner.link || '';
+            document.getElementById('banner-orden').value = banner.orden || 999;
+            document.getElementById('banner-activo').value = banner.activo || 'SI';
+            const preview = document.getElementById('banner-imagen-preview');
+            if (preview && banner.imagen_url) {
+                preview.innerHTML = `<img src="${banner.imagen_url}" style="max-width: 150px; border-radius: 8px;">`;
+            }
+            document.getElementById('modal-banner-title').textContent = 'Editar banner';
+        }
+    } else {
+        document.getElementById('banner-form').reset();
+        document.getElementById('banner-id').value = '';
+        document.getElementById('banner-imagen-preview').innerHTML = '';
+        document.getElementById('banner-orden').value = 999;
+        document.getElementById('banner-activo').value = 'SI';
+        document.getElementById('modal-banner-title').textContent = 'Nuevo banner';
+    }
+    
+    // Cargar vendedores en el select
+    const selectVendedor = document.getElementById('banner-vendedor');
+    if (selectVendedor && allVendedores.length) {
+        selectVendedor.innerHTML = '<option value="">Todos los vendedores</option>' + 
+            allVendedores.map(v => `<option value="${v.id}">${escapeHTML(v.nombre)}</option>`).join('');
+    }
+    
+    document.getElementById('modal-banner').classList.add('active');
+}
+
+function cerrarModalBanner() {
+    document.getElementById('modal-banner').classList.remove('active');
+}
+
+async function guardarBanner() {
+    const id = document.getElementById('banner-id').value;
+    const titulo = document.getElementById('banner-titulo').value.trim();
+    const link = document.getElementById('banner-link').value.trim();
+    const orden = parseInt(document.getElementById('banner-orden').value) || 999;
+    const activo = document.getElementById('banner-activo').value;
+    const vendedorId = document.getElementById('banner-vendedor').value;
+    const imagenFile = document.getElementById('banner-imagen').files[0];
+    
+    let imagenUrl = null;
+    
+    if (imagenFile) {
+        mostrarToast('Subiendo imagen...', 'info');
+        imagenUrl = await subirImagenACloudinary(imagenFile);
+        if (!imagenUrl) {
+            mostrarToast('Error al subir imagen', 'error');
+            return;
+        }
+    } else if (!id) {
+        mostrarToast('Debes seleccionar una imagen', 'error');
+        return;
+    }
+    
+    const data = {
+        titulo: titulo,
+        link: link,
+        orden: orden,
+        activo: activo
+    };
+    
+    if (vendedorId) data.vendedor_id = vendedorId;
+    if (imagenUrl) data.imagen_url = imagenUrl;
+    if (id) data.id = parseInt(id);
+    
+    const action = id ? 'actualizarBanner' : 'crearBanner';
+    
+    try {
+        const response = await callAPI(action, data);
+        if (response && response.success) {
+            mostrarToast(id ? 'Banner actualizado' : 'Banner creado', 'success');
+            cerrarModalBanner();
+            await cargarBanners();
+        } else {
+            throw new Error(response?.error || 'Error al guardar');
+        }
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+    }
+}
+
+async function eliminarBanner(bannerId, button) {
+    if (!confirm('¿Eliminar este banner?')) return;
+    
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    try {
+        const response = await callAPI('eliminarBanner', { bannerId });
+        if (response.success) {
+            mostrarToast('Banner eliminado', 'success');
+            await cargarBanners();
+        } else {
+            throw new Error(response?.error || 'Error al eliminar');
+        }
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        }
+    }
+}
+
+function editarBanner(id) {
+    abrirModalBanner(id);
 }
 
 // ===================================================
@@ -504,6 +716,12 @@ function cambiarSeccion(seccionId) {
         item.classList.remove('active');
         if (item.getAttribute('data-section') === seccionId) item.classList.add('active');
     });
+    
+    // Cargar datos según la sección
+    if (seccionId === 'web') {
+        cargarBanners();
+        if (allVendedores.length === 0) cargarTodosLosDatos();
+    }
 }
 
 // ===================================================
@@ -524,6 +742,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('filtro-fecha')?.addEventListener('change', () => renderizarPedidos());
     document.getElementById('filtro-vendedor-prod')?.addEventListener('change', () => renderizarProductos());
     document.getElementById('search-producto')?.addEventListener('input', () => renderizarProductos());
+    
+    // Eventos para Web
+    document.getElementById('btn-agregar-banner')?.addEventListener('click', () => abrirModalBanner());
+    document.getElementById('guardar-banner')?.addEventListener('click', guardarBanner);
+    
+    // Submenú de Web
+    document.querySelectorAll('.submenu-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sub = btn.getAttribute('data-sub');
+            document.querySelectorAll('.submenu-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.web-subcontent').forEach(c => c.classList.remove('active'));
+            document.getElementById(`sub-${sub}`).classList.add('active');
+            if (sub === 'banners') cargarBanners();
+        });
+    });
+    
     document.getElementById('search-vendedor')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
@@ -532,21 +767,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td></tr>'; return; }
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
-        tbody.innerHTML = filtered.map(v => `<tr>
-            <td>${v.id}</td>
-            <td><strong>${escapeHTML(v.nombre)}</strong></td>
-            <td>${escapeHTML(v.email || '-')}</td>
-            <td>${v.telefono || '-'}</td>
-            <td>${escapeHTML(v.direccion || '-')}</td>
-            <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
-            <td>${stats[v.id]?.pedidos || 0}</td>
-            <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
-            <td>
-                <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
-                <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-             </td>
-         </tr>`).join('');
+        tbody.innerHTML = filtered.map(v => `
+            <tr>
+                <td>${v.id}</td>
+                <td><strong>${escapeHTML(v.nombre)}</strong></td>
+                <td>${escapeHTML(v.email || '-')}</td>
+                <td>${v.telefono || '-'}</td>
+                <td>${escapeHTML(v.direccion || '-')}</td>
+                <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+                <td>${stats[v.id]?.pedidos || 0}</td>
+                <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
+                <td>
+                    <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
+                    <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
+                  </td>
+              </tr>
+        `).join('');
     });
     
     document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
