@@ -90,17 +90,17 @@
                         </form>
                         
                         <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
-                        <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
+                        <button class="btn btn-outline btn-block" id="btn-show-register" onclick="mostrarPanelRegistro(); return false;">Registrarse</button>
                         <div class="auth-links">
-                            <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
+                            <button class="link-btn" id="btn-show-recover" onclick="mostrarPanelRecuperacion(); return false;">¿Olvidaste tu contraseña?</button>
                         </div>
                     </div>
 
                     <!-- Panel de Registro -->
                     <div class="auth-panel" id="register-panel">
-                        <button class="back-to-login" id="back-to-login">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </button>
+<button class="back-to-login" id="back-to-login" onclick="mostrarPanelLogin(); return false;">
+    <i class="fas fa-arrow-left"></i> Volver al inicio
+</button>
                         <form id="register-form">
                             <div class="form-row">
                                 <div class="form-group half">
@@ -157,9 +157,9 @@
 
                     <!-- Panel de Recuperación -->
                     <div class="auth-panel" id="recover-panel">
-                        <button class="back-to-login" id="back-to-login-recover">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </button>
+<button class="back-to-login" id="back-to-login-recover" onclick="mostrarPanelLogin(); return false;">
+    <i class="fas fa-arrow-left"></i> Volver al inicio
+</button>
                         <form id="recover-form">
                             <div class="form-group">
                                 <label>Email</label>
