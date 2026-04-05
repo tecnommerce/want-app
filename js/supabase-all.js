@@ -1,5 +1,5 @@
 // ===================================================
-// SUPABASE - TODO EN UN SOLO ARCHIVO
+// SUPABASE - TODO EN UN SOLO ARCHIVO (CORREGIDO)
 // ===================================================
 
 (function() {
@@ -93,12 +93,14 @@
                     return { success: true, vendedor: vendedor };
                     
                 case 'registrarVendedor':
+                    // 1. Registrar en Auth
                     const { data: authReg, error: authRegError } = await supabaseClient.auth.signUp({
                         email: data.email,
                         password: data.password
                     });
                     if (authRegError) throw authRegError;
                     
+                    // 2. Registrar en tabla vendedores
                     const { data: newVendedor, error: vendRegError } = await supabaseClient
                         .from('vendedores')
                         .insert([{
@@ -113,6 +115,7 @@
                         .select()
                         .single();
                     if (vendRegError) throw vendRegError;
+                    
                     return { success: true, vendedor: newVendedor };
                     
                 case 'actualizarVendedor':
