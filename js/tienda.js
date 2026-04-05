@@ -36,9 +36,13 @@ async function cargarTienda() {
             `;
         }
         
+        // Obtener vendedores y filtrar por ID (CORREGIDO: activo === true)
         const vendedoresRes = await callAPI('getVendedores');
         if (vendedoresRes.success) {
-            vendedorActual = vendedoresRes.vendedores.find(v => v.id.toString() === vendedorId && v.activo === true);
+            vendedorActual = vendedoresRes.vendedores.find(v => 
+                v.id.toString() === vendedorId && v.activo === true
+            );
+            
             if (vendedorActual) {
                 const nombreNegocio = document.getElementById('negocio-nombre');
                 if (nombreNegocio) {
@@ -63,13 +67,15 @@ async function cargarTienda() {
             }
         }
         
+        // Obtener productos del vendedor
         const response = await callAPI('getProductos', { vendedorId: vendedorId });
         
         if (response.error) {
             throw new Error(response.error);
         }
         
-        productos = response.productos || [];
+        // CORREGIDO: Filtrar productos disponibles (disponible === true)
+        productos = (response.productos || []).filter(p => p.disponible === true);
         renderizarProductos();
         
     } catch (error) {
@@ -297,7 +303,7 @@ async function confirmarPedido() {
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    // Guardar en Google Sheets
+    // Guardar en Google Sheets / Supabase
     const resultadoSheets = await guardarPedidoEnSheets(pedido);
     
     // Limpiar carrito y formulario
@@ -320,7 +326,7 @@ async function confirmarPedido() {
 
 async function guardarPedidoEnSheets(pedido) {
     try {
-        console.log('📤 Intentando guardar en Google Sheets...');
+        console.log('📤 Intentando guardar en Supabase...');
         
         const response = await postAPI('crearPedido', {
             cliente_nombre: pedido.cliente_nombre,
@@ -334,18 +340,10 @@ async function guardarPedidoEnSheets(pedido) {
         });
         
         if (response && response.success) {
-            console.log('✅ Pedido guardado en Google Sheets. ID:', response.pedidoId);
-            
-            let pedidos = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
-            const ultimoPedido = pedidos[pedidos.length - 1];
-            if (ultimoPedido && ultimoPedido.id === Date.now()) {
-                ultimoPedido.sheetsId = response.pedidoId;
-                ultimoPedido.sincronizado = true;
-                localStorage.setItem('want_pedidos', JSON.stringify(pedidos));
-            }
+            console.log('✅ Pedido guardado en Supabase. ID:', response.pedidoId);
             return { success: true };
         } else {
-            console.error('❌ Error al guardar en Sheets:', response?.error || 'Error desconocido');
+            console.error('❌ Error al guardar en Supabase:', response?.error || 'Error desconocido');
             return { success: false, error: response?.error };
         }
     } catch (error) {
