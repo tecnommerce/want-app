@@ -839,36 +839,81 @@ function confirmarAgregarProducto() {
 }
 
 // ===================================================
-// REGISTRO Y LOGIN
+// REGISTRO Y LOGIN (CORREGIDO CON LOGS)
 // ===================================================
 
 async function registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile) {
+    console.log('📝 registrarVendedorConLogo llamado con:', { nombre, email, telefono, direccion, horario, passwordLength: password?.length });
+    
     let logoUrl = null;
-    if (logoFile) { logoUrl = await subirImagenACloudinary(logoFile); if (!logoUrl) { mostrarToast('Error al subir el logo', 'error'); return false; } }
-    const passwordHash = await hashPassword(password);
-    return await postAPI('registrarVendedor', { nombre, email, telefono, direccion, horario, password_hash: passwordHash, logo_url: logoUrl });
+    if (logoFile) {
+        console.log('📤 Subiendo logo...');
+        logoUrl = await subirImagenACloudinary(logoFile);
+        console.log('Logo subido:', logoUrl);
+        if (!logoUrl) {
+            mostrarToast('Error al subir el logo', 'error');
+            return false;
+        }
+    }
+    
+    console.log('📤 Enviando a postAPI...');
+    const response = await postAPI('registrarVendedor', {
+        nombre: nombre,
+        email: email,
+        telefono: telefono,
+        direccion: direccion,
+        horario: horario,
+        password: password,
+        logo_url: logoUrl
+    });
+    
+    console.log('📥 Respuesta de postAPI:', response);
+    return response;
 }
 
 async function login() {
     const email = document.getElementById('login-email')?.value.trim();
     const password = document.getElementById('login-password')?.value;
-    if (!email || !password) { mostrarToast('Completá todos los campos', 'error'); return; }
+    
+    console.log('🔐 Iniciando login con:', { email });
+    
+    if (!email || !password) {
+        mostrarToast('Completá todos los campos', 'error');
+        return;
+    }
+    
     try {
         mostrarToast('Validando credenciales...', 'info');
-        const passwordHash = await hashPassword(password);
-        const response = await callAPI('loginVendedor', { email, password: passwordHash }, true);
+        
+        const response = await callAPI('loginVendedor', { email, password }, true);
+        console.log('📥 Respuesta login completa:', response);
         
         if (response.success && response.vendedor) {
+            console.log('✅ Login exitoso, vendedor:', response.vendedor);
             vendedorActual = response.vendedor;
+            
             const rememberMe = document.getElementById('remember-me')?.checked || false;
-            if (rememberMe) localStorage.setItem('want_sesion', JSON.stringify({ id: vendedorActual.id, email: vendedorActual.email, nombre: vendedorActual.nombre }));
-            else guardarSesion(vendedorActual);
+            if (rememberMe) {
+                localStorage.setItem('want_sesion', JSON.stringify({ 
+                    id: vendedorActual.id, 
+                    email: vendedorActual.email, 
+                    nombre: vendedorActual.nombre 
+                }));
+            } else {
+                guardarSesion(vendedorActual);
+            }
+            
+            console.log('🚀 Llamando a iniciarPanel...');
             await iniciarPanel(vendedorActual);
+            console.log('✅ iniciarPanel completado');
+            
             mostrarToast(`Bienvenido ${vendedorActual.nombre}`, 'success');
         } else {
+            console.error('❌ Error en respuesta:', response);
             throw new Error(response.error || 'Email o contraseña incorrectos');
         }
     } catch (error) { 
+        console.error('❌ Error login capturado:', error);
         mostrarToast(error.message, 'error'); 
     }
 }
@@ -878,9 +923,18 @@ async function login() {
 // ===================================================
 
 async function iniciarPanel(vendedor) {
+    console.log('🎯 Iniciando panel para:', vendedor.nombre);
+    console.log('🎯 ID del vendedor:', vendedor.id);
+    
     const adminAuth = document.getElementById('admin-auth');
     const adminPanel = document.getElementById('admin-panel');
     const headerAdmin = document.getElementById('header-admin');
+    
+    console.log('Elementos encontrados:', { 
+        adminAuth: !!adminAuth, 
+        adminPanel: !!adminPanel, 
+        headerAdmin: !!headerAdmin 
+    });
     
     if (adminAuth) adminAuth.style.display = 'none';
     if (adminPanel) adminPanel.style.display = 'block';
@@ -891,10 +945,19 @@ async function iniciarPanel(vendedor) {
     if (panelNombre) panelNombre.textContent = vendedor.nombre;
     if (panelEmail) panelEmail.textContent = vendedor.email;
     
+    console.log('Cargando pedidos...');
     await cargarPedidos();
-    await cargarProductos();
-    await cargarDeliveries();
+    console.log('Pedidos cargados:', pedidos.length);
     
+    console.log('Cargando productos...');
+    await cargarProductos();
+    console.log('Productos cargados:', productos.length);
+    
+    console.log('Cargando deliveries...');
+    await cargarDeliveries();
+    console.log('Deliveries cargados:', deliveries.length);
+    
+    // Event listeners
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
         btnRefresh.addEventListener('click', async () => {
@@ -982,6 +1045,8 @@ async function iniciarPanel(vendedor) {
     inicializarFiltros();
     inicializarMenuAdmin();
     inicializarBuscador();
+    
+    console.log('✅ Panel inicializado correctamente');
 }
 
 function inicializarTabs() {
@@ -1062,6 +1127,7 @@ function inicializarMenuAdmin() {
 
 async function cargarPedidos(forceRefresh = false) {
     if (!vendedorActual) {
+        console.warn('No hay vendedor actual');
         return;
     }
     
@@ -1069,6 +1135,7 @@ async function cargarPedidos(forceRefresh = false) {
     if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>`;
     
     try {
+        console.log('📦 Cargando pedidos para vendedor:', vendedorActual.id);
         const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
         
         if (response.error) throw new Error(response.error);
@@ -1081,6 +1148,7 @@ async function cargarPedidos(forceRefresh = false) {
         
         if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
     } catch (error) { 
+        console.error('Error cargar pedidos:', error);
         if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar pedidos: ${error.message}</p></div>`; 
     }
 }
@@ -1176,20 +1244,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Login form
+    // ===================================================
+    // LOGIN FORM - Event listener DIRECTO
+    // ===================================================
+    
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
+        console.log('✅ Login form encontrado, agregando event listener');
         loginForm.addEventListener('submit', async (e) => { 
             e.preventDefault(); 
+            console.log('📝 Login form submit detectado');
             await login(); 
         });
+    } else {
+        console.error('❌ Login form NO encontrado');
     }
     
-    // Register form
+    // ===================================================
+    // REGISTER FORM - Event listener DIRECTO
+    // ===================================================
+    
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
+        console.log('✅ Register form encontrado, agregando event listener');
+        
+        // Eliminar cualquier event listener existente
+        registerForm.onsubmit = null;
+        
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('📝 Register form submit detectado');
+            
             const nombre = document.getElementById('reg-nombre')?.value.trim() || '';
             const email = document.getElementById('reg-email')?.value.trim() || '';
             const telefono = document.getElementById('reg-telefono')?.value.trim() || '';
@@ -1199,40 +1286,59 @@ document.addEventListener('DOMContentLoaded', () => {
             const password2 = document.getElementById('reg-password2')?.value || '';
             const logoFile = document.getElementById('reg-logo')?.files[0];
             
-            if (password !== password2) { alert('Las contraseñas no coinciden'); return; }
-            if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
+            console.log('📋 Datos del formulario:', { nombre, email, telefono, direccion, horario, passwordLength: password.length });
             
-            const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile);
-            if (response && response.success) { 
-                alert('Registro exitoso. Ahora podés iniciar sesión.'); 
-                mostrarPanelLogin(); 
-                document.getElementById('register-form').reset(); 
-                const preview = document.getElementById('reg-logo-preview');
-                if (preview) preview.innerHTML = '';
-                const loginEmail = document.getElementById('login-email');
-                if (loginEmail) loginEmail.value = email;
-            } else { 
-                alert(response?.error || 'Error al registrar'); 
+            if (!nombre || !email || !telefono || !direccion) {
+                alert('Completá todos los campos obligatorios');
+                return;
+            }
+            
+            if (password !== password2) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            const submitBtn = registerForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+            
+            try {
+                const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile);
+                console.log('📥 Respuesta registro:', response);
+                
+                if (response && response.success) {
+                    alert('Registro exitoso. Ahora podés iniciar sesión.');
+                    mostrarPanelLogin();
+                    registerForm.reset();
+                    const preview = document.getElementById('reg-logo-preview');
+                    if (preview) preview.innerHTML = '';
+                    const loginEmail = document.getElementById('login-email');
+                    if (loginEmail) loginEmail.value = email;
+                } else {
+                    throw new Error(response?.error || 'Error al registrar');
+                }
+            } catch (error) {
+                console.error('❌ Error registro:', error);
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
             }
         });
-        
-        const regLogo = document.getElementById('reg-logo');
-        if (regLogo) {
-            regLogo.addEventListener('change', (e) => { 
-                const file = e.target.files[0]; 
-                if (file) { 
-                    const reader = new FileReader(); 
-                    reader.onload = (ev) => { 
-                        const preview = document.getElementById('reg-logo-preview'); 
-                        if (preview) preview.innerHTML = `<img src="${ev.target.result}" style="max-width: 80px; border-radius: 12px;">`; 
-                    }; 
-                    reader.readAsDataURL(file); 
-                } 
-            });
-        }
+    } else {
+        console.error('❌ Register form NO encontrado');
     }
     
-    // Recover form
+    // ===================================================
+    // RECOVER FORM
+    // ===================================================
+    
     const recoverForm = document.getElementById('recover-form');
     if (recoverForm) {
         recoverForm.addEventListener('submit', async (e) => {
@@ -1309,107 +1415,22 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarPanelLogin();
         });
     }
-    // ===================================================
-// REGISTRO FORZADO - EVENT LISTENER DIRECTO
-// ===================================================
-
-setTimeout(() => {
-    const registerForm = document.getElementById('register-form');
-    if (registerForm) {
-        console.log('✅ Formulario de registro encontrado');
-        
-        // Eliminar event listeners existentes
-        const oldSubmit = registerForm.onsubmit;
-        registerForm.onsubmit = null;
-        
-        // Agregar nuevo event listener
-        registerForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            console.log('📝 Registro iniciado...');
-            
-            // Obtener valores del formulario
-            const nombre = document.getElementById('reg-nombre')?.value.trim() || '';
-            const email = document.getElementById('reg-email')?.value.trim() || '';
-            const telefono = document.getElementById('reg-telefono')?.value.trim() || '';
-            const direccion = document.getElementById('reg-direccion')?.value.trim() || '';
-            const horario = document.getElementById('reg-horario')?.value.trim() || '';
-            const password = document.getElementById('reg-password')?.value || '';
-            const password2 = document.getElementById('reg-password2')?.value || '';
-            const logoFile = document.getElementById('reg-logo')?.files[0];
-            
-            console.log('Datos:', { nombre, email, telefono, direccion, horario, passwordLength: password.length });
-            
-            // Validaciones
-            if (!nombre || !email || !telefono || !direccion) {
-                alert('Completá todos los campos obligatorios');
-                return;
-            }
-            
-            if (password !== password2) {
-                alert('Las contraseñas no coinciden');
-                return;
-            }
-            
-            if (password.length < 6) {
-                alert('La contraseña debe tener al menos 6 caracteres');
-                return;
-            }
-            
-            // Mostrar loading
-            const submitBtn = registerForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
-            
-            try {
-                // Subir logo si existe
-                let logoUrl = null;
-                if (logoFile) {
-                    mostrarToast('Subiendo logo...', 'info');
-                    logoUrl = await subirImagenACloudinary(logoFile);
-                    if (!logoUrl) {
-                        throw new Error('Error al subir el logo');
-                    }
-                }
-                
-                const passwordHash = await hashPassword(password);
-                
-                const response = await postAPI('registrarVendedor', {
-                    nombre: nombre,
-                    email: email,
-                    telefono: telefono,
-                    direccion: direccion,
-                    horario: horario,
-                    password_hash: passwordHash,
-                    logo_url: logoUrl
-                });
-                
-                console.log('Respuesta registro:', response);
-                
-                if (response && response.success) {
-                    alert('Registro exitoso. Ahora podés iniciar sesión.');
-                    mostrarPanelLogin();
-                    registerForm.reset();
-                    const preview = document.getElementById('reg-logo-preview');
-                    if (preview) preview.innerHTML = '';
-                    const loginEmail = document.getElementById('login-email');
-                    if (loginEmail) loginEmail.value = email;
-                } else {
-                    throw new Error(response?.error || 'Error al registrar');
-                }
-            } catch (error) {
-                console.error('Error registro:', error);
-                alert(error.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
+    
+    // Registrar logo preview
+    const regLogo = document.getElementById('reg-logo');
+    if (regLogo) {
+        regLogo.addEventListener('change', (e) => { 
+            const file = e.target.files[0]; 
+            if (file) { 
+                const reader = new FileReader(); 
+                reader.onload = (ev) => { 
+                    const preview = document.getElementById('reg-logo-preview'); 
+                    if (preview) preview.innerHTML = `<img src="${ev.target.result}" style="max-width: 80px; border-radius: 12px;">`; 
+                }; 
+                reader.readAsDataURL(file); 
+            } 
         });
-    } else {
-        console.error('❌ Formulario de registro no encontrado');
     }
-}, 500);
-
+    
+    console.log('✅ Admin.js inicializado correctamente');
 });
