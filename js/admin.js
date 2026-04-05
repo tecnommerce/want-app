@@ -1309,4 +1309,107 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarPanelLogin();
         });
     }
+    // ===================================================
+// REGISTRO FORZADO - EVENT LISTENER DIRECTO
+// ===================================================
+
+setTimeout(() => {
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        console.log('✅ Formulario de registro encontrado');
+        
+        // Eliminar event listeners existentes
+        const oldSubmit = registerForm.onsubmit;
+        registerForm.onsubmit = null;
+        
+        // Agregar nuevo event listener
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('📝 Registro iniciado...');
+            
+            // Obtener valores del formulario
+            const nombre = document.getElementById('reg-nombre')?.value.trim() || '';
+            const email = document.getElementById('reg-email')?.value.trim() || '';
+            const telefono = document.getElementById('reg-telefono')?.value.trim() || '';
+            const direccion = document.getElementById('reg-direccion')?.value.trim() || '';
+            const horario = document.getElementById('reg-horario')?.value.trim() || '';
+            const password = document.getElementById('reg-password')?.value || '';
+            const password2 = document.getElementById('reg-password2')?.value || '';
+            const logoFile = document.getElementById('reg-logo')?.files[0];
+            
+            console.log('Datos:', { nombre, email, telefono, direccion, horario, passwordLength: password.length });
+            
+            // Validaciones
+            if (!nombre || !email || !telefono || !direccion) {
+                alert('Completá todos los campos obligatorios');
+                return;
+            }
+            
+            if (password !== password2) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            // Mostrar loading
+            const submitBtn = registerForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+            
+            try {
+                // Subir logo si existe
+                let logoUrl = null;
+                if (logoFile) {
+                    mostrarToast('Subiendo logo...', 'info');
+                    logoUrl = await subirImagenACloudinary(logoFile);
+                    if (!logoUrl) {
+                        throw new Error('Error al subir el logo');
+                    }
+                }
+                
+                const passwordHash = await hashPassword(password);
+                
+                const response = await postAPI('registrarVendedor', {
+                    nombre: nombre,
+                    email: email,
+                    telefono: telefono,
+                    direccion: direccion,
+                    horario: horario,
+                    password_hash: passwordHash,
+                    logo_url: logoUrl
+                });
+                
+                console.log('Respuesta registro:', response);
+                
+                if (response && response.success) {
+                    alert('Registro exitoso. Ahora podés iniciar sesión.');
+                    mostrarPanelLogin();
+                    registerForm.reset();
+                    const preview = document.getElementById('reg-logo-preview');
+                    if (preview) preview.innerHTML = '';
+                    const loginEmail = document.getElementById('login-email');
+                    if (loginEmail) loginEmail.value = email;
+                } else {
+                    throw new Error(response?.error || 'Error al registrar');
+                }
+            } catch (error) {
+                console.error('Error registro:', error);
+                alert(error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    } else {
+        console.error('❌ Formulario de registro no encontrado');
+    }
+}, 500);
+
 });
