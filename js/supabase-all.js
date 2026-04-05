@@ -19,6 +19,9 @@
     
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
+    // Exponer cliente globalmente para debug
+    window.supabaseClient = supabaseClient;
+    
     // ===================================================
     // 3. FUNCIONES DE API
     // ===================================================
@@ -54,6 +57,7 @@
                         .order('fecha', { ascending: false });
                     if (pedError) throw pedError;
                     
+                    // Obtener productos de cada pedido
                     for (const pedido of pedidos) {
                         const { data: prodPedido } = await supabaseClient
                             .from('productos_pedido')
@@ -78,27 +82,36 @@
                     return { success: true, pedidos: pedidos };
                     
                 case 'loginVendedor':
+                    // Autenticar con Supabase Auth (usando email y password en texto plano)
                     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                         email: data.email,
                         password: data.password
                     });
                     if (authError) throw new Error(authError.message);
                     
+                    // Obtener datos del vendedor desde la tabla
                     const { data: vendedor, error: vendError } = await supabaseClient
                         .from('vendedores')
                         .select('*')
                         .eq('email', data.email)
                         .single();
                     if (vendError) throw vendError;
+                    
                     return { success: true, vendedor: vendedor };
                     
                 case 'registrarVendedor':
-                    // 1. Registrar en Auth
+                    console.log('📝 Registrando vendedor:', { email: data.email, nombre: data.nombre });
+                    
+                    // 1. Registrar en Auth (usando password en texto plano)
                     const { data: authReg, error: authRegError } = await supabaseClient.auth.signUp({
                         email: data.email,
                         password: data.password
                     });
-                    if (authRegError) throw authRegError;
+                    if (authRegError) {
+                        console.error('❌ Error en Auth:', authRegError);
+                        throw authRegError;
+                    }
+                    console.log('✅ Auth registrado:', authReg);
                     
                     // 2. Registrar en tabla vendedores
                     const { data: newVendedor, error: vendRegError } = await supabaseClient
@@ -114,8 +127,12 @@
                         }])
                         .select()
                         .single();
-                    if (vendRegError) throw vendRegError;
+                    if (vendRegError) {
+                        console.error('❌ Error en tabla vendedores:', vendRegError);
+                        throw vendRegError;
+                    }
                     
+                    console.log('✅ Vendedor registrado:', newVendedor);
                     return { success: true, vendedor: newVendedor };
                     
                 case 'actualizarVendedor':
@@ -171,6 +188,7 @@
                     return { success: true };
                     
                 case 'crearPedido':
+                    // Calcular número de orden para este vendedor
                     const { data: ultimoPedido } = await supabaseClient
                         .from('pedidos')
                         .select('numero_orden')
@@ -179,6 +197,7 @@
                         .limit(1);
                     const numeroOrden = (ultimoPedido && ultimoPedido[0]?.numero_orden || 0) + 1;
                     
+                    // Insertar pedido
                     const { data: pedidoNuevo, error: pedCreateError } = await supabaseClient
                         .from('pedidos')
                         .insert([{
@@ -196,6 +215,7 @@
                         .single();
                     if (pedCreateError) throw pedCreateError;
                     
+                    // Insertar productos del pedido
                     for (const producto of data.productos) {
                         await supabaseClient
                             .from('productos_pedido')
@@ -320,6 +340,7 @@
         }
     };
     
+    // postAPI es alias de callAPI para compatibilidad
     window.postAPI = window.callAPI;
     
     // ===================================================
