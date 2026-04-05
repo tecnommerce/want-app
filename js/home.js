@@ -48,7 +48,7 @@ async function cargarNegocios() {
             throw new Error(response.error || 'Error al cargar negocios');
         }
 
-        todosLosNegocios = (response.vendedores || []).filter(v => v.activo === 'SI');
+        todosLosNegocios = (response.vendedores || []).filter(v => v.activo === true);
         
         if (todosLosNegocios.length === 0) {
             grid.innerHTML = `<div class="sin-negocios"><p>📭 No hay negocios disponibles</p></div>`;
