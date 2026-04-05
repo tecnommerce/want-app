@@ -259,7 +259,6 @@ function renderizarPedidos() {
         const estado = p.estado || 'preparando';
         const numeroMostrar = p.numero_orden || p.id;
         
-        // Productos resumidos
         let productosResumen = '';
         if (p.productos && Array.isArray(p.productos) && p.productos.length > 0) {
             const primeros = p.productos.slice(0, 2);
@@ -271,10 +270,8 @@ function renderizarPedidos() {
             productosResumen = 'Sin productos';
         }
         
-        // Total
         const total = formatearPrecio(p.total || 0);
         
-        // Botones según estado
         let botonesHTML = '';
         
         if (estado === 'preparando') {
@@ -340,7 +337,6 @@ function verPedidoCompleto(pedidoId) {
     const metodoPago = pedido.metodo_pago === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
     const numeroMostrar = pedido.numero_orden || pedido.id;
     
-    // Productos completos
     let productosHTML = '';
     if (pedido.productos && Array.isArray(pedido.productos) && pedido.productos.length > 0) {
         pedido.productos.forEach(pr => {
@@ -355,7 +351,6 @@ function verPedidoCompleto(pedidoId) {
         productosHTML = '<p>No hay productos</p>';
     }
     
-    // Detalles
     let detallesHTML = '';
     if (pedido.detalles && pedido.detalles.trim()) {
         detallesHTML = `
@@ -411,14 +406,11 @@ function verPedidoCompleto(pedidoId) {
         </div>
     `;
     
-    // Eliminar modal existente si hay
     const existingModal = document.getElementById('modal-pedido-completo');
     if (existingModal) existingModal.remove();
     
-    // Agregar modal al body
     document.body.insertAdjacentHTML('beforeend', modalContent);
     
-    // Cerrar al hacer clic fuera
     const modal = document.getElementById('modal-pedido-completo');
     modal.addEventListener('click', (e) => {
         if (e.target === modal) cerrarModalPedidoCompleto();
@@ -728,7 +720,7 @@ async function actualizarPerfil() {
 }
 
 // ===================================================
-// EDICIÓN DE PEDIDO (simplificado)
+// EDICIÓN DE PEDIDO
 // ===================================================
 
 function abrirModalEditarPedido(pedidoId) {
@@ -778,7 +770,7 @@ async function guardarEditarPedido() {
 }
 
 // ===================================================
-// CREAR NUEVO PEDIDO (simplificado)
+// CREAR NUEVO PEDIDO
 // ===================================================
 
 function abrirModalNuevoPedido() {
@@ -903,7 +895,6 @@ async function iniciarPanel(vendedor) {
     await cargarProductos();
     await cargarDeliveries();
     
-    // Event listeners
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
         btnRefresh.addEventListener('click', async () => {
@@ -1121,20 +1112,21 @@ function mostrarPanelLogin() {
     document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
     document.getElementById('login-panel').classList.add('active'); 
 }
+
 function mostrarPanelRegistro() { 
     document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
     document.getElementById('register-panel').classList.add('active'); 
 }
+
 function mostrarPanelRecuperacion() { 
     document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
     document.getElementById('recover-panel').classList.add('active'); 
 }
 
 // ===================================================
-// INICIALIZACIÓN
+// INICIALIZAR BUSCADOR
 // ===================================================
 
-// INICIALIZAR BUSCADOR
 function inicializarBuscador() {
     const buscadorInput = document.getElementById('buscador-pedidos');
     const limpiarBtn = document.getElementById('btn-limpiar-busqueda');
@@ -1157,6 +1149,10 @@ function inicializarBuscador() {
         });
     }
 }
+
+// ===================================================
+// INICIALIZACIÓN PRINCIPAL
+// ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Panel de Vendedor iniciado');
@@ -1278,16 +1274,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Navegación entre paneles
+    // ===================================================
+    // NAVEGACIÓN ENTRE PANELES DE AUTENTICACIÓN
+    // ===================================================
+    
     const showRegister = document.getElementById('btn-show-register');
-    if (showRegister) showRegister.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelRegistro(); });
+    if (showRegister) {
+        showRegister.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            mostrarPanelRegistro();
+        });
+    }
     
     const showRecover = document.getElementById('btn-show-recover');
-    if (showRecover) showRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelRecuperacion(); });
+    if (showRecover) {
+        showRecover.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            mostrarPanelRecuperacion();
+        });
+    }
     
     const backToLogin = document.getElementById('back-to-login');
-    if (backToLogin) backToLogin.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
+    if (backToLogin) {
+        backToLogin.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            mostrarPanelLogin();
+        });
+    }
     
     const backToLoginRecover = document.getElementById('back-to-login-recover');
-    if (backToLoginRecover) backToLoginRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
+    if (backToLoginRecover) {
+        backToLoginRecover.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            mostrarPanelLogin();
+        });
+    }
 });
