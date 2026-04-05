@@ -38,7 +38,7 @@ async function cargarTienda() {
         
         const vendedoresRes = await callAPI('getVendedores');
         if (vendedoresRes.success) {
-            vendedorActual = vendedoresRes.vendedores.find(v => v.id.toString() === vendedorId && v.activo === 'SI');
+            vendedorActual = vendedoresRes.vendedores.find(v => v.id.toString() === vendedorId && v.activo === true);
             if (vendedorActual) {
                 const nombreNegocio = document.getElementById('negocio-nombre');
                 if (nombreNegocio) {
