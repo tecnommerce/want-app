@@ -657,7 +657,7 @@ async function guardarProducto() {
     const nombre = document.getElementById('producto-nombre').value.trim();
     const descripcion = document.getElementById('producto-descripcion').value.trim();
     const precio = parseFloat(document.getElementById('producto-precio').value);
-    const disponible = document.getElementById('producto-disponible')?.value || 'SI';
+    const disponible = document.getElementById('producto-disponible')?.value === 'SI' ? true : false;
     const imagenFile = document.getElementById('producto-imagen').files[0];
     if (!nombre || !precio) { mostrarToast('Nombre y precio son obligatorios', 'error'); return; }
     let imagenUrl = null;
