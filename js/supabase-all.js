@@ -14,7 +14,7 @@
     const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
     
     // ===================================================
-    // 2. INICIALIZAR CLIENTE (usar window.supabase)
+    // 2. INICIALIZAR CLIENTE
     // ===================================================
     
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -319,5 +319,37 @@
     
     window.postAPI = window.callAPI;
     
+    // ===================================================
+    // 4. NAVEGACIÓN ENTRE PANELES DE AUTENTICACIÓN
+    // ===================================================
+    
+    window.mostrarPanelLogin = function() {
+        const panels = document.querySelectorAll('.auth-panel');
+        if (panels.length) {
+            panels.forEach(panel => panel.classList.remove('active'));
+            const loginPanel = document.getElementById('login-panel');
+            if (loginPanel) loginPanel.classList.add('active');
+        }
+    };
+    
+    window.mostrarPanelRegistro = function() {
+        const panels = document.querySelectorAll('.auth-panel');
+        if (panels.length) {
+            panels.forEach(panel => panel.classList.remove('active'));
+            const registerPanel = document.getElementById('register-panel');
+            if (registerPanel) registerPanel.classList.add('active');
+        }
+    };
+    
+    window.mostrarPanelRecuperacion = function() {
+        const panels = document.querySelectorAll('.auth-panel');
+        if (panels.length) {
+            panels.forEach(panel => panel.classList.remove('active'));
+            const recoverPanel = document.getElementById('recover-panel');
+            if (recoverPanel) recoverPanel.classList.add('active');
+        }
+    };
+    
     console.log('✅ Supabase API inicializada');
+    console.log('✅ Funciones de navegación de autenticación inicializadas');
 })();
