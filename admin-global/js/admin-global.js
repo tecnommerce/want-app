@@ -1,47 +1,198 @@
 // ===================================================
-// ADMIN GLOBAL - Funciones completas con gestión de banners
+// ADMIN GLOBAL - Versión Supabase (CORREGIDA)
 // ===================================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbws2dMYwykCAqHmvKaL6ZXLIT3fUfgLRq7ZvpgHIKvidoNI5yQp62ej5yejCq569eFL/exec';
+// ===================================================
+// VARIABLES GLOBALES
+// ===================================================
+
+let allVendedores = [];
+let allPedidos = [];
+let allProductos = [];
+let banners = [];
+let charts = {};
 
 // ===================================================
-// FUNCIONES DE API
+// FUNCIONES DE API CON SUPABASE
 // ===================================================
 
 async function callAPI(action, data = {}) {
+    console.log(`🔄 Llamando a Supabase: ${action}`, data);
+    
     try {
-        let url = `${API_URL}?action=${action}`;
-        if (data && Object.keys(data).length > 0) {
-            for (let key in data) {
-                url += `&${key}=${encodeURIComponent(data[key])}`;
-            }
+        switch(action) {
+            case 'getVendedores':
+                const { data: vendedores, error: vError } = await supabaseClient
+                    .from('vendedores')
+                    .select('*')
+                    .order('nombre');
+                if (vError) throw vError;
+                return { success: true, vendedores: vendedores };
+                
+            case 'getAllPedidos':
+                const { data: pedidos, error: pError } = await supabaseClient
+                    .from('pedidos')
+                    .select('*')
+                    .order('fecha', { ascending: false });
+                if (pError) throw pError;
+                
+                // Obtener productos de cada pedido
+                for (const pedido of pedidos) {
+                    const { data: prodPedido } = await supabaseClient
+                        .from('productos_pedido')
+                        .select(`
+                            cantidad,
+                            precio_unitario,
+                            productos (id, nombre, precio)
+                        `)
+                        .eq('pedido_id', pedido.id);
+                    
+                    if (prodPedido && prodPedido.length > 0) {
+                        pedido.productos = prodPedido.map(pp => ({
+                            id: pp.productos.id,
+                            nombre: pp.productos.nombre,
+                            precio: pp.precio_unitario,
+                            cantidad: pp.cantidad
+                        }));
+                    } else {
+                        pedido.productos = [];
+                    }
+                }
+                return { success: true, pedidos: pedidos };
+                
+            case 'getAllProductos':
+                const { data: productos, error: prodError } = await supabaseClient
+                    .from('productos')
+                    .select('*, vendedores(nombre)')
+                    .order('nombre');
+                if (prodError) throw prodError;
+                
+                // Agregar nombre del vendedor
+                const productosConVendedor = productos.map(p => ({
+                    ...p,
+                    vendedor_nombre: p.vendedores?.nombre || 'Desconocido'
+                }));
+                return { success: true, productos: productosConVendedor };
+                
+            case 'actualizarVendedor':
+                const { error: updateError } = await supabaseClient
+                    .from('vendedores')
+                    .update({
+                        nombre: data.nombre,
+                        email: data.email,
+                        telefono: data.telefono,
+                        direccion: data.direccion,
+                        horario: data.horario,
+                        activo: data.activo === 'SI' ? true : false
+                    })
+                    .eq('id', data.id);
+                if (updateError) throw updateError;
+                return { success: true };
+                
+            case 'eliminarVendedor':
+                const { error: deleteError } = await supabaseClient
+                    .from('vendedores')
+                    .delete()
+                    .eq('id', data.vendedorId);
+                if (deleteError) throw deleteError;
+                return { success: true };
+                
+            case 'actualizarProducto':
+                const { error: prodUpdateError } = await supabaseClient
+                    .from('productos')
+                    .update({
+                        nombre: data.nombre,
+                        descripcion: data.descripcion,
+                        precio: data.precio,
+                        disponible: data.disponible === 'SI' ? true : false
+                    })
+                    .eq('id', data.id);
+                if (prodUpdateError) throw prodUpdateError;
+                return { success: true };
+                
+            case 'eliminarProducto':
+                const { error: prodDeleteError } = await supabaseClient
+                    .from('productos')
+                    .delete()
+                    .eq('id', data.productoId);
+                if (prodDeleteError) throw prodDeleteError;
+                return { success: true };
+                
+            case 'actualizarEstado':
+                const { error: estadoError } = await supabaseClient
+                    .from('pedidos')
+                    .update({ estado: data.estado })
+                    .eq('id', data.pedidoId);
+                if (estadoError) throw estadoError;
+                return { success: true };
+                
+            case 'cancelarPedido':
+                const { error: cancelError } = await supabaseClient
+                    .from('pedidos')
+                    .delete()
+                    .eq('id', data.pedidoId);
+                if (cancelError) throw cancelError;
+                return { success: true };
+                
+            case 'getAllBanners':
+                const { data: bannersData, error: banError } = await supabaseClient
+                    .from('banners')
+                    .select('*')
+                    .order('orden');
+                if (banError) throw banError;
+                return { success: true, banners: bannersData };
+                
+            case 'crearBanner':
+                const { data: newBanner, error: createBanError } = await supabaseClient
+                    .from('banners')
+                    .insert([{
+                        titulo: data.titulo,
+                        imagen_url: data.imagen_url,
+                        link: data.link,
+                        orden: data.orden,
+                        activo: data.activo === 'SI' ? true : false,
+                        vendedor_id: data.vendedor_id || null
+                    }])
+                    .select()
+                    .single();
+                if (createBanError) throw createBanError;
+                return { success: true, bannerId: newBanner.id };
+                
+            case 'actualizarBanner':
+                const { error: updateBanError } = await supabaseClient
+                    .from('banners')
+                    .update({
+                        titulo: data.titulo,
+                        imagen_url: data.imagen_url,
+                        link: data.link,
+                        orden: data.orden,
+                        activo: data.activo === 'SI' ? true : false,
+                        vendedor_id: data.vendedor_id || null
+                    })
+                    .eq('id', data.id);
+                if (updateBanError) throw updateBanError;
+                return { success: true };
+                
+            case 'eliminarBanner':
+                const { error: deleteBanError } = await supabaseClient
+                    .from('banners')
+                    .delete()
+                    .eq('id', data.bannerId);
+                if (deleteBanError) throw deleteBanError;
+                return { success: true };
+                
+            default:
+                console.warn(`⚠️ Acción no implementada: ${action}`);
+                return { success: false, error: `Acción no implementada: ${action}` };
         }
-        console.log('📡 GET:', url);
-        const response = await fetch(url, { method: 'GET', mode: 'cors' });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
     } catch (error) {
-        console.error('❌ Error en callAPI:', error);
-        return { error: error.message };
+        console.error(`❌ Error en ${action}:`, error);
+        return { success: false, error: error.message };
     }
 }
 
 async function postAPI(action, data = {}) {
-    try {
-        const url = API_URL;
-        const jsonData = JSON.stringify({ action, ...data });
-        const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: jsonData
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error('❌ Error en postAPI:', error);
-        return { success: false, error: error.message };
-    }
+    return await callAPI(action, data);
 }
 
 // ===================================================
@@ -121,16 +272,6 @@ async function subirImagenACloudinary(file) {
         return null;
     }
 }
-
-// ===================================================
-// VARIABLES GLOBALES
-// ===================================================
-
-let allVendedores = [];
-let allPedidos = [];
-let allProductos = [];
-let banners = [];
-let charts = {};
 
 // ===================================================
 // CARGA DE DATOS
@@ -229,7 +370,7 @@ function actualizarDashboard() {
 }
 
 // ===================================================
-// VENDEDORES
+// VENDEDORES (CORREGIDO: usar true/false)
 // ===================================================
 
 function renderizarVendedores() {
@@ -244,12 +385,12 @@ function renderizarVendedores() {
             <td>${escapeHTML(v.email || '-')}</td>
             <td>${v.telefono || '-'}</td>
             <td>${escapeHTML(v.direccion || '-')}</td>
-            <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+            <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
             <td>${stats[v.id]?.pedidos || 0}</td>
             <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
             <td>
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
+                <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
               </td>
           </tr>
@@ -277,7 +418,8 @@ async function guardarEditarVendedor() {
             email: document.getElementById('edit-vendedor-email').value.trim(),
             telefono: document.getElementById('edit-vendedor-telefono').value.trim(),
             direccion: document.getElementById('edit-vendedor-direccion').value.trim(),
-            horario: document.getElementById('edit-vendedor-horario').value.trim()
+            horario: document.getElementById('edit-vendedor-horario').value.trim(),
+            activo: document.getElementById('edit-vendedor-activo')?.value || 'SI'
         };
         try {
             const res = await callAPI('actualizarVendedor', data);
@@ -290,7 +432,7 @@ async function guardarEditarVendedor() {
 async function toggleVendedorStatus(id, button) {
     const v = allVendedores.find(v => v.id.toString() === id.toString());
     if (!v) return;
-    const nuevoEstado = v.activo === 'SI' ? 'NO' : 'SI';
+    const nuevoEstado = v.activo === true ? false : true;
     
     if (button) {
         button.disabled = true;
@@ -305,17 +447,17 @@ async function toggleVendedorStatus(id, button) {
             telefono: v.telefono || '',
             direccion: v.direccion || '',
             horario: v.horario || '',
-            activo: nuevoEstado
+            activo: nuevoEstado ? 'SI' : 'NO'
         });
         
         if (res && res.success) {
-            mostrarToast(`Vendedor ${nuevoEstado === 'SI' ? 'habilitado' : 'suspendido'}`, 'success');
+            mostrarToast(`Vendedor ${nuevoEstado ? 'habilitado' : 'suspendido'}`, 'success');
             await actualizarDatosManual();
         } else {
             mostrarToast(res?.error || 'Error al cambiar estado', 'error');
             if (button) {
                 button.disabled = false;
-                button.innerHTML = `<i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}`;
+                button.innerHTML = `<i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}`;
             }
         }
     } catch (error) {
@@ -323,7 +465,7 @@ async function toggleVendedorStatus(id, button) {
         mostrarToast('Error al cambiar estado', 'error');
         if (button) {
             button.disabled = false;
-            button.innerHTML = `<i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}`;
+            button.innerHTML = `<i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}`;
         }
     }
 }
@@ -347,7 +489,7 @@ async function confirmarEliminarVendedor() {
 }
 
 // ===================================================
-// PRODUCTOS
+// PRODUCTOS (CORREGIDO: usar true/false)
 // ===================================================
 
 function renderizarProductos() {
@@ -368,7 +510,7 @@ function renderizarProductos() {
             <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
             <td>${formatearPrecio(p.precio)}</td>
             <td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td>
-            <td><span class="status-badge ${p.disponible === 'SI' ? 'status-activo' : 'status-inactivo'}">${p.disponible === 'SI' ? 'Disponible' : 'No disponible'}</span></td>
+            <td><span class="status-badge ${p.disponible === true ? 'status-activo' : 'status-inactivo'}">${p.disponible === true ? 'Disponible' : 'No disponible'}</span></td>
             <td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
          </tr>
     `).join('');
@@ -381,7 +523,7 @@ function editarProducto(id) {
     document.getElementById('edit-producto-nombre').value = p.nombre || '';
     document.getElementById('edit-producto-descripcion').value = p.descripcion || '';
     document.getElementById('edit-producto-precio').value = p.precio || '';
-    document.getElementById('edit-producto-disponible').value = p.disponible || 'SI';
+    document.getElementById('edit-producto-disponible').value = p.disponible === true ? 'SI' : 'NO';
     document.getElementById('modal-editar-producto').classList.add('active');
 }
 
@@ -444,7 +586,7 @@ function renderizarPedidos() {
             <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
             <td>${formatearPrecio(p.total)}</td>
             <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-            <td>${p.productos ? p.productos.length : 0} productos</td>
+            <td>${p.productos ? p.productos.length : 0} productos}</td>
             <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
          </tr>
     `).join('');
@@ -497,34 +639,9 @@ async function confirmarEliminarPedido() {
 // WEB - BANNERS
 // ===================================================
 
-async function eliminarBanner(bannerId, button) {
-    if (!confirm('¿Eliminar este banner?')) return;
-    
-    if (button) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    }
-    
-    try {
-        const response = await postAPI('eliminarBanner', { bannerId });
-        if (response.success) {
-            mostrarToast('Banner eliminado', 'success');
-            await cargarBanners();
-        } else {
-            throw new Error(response?.error || 'Error al eliminar');
-        }
-    } catch (error) {
-        mostrarToast(error.message, 'error');
-        if (button) {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
-        }
-    }
-}
-
 async function cargarBanners() {
     const tbody = document.getElementById('banners-tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td>';
     
     try {
         const response = await callAPI('getAllBanners');
@@ -535,7 +652,7 @@ async function cargarBanners() {
             throw new Error(response.error);
         }
     } catch (error) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${error.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${error.message}</td>`;
     }
 }
 
@@ -544,7 +661,7 @@ function renderizarBanners() {
     if (!tbody) return;
     
     if (banners.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay banners registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay banners registrados</td>';
         return;
     }
     
@@ -554,12 +671,12 @@ function renderizarBanners() {
             <td><img src="${b.imagen_url}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 8px;"></td>
             <td>${escapeHTML(b.titulo || '-')}</td>
             <td>${b.orden || 999}</td>
-            <td><span class="status-badge ${b.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${b.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+            <td><span class="status-badge ${b.activo === true ? 'status-activo' : 'status-inactivo'}">${b.activo === true ? 'Activo' : 'Inactivo'}</span></td>
             <td>
                 <button class="btn-edit" onclick="editarBanner(${b.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-delete" onclick="eliminarBanner(${b.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
             </td>
-         </tr>
+        </tr>
     `).join('');
 }
 
@@ -571,7 +688,7 @@ function abrirModalBanner(bannerId = null) {
             document.getElementById('banner-titulo').value = banner.titulo || '';
             document.getElementById('banner-link').value = banner.link || '';
             document.getElementById('banner-orden').value = banner.orden || 999;
-            document.getElementById('banner-activo').value = banner.activo || 'SI';
+            document.getElementById('banner-activo').value = banner.activo === true ? 'SI' : 'NO';
             const preview = document.getElementById('banner-imagen-preview');
             if (preview && banner.imagen_url) {
                 preview.innerHTML = `<img src="${banner.imagen_url}" style="max-width: 150px; border-radius: 8px;">`;
@@ -587,7 +704,6 @@ function abrirModalBanner(bannerId = null) {
         document.getElementById('modal-banner-title').textContent = 'Nuevo banner';
     }
     
-    // Cargar vendedores en el select
     const selectVendedor = document.getElementById('banner-vendedor');
     if (selectVendedor && allVendedores.length) {
         selectVendedor.innerHTML = '<option value="">Todos los vendedores</option>' + 
@@ -599,6 +715,10 @@ function abrirModalBanner(bannerId = null) {
 
 function cerrarModalBanner() {
     document.getElementById('modal-banner').classList.remove('active');
+}
+
+function editarBanner(id) {
+    abrirModalBanner(id);
 }
 
 async function guardarBanner() {
@@ -638,7 +758,7 @@ async function guardarBanner() {
     const action = id ? 'actualizarBanner' : 'crearBanner';
     
     try {
-        const response = await postAPI(action, data);
+        const response = await callAPI(action, data);
         if (response && response.success) {
             mostrarToast(id ? 'Banner actualizado' : 'Banner creado', 'success');
             cerrarModalBanner();
@@ -648,6 +768,31 @@ async function guardarBanner() {
         }
     } catch (error) {
         mostrarToast(error.message, 'error');
+    }
+}
+
+async function eliminarBanner(bannerId, button) {
+    if (!confirm('¿Eliminar este banner?')) return;
+    
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    try {
+        const response = await callAPI('eliminarBanner', { bannerId });
+        if (response.success) {
+            mostrarToast('Banner eliminado', 'success');
+            await cargarBanners();
+        } else {
+            throw new Error(response?.error || 'Error al eliminar');
+        }
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        }
     }
 }
 
@@ -666,7 +811,7 @@ function cargarFiltros() {
 async function exportarVendedores() {
     const btn = document.getElementById('export-vendedores');
     await withLoading(btn, async () => {
-        const data = allVendedores.map(v => ({ ID: v.id, Nombre: v.nombre, Email: v.email, Telefono: v.telefono, Direccion: v.direccion, Horario: v.horario, Estado: v.activo === 'SI' ? 'Activo' : 'Inactivo' }));
+        const data = allVendedores.map(v => ({ ID: v.id, Nombre: v.nombre, Email: v.email, Telefono: v.telefono, Direccion: v.direccion, Horario: v.horario, Estado: v.activo === true ? 'Activo' : 'Inactivo' }));
         downloadCSV(data, 'vendedores_want.csv');
     });
 }
@@ -682,7 +827,7 @@ async function exportarPedidos() {
 async function exportarProductos() {
     const btn = document.getElementById('export-productos');
     await withLoading(btn, async () => {
-        const data = allProductos.map(p => ({ ID: p.id, Nombre: p.nombre, Vendedor: p.vendedor_nombre, Precio: p.precio, Descripcion: p.descripcion, Disponible: p.disponible === 'SI' ? 'Sí' : 'No' }));
+        const data = allProductos.map(p => ({ ID: p.id, Nombre: p.nombre, Vendedor: p.vendedor_nombre, Precio: p.precio, Descripcion: p.descripcion, Disponible: p.disponible === true ? 'Sí' : 'No' }));
         downloadCSV(data, 'productos_want.csv');
     });
 }
@@ -713,7 +858,6 @@ function cambiarSeccion(seccionId) {
         if (item.getAttribute('data-section') === seccionId) item.classList.add('active');
     });
     
-    // Cargar datos según la sección
     if (seccionId === 'web') {
         cargarBanners();
         if (allVendedores.length === 0) cargarTodosLosDatos();
@@ -726,6 +870,13 @@ function cambiarSeccion(seccionId) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Panel Administrativo Global iniciado');
+    
+    // Verificar que supabaseClient existe
+    if (typeof supabaseClient === 'undefined') {
+        console.error('❌ supabaseClient no está definido. Asegúrate de que supabase-all.js está cargado.');
+        return;
+    }
+    
     await cargarTodosLosDatos();
     
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -739,11 +890,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('filtro-vendedor-prod')?.addEventListener('change', () => renderizarProductos());
     document.getElementById('search-producto')?.addEventListener('input', () => renderizarProductos());
     
-    // Eventos para Web
     document.getElementById('btn-agregar-banner')?.addEventListener('click', () => abrirModalBanner());
     document.getElementById('guardar-banner')?.addEventListener('click', guardarBanner);
     
-    // Submenú de Web
     document.querySelectorAll('.submenu-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const sub = btn.getAttribute('data-sub');
@@ -770,12 +919,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td>${escapeHTML(v.email || '-')}</td>
                 <td>${v.telefono || '-'}</td>
                 <td>${escapeHTML(v.direccion || '-')}</td>
-                <td><span class="status-badge ${v.activo === 'SI' ? 'status-activo' : 'status-inactivo'}">${v.activo === 'SI' ? 'Activo' : 'Inactivo'}</span></td>
+                <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
                 <td>${stats[v.id]?.pedidos || 0}</td>
                 <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
                 <td>
                     <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === 'SI' ? 'ban' : 'check-circle'}"></i> ${v.activo === 'SI' ? 'Suspender' : 'Habilitar'}</button>
+                    <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                     <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
                   </td>
               </tr>
