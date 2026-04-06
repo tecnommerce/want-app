@@ -657,20 +657,50 @@ async function guardarProducto() {
     const nombre = document.getElementById('producto-nombre').value.trim();
     const descripcion = document.getElementById('producto-descripcion').value.trim();
     const precio = parseFloat(document.getElementById('producto-precio').value);
-    const disponible = document.getElementById('producto-disponible')?.value === 'SI' ? true : false;
+    const disponible = document.getElementById('producto-disponible')?.value || 'SI';
     const imagenFile = document.getElementById('producto-imagen').files[0];
-    if (!nombre || !precio) { mostrarToast('Nombre y precio son obligatorios', 'error'); return; }
+    
+    if (!nombre || !precio) {
+        mostrarToast('Nombre y precio son obligatorios', 'error');
+        return;
+    }
+    
     let imagenUrl = null;
-    if (imagenFile) { mostrarToast('Subiendo imagen...', 'info'); imagenUrl = await subirImagenACloudinary(imagenFile); if (!imagenUrl) { mostrarToast('Error al subir imagen', 'error'); return; } }
-    const data = { vendedor_id: vendedorActual.id, nombre, descripcion, precio, disponible };
+    if (imagenFile) {
+        mostrarToast('Subiendo imagen...', 'info');
+        imagenUrl = await subirImagenACloudinary(imagenFile);
+        if (!imagenUrl) {
+            mostrarToast('Error al subir imagen', 'error');
+            return;
+        }
+    }
+    
+    // CORREGIDO: convertir 'SI'/'NO' a true/false
+    const data = {
+        vendedor_id: vendedorActual.id,
+        nombre: nombre,
+        descripcion: descripcion,
+        precio: precio,
+        disponible: disponible === 'SI' ? true : false
+    };
+    
     if (imagenUrl) data.imagen_url = imagenUrl;
     if (id) data.id = parseInt(id);
+    
     const action = id ? 'actualizarProducto' : 'crearProducto';
+    
     try {
         const response = await postAPI(action, data);
-        if (response && response.success) { mostrarToast(id ? 'Producto actualizado' : 'Producto creado', 'success'); cerrarModalProducto(); await cargarProductos(true); }
-        else throw new Error(response?.error || 'Error');
-    } catch (error) { mostrarToast(error.message, 'error'); }
+        if (response && response.success) {
+            mostrarToast(id ? 'Producto actualizado' : 'Producto creado', 'success');
+            cerrarModalProducto();
+            await cargarProductos(true);
+        } else {
+            throw new Error(response?.error || 'Error al guardar');
+        }
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+    }
 }
 async function eliminarProducto(productoId) { const producto = productos.find(p => p.id === productoId); if (!producto) return; if (!confirm(`¿Eliminar "${producto.nombre}"?`)) return; try { const response = await postAPI('eliminarProducto', { productoId }); if (response.success) { mostrarToast('Producto eliminado', 'success'); await cargarProductos(true); } } catch (error) { mostrarToast('Error al eliminar', 'error'); } }
 
