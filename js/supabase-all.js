@@ -158,7 +158,7 @@
                             descripcion: data.descripcion,
                             precio: data.precio,
                             imagen_url: data.imagen_url,
-                            disponible: data.disponible === 'SI'
+                            disponible: data.disponible === true || data.disponible === 'SI' ? true : false
                         }])
                         .select()
                         .single();
@@ -173,7 +173,7 @@
                             descripcion: data.descripcion,
                             precio: data.precio,
                             imagen_url: data.imagen_url,
-                            disponible: data.disponible === 'SI'
+                            disponible: data.disponible === true || data.disponible === 'SI' ? true : false
                         })
                         .eq('id', data.id);
                     if (prodUpdateError) throw prodUpdateError;
