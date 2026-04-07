@@ -1867,3 +1867,34 @@ body {
 .modal#modal-perfil {
     z-index: 3000;
 }
+
+/* ===================================================
+   MÓVIL - ASEGURAR QUE SOLO UN TAB SE VEA
+   =================================================== */
+@media (max-width: 768px) {
+    /* En móvil, solo mostrar el tab activo */
+    .tab-content {
+        display: none !important;
+    }
+    
+    .tab-content.active {
+        display: block !important;
+    }
+    
+    /* Asegurar que el tab de reportes no se vea en pedidos */
+    #tab-reportes {
+        display: none !important;
+    }
+    
+    #tab-reportes.active {
+        display: block !important;
+    }
+    
+    #tab-pedidos {
+        display: none !important;
+    }
+    
+    #tab-pedidos.active {
+        display: block !important;
+    }
+}
