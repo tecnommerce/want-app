@@ -1554,3 +1554,213 @@ body {
 .modal#modal-perfil {
     z-index: 3000;
 }
+/* ===================================================
+   SECCIÓN REPORTES - ESTILOS
+   =================================================== */
+
+.reportes-container {
+    padding: 20px 0;
+}
+
+.reportes-section {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.reportes-titulo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.reportes-titulo i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+/* Grid de métricas de reportes */
+.reportes-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.reporte-card {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    border: 1px solid var(--gray-200);
+}
+
+.reporte-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.reporte-icon {
+    width: 44px;
+    height: 44px;
+    background: #FFF5EB;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.reporte-info h4 {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+}
+
+.reporte-info p {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+/* Lista de top productos */
+.reportes-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reporte-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.reporte-item-nombre {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+}
+
+.reporte-item-cantidad {
+    background: var(--gray-100);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Ventas por día */
+.reportes-dias {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dia-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.dia-nombre {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.dia-valor {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Últimos pedidos */
+.reportes-pedidos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pedido-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.pedido-info {
+    flex: 1;
+}
+
+.pedido-numero {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--primary);
+}
+
+.pedido-cliente {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+}
+
+.pedido-total {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--gray-800);
+}
+
+.loading-small {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-400);
+    font-size: 0.8rem;
+}
+
+/* Responsive reportes móvil */
+@media (max-width: 768px) {
+    .reportes-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .reporte-card {
+        padding: 10px;
+    }
+    
+    .reporte-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .reporte-info p {
+        font-size: 0.9rem;
+    }
+    
+    .reporte-info h4 {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .reportes-metrics {
+        grid-template-columns: 1fr;
+    }
+}

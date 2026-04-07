@@ -48,7 +48,7 @@
         </div>
     </header>
 
-    <!-- Menú móvil admin - MEJORADO -->
+<!-- Menú móvil admin - CON SECCIÓN REPORTES -->
 <div class="mobile-menu-admin" id="mobile-menu-admin">
     <button class="menu-close" id="menu-close-admin">
         <i class="fas fa-times"></i>
@@ -62,6 +62,9 @@
         </button>
         <button class="mobile-tab-btn" data-tab="delivery">
             <i class="fas fa-truck"></i> Delivery
+        </button>
+        <button class="mobile-tab-btn" data-tab="reportes">
+            <i class="fas fa-chart-line"></i> Reportes
         </button>
         <button class="mobile-logout-btn" id="mobile-logout-btn">
             <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -326,19 +329,97 @@
                     </div>
                 </div>
 
-                <!-- Tab Delivery -->
-                <div class="tab-content" id="tab-delivery">
-                    <div class="delivery-header-actions">
-                        <button class="btn-primary" id="btn-agregar-delivery">
-                            <i class="fas fa-plus"></i> Agregar delivery
-                        </button>
+                <!-- Tab Delivery (existente) -->
+<div class="tab-content" id="tab-delivery">
+    <div class="delivery-header-actions">
+        <button class="btn-primary" id="btn-agregar-delivery">
+            <i class="fas fa-plus"></i> Agregar delivery
+        </button>
+    </div>
+    <div class="delivery-grid" id="delivery-grid">
+        <div class="loading"><div class="spinner"></div><p>Cargando deliveries...</p></div>
+    </div>
+</div>
+
+<!-- NUEVA SECCIÓN: Tab Reportes -->
+<div class="tab-content" id="tab-reportes">
+    <div class="reportes-container">
+        <!-- Resumen de ventas -->
+        <div class="reportes-section">
+            <h3 class="reportes-titulo"><i class="fas fa-chart-simple"></i> Resumen de ventas</h3>
+            <div class="reportes-metrics">
+                <div class="reporte-card">
+                    <div class="reporte-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="reporte-info">
+                        <h4>Ventas hoy</h4>
+                        <p id="reporte-ventas-hoy">$0</p>
                     </div>
-                    <div class="delivery-grid" id="delivery-grid">
-                        <div class="loading"><div class="spinner"></div><p>Cargando deliveries...</p></div>
+                </div>
+                <div class="reporte-card">
+                    <div class="reporte-icon"><i class="fas fa-calendar-week"></i></div>
+                    <div class="reporte-info">
+                        <h4>Ventas esta semana</h4>
+                        <p id="reporte-ventas-semana">$0</p>
+                    </div>
+                </div>
+                <div class="reporte-card">
+                    <div class="reporte-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="reporte-info">
+                        <h4>Ventas este mes</h4>
+                        <p id="reporte-ventas-mes">$0</p>
+                    </div>
+                </div>
+                <div class="reporte-card">
+                    <div class="reporte-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="reporte-info">
+                        <h4>Pedidos entregados</h4>
+                        <p id="reporte-pedidos-entregados">0</p>
+                    </div>
+                </div>
+                <div class="reporte-card">
+                    <div class="reporte-icon"><i class="fas fa-clock"></i></div>
+                    <div class="reporte-info">
+                        <h4>Pedidos pendientes</h4>
+                        <p id="reporte-pedidos-pendientes">0</p>
+                    </div>
+                </div>
+                <div class="reporte-card">
+                    <div class="reporte-icon"><i class="fas fa-truck"></i></div>
+                    <div class="reporte-info">
+                        <h4>Total pedidos</h4>
+                        <p id="reporte-total-pedidos">0</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Top productos más vendidos -->
+        <div class="reportes-section">
+            <h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top productos más vendidos</h3>
+            <div class="reportes-lista" id="reporte-top-productos">
+                <div class="loading-small">Cargando...</div>
+            </div>
+        </div>
+
+        <!-- Ventas por día (últimos 7 días) -->
+        <div class="reportes-section">
+            <h3 class="reportes-titulo"><i class="fas fa-chart-line"></i> Ventas por día (últimos 7 días)</h3>
+            <div class="reportes-dias" id="reporte-ventas-dias">
+                <div class="loading-small">Cargando...</div>
+            </div>
+        </div>
+
+        <!-- Últimos pedidos -->
+        <div class="reportes-section">
+            <h3 class="reportes-titulo"><i class="fas fa-history"></i> Últimos 10 pedidos</h3>
+            <div class="reportes-pedidos-lista" id="reporte-ultimos-pedidos">
+                <div class="loading-small">Cargando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
     </main>
 
     <!-- Modal para seleccionar rubros -->

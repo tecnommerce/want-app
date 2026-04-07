@@ -41,6 +41,15 @@ function abrirModalRubros(rubrosActuales, callback) {
     rubrosTemporales = [...(rubrosActuales || [])];
     rubrosCallback = callback;
     
+    // Cerrar modal padre (perfil) temporalmente si está abierto
+    const modalPerfil = document.getElementById('modal-perfil');
+    const modalPerfilEstabaAbierto = modalPerfil && modalPerfil.classList.contains('active');
+    
+    if (modalPerfilEstabaAbierto) {
+        modalPerfil.classList.remove('active');
+        window.modalPerfilAbierto = true;
+    }
+    
     const grid = document.getElementById('rubros-grid-modal');
     if (!grid) return;
     
@@ -83,6 +92,12 @@ function actualizarListaRubrosSeleccionados() {
 function cerrarModalRubros() {
     document.getElementById('modal-rubros').classList.remove('active');
     rubrosCallback = null;
+    
+    // Reabrir modal padre (perfil) si estaba abierto
+    if (window.modalPerfilAbierto) {
+        document.getElementById('modal-perfil').classList.add('active');
+        window.modalPerfilAbierto = false;
+    }
 }
 
 function confirmarRubros() {
@@ -565,6 +580,7 @@ async function actualizarEstado(pedidoId, nuevoEstado, boton) {
                 actualizarContadoresPedidos();
                 calcularMetricas();
                 renderizarPedidos();
+                actualizarReportes();
             } else throw new Error(response?.error || 'Error');
         } catch (error) { mostrarToast('Error al actualizar', 'error'); throw error; }
     });
@@ -581,6 +597,7 @@ async function cancelarPedido(pedidoId, boton) {
                 actualizarContadoresPedidos();
                 calcularMetricas();
                 renderizarPedidos();
+                actualizarReportes();
             } else throw new Error(response?.error || 'Error');
         } catch (error) { mostrarToast('Error al cancelar', 'error'); throw error; }
     });
@@ -1205,6 +1222,130 @@ function mostrarPanelLogin() {
 }
 
 // ===================================================
+// FUNCIONES PARA REPORTES
+// ===================================================
+
+function actualizarReportes() {
+    if (!pedidos) return;
+    
+    // Calcular métricas para reportes
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const inicioSemana = new Date(hoy);
+    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    
+    let ventasHoy = 0, ventasSemana = 0, ventasMes = 0, pedidosEntregados = 0, pedidosPendientes = 0;
+    
+    pedidos.forEach(pedido => {
+        const fechaPedido = new Date(pedido.fecha);
+        fechaPedido.setHours(0, 0, 0, 0);
+        const total = parseFloat(pedido.total) || 0;
+        if (pedido.estado === 'entregado') {
+            pedidosEntregados++;
+            if (fechaPedido >= hoy) ventasHoy += total;
+            if (fechaPedido >= inicioSemana) ventasSemana += total;
+            if (fechaPedido >= inicioMes) ventasMes += total;
+        } else if (pedido.estado !== 'entregado' && pedido.estado !== 'cancelado') {
+            pedidosPendientes++;
+        }
+    });
+    
+    // Actualizar elementos del DOM de reportes
+    const rh = document.getElementById('reporte-ventas-hoy');
+    const rs = document.getElementById('reporte-ventas-semana');
+    const rm = document.getElementById('reporte-ventas-mes');
+    const re = document.getElementById('reporte-pedidos-entregados');
+    const rp = document.getElementById('reporte-pedidos-pendientes');
+    const rt = document.getElementById('reporte-total-pedidos');
+    
+    if (rh) rh.textContent = formatearPrecio(ventasHoy);
+    if (rs) rs.textContent = formatearPrecio(ventasSemana);
+    if (rm) rm.textContent = formatearPrecio(ventasMes);
+    if (re) re.textContent = pedidosEntregados;
+    if (rp) rp.textContent = pedidosPendientes;
+    if (rt) rt.textContent = pedidos.length;
+    
+    // Top productos más vendidos
+    const ventasPorProducto = {};
+    pedidos.forEach(pedido => {
+        if (pedido.productos && pedido.productos.length > 0) {
+            pedido.productos.forEach(prod => {
+                const nombre = prod.nombre;
+                if (!ventasPorProducto[nombre]) ventasPorProducto[nombre] = 0;
+                ventasPorProducto[nombre] += prod.cantidad;
+            });
+        }
+    });
+    
+    const topProductos = Object.entries(ventasPorProducto)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    const topProductosContainer = document.getElementById('reporte-top-productos');
+    if (topProductosContainer) {
+        if (topProductos.length === 0) {
+            topProductosContainer.innerHTML = '<div class="loading-small">No hay productos vendidos</div>';
+        } else {
+            topProductosContainer.innerHTML = topProductos.map(([nombre, cantidad]) => `
+                <div class="reporte-item">
+                    <span class="reporte-item-nombre">${escapeHTML(nombre)}</span>
+                    <span class="reporte-item-cantidad">${cantidad} unidades</span>
+                </div>
+            `).join('');
+        }
+    }
+    
+    // Ventas por día (últimos 7 días)
+    const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const ventasPorDia = Array(7).fill(0);
+    const hoyDate = new Date();
+    
+    pedidos.forEach(pedido => {
+        if (pedido.estado === 'entregado') {
+            const fechaPedido = new Date(pedido.fecha);
+            const diffDias = Math.floor((hoyDate - fechaPedido) / (1000 * 60 * 60 * 24));
+            if (diffDias >= 0 && diffDias < 7) {
+                const diaIndex = fechaPedido.getDay();
+                ventasPorDia[diaIndex] += parseFloat(pedido.total) || 0;
+            }
+        }
+    });
+    
+    const ventasDiasContainer = document.getElementById('reporte-ventas-dias');
+    if (ventasDiasContainer) {
+        ventasDiasContainer.innerHTML = diasSemana.map((dia, i) => `
+            <div class="dia-item">
+                <span class="dia-nombre">${dia}</span>
+                <span class="dia-valor">${formatearPrecio(ventasPorDia[i])}</span>
+            </div>
+        `).join('');
+    }
+    
+    // Últimos 10 pedidos
+    const ultimosPedidos = [...pedidos]
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .slice(0, 10);
+    
+    const ultimosPedidosContainer = document.getElementById('reporte-ultimos-pedidos');
+    if (ultimosPedidosContainer) {
+        if (ultimosPedidos.length === 0) {
+            ultimosPedidosContainer.innerHTML = '<div class="loading-small">No hay pedidos</div>';
+        } else {
+            ultimosPedidosContainer.innerHTML = ultimosPedidos.map(p => `
+                <div class="pedido-item">
+                    <div class="pedido-info">
+                        <div class="pedido-numero">Pedido #${p.numero_orden || p.id}</div>
+                        <div class="pedido-cliente">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
+                    </div>
+                    <div class="pedido-total">${formatearPrecio(p.total || 0)}</div>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+// ===================================================
 // INICIALIZACIÓN DEL PANEL
 // ===================================================
 
@@ -1240,6 +1381,7 @@ async function iniciarPanel(vendedor) {
     await cargarPedidos();
     await cargarProductos();
     await cargarDeliveries();
+    actualizarReportes();
     
     // Event listeners
     const btnRefresh = document.getElementById('btn-refresh');
@@ -1249,6 +1391,7 @@ async function iniciarPanel(vendedor) {
                 await cargarPedidos(true);
                 await cargarProductos(true);
                 await cargarDeliveries(true);
+                actualizarReportes();
                 mostrarToast('Datos actualizados', 'success');
             });
         });
@@ -1349,6 +1492,7 @@ function inicializarTabs() {
             if (tabContent) tabContent.classList.add('active');
             if (tabId === 'productos') cargarProductos();
             if (tabId === 'delivery') cargarDeliveries();
+            if (tabId === 'reportes') actualizarReportes();
         });
     });
 }
@@ -1371,33 +1515,22 @@ function inicializarMenuAdmin() {
     const overlay = document.getElementById('menu-overlay-admin');
     const close = document.getElementById('menu-close-admin');
     
-    // Función para cerrar menú
     function closeMenu() {
         if (menu) menu.classList.remove('active');
         if (overlay) overlay.classList.remove('active');
         document.body.style.overflow = '';
     }
     
-    // Función para abrir menú
     function openMenu() {
         if (menu) menu.classList.add('active');
         if (overlay) overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
     
-    if (toggle) {
-        toggle.onclick = openMenu;
-    }
+    if (toggle) toggle.onclick = openMenu;
+    if (close) close.onclick = closeMenu;
+    if (overlay) overlay.onclick = closeMenu;
     
-    if (close) {
-        close.onclick = closeMenu;
-    }
-    
-    if (overlay) {
-        overlay.onclick = closeMenu;
-    }
-    
-    // Cerrar menú al hacer clic en un tab móvil
     const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
     mobileTabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -1414,11 +1547,11 @@ function inicializarMenuAdmin() {
             const tabContent = document.getElementById(`tab-${tabId}`);
             if (tabContent) tabContent.classList.add('active');
             
-            // Cargar datos si es necesario
+            // Cargar datos según el tab
             if (tabId === 'productos') cargarProductos();
             if (tabId === 'delivery') cargarDeliveries();
+            if (tabId === 'reportes') actualizarReportes();
             
-            // Cerrar menú
             closeMenu();
         });
     });
@@ -1438,6 +1571,7 @@ async function cargarPedidos(forceRefresh = false) {
         actualizarContadoresPedidos();
         calcularMetricas();
         renderizarPedidos();
+        actualizarReportes();
         
         if (forceRefresh) mostrarToast('Pedidos actualizados', 'success');
     } catch (error) { 
