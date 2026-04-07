@@ -117,10 +117,10 @@ function renderizarProductos() {
     const isMobile = window.innerWidth <= 768;
     
     grid.innerHTML = productos.map(producto => {
-        // En móvil, mostrar descripción más corta
         const descripcion = producto.descripcion || 'Sin descripción';
-        const descripcionCorta = isMobile && descripcion.length > 50 
-            ? descripcion.substring(0, 50) + '...' 
+        // En móvil, mostrar descripción con límite de 60 caracteres
+        const descripcionCorta = isMobile && descripcion.length > 60 
+            ? descripcion.substring(0, 60) + '...' 
             : descripcion;
         
         return `
@@ -133,7 +133,7 @@ function renderizarProductos() {
                 </div>
                 <div class="producto-info">
                     <h3 class="producto-nombre">${escapeHTML(producto.nombre)}</h3>
-                    ${!isMobile ? `<p class="producto-descripcion">${escapeHTML(descripcionCorta)}</p>` : ''}
+                    <p class="producto-descripcion">${escapeHTML(descripcionCorta)}</p>
                     <p class="producto-precio">${formatearPrecio(parseFloat(producto.precio))}</p>
                     <button class="btn-agregar" onclick="agregarAlCarrito(${producto.id})">
                         Agregar al carrito
