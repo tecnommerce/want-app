@@ -1371,44 +1371,55 @@ function inicializarMenuAdmin() {
     const overlay = document.getElementById('menu-overlay-admin');
     const close = document.getElementById('menu-close-admin');
     
-    if (toggle) {
-        toggle.onclick = () => {
-            if (menu) menu.classList.add('active');
-            if (overlay) overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
-    }
-    if (close) {
-        close.onclick = () => {
-            if (menu) menu.classList.remove('active');
-            if (overlay) overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        };
-    }
-    if (overlay) {
-        overlay.onclick = () => {
-            if (menu) menu.classList.remove('active');
-            if (overlay) overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        };
+    // Función para cerrar menú
+    function closeMenu() {
+        if (menu) menu.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
     }
     
+    // Función para abrir menú
+    function openMenu() {
+        if (menu) menu.classList.add('active');
+        if (overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    if (toggle) {
+        toggle.onclick = openMenu;
+    }
+    
+    if (close) {
+        close.onclick = closeMenu;
+    }
+    
+    if (overlay) {
+        overlay.onclick = closeMenu;
+    }
+    
+    // Cerrar menú al hacer clic en un tab móvil
     const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
     mobileTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
+            
+            // Cambiar tab activo en desktop
             document.querySelectorAll('.tab-btn').forEach(t => {
                 t.classList.remove('active');
                 if (t.getAttribute('data-tab') === tabId) t.classList.add('active');
             });
+            
+            // Mostrar contenido del tab
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             const tabContent = document.getElementById(`tab-${tabId}`);
             if (tabContent) tabContent.classList.add('active');
-            if (menu) menu.classList.remove('active');
-            if (overlay) overlay.classList.remove('active');
-            document.body.style.overflow = '';
+            
+            // Cargar datos si es necesario
             if (tabId === 'productos') cargarProductos();
             if (tabId === 'delivery') cargarDeliveries();
+            
+            // Cerrar menú
+            closeMenu();
         });
     });
 }
