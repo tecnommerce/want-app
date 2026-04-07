@@ -227,7 +227,7 @@ async function toggleEstadoAbierto() {
     if (!vendedorActual) return;
     
     const nuevoEstado = !vendedorActual.estado_abierto;
-    const btnToggle = document.getElementById('toggle-estado-btn');
+    const btnToggle = document.getElementById('toggle-estado-switch');
     
     await withLoading(btnToggle, async () => {
         try {
@@ -1145,6 +1145,66 @@ async function login() {
 }
 
 // ===================================================
+// MOSTRAR PANEL REGISTRO (con rubros funcionales)
+// ===================================================
+
+function mostrarPanelRegistro() { 
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById('register-panel').classList.add('active'); 
+    
+    // Resetear rubros temporales
+    rubrosTempRegistro = [];
+    
+    // Generar botones de rubros para registro
+    const rubrosContainer = document.getElementById('rubros-selector-registro');
+    if (rubrosContainer) {
+        rubrosContainer.innerHTML = RUBROS_DISPONIBLES.map(rubro => `
+            <button type="button" class="btn-rubro-registro ${rubrosTempRegistro.includes(rubro) ? 'selected' : ''}" data-rubro="${rubro}">
+                ${rubro}
+            </button>
+        `).join('');
+        
+        // Agregar event listeners a los botones
+        document.querySelectorAll('.btn-rubro-registro').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rubro = btn.getAttribute('data-rubro');
+                if (rubrosTempRegistro.includes(rubro)) {
+                    rubrosTempRegistro = rubrosTempRegistro.filter(r => r !== rubro);
+                    btn.classList.remove('selected');
+                } else {
+                    rubrosTempRegistro.push(rubro);
+                    btn.classList.add('selected');
+                }
+                actualizarListaRubrosRegistro();
+            });
+        });
+    }
+    
+    actualizarListaRubrosRegistro();
+}
+
+function actualizarListaRubrosRegistro() {
+    const listaSpan = document.getElementById('rubros-lista-registro');
+    if (listaSpan) {
+        if (rubrosTempRegistro.length === 0) {
+            listaSpan.textContent = 'Ninguno';
+        } else {
+            listaSpan.textContent = rubrosTempRegistro.join(', ');
+        }
+    }
+}
+
+function mostrarPanelRecuperacion() { 
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById('recover-panel').classList.add('active'); 
+}
+
+function mostrarPanelLogin() { 
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById('login-panel').classList.add('active'); 
+}
+
+// ===================================================
 // INICIALIZACIÓN DEL PANEL
 // ===================================================
 
@@ -1158,6 +1218,16 @@ async function iniciarPanel(vendedor) {
     if (adminAuth) adminAuth.style.display = 'none';
     if (adminPanel) adminPanel.style.display = 'block';
     if (headerAdmin) headerAdmin.style.display = 'block';
+    
+    // Actualizar nombre y logo en el header
+    const headerNombreNegocio = document.getElementById('header-nombre-negocio');
+    if (headerNombreNegocio) headerNombreNegocio.textContent = vendedor.nombre;
+    
+    const headerLogoImg = document.getElementById('header-logo-img');
+    if (headerLogoImg && vendedor.logo_url) {
+        headerLogoImg.src = vendedor.logo_url;
+        headerLogoImg.style.display = 'block';
+    }
     
     const panelNombre = document.getElementById('panel-nombre');
     const panelEmail = document.getElementById('panel-email');
@@ -1383,58 +1453,6 @@ async function cargarVendedorPorId(vendedorId) {
     }
 }
 
-//RUBROS//
-function mostrarPanelRegistro() { 
-    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
-    document.getElementById('register-panel').classList.add('active'); 
-    
-    // Resetear rubros temporales
-    rubrosTempRegistro = [];
-    
-    // Generar botones de rubros para registro
-    const rubrosContainer = document.getElementById('rubros-selector-registro');
-    if (rubrosContainer) {
-        rubrosContainer.innerHTML = RUBROS_DISPONIBLES.map(rubro => `
-            <button type="button" class="btn-rubro-registro" data-rubro="${rubro}">
-                ${rubro}
-            </button>
-        `).join('');
-        
-        // Agregar event listeners a los botones
-        document.querySelectorAll('.btn-rubro-registro').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const rubro = btn.getAttribute('data-rubro');
-                if (rubrosTempRegistro.includes(rubro)) {
-                    rubrosTempRegistro = rubrosTempRegistro.filter(r => r !== rubro);
-                    btn.classList.remove('selected');
-                } else {
-                    rubrosTempRegistro.push(rubro);
-                    btn.classList.add('selected');
-                }
-                actualizarListaRubrosRegistro();
-            });
-        });
-    }
-    
-    actualizarListaRubrosRegistro();
-}
-
-function actualizarListaRubrosRegistro() {
-    const listaSpan = document.getElementById('rubros-lista-registro');
-    if (listaSpan) {
-        if (rubrosTempRegistro.length === 0) {
-            listaSpan.textContent = 'Ninguno';
-        } else {
-            listaSpan.textContent = rubrosTempRegistro.join(', ');
-        }
-    }
-}
-
-function mostrarPanelRecuperacion() { 
-    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
-    document.getElementById('recover-panel').classList.add('active'); 
-}
-
 // ===================================================
 // INICIALIZAR BUSCADOR (con botón limpiar corregido)
 // ===================================================
@@ -1527,8 +1545,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 mostrarPanelLogin(); 
                 registerForm.reset(); 
                 rubrosTempRegistro = [];
-                const rubrosContainer = document.getElementById('rubros-seleccionados-registro');
-                if (rubrosContainer) rubrosContainer.innerHTML = '<span class="rubro-placeholder">Ningún rubro seleccionado</span>';
+                const rubrosContainer = document.getElementById('rubros-selector-registro');
+                if (rubrosContainer) rubrosContainer.innerHTML = '';
                 document.getElementById('login-email').value = email;
             } else { 
                 alert(response?.error || 'Error al registrar'); 

@@ -355,7 +355,6 @@ function abrirModalRubrosAdmin(rubrosActuales, callback) {
     const modal = document.getElementById('modal-rubros-admin');
     const listaSpan = document.getElementById('rubros-seleccionados-lista-admin');
     
-    // Actualizar lista cuando cambian los checkboxes
     const updateLista = () => {
         const seleccionados = [];
         document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]:checked').forEach(cb => {
@@ -442,7 +441,7 @@ function actualizarDashboard() {
     document.getElementById('total-ingresos').textContent = formatearPrecio(ingresos);
     
     // Ocultar el gráfico si existe
-    const chartContainer = document.getElementById('ventas-chart');
+    const chartContainer = document.getElementById('ventas-chart')?.parentElement?.parentElement;
     if (chartContainer) {
         chartContainer.style.display = 'none';
     }
@@ -477,14 +476,8 @@ function actualizarDashboard() {
 function renderizarVendedores() {
     const tbody = document.getElementById('vendedores-tbody');
     if (!tbody) return;
-    
     const stats = {};
-    allPedidos.forEach(p => { 
-        const id = p.vendedor_id; 
-        if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; 
-        stats[id].pedidos++; 
-        stats[id].ingresos += parseFloat(p.total) || 0; 
-    });
+    allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
     
     tbody.innerHTML = allVendedores.map(v => `
         <tr>
@@ -502,8 +495,8 @@ function renderizarVendedores() {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-               </td>
-           </tr>
+            </td>
+        </tr>
     `).join('');
 }
 
@@ -523,30 +516,14 @@ function editarVendedor(id) {
     // Mostrar rubros actuales
     const rubrosActuales = v.rubros || [];
     rubrosTempEditVendedor = [...rubrosActuales];
-    const rubrosContainer = document.getElementById('edit-vendedor-rubros-container');
+    const rubrosContainer = document.getElementById('edit-vendedor-rubros');
     if (rubrosContainer) {
-        if (rubrosActuales.length === 0) {
-            rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
-        } else {
-            rubrosContainer.innerHTML = rubrosActuales.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
-        }
-    }
-    
-    // Configurar botón para editar rubros
-    const btnEditRubros = document.getElementById('btn-edit-rubros');
-    if (btnEditRubros) {
-        btnEditRubros.onclick = () => {
-            abrirModalRubrosAdmin(rubrosTempEditVendedor, (nuevosRubros) => {
-                rubrosTempEditVendedor = nuevosRubros;
-                if (rubrosContainer) {
-                    if (nuevosRubros.length === 0) {
-                        rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
-                    } else {
-                        rubrosContainer.innerHTML = nuevosRubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
-                    }
-                }
-            });
-        };
+        rubrosContainer.innerHTML = RUBROS_DISPONIBLES.map(rubro => `
+            <label class="rubro-checkbox">
+                <input type="checkbox" value="${rubro}" ${rubrosActuales.includes(rubro) ? 'checked' : ''}>
+                <span>${rubro}</span>
+            </label>
+        `).join('');
     }
     
     document.getElementById('modal-editar-vendedor').classList.add('active');
@@ -555,6 +532,12 @@ function editarVendedor(id) {
 async function guardarEditarVendedor() {
     const btn = document.getElementById('guardar-editar-vendedor');
     await withLoading(btn, async () => {
+        // Obtener rubros seleccionados
+        const rubrosSeleccionados = [];
+        document.querySelectorAll('#edit-vendedor-rubros input[type="checkbox"]:checked').forEach(cb => {
+            rubrosSeleccionados.push(cb.value);
+        });
+        
         const estadoAbierto = document.getElementById('edit-vendedor-estado')?.value === 'abierto';
         
         const data = {
@@ -565,7 +548,7 @@ async function guardarEditarVendedor() {
             direccion: document.getElementById('edit-vendedor-direccion').value.trim(),
             horario: document.getElementById('edit-vendedor-horario').value.trim(),
             activo: document.getElementById('edit-vendedor-activo')?.value || 'SI',
-            rubros: rubrosTempEditVendedor,
+            rubros: rubrosSeleccionados,
             estado_abierto: estadoAbierto
         };
         try {
@@ -669,7 +652,7 @@ function renderizarProductos() {
             <td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td>
             <td><span class="status-badge ${p.disponible === true ? 'status-activo' : 'status-inactivo'}">${p.disponible === true ? 'Disponible' : 'No disponible'}</span></td>
             <td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-          </tr>
+        </tr>
     `).join('');
 }
 
@@ -751,7 +734,7 @@ function renderizarPedidos() {
             <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
             <td>${formatearPrecio(p.total)}</td>
             <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-            <td>${p.productos ? p.productos.length : 0} productos}</td>
+            <td>${p.productos ? p.productos.length : 0} productos</td>
             <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
         </tr>
     `).join('');
@@ -814,7 +797,7 @@ async function confirmarEliminarPedido() {
 
 async function cargarBanners() {
     const tbody = document.getElementById('banners-tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td>';
     
     try {
         const response = await callAPI('getAllBanners');
@@ -1093,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
         const tbody = document.getElementById('vendedores-tbody');
         if (!tbody) return;
-        if (!filtered.length) { tbody.innerHTML = '<td><td colspan="10" class="loading-text">No hay vendedores</td></tr>'; return; }
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="11" class="loading-text">No hay vendedores</td>'; return; }
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
         tbody.innerHTML = filtered.map(v => `
@@ -1112,7 +1095,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                     <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                     <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-                  </td>
+                </td>
               </tr>
         `).join('');
     });
