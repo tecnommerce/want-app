@@ -362,10 +362,24 @@ function filtrarPedidos() {
 }
 
 // ===================================================
-// RENDERIZAR PEDIDOS - TABLA
+// RENDERIZAR PEDIDOS - DETECCIÓN MÓVIL/DESKTOP
 // ===================================================
 
 function renderizarPedidos() {
+    const container = document.getElementById('pedidos-container');
+    if (!container) return;
+    
+    // Detectar si es móvil (ancho de pantalla <= 768px)
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        renderizarPedidosMovil();
+    } else {
+        renderizarPedidosDesktop();
+    }
+}
+
+function renderizarPedidosDesktop() {
     const container = document.getElementById('pedidos-container');
     if (!container) return;
     
@@ -468,7 +482,208 @@ function renderizarPedidos() {
 }
 
 // ===================================================
-// VER PEDIDO COMPLETO (MODAL)
+// RENDERIZAR PEDIDOS EN MÓVIL (TARJETAS)
+// ===================================================
+
+function renderizarPedidosMovil() {
+    const container = document.getElementById('pedidos-container');
+    if (!container) return;
+    
+    const pedidosFiltrados = filtrarPedidos();
+    
+    if (!pedidosFiltrados || pedidosFiltrados.length === 0) {
+        container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
+        return;
+    }
+    
+    let html = `<div class="pedidos-lista-movil">`;
+    
+    for (const p of pedidosFiltrados) {
+        const fecha = new Date(p.fecha);
+        const estado = p.estado || 'preparando';
+        const numeroMostrar = p.numero_orden || p.id;
+        
+        let productosResumen = '';
+        if (p.productos && Array.isArray(p.productos) && p.productos.length > 0) {
+            const primeros = p.productos.slice(0, 2);
+            productosResumen = primeros.map(pr => `${pr.cantidad}x ${pr.nombre}`).join(', ');
+            if (p.productos.length > 2) {
+                productosResumen += ` +${p.productos.length - 2} más`;
+            }
+        } else {
+            productosResumen = 'Sin productos';
+        }
+        
+        let estadoTexto = '';
+        let estadoClase = '';
+        if (estado === 'preparando') {
+            estadoTexto = 'NUEVO';
+            estadoClase = 'estado-preparando';
+        } else if (estado === 'en preparacion') {
+            estadoTexto = 'EN PREPARACIÓN';
+            estadoClase = 'estado-en-preparacion';
+        } else if (estado === 'en camino') {
+            estadoTexto = 'EN CAMINO';
+            estadoClase = 'estado-en-camino';
+        } else if (estado === 'entregado') {
+            estadoTexto = 'ENTREGADO';
+            estadoClase = 'estado-entregado';
+        }
+        
+        html += `
+            <div class="pedido-card-movil" data-pedido-id="${p.id}">
+                <div class="pedido-card-header">
+                    <span class="pedido-numero-movil">#${numeroMostrar}</span>
+                    <span class="pedido-estado-movil ${estadoClase}">${estadoTexto}</span>
+                </div>
+                <div class="pedido-card-body">
+                    <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
+                    <div class="pedido-resumen-movil">📦 ${escapeHTML(productosResumen)}</div>
+                    <div class="pedido-resumen-movil">💰 ${formatearPrecio(p.total || 0)}</div>
+                </div>
+                <div class="pedido-card-footer">
+                    <button class="btn-ver-pedido-movil" onclick="verPedidoCompletoMovil(${p.id})">
+                        <i class="fas fa-eye"></i> Ver pedido
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+// ===================================================
+// VER PEDIDO COMPLETO MÓVIL CON BOTONES DE ACCIÓN
+// ===================================================
+
+function verPedidoCompletoMovil(pedidoId) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    const fecha = new Date(pedido.fecha);
+    const metodoPago = pedido.metodo_pago === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
+    const numeroMostrar = pedido.numero_orden || pedido.id;
+    const estado = pedido.estado || 'preparando';
+    
+    let productosHTML = '';
+    if (pedido.productos && Array.isArray(pedido.productos) && pedido.productos.length > 0) {
+        pedido.productos.forEach(pr => {
+            productosHTML += `
+                <div class="producto-detalle">
+                    <span>${pr.cantidad}x ${escapeHTML(pr.nombre)}</span>
+                    <span>${formatearPrecio(pr.precio * pr.cantidad)}</span>
+                </div>
+            `;
+        });
+    } else {
+        productosHTML = '<p>No hay productos</p>';
+    }
+    
+    let detallesHTML = '';
+    if (pedido.detalles && pedido.detalles.trim()) {
+        detallesHTML = `
+            <div class="detalle-seccion">
+                <strong><i class="fas fa-pen"></i> Detalles:</strong>
+                <p>${escapeHTML(pedido.detalles)}</p>
+            </div>
+        `;
+    }
+    
+    // Generar botones según el estado
+    let botonesAccion = '';
+    
+    if (estado === 'preparando') {
+        botonesAccion = `
+            <button class="btn-tabla btn-whatsapp" onclick="confirmarPedidoWhatsApp(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
+            <button class="btn-tabla btn-preparar" onclick="actualizarEstado(${pedido.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
+            <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+        `;
+    } else if (estado === 'en preparacion') {
+        botonesAccion = `
+            <button class="btn-tabla btn-pedido-listo" onclick="abrirModalAsignarDelivery(${pedido.id})"><i class="fas fa-check-circle"></i> Listo</button>
+            <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+        `;
+    } else if (estado === 'en camino') {
+        botonesAccion = `
+            <button class="btn-tabla btn-notificar" onclick="notificarEnCamino(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
+            <button class="btn-tabla btn-entregar" onclick="actualizarEstado(${pedido.id}, 'entregado', this)"><i class="fas fa-check-double"></i> Entregar</button>
+            <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+        `;
+    } else if (estado === 'entregado') {
+        botonesAccion = `
+            <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+        `;
+    }
+    
+    const modalContent = `
+        <div class="modal" id="modal-pedido-completo-movil" style="display: flex;">
+            <div class="modal-content" style="max-width: 550px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-receipt"></i> Pedido #${numeroMostrar}</h3>
+                    <button class="modal-close" onclick="cerrarModalPedidoCompletoMovil()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="detalle-seccion">
+                        <strong><i class="fas fa-calendar"></i> Fecha:</strong>
+                        <p>${fecha.toLocaleString('es-AR')}</p>
+                    </div>
+                    <div class="detalle-seccion">
+                        <strong><i class="fas fa-user"></i> Cliente:</strong>
+                        <p>${escapeHTML(pedido.cliente_nombre || 'Sin nombre')}</p>
+                    </div>
+                    <div class="detalle-seccion">
+                        <strong><i class="fas fa-phone"></i> Teléfono:</strong>
+                        <p>${pedido.cliente_telefono || 'Sin teléfono'}</p>
+                    </div>
+                    <div class="detalle-seccion">
+                        <strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong>
+                        <p>${escapeHTML(pedido.direccion || 'Sin dirección')}</p>
+                    </div>
+                    <div class="detalle-seccion">
+                        <strong><i class="fas fa-money-bill-wave"></i> Pago:</strong>
+                        <p>${metodoPago}</p>
+                    </div>
+                    <div class="detalle-seccion">
+                        <strong><i class="fas fa-box"></i> Productos:</strong>
+                        <div class="productos-detalle">${productosHTML}</div>
+                    </div>
+                    ${detallesHTML}
+                    <div class="detalle-seccion total">
+                        <strong><i class="fas fa-calculator"></i> Total:</strong>
+                        <p class="total-monto">${formatearPrecio(pedido.total || 0)}</p>
+                    </div>
+                </div>
+                <div class="modal-footer" style="flex-wrap: wrap; gap: 8px;">
+                    ${botonesAccion}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('modal-pedido-completo-movil');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalContent);
+    
+    const modal = document.getElementById('modal-pedido-completo-movil');
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrarModalPedidoCompletoMovil();
+    });
+}
+
+function cerrarModalPedidoCompletoMovil() {
+    const modal = document.getElementById('modal-pedido-completo-movil');
+    if (modal) modal.remove();
+}
+
+// ===================================================
+// VER PEDIDO COMPLETO (MODAL DESKTOP)
 // ===================================================
 
 function verPedidoCompleto(pedidoId) {
@@ -1647,6 +1862,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (adminAuth) adminAuth.style.display = 'flex'; 
     }
     
+    // Detectar cambio de tamaño de pantalla para cambiar entre vista móvil y desktop
+    window.addEventListener('resize', () => {
+        if (pedidos.length > 0) {
+            renderizarPedidos();
+        }
+    });
+    
     // Toggle password
     document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1749,3 +1971,5 @@ window.abrirModalRubros = abrirModalRubros;
 window.cerrarModalRubros = cerrarModalRubros;
 window.confirmarRubros = confirmarRubros;
 window.toggleEstadoAbierto = toggleEstadoAbierto;
+window.verPedidoCompletoMovil = verPedidoCompletoMovil;
+window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;

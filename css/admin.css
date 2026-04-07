@@ -218,15 +218,23 @@ body {
     color: white;
 }
 
+/* Botón menú hamburguesa - MÁS GRANDE Y COLOR WANT */
 .menu-toggle-admin {
     display: none;
-    background: var(--gray-100);
+    background: var(--primary);
     border: none;
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-full);
     cursor: pointer;
-    color: var(--gray-600);
+    color: white;
+    font-size: 1.3rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-toggle-admin i {
+    font-size: 1.3rem;
 }
 
 /* ===================================================
@@ -839,7 +847,7 @@ body {
     background: var(--primary-dark);
 }
 
-/* TABLA DE PEDIDOS */
+/* TABLA DE PEDIDOS - Desktop */
 .pedidos-container {
     max-height: 65vh;
     overflow-y: auto;
@@ -943,6 +951,8 @@ body {
 .btn-editar:hover { background: #2563eb; }
 .btn-cancelar-tabla { background: #FEF2F2; color: var(--danger); border: 1px solid #fee2e2; }
 .btn-cancelar-tabla:hover { background: var(--danger); color: white; }
+.btn-ver-pedido { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
+.btn-ver-pedido:hover { background: var(--primary); color: white; }
 
 /* PRODUCTOS ADMIN */
 .productos-header-actions {
@@ -1517,6 +1527,71 @@ body {
 }
 
 /* ===================================================
+   PRODUCTOS MÓVIL - VISTA LISTA
+   =================================================== */
+@media (max-width: 768px) {
+    .productos-admin-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .producto-admin-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+    }
+    
+    .producto-admin-imagen {
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
+        border-radius: var(--radius-md);
+    }
+    
+    .producto-admin-imagen img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        padding: 0;
+    }
+    
+    .producto-admin-info {
+        flex: 1;
+        padding: 0;
+    }
+    
+    .producto-admin-nombre {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+    
+    .producto-admin-precio {
+        font-size: 0.85rem;
+        margin: 4px 0;
+    }
+    
+    .producto-admin-descripcion {
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+    }
+    
+    .producto-admin-actions {
+        flex-direction: column;
+        gap: 8px;
+        width: auto;
+    }
+    
+    .producto-admin-actions button {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+    }
+}
+
+/* ===================================================
    RESPONSIVE MÓVIL - VERSIÓN APP
    =================================================== */
 
@@ -1539,16 +1614,16 @@ body {
         display: block !important;
     }
 
-    /* Mostrar botón menú hamburguesa */
+    /* Mostrar botón menú hamburguesa - MÁS GRANDE Y COLOR WANT */
     .menu-toggle-admin {
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    /* Ocultar botones de escritorio en móvil */
-    .header-btn {
-        display: none;
+    /* Ocultar botón de logout del header en móvil (está en el menú hamburguesa) */
+    .btn-icon#btn-logout {
+        display: none !important;
     }
 
     /* Header más compacto en móvil */
@@ -1593,10 +1668,7 @@ body {
         display: none;
     }
 
-    /* ===================================================
-       MÉTRICAS - OCULTAR EN MÓVIL PARA QUE NO OCUPEN ESPACIO
-       (Elimina esta sección si quieres mantener las métricas)
-    =================================================== */
+    /* Ocultar métricas en móvil */
     .metrics-grid {
         display: none !important;
     }
@@ -1680,44 +1752,87 @@ body {
         font-size: 0.85rem;
     }
 
-    /* Tabla horizontal scrollable - TERCERO */
+    /* LISTA DE PEDIDOS MÓVIL - TARJETAS EN VEZ DE TABLA */
     .pedidos-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow-x: visible;
         order: 3;
         margin-top: 10px;
+        max-height: none;
     }
-
+    
+    /* Ocultar tabla en móvil */
     .pedidos-tabla {
-        min-width: 700px;
+        display: none;
     }
-
-    /* Botones de acción más grandes para touch */
-    .btn-tabla {
-        padding: 8px 12px;
-        font-size: 0.7rem;
-    }
-
-    /* Productos en grid 2 columnas */
-    .productos-admin-grid {
-        grid-template-columns: repeat(2, 1fr);
+    
+    /* Mostrar tarjetas en móvil */
+    .pedidos-lista-movil {
+        display: flex;
+        flex-direction: column;
         gap: 12px;
     }
-
-    .producto-admin-card {
-        min-height: auto;
+    
+    .pedido-card-movil {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
     }
-
-    .producto-admin-imagen {
-        height: 100px;
+    
+    .pedido-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--gray-100);
     }
-
-    .producto-admin-nombre {
-        font-size: 0.8rem;
+    
+    .pedido-numero-movil {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 0.9rem;
     }
-
-    .producto-admin-precio {
+    
+    .pedido-estado-movil {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    
+    .pedido-card-body {
+        margin-bottom: 12px;
+    }
+    
+    .pedido-cliente-movil {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+    
+    .pedido-resumen-movil {
         font-size: 0.75rem;
+        color: var(--gray-500);
+    }
+    
+    .pedido-card-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .btn-ver-pedido-movil {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 40px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
     }
 
     /* Delivery grid 1 columna en móvil */
@@ -1789,4 +1904,48 @@ body {
         padding: 8px 10px;
         font-size: 0.7rem;
     }
+}
+
+/* Para tabletas pequeñas */
+@media (max-width: 480px) {
+    .reportes-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Pantallas grandes (desktop) */
+@media (min-width: 769px) {
+    .mobile-menu-admin,
+    .menu-overlay-admin {
+        display: none !important;
+    }
+    
+    /* Ocultar lista móvil en desktop */
+    .pedidos-lista-movil {
+        display: none !important;
+    }
+}
+
+/* ===================================================
+   MODAL DE RUBROS - POR ENCIMA DE TODO
+   =================================================== */
+#modal-rubros,
+.modal#modal-rubros {
+    z-index: 10000 !important;
+}
+
+#modal-rubros .modal-content,
+.modal#modal-rubros .modal-content {
+    z-index: 10001 !important;
+}
+
+#modal-rubros.active,
+.modal#modal-rubros.active {
+    display: flex !important;
+    z-index: 10000 !important;
+}
+
+#modal-perfil,
+.modal#modal-perfil {
+    z-index: 3000;
 }
