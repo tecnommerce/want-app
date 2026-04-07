@@ -144,7 +144,7 @@ function renderizarNegocios(vendedores) {
                     ${formatearRubros(rubros)}
                     <p class="negocio-direccion">📍 ${direccionResaltada}</p>
                     <p class="negocio-horario">🕐 ${escapeHTML(v.horario || 'Sin horario')}</p>
-                    ${productosPreview ? `<p class="negocio-productos">🍕 ${escapeHTML(productosPreview)}...</p>` : ''}
+                    ${productosPreview ? `<p class="negocio-productos"> ${escapeHTML(productosPreview)}...</p>` : ''}
                 </div>
             </a>
         `;

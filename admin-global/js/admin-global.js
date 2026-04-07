@@ -477,8 +477,14 @@ function actualizarDashboard() {
 function renderizarVendedores() {
     const tbody = document.getElementById('vendedores-tbody');
     if (!tbody) return;
+    
     const stats = {};
-    allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
+    allPedidos.forEach(p => { 
+        const id = p.vendedor_id; 
+        if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; 
+        stats[id].pedidos++; 
+        stats[id].ingresos += parseFloat(p.total) || 0; 
+    });
     
     tbody.innerHTML = allVendedores.map(v => `
         <tr>
@@ -496,8 +502,8 @@ function renderizarVendedores() {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-              </td>
-          </tr>
+               </td>
+           </tr>
     `).join('');
 }
 
