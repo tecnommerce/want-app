@@ -1714,3 +1714,49 @@ body {
     font-size: 0.8rem;
     font-style: italic;
 }
+/* ===================================================
+   FIX: MODAL RUBROS POR ENCIMA DEL MODAL PERFIL
+   =================================================== */
+
+/* Modal de rubros - z-index más alto */
+#modal-rubros,
+.modal#modal-rubros {
+    z-index: 10000 !important;
+}
+
+#modal-rubros .modal-content,
+.modal#modal-rubros .modal-content {
+    z-index: 10001 !important;
+}
+
+#modal-rubros.active,
+.modal#modal-rubros.active {
+    display: flex !important;
+    z-index: 10000 !important;
+}
+
+/* Modal de perfil - z-index normal */
+#modal-perfil,
+.modal#modal-perfil {
+    z-index: 3000;
+}
+
+#modal-perfil.active,
+.modal#modal-perfil.active {
+    z-index: 3000;
+}
+
+/* Asegurar que cualquier otro modal tenga z-index menor */
+.modal {
+    z-index: 3000;
+}
+
+.modal.active {
+    z-index: 3000;
+}
+
+/* Overlay del modal de rubros */
+#modal-rubros.active + .modal-overlay,
+.modal-overlay[data-for="rubros"] {
+    z-index: 9999 !important;
+}
