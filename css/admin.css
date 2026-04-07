@@ -798,6 +798,12 @@ body {
     border-color: var(--primary);
 }
 
+/* Botones buscador */
+.buscador-buttons {
+    display: flex;
+    gap: 10px;
+}
+
 .btn-limpiar-busqueda {
     background: var(--gray-100);
     border: none;
@@ -806,6 +812,9 @@ body {
     cursor: pointer;
     font-size: 0.75rem;
     color: var(--gray-600);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-limpiar-busqueda:hover {
@@ -1258,6 +1267,12 @@ body {
     display: inline-block;
 }
 
+.rubro-placeholder {
+    color: var(--gray-500);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
 /* LOADING */
 .loading {
     text-align: center;
@@ -1288,346 +1303,6 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-/* ===================================================
-   RESPONSIVE MÓVIL - VERSIÓN APP
-   =================================================== */
-
-@media (max-width: 768px) {
-    .container {
-        padding: 0 12px;
-    }
-
-    /* Ocultar tabs desktop en móvil */
-    .admin-tabs {
-        display: none;
-    }
-
-    /* Mostrar botón menú hamburguesa */
-    .menu-toggle-admin {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .header-btn {
-        display: none;
-    }
-
-    /* Header más compacto en móvil */
-    .header-logo-estado {
-        gap: 10px;
-    }
-
-    .header-logo .logo {
-        font-size: 0.9rem;
-        display: none;
-    }
-
-    .estado-toggle-header {
-        padding: 4px 10px;
-        gap: 6px;
-    }
-
-    .estado-label {
-        font-size: 0.7rem;
-    }
-
-    .toggle-switch {
-        width: 40px;
-        height: 20px;
-    }
-
-    .toggle-slider:before {
-        height: 14px;
-        width: 14px;
-    }
-
-    .toggle-switch input:checked + .toggle-slider:before {
-        transform: translateX(20px);
-    }
-
-    .estado-badge-header {
-        display: none;
-    }
-
-    /* Métricas en grid 2x2 en móvil */
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-
-    .metric-card {
-        padding: 12px;
-    }
-
-    .metric-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
-    }
-
-    .metric-info h3 {
-        font-size: 1rem;
-    }
-
-    .metric-info p {
-        font-size: 0.65rem;
-    }
-
-    /* ===================================================
-       BUSCADOR MÓVIL - REORGANIZADO
-       Buscador arriba, luego Limpiar y Nuevo pedido
-    =================================================== */
-    .filtros-buscador {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    /* Filtros en horizontal scrollable */
-    .filtros-pedidos {
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        width: 100%;
-        justify-content: flex-start;
-        border-radius: 40px;
-        padding: 6px 12px;
-        order: 1;
-    }
-
-    .filtro-btn {
-        white-space: nowrap;
-        padding: 5px 12px;
-        font-size: 0.7rem;
-    }
-
-    /* Buscador - PRIMERO (arriba) */
-    .buscador-container {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-        order: 2;
-    }
-
-    /* Input de búsqueda - ocupa todo el ancho */
-    .buscador-input {
-        width: 100%;
-    }
-
-    .buscador-input input {
-        width: 100%;
-        padding: 12px 12px 12px 40px;
-        font-size: 0.9rem;
-    }
-
-    .buscador-input i {
-        left: 14px;
-        font-size: 1rem;
-    }
-
-    /* Botones Limpiar y Nuevo pedido - lado a lado */
-    .buscador-buttons {
-        display: flex;
-        gap: 10px;
-        width: 100%;
-    }
-
-    .btn-limpiar-busqueda {
-        flex: 1;
-        justify-content: center;
-        padding: 12px;
-        font-size: 0.85rem;
-        background: var(--gray-100);
-        border-radius: 40px;
-    }
-
-    .btn-nuevo-pedido {
-        flex: 1;
-        justify-content: center;
-        padding: 12px;
-        font-size: 0.85rem;
-    }
-
-    /* Tabla horizontal scrollable */
-    .pedidos-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        order: 3;
-    }
-
-    .pedidos-tabla {
-        min-width: 700px;
-    }
-
-    /* Botones de acción más grandes para touch */
-    .btn-tabla {
-        padding: 8px 12px;
-        font-size: 0.7rem;
-    }
-
-    /* Productos en grid 2 columnas */
-    .productos-admin-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .producto-admin-card {
-        min-height: auto;
-    }
-
-    .producto-admin-imagen {
-        height: 100px;
-    }
-
-    .producto-admin-nombre {
-        font-size: 0.8rem;
-    }
-
-    .producto-admin-precio {
-        font-size: 0.75rem;
-    }
-
-    /* Delivery grid 1 columna en móvil */
-    .delivery-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Reportes - ocultar métricas del dashboard principal en móvil? No, ya no están en el dashboard */
-    /* Los reportes están en su propio tab */
-
-    /* Modales full en móvil */
-    .modal-content {
-        width: 95%;
-        max-height: 90vh;
-    }
-
-    .form-row {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .form-row .form-group {
-        margin-bottom: 0;
-    }
-
-    /* Perfil en móvil */
-    .perfil-header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .logo-upload-area {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    /* Rubros grid responsive */
-    .rubros-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .btn-rubro {
-        padding: 8px 10px;
-        font-size: 0.7rem;
-    }
-
-    /* Reportes móvil */
-    .reportes-metrics {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .reporte-card {
-        padding: 10px;
-    }
-
-    .reporte-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-
-    .reporte-info p {
-        font-size: 0.9rem;
-    }
-
-    .reporte-info h4 {
-        font-size: 0.65rem;
-    }
-
-    .reportes-section {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-}
-
-/* Para tabletas pequeñas */
-@media (max-width: 480px) {
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .metric-card {
-        padding: 10px;
-    }
-
-    .metric-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
-    }
-
-    .metric-info h3 {
-        font-size: 0.9rem;
-    }
-
-    .productos-admin-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .filtro-btn {
-        padding: 4px 10px;
-        font-size: 0.65rem;
-    }
-
-    .reportes-metrics {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Pantallas grandes (desktop) */
-@media (min-width: 769px) {
-    .mobile-menu-admin,
-    .menu-overlay-admin {
-        display: none !important;
-    }
-}
-
-/* ===================================================
-   MODAL DE RUBROS - POR ENCIMA DE TODO
-   =================================================== */
-#modal-rubros,
-.modal#modal-rubros {
-    z-index: 10000 !important;
-}
-
-#modal-rubros .modal-content,
-.modal#modal-rubros .modal-content {
-    z-index: 10001 !important;
-}
-
-#modal-rubros.active,
-.modal#modal-rubros.active {
-    display: flex !important;
-    z-index: 10000 !important;
-}
-
-#modal-perfil,
-.modal#modal-perfil {
-    z-index: 3000;
-}
 /* ===================================================
    SECCIÓN REPORTES - ESTILOS
    =================================================== */
@@ -1807,72 +1482,371 @@ body {
     font-size: 0.8rem;
 }
 
-/* Responsive reportes móvil */
+/* ===================================================
+   BOTONES RUBROS REGISTRO
+   =================================================== */
+.btn-rubro-registro {
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 40px;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-700);
+    text-align: center;
+}
+
+.btn-rubro-registro:hover {
+    border-color: var(--primary);
+    background: #FFF5EB;
+}
+
+.btn-rubro-registro.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.rubros-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* ===================================================
+   RESPONSIVE MÓVIL - VERSIÓN APP
+   =================================================== */
+
 @media (max-width: 768px) {
+    .container {
+        padding: 0 12px;
+    }
+
+    /* Ocultar tabs desktop en móvil */
+    .admin-tabs {
+        display: none;
+    }
+
+    /* Mostrar botón menú hamburguesa */
+    .menu-toggle-admin {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .header-btn {
+        display: none;
+    }
+
+    /* Header más compacto en móvil */
+    .header-logo-estado {
+        gap: 10px;
+    }
+
+    .header-logo .logo {
+        font-size: 0.9rem;
+        display: none;
+    }
+
+    .estado-toggle-header {
+        padding: 4px 10px;
+        gap: 6px;
+    }
+
+    .estado-label {
+        font-size: 0.7rem;
+    }
+
+    .toggle-switch {
+        width: 40px;
+        height: 20px;
+    }
+
+    .toggle-slider:before {
+        height: 14px;
+        width: 14px;
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+
+    .estado-badge-header {
+        display: none;
+    }
+
+    /* Métricas en grid 2x2 en móvil */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .metric-card {
+        padding: 12px;
+    }
+
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .metric-info h3 {
+        font-size: 1rem;
+    }
+
+    .metric-info p {
+        font-size: 0.65rem;
+    }
+
+    /* FILTROS Y BUSCADOR MÓVIL - REORGANIZADO */
+    .filtros-buscador {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Filtros en horizontal scrollable */
+    .filtros-pedidos {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 40px;
+        padding: 6px 12px;
+        order: 1;
+    }
+
+    .filtro-btn {
+        white-space: nowrap;
+        padding: 5px 12px;
+        font-size: 0.7rem;
+    }
+
+    /* Buscador - PRIMERO (arriba) */
+    .buscador-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+        order: 2;
+    }
+
+    /* Input de búsqueda - ocupa todo el ancho */
+    .buscador-input {
+        width: 100%;
+    }
+
+    .buscador-input input {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        font-size: 0.9rem;
+    }
+
+    .buscador-input i {
+        left: 14px;
+        font-size: 1rem;
+    }
+
+    /* Botones Limpiar y Nuevo pedido - lado a lado */
+    .buscador-buttons {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .btn-limpiar-busqueda {
+        flex: 1;
+        justify-content: center;
+        padding: 12px;
+        font-size: 0.85rem;
+        background: var(--gray-100);
+        border-radius: 40px;
+    }
+
+    .btn-nuevo-pedido {
+        flex: 1;
+        justify-content: center;
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Tabla horizontal scrollable */
+    .pedidos-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        order: 3;
+    }
+
+    .pedidos-tabla {
+        min-width: 700px;
+    }
+
+    /* Botones de acción más grandes para touch */
+    .btn-tabla {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+    }
+
+    /* Productos en grid 2 columnas */
+    .productos-admin-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .producto-admin-card {
+        min-height: auto;
+    }
+
+    .producto-admin-imagen {
+        height: 100px;
+    }
+
+    .producto-admin-nombre {
+        font-size: 0.8rem;
+    }
+
+    .producto-admin-precio {
+        font-size: 0.75rem;
+    }
+
+    /* Delivery grid 1 columna en móvil */
+    .delivery-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Reportes móvil */
     .reportes-metrics {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
-    
+
     .reporte-card {
         padding: 10px;
     }
-    
+
     .reporte-icon {
         width: 36px;
         height: 36px;
         font-size: 1rem;
     }
-    
+
     .reporte-info p {
         font-size: 0.9rem;
     }
-    
+
     .reporte-info h4 {
         font-size: 0.65rem;
     }
+
+    .reportes-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    /* Modales full en móvil */
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 0;
+    }
+
+    /* Perfil en móvil */
+    .perfil-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-upload-area {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Rubros grid responsive */
+    .rubros-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .btn-rubro {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+    }
 }
 
+/* Para tabletas pequeñas */
 @media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .metric-card {
+        padding: 10px;
+    }
+
+    .metric-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    .metric-info h3 {
+        font-size: 0.9rem;
+    }
+
+    .productos-admin-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filtro-btn {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+    }
+
     .reportes-metrics {
         grid-template-columns: 1fr;
     }
 }
+
+/* Pantallas grandes (desktop) */
+@media (min-width: 769px) {
+    .mobile-menu-admin,
+    .menu-overlay-admin {
+        display: none !important;
+    }
+}
+
 /* ===================================================
-   BOTONES BUSCADOR MÓVIL
+   MODAL DE RUBROS - POR ENCIMA DE TODO
    =================================================== */
-.buscador-buttons {
-    display: flex;
-    gap: 10px;
+#modal-rubros,
+.modal#modal-rubros {
+    z-index: 10000 !important;
 }
 
-.btn-limpiar-busqueda,
-.btn-nuevo-pedido {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: var(--radius-full);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
+#modal-rubros .modal-content,
+.modal#modal-rubros .modal-content {
+    z-index: 10001 !important;
 }
 
-.btn-limpiar-busqueda {
-    background: var(--gray-100);
-    color: var(--gray-700);
+#modal-rubros.active,
+.modal#modal-rubros.active {
+    display: flex !important;
+    z-index: 10000 !important;
 }
 
-.btn-limpiar-busqueda:hover {
-    background: var(--gray-200);
-}
-
-.btn-nuevo-pedido {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-nuevo-pedido:hover {
-    background: var(--primary-dark);
+#modal-perfil,
+.modal#modal-perfil {
+    z-index: 3000;
 }
