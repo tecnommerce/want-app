@@ -119,36 +119,61 @@ function renderizarNegocios(vendedores) {
         return;
     }
     
+    // Detectar si es móvil
+    const isMobile = window.innerWidth <= 768;
+    
     grid.innerHTML = vendedores.map(v => {
         const rubros = v.rubros || [];
         const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        const productosPreview = v.productos && v.productos.length > 0 
-            ? v.productos.slice(0, 2).map(p => p.nombre).join(', ') 
-            : '';
+        // En móvil, mostrar solo 1 rubro para ahorrar espacio
+        const rubrosMostrar = isMobile ? rubros.slice(0, 1) : rubros.slice(0, 2);
+        const resto = rubros.length - rubrosMostrar.length;
+        let rubrosHTML = rubrosMostrar.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+        if (resto > 0 && !isMobile) {
+            rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
+        } else if (resto > 0 && isMobile) {
+            rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
+        }
         
         const nombreResaltado = resaltarCoincidencia(v.nombre || 'Sin nombre', terminoBusquedaActual);
         const direccionResaltada = resaltarCoincidencia(v.direccion || 'Sin dirección', terminoBusquedaActual);
+        
+        // En móvil, mostrar menos información
+        const mostrarProductosPreview = !isMobile && v.productos && v.productos.length > 0;
+        const productosPreview = mostrarProductosPreview 
+            ? v.productos.slice(0, 2).map(p => p.nombre).join(', ') 
+            : '';
         
         return `
             <a href="tienda.html?vendedor=${v.id}" class="negocio-card" data-nombre="${escapeHTML(v.nombre || '').toLowerCase()}" data-direccion="${escapeHTML(v.direccion || '').toLowerCase()}">
                 <div class="negocio-logo">
                     ${v.logo_url ? 
-                        `<img src="${v.logo_url}" alt="${escapeHTML(v.nombre || 'Negocio')}">` : 
+                        `<img src="${v.logo_url}" alt="${escapeHTML(v.nombre || 'Negocio')}" loading="lazy">` : 
                         `<div class="placeholder-logo">${(v.nombre || '?').charAt(0)}</div>`
                     }
                 </div>
                 <div class="negocio-info">
                     <h3 class="negocio-nombre">${nombreResaltado}</h3>
                     <div class="negocio-estado">${getEstadoTexto(estadoAbierto)}</div>
-                    ${formatearRubros(rubros)}
+                    ${rubrosHTML ? `<div class="rubros-container">${rubrosHTML}</div>` : ''}
                     <p class="negocio-direccion">📍 ${direccionResaltada}</p>
-                    <p class="negocio-horario">🕐 ${escapeHTML(v.horario || 'Sin horario')}</p>
-                    ${productosPreview ? `<p class="negocio-productos"> ${escapeHTML(productosPreview)}...</p>` : ''}
+                    ${!isMobile ? `<p class="negocio-horario">🕐 ${escapeHTML(v.horario || 'Sin horario')}</p>` : ''}
+                    ${productosPreview ? `<p class="negocio-productos">📦 ${escapeHTML(productosPreview)}...</p>` : ''}
                 </div>
             </a>
         `;
     }).join('');
+    
+    // Agregar event listener para redimensionar
+    if (!window.resizedListener) {
+        window.addEventListener('resize', () => {
+            if (todosLosNegocios.length > 0) {
+                renderizarNegocios(todosLosNegocios);
+            }
+        });
+        window.resizedListener = true;
+    }
 }
 
 function resaltarCoincidencia(texto, busqueda) {

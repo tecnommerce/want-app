@@ -113,24 +113,45 @@ function renderizarProductos() {
         return;
     }
     
-    grid.innerHTML = productos.map(producto => `
-        <div class="producto-card">
-            <div class="producto-imagen">
-                ${producto.imagen_url && producto.imagen_url !== '' ? 
-                    `<img src="${producto.imagen_url}" alt="${escapeHTML(producto.nombre)}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'55\' font-size=\'40\' text-anchor=\'middle\' fill=\'%23ccc\'%3E🍕%3C/text%3E%3C/svg%3E'">` : 
-                    `<div class="placeholder-img">🍕</div>`
-                }
+    // Detectar si es móvil
+    const isMobile = window.innerWidth <= 768;
+    
+    grid.innerHTML = productos.map(producto => {
+        // En móvil, mostrar descripción más corta
+        const descripcion = producto.descripcion || 'Sin descripción';
+        const descripcionCorta = isMobile && descripcion.length > 50 
+            ? descripcion.substring(0, 50) + '...' 
+            : descripcion;
+        
+        return `
+            <div class="producto-card">
+                <div class="producto-imagen">
+                    ${producto.imagen_url && producto.imagen_url !== '' ? 
+                        `<img src="${producto.imagen_url}" alt="${escapeHTML(producto.nombre)}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'55\' font-size=\'40\' text-anchor=\'middle\' fill=\'%23ccc\'%3E🍕%3C/text%3E%3C/svg%3E'">` : 
+                        `<div class="placeholder-img">🍕</div>`
+                    }
+                </div>
+                <div class="producto-info">
+                    <h3 class="producto-nombre">${escapeHTML(producto.nombre)}</h3>
+                    ${!isMobile ? `<p class="producto-descripcion">${escapeHTML(descripcionCorta)}</p>` : ''}
+                    <p class="producto-precio">${formatearPrecio(parseFloat(producto.precio))}</p>
+                    <button class="btn-agregar" onclick="agregarAlCarrito(${producto.id})">
+                        Agregar al carrito
+                    </button>
+                </div>
             </div>
-            <div class="producto-info">
-                <h3 class="producto-nombre">${escapeHTML(producto.nombre)}</h3>
-                <p class="producto-descripcion">${escapeHTML(producto.descripcion || 'Sin descripción')}</p>
-                <p class="producto-precio">${formatearPrecio(parseFloat(producto.precio))}</p>
-                <button class="btn-agregar" onclick="agregarAlCarrito(${producto.id})">
-                    Agregar al carrito
-                </button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+    
+    // Agregar event listener para redimensionar
+    if (!window.productosResizedListener) {
+        window.addEventListener('resize', () => {
+            if (productos.length > 0) {
+                renderizarProductos();
+            }
+        });
+        window.productosResizedListener = true;
+    }
 }
 
 function agregarAlCarrito(productoId) {

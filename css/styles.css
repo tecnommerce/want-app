@@ -1396,3 +1396,309 @@ a.logo-link {
     box-shadow: none !important;
     outline: none !important;
 }
+/* ===================================================
+   VISTA LISTA PARA MÓVIL - VENDEDORES Y PRODUCTOS
+   =================================================== */
+
+/* Vista de lista para vendedores en móvil */
+@media (max-width: 768px) {
+    /* Vendedores en formato lista */
+    .negocios-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .negocio-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        min-height: auto;
+        border-radius: 16px;
+    }
+    
+    .negocio-logo {
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        background: #f8f8f8;
+    }
+    
+    .negocio-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        padding: 0;
+    }
+    
+    .negocio-logo .placeholder-logo {
+        font-size: 2rem;
+    }
+    
+    .negocio-info {
+        flex: 1;
+        padding: 0;
+    }
+    
+    .negocio-nombre {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+    
+    .negocio-direccion {
+        font-size: 0.7rem;
+        margin-bottom: 4px;
+    }
+    
+    .negocio-horario {
+        font-size: 0.65rem;
+    }
+    
+    .rubros-container {
+        margin: 4px 0;
+    }
+    
+    .rubro-tag {
+        font-size: 0.55rem;
+        padding: 2px 8px;
+    }
+    
+    .negocio-estado {
+        margin-bottom: 4px;
+    }
+    
+    .negocio-estado span {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+    
+    .negocio-productos {
+        font-size: 0.65rem;
+        margin-top: 4px;
+        color: var(--gray-500);
+    }
+}
+
+/* Vista de lista para productos en tienda móvil */
+@media (max-width: 768px) {
+    .productos-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .producto-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        min-height: auto;
+        border-radius: 16px;
+    }
+    
+    .producto-imagen {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        background: #f8f8f8;
+    }
+    
+    .producto-imagen img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        padding: 0;
+        border-radius: 12px;
+    }
+    
+    .producto-imagen .placeholder-img {
+        font-size: 2rem;
+    }
+    
+    .producto-info {
+        flex: 1;
+        padding: 0;
+    }
+    
+    .producto-nombre {
+        font-size: 0.9rem;
+        min-height: auto;
+        margin-bottom: 4px;
+    }
+    
+    .producto-descripcion {
+        font-size: 0.7rem;
+        min-height: auto;
+        margin-bottom: 6px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .producto-precio {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        margin-top: 0;
+    }
+    
+    .btn-agregar {
+        width: auto;
+        padding: 6px 16px;
+        font-size: 0.7rem;
+        margin-top: 0;
+        border-radius: 20px;
+    }
+    
+    /* Ajustes para el header de tienda en móvil */
+    .vendedor-info-header {
+        gap: 8px;
+    }
+    
+    .vendedor-logo-header {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .tagline {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+    }
+    
+    .cart-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .cart-count {
+        width: 16px;
+        height: 16px;
+        font-size: 0.55rem;
+        top: -3px;
+        right: -3px;
+    }
+}
+
+/* Para pantallas muy pequeñas (iPhone SE) */
+@media (max-width: 480px) {
+    .negocio-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .producto-imagen {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .negocio-nombre {
+        font-size: 0.85rem;
+    }
+    
+    .producto-nombre {
+        font-size: 0.8rem;
+    }
+    
+    .tagline {
+        max-width: 120px;
+        font-size: 0.7rem;
+    }
+}
+/* ===================================================
+   MEJORAS PARA CARRITO EN MÓVIL
+   =================================================== */
+
+@media (max-width: 768px) {
+    /* Modal de carrito más compacto */
+    .modal-content {
+        max-width: 95%;
+    }
+    
+    .carrito-item {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .carrito-item-info {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    .carrito-item-cantidad {
+        order: 2;
+    }
+    
+    .carrito-item-total {
+        order: 3;
+        min-width: auto;
+    }
+    
+    .btn-eliminar {
+        order: 4;
+    }
+    
+    /* Botón finalizar pedido más grande */
+    .btn-finalizar {
+        width: 100%;
+        padding: 14px;
+        font-size: 1rem;
+    }
+    
+    /* Formulario más compacto */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    .form-group label {
+        font-size: 0.8rem;
+    }
+    
+    /* Ticket de confirmación más compacto */
+    .ticket-modal {
+        max-width: 95%;
+    }
+    
+    .ticket-info {
+        padding: 15px;
+    }
+    
+    .ticket-section {
+        padding: 10px;
+    }
+    
+    .ticket-footer {
+        flex-direction: column;
+    }
+    
+    .ticket-footer .btn {
+        width: 100%;
+    }
+}
+
+/* Estado cerrado mensaje en móvil */
+@media (max-width: 768px) {
+    .negocio-cerrado-mensaje {
+        padding: 30px 20px;
+    }
+    
+    .negocio-cerrado-mensaje h3 {
+        font-size: 1.1rem;
+    }
+    
+    .negocio-cerrado-mensaje p {
+        font-size: 0.8rem;
+    }
+}
