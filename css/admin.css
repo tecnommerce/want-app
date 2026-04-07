@@ -1375,6 +1375,15 @@ body {
         font-size: 0.65rem;
     }
 
+    /* ===================================================
+       BUSCADOR MÓVIL - REORGANIZADO
+       Buscador arriba, luego Limpiar y Nuevo pedido
+    =================================================== */
+    .filtros-buscador {
+        flex-direction: column;
+        gap: 12px;
+    }
+
     /* Filtros en horizontal scrollable */
     .filtros-pedidos {
         overflow-x: auto;
@@ -1383,6 +1392,7 @@ body {
         justify-content: flex-start;
         border-radius: 40px;
         padding: 6px 12px;
+        order: 1;
     }
 
     .filtro-btn {
@@ -1391,31 +1401,59 @@ body {
         font-size: 0.7rem;
     }
 
-    /* Buscador apilado verticalmente */
+    /* Buscador - PRIMERO (arriba) */
     .buscador-container {
+        display: flex;
         flex-direction: column;
         width: 100%;
+        gap: 10px;
+        order: 2;
     }
 
+    /* Input de búsqueda - ocupa todo el ancho */
     .buscador-input {
         width: 100%;
     }
 
     .buscador-input input {
         width: 100%;
+        padding: 12px 12px 12px 40px;
+        font-size: 0.9rem;
     }
 
-    .btn-limpiar-busqueda,
-    .btn-nuevo-pedido {
+    .buscador-input i {
+        left: 14px;
+        font-size: 1rem;
+    }
+
+    /* Botones Limpiar y Nuevo pedido - lado a lado */
+    .buscador-buttons {
+        display: flex;
+        gap: 10px;
         width: 100%;
+    }
+
+    .btn-limpiar-busqueda {
+        flex: 1;
         justify-content: center;
-        padding: 10px;
+        padding: 12px;
+        font-size: 0.85rem;
+        background: var(--gray-100);
+        border-radius: 40px;
+    }
+
+    .btn-nuevo-pedido {
+        flex: 1;
+        justify-content: center;
+        padding: 12px;
+        font-size: 0.85rem;
     }
 
     /* Tabla horizontal scrollable */
     .pedidos-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        order: 3;
     }
 
     .pedidos-tabla {
@@ -1455,6 +1493,9 @@ body {
         grid-template-columns: 1fr;
     }
 
+    /* Reportes - ocultar métricas del dashboard principal en móvil? No, ya no están en el dashboard */
+    /* Los reportes están en su propio tab */
+
     /* Modales full en móvil */
     .modal-content {
         width: 95%;
@@ -1490,6 +1531,35 @@ body {
         padding: 8px 10px;
         font-size: 0.7rem;
     }
+
+    /* Reportes móvil */
+    .reportes-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .reporte-card {
+        padding: 10px;
+    }
+
+    .reporte-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .reporte-info p {
+        font-size: 0.9rem;
+    }
+
+    .reporte-info h4 {
+        font-size: 0.65rem;
+    }
+
+    .reportes-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
 }
 
 /* Para tabletas pequeñas */
@@ -1520,6 +1590,10 @@ body {
     .filtro-btn {
         padding: 4px 10px;
         font-size: 0.65rem;
+    }
+
+    .reportes-metrics {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1763,4 +1837,42 @@ body {
     .reportes-metrics {
         grid-template-columns: 1fr;
     }
+}
+/* ===================================================
+   BOTONES BUSCADOR MÓVIL
+   =================================================== */
+.buscador-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-limpiar-busqueda,
+.btn-nuevo-pedido {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-limpiar-busqueda {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.btn-limpiar-busqueda:hover {
+    background: var(--gray-200);
+}
+
+.btn-nuevo-pedido {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-nuevo-pedido:hover {
+    background: var(--primary-dark);
 }

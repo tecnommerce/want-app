@@ -284,41 +284,43 @@
                     </button>
                 </div>
 
-                <!-- Tab Pedidos -->
-                <div class="tab-content active" id="tab-pedidos">
-                    <div class="filtros-buscador">
-                        <div class="filtros-pedidos">
-                            <button class="filtro-btn active" data-estado="preparando">
-                                <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
-                            </button>
-                            <button class="filtro-btn" data-estado="en preparacion">
-                                <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
-                            </button>
-                            <button class="filtro-btn" data-estado="en camino">
-                                <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
-                            </button>
-                            <button class="filtro-btn" data-estado="entregado">
-                                <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
-                            </button>
-                        </div>
-                        <div class="buscador-container">
-                            <div class="buscador-input">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
-                            </div>
-                            <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
-                                <i class="fas fa-times"></i> Limpiar
-                            </button>
-                            <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
-                                <i class="fas fa-plus-circle"></i> Nuevo pedido
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="pedidos-container" id="pedidos-container">
-                        <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
-                    </div>
-                </div>
+<!-- Tab Pedidos -->
+<div class="tab-content active" id="tab-pedidos">
+    <div class="filtros-buscador">
+        <div class="filtros-pedidos">
+            <button class="filtro-btn active" data-estado="preparando">
+                <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
+            </button>
+            <button class="filtro-btn" data-estado="en preparacion">
+                <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
+            </button>
+            <button class="filtro-btn" data-estado="en camino">
+                <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
+            </button>
+            <button class="filtro-btn" data-estado="entregado">
+                <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
+            </button>
+        </div>
+        <div class="buscador-container">
+            <div class="buscador-input">
+                <i class="fas fa-search"></i>
+                <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
+            </div>
+            <div class="buscador-buttons">
+                <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
+                    <i class="fas fa-times"></i> Limpiar
+                </button>
+                <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
+                    <i class="fas fa-plus-circle"></i> Nuevo pedido
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="pedidos-container" id="pedidos-container">
+        <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
+    </div>
+</div>
 
                 <!-- Tab Productos -->
                 <div class="tab-content" id="tab-productos">
