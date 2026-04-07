@@ -1536,16 +1536,24 @@ function inicializarMenuAdmin() {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
             
+            // Actualizar clase activa en tabs móviles
+            mobileTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
             // Cambiar tab activo en desktop
             document.querySelectorAll('.tab-btn').forEach(t => {
                 t.classList.remove('active');
                 if (t.getAttribute('data-tab') === tabId) t.classList.add('active');
             });
             
-            // Mostrar contenido del tab
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            // Ocultar todos los tab-content y mostrar el seleccionado
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.remove('active');
+            });
             const tabContent = document.getElementById(`tab-${tabId}`);
-            if (tabContent) tabContent.classList.add('active');
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
             
             // Cargar datos según el tab
             if (tabId === 'productos') cargarProductos();

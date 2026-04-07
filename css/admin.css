@@ -1530,6 +1530,15 @@ body {
         display: none;
     }
 
+    /* En móvil, solo mostrar el tab activo */
+    .tab-content {
+        display: none !important;
+    }
+    
+    .tab-content.active {
+        display: block !important;
+    }
+
     /* Mostrar botón menú hamburguesa */
     .menu-toggle-admin {
         display: flex;
@@ -1605,11 +1614,13 @@ body {
 
     /* FILTROS Y BUSCADOR MÓVIL - REORGANIZADO */
     .filtros-buscador {
+        display: flex;
         flex-direction: column;
         gap: 12px;
+        width: 100%;
     }
 
-    /* Filtros en horizontal scrollable */
+    /* Filtros en horizontal scrollable - PRIMERO */
     .filtros-pedidos {
         overflow-x: auto;
         flex-wrap: nowrap;
@@ -1618,15 +1629,17 @@ body {
         border-radius: 40px;
         padding: 6px 12px;
         order: 1;
+        background: white;
+        border: 1px solid var(--gray-200);
     }
 
     .filtro-btn {
         white-space: nowrap;
-        padding: 5px 12px;
+        padding: 6px 14px;
         font-size: 0.7rem;
     }
 
-    /* Buscador - PRIMERO (arriba) */
+    /* Buscador container - SEGUNDO (input arriba, botones abajo) */
     .buscador-container {
         display: flex;
         flex-direction: column;
@@ -1644,6 +1657,8 @@ body {
         width: 100%;
         padding: 12px 12px 12px 40px;
         font-size: 0.9rem;
+        background: white;
+        border: 1px solid var(--gray-200);
     }
 
     .buscador-input i {
@@ -1651,7 +1666,7 @@ body {
         font-size: 1rem;
     }
 
-    /* Botones Limpiar y Nuevo pedido - lado a lado */
+    /* Botones Limpiar y Nuevo pedido - lado a lado DEBAJO del input */
     .buscador-buttons {
         display: flex;
         gap: 10px;
@@ -1665,6 +1680,7 @@ body {
         font-size: 0.85rem;
         background: var(--gray-100);
         border-radius: 40px;
+        color: var(--gray-700);
     }
 
     .btn-nuevo-pedido {
@@ -1674,11 +1690,12 @@ body {
         font-size: 0.85rem;
     }
 
-    /* Tabla horizontal scrollable */
+    /* Tabla horizontal scrollable - TERCERO */
     .pedidos-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         order: 3;
+        margin-top: 10px;
     }
 
     .pedidos-tabla {
