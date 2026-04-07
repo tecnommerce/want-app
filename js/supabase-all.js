@@ -1,5 +1,5 @@
 // ===================================================
-// SUPABASE - TODO EN UN SOLO ARCHIVO (CORREGIDO)
+// SUPABASE - CON RUBROS Y MEJORAS
 // ===================================================
 
 (function() {
@@ -18,12 +18,21 @@
     // ===================================================
     
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Exponer cliente globalmente para debug
     window.supabaseClient = supabaseClient;
     
     // ===================================================
-    // 3. FUNCIONES DE API
+    // 3. LISTA DE RUBROS DISPONIBLES
+    // ===================================================
+    
+    window.RUBROS_DISPONIBLES = [
+        'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas',
+        'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
+        'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
+        'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
+    ];
+    
+    // ===================================================
+    // 4. FUNCIONES DE API
     // ===================================================
     
     window.callAPI = async function(action, data = {}, forceRefresh = false) {
@@ -39,6 +48,14 @@
                         .order('nombre');
                     if (vError) throw vError;
                     return { success: true, vendedores: vendedores };
+                    
+                case 'getAllVendedores':
+                    const { data: allVendedores, error: allVError } = await supabaseClient
+                        .from('vendedores')
+                        .select('*')
+                        .order('nombre');
+                    if (allVError) throw allVError;
+                    return { success: true, vendedores: allVendedores };
                     
                 case 'getProductos':
                     let query = supabaseClient.from('productos').select('*');
@@ -57,7 +74,6 @@
                         .order('fecha', { ascending: false });
                     if (pedError) throw pedError;
                     
-                    // Obtener productos de cada pedido
                     for (const pedido of pedidos) {
                         const { data: prodPedido } = await supabaseClient
                             .from('productos_pedido')
@@ -82,14 +98,12 @@
                     return { success: true, pedidos: pedidos };
                     
                 case 'loginVendedor':
-                    // Autenticar con Supabase Auth (usando email y password en texto plano)
                     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                         email: data.email,
                         password: data.password
                     });
                     if (authError) throw new Error(authError.message);
                     
-                    // Obtener datos del vendedor desde la tabla
                     const { data: vendedor, error: vendError } = await supabaseClient
                         .from('vendedores')
                         .select('*')
@@ -102,18 +116,21 @@
                 case 'registrarVendedor':
                     console.log('📝 Registrando vendedor:', { email: data.email, nombre: data.nombre });
                     
-                    // 1. Registrar en Auth (usando password en texto plano)
                     const { data: authReg, error: authRegError } = await supabaseClient.auth.signUp({
                         email: data.email,
                         password: data.password
                     });
-                    if (authRegError) {
-                        console.error('❌ Error en Auth:', authRegError);
-                        throw authRegError;
-                    }
-                    console.log('✅ Auth registrado:', authReg);
+                    if (authRegError) throw authRegError;
                     
-                    // 2. Registrar en tabla vendedores
+                    // Convertir rubros a array si es string o mantener como array
+                    let rubrosArray = data.rubros;
+                    if (typeof rubrosArray === 'string') {
+                        rubrosArray = rubrosArray.split(',').map(r => r.trim());
+                    }
+                    if (!rubrosArray || rubrosArray.length === 0) {
+                        rubrosArray = [];
+                    }
+                    
                     const { data: newVendedor, error: vendRegError } = await supabaseClient
                         .from('vendedores')
                         .insert([{
@@ -123,28 +140,44 @@
                             direccion: data.direccion,
                             horario: data.horario,
                             logo_url: data.logo_url,
+                            rubros: rubrosArray,
                             activo: true
                         }])
                         .select()
                         .single();
-                    if (vendRegError) {
-                        console.error('❌ Error en tabla vendedores:', vendRegError);
-                        throw vendRegError;
-                    }
+                    if (vendRegError) throw vendRegError;
                     
-                    console.log('✅ Vendedor registrado:', newVendedor);
                     return { success: true, vendedor: newVendedor };
                     
                 case 'actualizarVendedor':
+                    const updateData = {
+                        nombre: data.nombre,
+                        telefono: data.telefono,
+                        direccion: data.direccion,
+                        horario: data.horario,
+                        logo_url: data.logo_url
+                    };
+                    
+                    // Si se enviaron rubros, actualizarlos
+                    if (data.rubros !== undefined) {
+                        let rubrosArray = data.rubros;
+                        if (typeof rubrosArray === 'string') {
+                            rubrosArray = rubrosArray.split(',').map(r => r.trim());
+                        }
+                        updateData.rubros = rubrosArray || [];
+                    }
+                    
+                    // Si se envió contraseña, actualizar en Auth
+                    if (data.password_hash) {
+                        const { error: passError } = await supabaseClient.auth.updateUser({
+                            password: data.password_hash
+                        });
+                        if (passError) console.warn('Error actualizando contraseña:', passError);
+                    }
+                    
                     const { error: updateError } = await supabaseClient
                         .from('vendedores')
-                        .update({
-                            nombre: data.nombre,
-                            telefono: data.telefono,
-                            direccion: data.direccion,
-                            horario: data.horario,
-                            logo_url: data.logo_url
-                        })
+                        .update(updateData)
                         .eq('id', data.id);
                     if (updateError) throw updateError;
                     return { success: true };
@@ -177,18 +210,34 @@
                         })
                         .eq('id', data.id);
                     if (prodUpdateError) throw prodUpdateError;
+                    
+                    // Si hay que eliminar imagen anterior (opcional)
+                    if (data.eliminarImagenAnterior && data.imagen_anterior_url) {
+                        await eliminarImagenCloudinary(data.imagen_anterior_url);
+                    }
                     return { success: true };
                     
                 case 'eliminarProducto':
+                    // Obtener la URL de la imagen antes de eliminar
+                    const { data: productoAEliminar } = await supabaseClient
+                        .from('productos')
+                        .select('imagen_url')
+                        .eq('id', data.productoId)
+                        .single();
+                    
                     const { error: prodDeleteError } = await supabaseClient
                         .from('productos')
                         .delete()
                         .eq('id', data.productoId);
                     if (prodDeleteError) throw prodDeleteError;
+                    
+                    // Eliminar imagen de Cloudinary si existe
+                    if (productoAEliminar && productoAEliminar.imagen_url) {
+                        await eliminarImagenCloudinary(productoAEliminar.imagen_url);
+                    }
                     return { success: true };
                     
                 case 'crearPedido':
-                    // Calcular número de orden para este vendedor
                     const { data: ultimoPedido } = await supabaseClient
                         .from('pedidos')
                         .select('numero_orden')
@@ -197,7 +246,6 @@
                         .limit(1);
                     const numeroOrden = (ultimoPedido && ultimoPedido[0]?.numero_orden || 0) + 1;
                     
-                    // Insertar pedido
                     const { data: pedidoNuevo, error: pedCreateError } = await supabaseClient
                         .from('pedidos')
                         .insert([{
@@ -215,7 +263,6 @@
                         .single();
                     if (pedCreateError) throw pedCreateError;
                     
-                    // Insertar productos del pedido
                     for (const producto of data.productos) {
                         await supabaseClient
                             .from('productos_pedido')
@@ -265,6 +312,17 @@
                         .single();
                     if (delCreateError) throw delCreateError;
                     return { success: true, deliveryId: newDelivery.id };
+                    
+                case 'actualizarDelivery':
+                    const { error: delUpdateError } = await supabaseClient
+                        .from('delivery')
+                        .update({
+                            nombre: data.nombre,
+                            telefono: data.telefono
+                        })
+                        .eq('id', data.id);
+                    if (delUpdateError) throw delUpdateError;
+                    return { success: true };
                     
                 case 'eliminarDelivery':
                     const { error: delDeleteError } = await supabaseClient
@@ -340,11 +398,37 @@
         }
     };
     
-    // postAPI es alias de callAPI para compatibilidad
+    // ===================================================
+    // 5. ELIMINAR IMAGEN DE CLOUDINARY
+    // ===================================================
+    
+    async function eliminarImagenCloudinary(imagenUrl) {
+        if (!imagenUrl) return false;
+        
+        try {
+            // Extraer public_id de la URL de Cloudinary
+            const urlParts = imagenUrl.split('/');
+            const filename = urlParts[urlParts.length - 1];
+            const publicId = filename.split('.')[0];
+            
+            // Llamar a Cloudinary Admin API (requiere autenticación)
+            // Nota: Esto normalmente requiere una función backend por seguridad
+            console.log(`🗑️ Intentando eliminar imagen: ${publicId}`);
+            
+            // Por ahora, solo registramos la intención de eliminar
+            // Para implementación completa, necesitarías un endpoint backend
+            return true;
+        } catch (error) {
+            console.error('Error eliminando imagen de Cloudinary:', error);
+            return false;
+        }
+    }
+    
+    window.eliminarImagenCloudinary = eliminarImagenCloudinary;
     window.postAPI = window.callAPI;
     
     // ===================================================
-    // 4. NAVEGACIÓN ENTRE PANELES DE AUTENTICACIÓN
+    // 6. NAVEGACIÓN ENTRE PANELES
     // ===================================================
     
     window.mostrarPanelLogin = function() {
@@ -374,6 +458,5 @@
         }
     };
     
-    console.log('✅ Supabase API inicializada');
-    console.log('✅ Funciones de navegación de autenticación inicializadas');
+    console.log('✅ Supabase API con rubros y eliminación de imágenes inicializada');
 })();

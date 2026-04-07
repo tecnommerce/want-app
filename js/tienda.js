@@ -186,14 +186,18 @@ function actualizarContadorCarrito() {
 function renderizarCarrito() {
     const container = document.getElementById('carrito-items');
     const totalSpan = document.getElementById('carrito-total');
+    const finalizarBtn = document.getElementById('finalizar-pedido');
     
     if (!container) return;
     
     if (carrito.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No hay productos en el carrito</p>';
         if (totalSpan) totalSpan.textContent = formatearPrecio(0);
+        if (finalizarBtn) finalizarBtn.disabled = true;
         return;
     }
+    
+    if (finalizarBtn) finalizarBtn.disabled = false;
     
     let total = 0;
     

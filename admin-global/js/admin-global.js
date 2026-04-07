@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - Versión Supabase (CORREGIDA)
+// ADMIN GLOBAL - Versión Supabase CON RUBROS
 // ===================================================
 
 // ===================================================
@@ -11,6 +11,14 @@ let allPedidos = [];
 let allProductos = [];
 let banners = [];
 let charts = {};
+
+// Lista de rubros disponibles
+const RUBROS_DISPONIBLES = [
+    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas',
+    'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
+    'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
+    'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
+];
 
 // ===================================================
 // FUNCIONES DE API CON SUPABASE
@@ -25,9 +33,18 @@ async function callAPI(action, data = {}) {
                 const { data: vendedores, error: vError } = await supabaseClient
                     .from('vendedores')
                     .select('*')
+                    .eq('activo', true)
                     .order('nombre');
                 if (vError) throw vError;
                 return { success: true, vendedores: vendedores };
+                
+            case 'getAllVendedores':
+                const { data: allVendedores, error: allVError } = await supabaseClient
+                    .from('vendedores')
+                    .select('*')
+                    .order('nombre');
+                if (allVError) throw allVError;
+                return { success: true, vendedores: allVendedores };
                 
             case 'getAllPedidos':
                 const { data: pedidos, error: pError } = await supabaseClient
@@ -36,7 +53,6 @@ async function callAPI(action, data = {}) {
                     .order('fecha', { ascending: false });
                 if (pError) throw pError;
                 
-                // Obtener productos de cada pedido
                 for (const pedido of pedidos) {
                     const { data: prodPedido } = await supabaseClient
                         .from('productos_pedido')
@@ -67,7 +83,6 @@ async function callAPI(action, data = {}) {
                     .order('nombre');
                 if (prodError) throw prodError;
                 
-                // Agregar nombre del vendedor
                 const productosConVendedor = productos.map(p => ({
                     ...p,
                     vendedor_nombre: p.vendedores?.nombre || 'Desconocido'
@@ -75,6 +90,11 @@ async function callAPI(action, data = {}) {
                 return { success: true, productos: productosConVendedor };
                 
             case 'actualizarVendedor':
+                let rubrosArray = data.rubros;
+                if (typeof rubrosArray === 'string') {
+                    rubrosArray = rubrosArray.split(',').map(r => r.trim());
+                }
+                
                 const { error: updateError } = await supabaseClient
                     .from('vendedores')
                     .update({
@@ -83,6 +103,7 @@ async function callAPI(action, data = {}) {
                         telefono: data.telefono,
                         direccion: data.direccion,
                         horario: data.horario,
+                        rubros: rubrosArray || [],
                         activo: data.activo === 'SI' ? true : false
                     })
                     .eq('id', data.id);
@@ -280,7 +301,7 @@ async function subirImagenACloudinary(file) {
 async function cargarTodosLosDatos() {
     console.log('🔄 Cargando todos los datos...');
     try {
-        const vendedoresRes = await callAPI('getVendedores');
+        const vendedoresRes = await callAPI('getAllVendedores');
         if (vendedoresRes.success) allVendedores = vendedoresRes.vendedores || [];
         
         const pedidosRes = await callAPI('getAllPedidos');
@@ -304,7 +325,7 @@ async function actualizarDatosManual() {
     await withLoading(btnRefresh, async () => {
         mostrarToast('Actualizando datos...', 'info');
         try {
-            const vendedoresRes = await callAPI('getVendedores');
+            const vendedoresRes = await callAPI('getAllVendedores');
             if (vendedoresRes.success) allVendedores = vendedoresRes.vendedores || [];
             const pedidosRes = await callAPI('getAllPedidos');
             if (pedidosRes.success) allPedidos = pedidosRes.pedidos || [];
@@ -370,8 +391,13 @@ function actualizarDashboard() {
 }
 
 // ===================================================
-// VENDEDORES (CORREGIDO: usar true/false)
+// VENDEDORES (CON RUBROS)
 // ===================================================
+
+function formatearRubrosParaLista(rubros) {
+    if (!rubros || rubros.length === 0) return '-';
+    return rubros.slice(0, 3).join(', ') + (rubros.length > 3 ? ` +${rubros.length - 3}` : '');
+}
 
 function renderizarVendedores() {
     const tbody = document.getElementById('vendedores-tbody');
@@ -383,8 +409,8 @@ function renderizarVendedores() {
             <td>${v.id}</td>
             <td><strong>${escapeHTML(v.nombre)}</strong></td>
             <td>${escapeHTML(v.email || '-')}</td>
+            <td>${formatearRubrosParaLista(v.rubros)}</td>
             <td>${v.telefono || '-'}</td>
-            <td>${escapeHTML(v.direccion || '-')}</td>
             <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
             <td>${stats[v.id]?.pedidos || 0}</td>
             <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
@@ -406,12 +432,35 @@ function editarVendedor(id) {
     document.getElementById('edit-vendedor-telefono').value = v.telefono || '';
     document.getElementById('edit-vendedor-direccion').value = v.direccion || '';
     document.getElementById('edit-vendedor-horario').value = v.horario || '';
+    document.getElementById('edit-vendedor-activo').value = v.activo === true ? 'SI' : 'NO';
+    
+    // Cargar checkboxes de rubros
+    const rubrosContainer = document.getElementById('edit-vendedor-rubros');
+    if (rubrosContainer) {
+        const rubrosActuales = v.rubros || [];
+        rubrosContainer.innerHTML = '';
+        RUBROS_DISPONIBLES.forEach(rubro => {
+            const label = document.createElement('label');
+            label.className = 'rubro-checkbox';
+            label.innerHTML = `
+                <input type="checkbox" name="edit-rubros" value="${rubro}" ${rubrosActuales.includes(rubro) ? 'checked' : ''}>
+                <span>${rubro}</span>
+            `;
+            rubrosContainer.appendChild(label);
+        });
+    }
+    
     document.getElementById('modal-editar-vendedor').classList.add('active');
 }
 
 async function guardarEditarVendedor() {
     const btn = document.getElementById('guardar-editar-vendedor');
     await withLoading(btn, async () => {
+        const rubrosSeleccionados = [];
+        document.querySelectorAll('#edit-vendedor-rubros input[type="checkbox"]:checked').forEach(cb => {
+            rubrosSeleccionados.push(cb.value);
+        });
+        
         const data = {
             id: parseInt(document.getElementById('edit-vendedor-id').value),
             nombre: document.getElementById('edit-vendedor-nombre').value.trim(),
@@ -419,7 +468,8 @@ async function guardarEditarVendedor() {
             telefono: document.getElementById('edit-vendedor-telefono').value.trim(),
             direccion: document.getElementById('edit-vendedor-direccion').value.trim(),
             horario: document.getElementById('edit-vendedor-horario').value.trim(),
-            activo: document.getElementById('edit-vendedor-activo')?.value || 'SI'
+            activo: document.getElementById('edit-vendedor-activo')?.value || 'SI',
+            rubros: rubrosSeleccionados
         };
         try {
             const res = await callAPI('actualizarVendedor', data);
@@ -440,6 +490,7 @@ async function toggleVendedorStatus(id, button) {
     }
     
     try {
+        const rubrosArray = v.rubros || [];
         const res = await callAPI('actualizarVendedor', {
             id: id,
             nombre: v.nombre || '',
@@ -447,6 +498,7 @@ async function toggleVendedorStatus(id, button) {
             telefono: v.telefono || '',
             direccion: v.direccion || '',
             horario: v.horario || '',
+            rubros: rubrosArray,
             activo: nuevoEstado ? 'SI' : 'NO'
         });
         
@@ -489,7 +541,7 @@ async function confirmarEliminarVendedor() {
 }
 
 // ===================================================
-// PRODUCTOS (CORREGIDO: usar true/false)
+// PRODUCTOS
 // ===================================================
 
 function renderizarProductos() {
@@ -512,7 +564,7 @@ function renderizarProductos() {
             <td>${ventasPorProducto[`${p.id}_${p.vendedor_id}`] || 0}</td>
             <td><span class="status-badge ${p.disponible === true ? 'status-activo' : 'status-inactivo'}">${p.disponible === true ? 'Disponible' : 'No disponible'}</span></td>
             <td><button class="btn-edit" onclick="editarProducto(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarProducto(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-         </tr>
+          </tr>
     `).join('');
 }
 
@@ -586,9 +638,9 @@ function renderizarPedidos() {
             <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
             <td>${formatearPrecio(p.total)}</td>
             <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-            <td>${p.productos ? p.productos.length : 0} productos}</td>
+            <td>${p.productos ? p.productos.length : 0} productos</td>
             <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
-         </tr>
+        </tr>
     `).join('');
 }
 
@@ -641,7 +693,7 @@ async function confirmarEliminarPedido() {
 
 async function cargarBanners() {
     const tbody = document.getElementById('banners-tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>';
     
     try {
         const response = await callAPI('getAllBanners');
@@ -652,7 +704,7 @@ async function cargarBanners() {
             throw new Error(response.error);
         }
     } catch (error) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${error.message}</td>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${error.message}</td></tr>`;
     }
 }
 
@@ -811,7 +863,16 @@ function cargarFiltros() {
 async function exportarVendedores() {
     const btn = document.getElementById('export-vendedores');
     await withLoading(btn, async () => {
-        const data = allVendedores.map(v => ({ ID: v.id, Nombre: v.nombre, Email: v.email, Telefono: v.telefono, Direccion: v.direccion, Horario: v.horario, Estado: v.activo === true ? 'Activo' : 'Inactivo' }));
+        const data = allVendedores.map(v => ({ 
+            ID: v.id, 
+            Nombre: v.nombre, 
+            Email: v.email, 
+            Rubros: (v.rubros || []).join(', '),
+            Telefono: v.telefono, 
+            Direccion: v.direccion, 
+            Horario: v.horario, 
+            Estado: v.activo === true ? 'Activo' : 'Inactivo' 
+        }));
         downloadCSV(data, 'vendedores_want.csv');
     });
 }
@@ -871,9 +932,8 @@ function cambiarSeccion(seccionId) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Panel Administrativo Global iniciado');
     
-    // Verificar que supabaseClient existe
     if (typeof supabaseClient === 'undefined') {
-        console.error('❌ supabaseClient no está definido. Asegúrate de que supabase-all.js está cargado.');
+        console.error('❌ supabaseClient no está definido');
         return;
     }
     
@@ -909,7 +969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
         const tbody = document.getElementById('vendedores-tbody');
         if (!tbody) return;
-        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td></tr>'; return; }
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td>'; return; }
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
         tbody.innerHTML = filtered.map(v => `
@@ -917,8 +977,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td>${v.id}</td>
                 <td><strong>${escapeHTML(v.nombre)}</strong></td>
                 <td>${escapeHTML(v.email || '-')}</td>
+                <td>${formatearRubrosParaLista(v.rubros)}</td>
                 <td>${v.telefono || '-'}</td>
-                <td>${escapeHTML(v.direccion || '-')}</td>
                 <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
                 <td>${stats[v.id]?.pedidos || 0}</td>
                 <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>

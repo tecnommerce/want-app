@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (versión completa funcional)
+// ADMIN - Panel de vendedor (versión completa con RUBROS)
 // ===================================================
 
 console.log('🚀 admin.js cargado correctamente');
@@ -18,6 +18,43 @@ let botonPendienteConfirmar = null;
 
 let productosTempEdit = [];
 let productosTempNuevo = [];
+
+// ===================================================
+// RUBROS - LISTA Y FUNCIONES
+// ===================================================
+
+const RUBROS_DISPONIBLES = [
+    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas',
+    'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
+    'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
+    'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
+];
+
+function cargarCheckboxesRubros(containerId, rubrosSeleccionados = []) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    RUBROS_DISPONIBLES.forEach(rubro => {
+        const label = document.createElement('label');
+        label.className = 'rubro-checkbox';
+        const isChecked = rubrosSeleccionados.includes(rubro);
+        label.innerHTML = `
+            <input type="checkbox" name="rubros" value="${rubro}" ${isChecked ? 'checked' : ''}>
+            <span>${rubro}</span>
+        `;
+        container.appendChild(label);
+    });
+}
+
+function obtenerRubrosSeleccionados(containerId) {
+    const rubros = [];
+    document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).forEach(cb => {
+        rubros.push(cb.value);
+    });
+    return rubros;
+}
 
 // ===================================================
 // UTILIDADES
@@ -462,7 +499,7 @@ async function cancelarPedido(pedidoId, boton) {
 }
 
 // ===================================================
-// WHATSAPP Y DELIVERY (funciones simplificadas)
+// WHATSAPP Y DELIVERY
 // ===================================================
 
 async function confirmarPedidoWhatsApp(pedidoId, boton) {
@@ -577,6 +614,7 @@ function renderizarDeliveries() {
             <div class="delivery-info"><h4>${escapeHTML(d.nombre)}</h4><p><i class="fab fa-whatsapp"></i> ${d.telefono}</p></div>
             <div class="delivery-actions">
                 <button class="btn-wa-delivery" onclick="whatsappDelivery('${d.telefono}', '${escapeHTML(d.nombre)}')"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn-edit-delivery" onclick="abrirModalDelivery(${d.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-delete-delivery" onclick="eliminarDelivery(${d.id})"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>
@@ -607,7 +645,7 @@ async function eliminarDelivery(deliveryId) { if (!confirm('¿Eliminar este deli
 function whatsappDelivery(telefono, nombre) { window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(`Hola ${nombre}, soy del negocio.`)}`, '_blank'); }
 
 // ===================================================
-// PRODUCTOS CRUD (simplificado)
+// PRODUCTOS CRUD
 // ===================================================
 
 async function cargarProductos(forceRefresh = false) {
@@ -647,7 +685,7 @@ function renderizarProductosAdmin() {
 }
 
 function abrirModalProducto(productoId = null) {
-    if (productoId) { const p = productos.find(p => p.id === productoId); if (p) { document.getElementById('producto-id').value = p.id; document.getElementById('producto-nombre').value = p.nombre; document.getElementById('producto-descripcion').value = p.descripcion || ''; document.getElementById('producto-precio').value = p.precio; document.getElementById('producto-disponible').value = p.disponible || 'SI'; const preview = document.getElementById('producto-imagen-preview'); if (preview && p.imagen_url) preview.innerHTML = `<img src="${p.imagen_url}" style="max-width: 100px;">`; document.getElementById('modal-producto-title').textContent = 'Editar producto'; } }
+    if (productoId) { const p = productos.find(p => p.id === productoId); if (p) { document.getElementById('producto-id').value = p.id; document.getElementById('producto-nombre').value = p.nombre; document.getElementById('producto-descripcion').value = p.descripcion || ''; document.getElementById('producto-precio').value = p.precio; document.getElementById('producto-disponible').value = p.disponible ? 'SI' : 'NO'; const preview = document.getElementById('producto-imagen-preview'); if (preview && p.imagen_url) preview.innerHTML = `<img src="${p.imagen_url}" style="max-width: 100px;">`; document.getElementById('modal-producto-title').textContent = 'Editar producto'; } }
     else { document.getElementById('producto-form').reset(); document.getElementById('producto-id').value = ''; document.getElementById('producto-imagen-preview').innerHTML = ''; document.getElementById('producto-disponible').value = 'SI'; document.getElementById('modal-producto-title').textContent = 'Nuevo producto'; }
     document.getElementById('modal-producto').classList.add('active');
 }
@@ -675,7 +713,6 @@ async function guardarProducto() {
         }
     }
     
-    // CORREGIDO: convertir 'SI'/'NO' a true/false
     const data = {
         vendedor_id: vendedorActual.id,
         nombre: nombre,
@@ -705,11 +742,12 @@ async function guardarProducto() {
 async function eliminarProducto(productoId) { const producto = productos.find(p => p.id === productoId); if (!producto) return; if (!confirm(`¿Eliminar "${producto.nombre}"?`)) return; try { const response = await postAPI('eliminarProducto', { productoId }); if (response.success) { mostrarToast('Producto eliminado', 'success'); await cargarProductos(true); } } catch (error) { mostrarToast('Error al eliminar', 'error'); } }
 
 // ===================================================
-// PERFIL (simplificado)
+// PERFIL (con RUBROS)
 // ===================================================
 
 function abrirModalPerfil() { cargarPerfil(); document.getElementById('modal-perfil').classList.add('active'); }
 function cerrarModalPerfil() { document.getElementById('modal-perfil').classList.remove('active'); }
+
 function cargarPerfil() {
     if (!vendedorActual) return;
     const pn = document.getElementById('perfil-nombre');
@@ -718,23 +756,32 @@ function cargarPerfil() {
     const ph = document.getElementById('perfil-horario');
     const pnd = document.getElementById('perfil-nombre-display');
     const ped = document.getElementById('perfil-email-display');
+    
     if (pn) pn.value = vendedorActual.nombre || '';
     if (pt) pt.value = vendedorActual.telefono || '';
     if (pd) pd.value = vendedorActual.direccion || '';
     if (ph) ph.value = vendedorActual.horario || '';
     if (pnd) pnd.textContent = vendedorActual.nombre || '';
     if (ped) ped.textContent = vendedorActual.email || '';
+    
+    // Cargar checkboxes de rubros en el perfil
+    const rubrosActuales = vendedorActual.rubros || [];
+    cargarCheckboxesRubros('perfil-rubros-selector', rubrosActuales);
+    
     const logoPreview = document.getElementById('logo-preview');
     if (logoPreview && vendedorActual.logo_url) logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`;
+    
     const btnUpload = document.getElementById('btn-upload-logo');
     const logoInput = document.getElementById('perfil-logo');
     if (btnUpload && logoInput) {
         btnUpload.onclick = () => logoInput.click();
         logoInput.onchange = (e) => { const file = e.target.files[0]; if (file && logoPreview) { const reader = new FileReader(); reader.onload = (ev) => logoPreview.innerHTML = `<img src="${ev.target.result}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`; reader.readAsDataURL(file); } };
     }
+    
     const perfilForm = document.getElementById('perfil-form');
     if (perfilForm) perfilForm.onsubmit = async (e) => { e.preventDefault(); await actualizarPerfil(); };
 }
+
 async function actualizarPerfil() {
     const nombre = document.getElementById('perfil-nombre')?.value.trim() || '';
     const telefono = document.getElementById('perfil-telefono')?.value.trim() || '';
@@ -742,19 +789,59 @@ async function actualizarPerfil() {
     const horario = document.getElementById('perfil-horario')?.value.trim() || '';
     const newPassword = document.getElementById('perfil-new-password')?.value || '';
     const logoFile = document.getElementById('perfil-logo')?.files[0];
+    
+    // Obtener rubros seleccionados del perfil
+    const rubrosSeleccionados = obtenerRubrosSeleccionados('perfil-rubros-selector');
+    
     let logoUrl = vendedorActual.logo_url;
-    if (logoFile) { mostrarToast('Subiendo logo...', 'info'); logoUrl = await subirImagenACloudinary(logoFile); if (!logoUrl) { mostrarToast('Error al subir logo', 'error'); return; } }
-    const updateData = { id: vendedorActual.id, nombre, telefono, direccion, horario, logo_url: logoUrl };
-    if (newPassword) { if (newPassword.length < 6) { mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error'); return; } updateData.password_hash = await hashPassword(newPassword); }
+    if (logoFile) { 
+        mostrarToast('Subiendo logo...', 'info'); 
+        logoUrl = await subirImagenACloudinary(logoFile); 
+        if (!logoUrl) { 
+            mostrarToast('Error al subir logo', 'error'); 
+            return; 
+        } 
+    }
+    
+    const updateData = { 
+        id: vendedorActual.id, 
+        nombre, 
+        telefono, 
+        direccion, 
+        horario, 
+        logo_url: logoUrl,
+        rubros: rubrosSeleccionados
+    };
+    
+    if (newPassword) { 
+        if (newPassword.length < 6) { 
+            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error'); 
+            return; 
+        } 
+        updateData.password_hash = newPassword;
+    }
+    
     try {
         const response = await postAPI('actualizarVendedor', updateData);
-        if (response && response.success) { mostrarToast('Perfil actualizado', 'success'); vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl }; const pn = document.getElementById('panel-nombre'); if (pn) pn.textContent = nombre; const pnd = document.getElementById('perfil-nombre-display'); if (pnd) pnd.textContent = nombre; const pnp = document.getElementById('perfil-new-password'); if (pnp) pnp.value = ''; cerrarModalPerfil(); }
+        if (response && response.success) { 
+            mostrarToast('Perfil actualizado', 'success'); 
+            vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl, rubros: rubrosSeleccionados }; 
+            const pn = document.getElementById('panel-nombre'); 
+            if (pn) pn.textContent = nombre; 
+            const pnd = document.getElementById('perfil-nombre-display'); 
+            if (pnd) pnd.textContent = nombre; 
+            const pnp = document.getElementById('perfil-new-password'); 
+            if (pnp) pnp.value = ''; 
+            cerrarModalPerfil(); 
+        }
         else throw new Error(response?.error || 'Error');
-    } catch (error) { mostrarToast('Error al actualizar perfil', 'error'); }
+    } catch (error) { 
+        mostrarToast('Error al actualizar perfil', 'error'); 
+    }
 }
 
 // ===================================================
-// EDICIÓN DE PEDIDO (simplificado)
+// EDICIÓN DE PEDIDO
 // ===================================================
 
 function abrirModalEditarPedido(pedidoId) {
@@ -804,7 +891,7 @@ async function guardarEditarPedido() {
 }
 
 // ===================================================
-// CREAR NUEVO PEDIDO (simplificado)
+// CREAR NUEVO PEDIDO
 // ===================================================
 
 function abrirModalNuevoPedido() {
@@ -856,7 +943,7 @@ function abrirModalSeleccionarProducto(productosList, callback) {
     currentCallback = callback;
     const select = document.getElementById('select-producto');
     select.innerHTML = '<option value="">Seleccionar...</option>';
-    productos.forEach(p => { if (p.disponible === 'SI') select.innerHTML += `<option value="${p.id}" data-precio="${p.precio}" data-nombre="${escapeHTML(p.nombre)}">${escapeHTML(p.nombre)} - ${formatearPrecio(p.precio)}</option>`; });
+    productos.forEach(p => { if (p.disponible === true || p.disponible === 'SI') select.innerHTML += `<option value="${p.id}" data-precio="${p.precio}" data-nombre="${escapeHTML(p.nombre)}">${escapeHTML(p.nombre)} - ${formatearPrecio(p.precio)}</option>`; });
     document.getElementById('select-cantidad').value = '1';
     document.getElementById('modal-seleccionar-producto').classList.add('active');
 }
@@ -873,11 +960,11 @@ function confirmarAgregarProducto() {
 }
 
 // ===================================================
-// REGISTRO Y LOGIN
+// REGISTRO Y LOGIN (con RUBROS)
 // ===================================================
 
-async function registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile) {
-    console.log('📝 Registrando vendedor:', { nombre, email });
+async function registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile, rubros) {
+    console.log('📝 Registrando vendedor:', { nombre, email, rubros });
     
     let logoUrl = null;
     if (logoFile) {
@@ -895,7 +982,8 @@ async function registrarVendedorConLogo(nombre, email, telefono, direccion, hora
         direccion: direccion,
         horario: horario,
         password: password,
-        logo_url: logoUrl
+        logo_url: logoUrl,
+        rubros: rubros
     });
     
     console.log('Respuesta registro:', response);
@@ -1158,7 +1246,7 @@ async function cargarVendedorPorId(vendedorId) {
         if (response.success) {
             const vendedor = response.vendedores.find(v => v.id.toString() === vendedorId.toString());
             
-            if (vendedor && vendedor.activo === 'SI') { 
+            if (vendedor && vendedor.activo === true) { 
                 vendedorActual = vendedor; 
                 await iniciarPanel(vendedorActual); 
             } else { 
@@ -1182,6 +1270,8 @@ function mostrarPanelLogin() {
 function mostrarPanelRegistro() { 
     document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
     document.getElementById('register-panel').classList.add('active'); 
+    // Cargar checkboxes de rubros en el registro
+    cargarCheckboxesRubros('rubros-selector', []);
 }
 
 function mostrarPanelRecuperacion() { 
@@ -1222,6 +1312,9 @@ function inicializarBuscador() {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM cargado, configurando event listeners');
+    
+    // Cargar checkboxes de rubros en el registro
+    cargarCheckboxesRubros('rubros-selector', []);
     
     // Cargar sesión guardada
     const sesion = cargarSesionGuardada();
@@ -1268,15 +1361,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const password2 = document.getElementById('reg-password2')?.value || '';
             const logoFile = document.getElementById('reg-logo')?.files[0];
             
+            // OBTENER RUBROS SELECCIONADOS
+            const rubrosSeleccionados = obtenerRubrosSeleccionados('rubros-selector');
+            
             if (password !== password2) { alert('Las contraseñas no coinciden'); return; }
             if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
+            if (rubrosSeleccionados.length === 0) { alert('Selecciona al menos un rubro'); return; }
             
-            const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile);
+            const response = await registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile, rubrosSeleccionados);
             
             if (response && response.success) { 
                 alert('Registro exitoso. Ahora podés iniciar sesión.'); 
                 mostrarPanelLogin(); 
                 registerForm.reset(); 
+                // Limpiar checkboxes
+                document.querySelectorAll('#rubros-selector input[type="checkbox"]').forEach(cb => cb.checked = false);
                 document.getElementById('login-email').value = email;
             } else { 
                 alert(response?.error || 'Error al registrar'); 
@@ -1322,3 +1421,4 @@ window.mostrarPanelLogin = mostrarPanelLogin;
 window.cargarPedidos = cargarPedidos;
 window.cargarProductos = cargarProductos;
 window.cargarDeliveries = cargarDeliveries;
+window.cargarCheckboxesRubros = cargarCheckboxesRubros;
