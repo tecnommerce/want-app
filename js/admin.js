@@ -24,7 +24,7 @@ let productosTempNuevo = [];
 // ===================================================
 
 const RUBROS_DISPONIBLES = [
-    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas',
+    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas', 'Pancheria', 
     'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
     'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
     'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
