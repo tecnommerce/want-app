@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - Versión Supabase CON RUBROS
+// ADMIN GLOBAL - Versión Supabase (SIN GRÁFICO, CON RUBROS)
 // ===================================================
 
 // ===================================================
@@ -10,15 +10,17 @@ let allVendedores = [];
 let allPedidos = [];
 let allProductos = [];
 let banners = [];
-let charts = {};
 
-// Lista de rubros disponibles
+// Lista de rubros disponibles (con Pancheria)
 const RUBROS_DISPONIBLES = [
-    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas',
+    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas', 'Pancheria',
     'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
     'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
     'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
 ];
+
+// Variables para rubros en edición
+let rubrosTempEditVendedor = [];
 
 // ===================================================
 // FUNCIONES DE API CON SUPABASE
@@ -95,17 +97,23 @@ async function callAPI(action, data = {}) {
                     rubrosArray = rubrosArray.split(',').map(r => r.trim());
                 }
                 
+                const updateData = {
+                    nombre: data.nombre,
+                    email: data.email,
+                    telefono: data.telefono,
+                    direccion: data.direccion,
+                    horario: data.horario,
+                    rubros: rubrosArray || [],
+                    activo: data.activo === 'SI' ? true : false
+                };
+                
+                if (data.estado_abierto !== undefined) {
+                    updateData.estado_abierto = data.estado_abierto === true || data.estado_abierto === 'true';
+                }
+                
                 const { error: updateError } = await supabaseClient
                     .from('vendedores')
-                    .update({
-                        nombre: data.nombre,
-                        email: data.email,
-                        telefono: data.telefono,
-                        direccion: data.direccion,
-                        horario: data.horario,
-                        rubros: rubrosArray || [],
-                        activo: data.activo === 'SI' ? true : false
-                    })
+                    .update(updateData)
                     .eq('id', data.id);
                 if (updateError) throw updateError;
                 return { success: true };
@@ -240,6 +248,11 @@ function escapeHTML(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+function formatearRubrosParaLista(rubros) {
+    if (!rubros || rubros.length === 0) return '-';
+    return rubros.slice(0, 2).join(', ') + (rubros.length > 2 ? ` +${rubros.length - 2}` : '');
+}
+
 function mostrarToast(mensaje, tipo = 'info') {
     const toast = document.createElement('div');
     toast.textContent = mensaje;
@@ -259,12 +272,13 @@ function mostrarToast(mensaje, tipo = 'info') {
 async function withLoading(button, callback) {
     if (!button) return await callback();
     const originalText = button.innerHTML;
+    const originalDisabled = button.disabled;
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
     try {
         return await callback();
     } finally {
-        button.disabled = false;
+        button.disabled = originalDisabled;
         button.innerHTML = originalText;
     }
 }
@@ -292,6 +306,81 @@ async function subirImagenACloudinary(file) {
         console.error('Error subir imagen:', error);
         return null;
     }
+}
+
+// ===================================================
+// MODAL SELECTOR DE RUBROS PARA ADMIN
+// ===================================================
+
+function abrirModalRubrosAdmin(rubrosActuales, callback) {
+    const rubrosTemporales = [...(rubrosActuales || [])];
+    const rubrosLista = RUBROS_DISPONIBLES;
+    
+    const rubrosHTML = rubrosLista.map(rubro => `
+        <label class="rubro-checkbox-modal">
+            <input type="checkbox" value="${rubro}" ${rubrosTemporales.includes(rubro) ? 'checked' : ''}>
+            <span>${rubro}</span>
+        </label>
+    `).join('');
+    
+    const modalContent = `
+        <div class="modal" id="modal-rubros-admin" style="display: flex;">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-tags"></i> Seleccionar rubros</h3>
+                    <button class="modal-close" onclick="cerrarModalRubrosAdmin()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-help">Selecciona uno o varios rubros para el negocio:</p>
+                    <div class="rubros-grid-modal" id="rubros-grid-modal-admin">
+                        ${rubrosHTML}
+                    </div>
+                    <div class="rubros-seleccionados-info">
+                        <strong>Rubros seleccionados:</strong> <span id="rubros-seleccionados-lista-admin">${rubrosTemporales.join(', ') || 'Ninguno'}</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-outline" onclick="cerrarModalRubrosAdmin()">Cancelar</button>
+                    <button class="btn-primary" id="btn-confirmar-rubros-admin">Confirmar selección</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('modal-rubros-admin');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalContent);
+    
+    const modal = document.getElementById('modal-rubros-admin');
+    const listaSpan = document.getElementById('rubros-seleccionados-lista-admin');
+    
+    // Actualizar lista cuando cambian los checkboxes
+    const updateLista = () => {
+        const seleccionados = [];
+        document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]:checked').forEach(cb => {
+            seleccionados.push(cb.value);
+        });
+        listaSpan.textContent = seleccionados.length ? seleccionados.join(', ') : 'Ninguno';
+    };
+    
+    document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', updateLista);
+    });
+    
+    document.getElementById('btn-confirmar-rubros-admin').onclick = () => {
+        const seleccionados = [];
+        document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]:checked').forEach(cb => {
+            seleccionados.push(cb.value);
+        });
+        callback(seleccionados);
+        cerrarModalRubrosAdmin();
+    };
+}
+
+function cerrarModalRubrosAdmin() {
+    const modal = document.getElementById('modal-rubros-admin');
+    if (modal) modal.remove();
 }
 
 // ===================================================
@@ -331,14 +420,18 @@ async function actualizarDatosManual() {
             if (pedidosRes.success) allPedidos = pedidosRes.pedidos || [];
             const productosRes = await callAPI('getAllProductos');
             if (productosRes.success) allProductos = productosRes.productos || [];
-            actualizarDashboard(); renderizarVendedores(); renderizarPedidos(); renderizarProductos(); cargarFiltros();
+            actualizarDashboard(); 
+            renderizarVendedores(); 
+            renderizarPedidos(); 
+            renderizarProductos(); 
+            cargarFiltros();
             mostrarToast('Datos actualizados', 'success');
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
     });
 }
 
 // ===================================================
-// DASHBOARD
+// DASHBOARD (SIN GRÁFICO)
 // ===================================================
 
 function actualizarDashboard() {
@@ -348,23 +441,10 @@ function actualizarDashboard() {
     const ingresos = allPedidos.reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     document.getElementById('total-ingresos').textContent = formatearPrecio(ingresos);
     
-    const ultimos7Dias = [], ventasPorDia = {};
-    for (let i = 6; i >= 0; i--) {
-        const fecha = new Date(); fecha.setDate(fecha.getDate() - i);
-        const fechaStr = fecha.toISOString().split('T')[0];
-        ultimos7Dias.push(fechaStr); ventasPorDia[fechaStr] = 0;
-    }
-    allPedidos.forEach(p => {
-        const fecha = p.fecha ? p.fecha.split('T')[0] : null;
-        if (fecha && ventasPorDia[fecha] !== undefined) ventasPorDia[fecha] += parseFloat(p.total) || 0;
-    });
-    const ctxVentas = document.getElementById('ventas-chart');
-    if (ctxVentas && typeof Chart !== 'undefined') {
-        if (charts.ventas) charts.ventas.destroy();
-        charts.ventas = new Chart(ctxVentas, {
-            type: 'line', data: { labels: ultimos7Dias.map(d => d.slice(5)), datasets: [{ label: 'Ventas', data: ultimos7Dias.map(d => ventasPorDia[d]), borderColor: '#FF5A00', backgroundColor: 'rgba(255,90,0,0.1)', fill: true, tension: 0.3 }] },
-            options: { responsive: true, maintainAspectRatio: true }
-        });
+    // Ocultar el gráfico si existe
+    const chartContainer = document.getElementById('ventas-chart');
+    if (chartContainer) {
+        chartContainer.style.display = 'none';
     }
     
     const ventasPorVendedor = {};
@@ -391,27 +471,25 @@ function actualizarDashboard() {
 }
 
 // ===================================================
-// VENDEDORES (CON RUBROS)
+// VENDEDORES (CON RUBROS Y ESTADO)
 // ===================================================
-
-function formatearRubrosParaLista(rubros) {
-    if (!rubros || rubros.length === 0) return '-';
-    return rubros.slice(0, 3).join(', ') + (rubros.length > 3 ? ` +${rubros.length - 3}` : '');
-}
 
 function renderizarVendedores() {
     const tbody = document.getElementById('vendedores-tbody');
     if (!tbody) return;
     const stats = {};
     allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
+    
     tbody.innerHTML = allVendedores.map(v => `
         <tr>
             <td>${v.id}</td>
             <td><strong>${escapeHTML(v.nombre)}</strong></td>
             <td>${escapeHTML(v.email || '-')}</td>
-            <td>${formatearRubrosParaLista(v.rubros)}</td>
             <td>${v.telefono || '-'}</td>
+            <td>${escapeHTML(v.direccion || '-')}</td>
+            <td>${formatearRubrosParaLista(v.rubros)}</td>
             <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
+            <td><span class="status-badge ${v.estado_abierto === true ? 'status-abierto' : 'status-cerrado'}">${v.estado_abierto === true ? 'Atendiendo' : 'Cerrado'}</span></td>
             <td>${stats[v.id]?.pedidos || 0}</td>
             <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
             <td>
@@ -426,6 +504,7 @@ function renderizarVendedores() {
 function editarVendedor(id) {
     const v = allVendedores.find(v => v.id.toString() === id.toString());
     if (!v) return;
+    
     document.getElementById('edit-vendedor-id').value = v.id;
     document.getElementById('edit-vendedor-nombre').value = v.nombre || '';
     document.getElementById('edit-vendedor-email').value = v.email || '';
@@ -433,21 +512,35 @@ function editarVendedor(id) {
     document.getElementById('edit-vendedor-direccion').value = v.direccion || '';
     document.getElementById('edit-vendedor-horario').value = v.horario || '';
     document.getElementById('edit-vendedor-activo').value = v.activo === true ? 'SI' : 'NO';
+    document.getElementById('edit-vendedor-estado').value = v.estado_abierto === true ? 'abierto' : 'cerrado';
     
-    // Cargar checkboxes de rubros
-    const rubrosContainer = document.getElementById('edit-vendedor-rubros');
+    // Mostrar rubros actuales
+    const rubrosActuales = v.rubros || [];
+    rubrosTempEditVendedor = [...rubrosActuales];
+    const rubrosContainer = document.getElementById('edit-vendedor-rubros-container');
     if (rubrosContainer) {
-        const rubrosActuales = v.rubros || [];
-        rubrosContainer.innerHTML = '';
-        RUBROS_DISPONIBLES.forEach(rubro => {
-            const label = document.createElement('label');
-            label.className = 'rubro-checkbox';
-            label.innerHTML = `
-                <input type="checkbox" name="edit-rubros" value="${rubro}" ${rubrosActuales.includes(rubro) ? 'checked' : ''}>
-                <span>${rubro}</span>
-            `;
-            rubrosContainer.appendChild(label);
-        });
+        if (rubrosActuales.length === 0) {
+            rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
+        } else {
+            rubrosContainer.innerHTML = rubrosActuales.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+        }
+    }
+    
+    // Configurar botón para editar rubros
+    const btnEditRubros = document.getElementById('btn-edit-rubros');
+    if (btnEditRubros) {
+        btnEditRubros.onclick = () => {
+            abrirModalRubrosAdmin(rubrosTempEditVendedor, (nuevosRubros) => {
+                rubrosTempEditVendedor = nuevosRubros;
+                if (rubrosContainer) {
+                    if (nuevosRubros.length === 0) {
+                        rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
+                    } else {
+                        rubrosContainer.innerHTML = nuevosRubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+                    }
+                }
+            });
+        };
     }
     
     document.getElementById('modal-editar-vendedor').classList.add('active');
@@ -456,10 +549,7 @@ function editarVendedor(id) {
 async function guardarEditarVendedor() {
     const btn = document.getElementById('guardar-editar-vendedor');
     await withLoading(btn, async () => {
-        const rubrosSeleccionados = [];
-        document.querySelectorAll('#edit-vendedor-rubros input[type="checkbox"]:checked').forEach(cb => {
-            rubrosSeleccionados.push(cb.value);
-        });
+        const estadoAbierto = document.getElementById('edit-vendedor-estado')?.value === 'abierto';
         
         const data = {
             id: parseInt(document.getElementById('edit-vendedor-id').value),
@@ -469,11 +559,16 @@ async function guardarEditarVendedor() {
             direccion: document.getElementById('edit-vendedor-direccion').value.trim(),
             horario: document.getElementById('edit-vendedor-horario').value.trim(),
             activo: document.getElementById('edit-vendedor-activo')?.value || 'SI',
-            rubros: rubrosSeleccionados
+            rubros: rubrosTempEditVendedor,
+            estado_abierto: estadoAbierto
         };
         try {
             const res = await callAPI('actualizarVendedor', data);
-            if (res && res.success) { mostrarToast('Vendedor actualizado', 'success'); cerrarModal('modal-editar-vendedor'); await actualizarDatosManual(); }
+            if (res && res.success) { 
+                mostrarToast('Vendedor actualizado', 'success'); 
+                cerrarModal('modal-editar-vendedor'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
     });
@@ -533,7 +628,11 @@ async function confirmarEliminarVendedor() {
     await withLoading(btn, async () => {
         try {
             const res = await callAPI('eliminarVendedor', { vendedorId: window.vendedorAEliminar });
-            if (res && res.success) { mostrarToast('Vendedor eliminado', 'success'); cerrarModal('modal-confirmar-vendedor'); await actualizarDatosManual(); }
+            if (res && res.success) { 
+                mostrarToast('Vendedor eliminado', 'success'); 
+                cerrarModal('modal-confirmar-vendedor'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.vendedorAEliminar = null;
@@ -591,7 +690,11 @@ async function guardarEditarProducto() {
         };
         try {
             const res = await callAPI('actualizarProducto', data);
-            if (res && res.success) { mostrarToast('Producto actualizado', 'success'); cerrarModal('modal-editar-producto'); await actualizarDatosManual(); }
+            if (res && res.success) { 
+                mostrarToast('Producto actualizado', 'success'); 
+                cerrarModal('modal-editar-producto'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
     });
@@ -608,7 +711,11 @@ async function confirmarEliminarProducto() {
     await withLoading(btn, async () => {
         try {
             const res = await callAPI('eliminarProducto', { productoId: window.productoAEliminar });
-            if (res && res.success) { mostrarToast('Producto eliminado', 'success'); cerrarModal('modal-confirmar-producto'); await actualizarDatosManual(); }
+            if (res && res.success) { 
+                mostrarToast('Producto eliminado', 'success'); 
+                cerrarModal('modal-confirmar-producto'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.productoAEliminar = null;
@@ -638,7 +745,7 @@ function renderizarPedidos() {
             <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
             <td>${formatearPrecio(p.total)}</td>
             <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-            <td>${p.productos ? p.productos.length : 0} productos</td>
+            <td>${p.productos ? p.productos.length : 0} productos}</td>
             <td><button class="btn-edit" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn-delete" onclick="eliminarPedido(${p.id}, this)"><i class="fas fa-trash"></i> Eliminar</button></td>
         </tr>
     `).join('');
@@ -663,7 +770,11 @@ async function guardarEditarPedido() {
         const nuevoEstado = document.getElementById('edit-pedido-estado').value;
         try {
             const res = await callAPI('actualizarEstado', { pedidoId: parseInt(id), estado: nuevoEstado });
-            if (res && res.success) { mostrarToast('Pedido actualizado', 'success'); cerrarModal('modal-editar-pedido'); await actualizarDatosManual(); }
+            if (res && res.success) { 
+                mostrarToast('Pedido actualizado', 'success'); 
+                cerrarModal('modal-editar-pedido'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al actualizar', 'error'); }
         } catch (error) { mostrarToast('Error al actualizar', 'error'); }
     });
@@ -680,7 +791,11 @@ async function confirmarEliminarPedido() {
     await withLoading(btn, async () => {
         try {
             const res = await callAPI('cancelarPedido', { pedidoId: window.pedidoAEliminar });
-            if (res && res.success) { mostrarToast('Pedido eliminado', 'success'); cerrarModal('modal-confirmar-pedido'); await actualizarDatosManual(); }
+            if (res && res.success) { 
+                mostrarToast('Pedido eliminado', 'success'); 
+                cerrarModal('modal-confirmar-pedido'); 
+                await actualizarDatosManual(); 
+            }
             else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
         } catch (error) { mostrarToast('Error al eliminar', 'error'); }
         window.pedidoAEliminar = null;
@@ -867,11 +982,14 @@ async function exportarVendedores() {
             ID: v.id, 
             Nombre: v.nombre, 
             Email: v.email, 
+            Telefono: v.telefono,
+            Direccion: v.direccion,
             Rubros: (v.rubros || []).join(', '),
-            Telefono: v.telefono, 
-            Direccion: v.direccion, 
-            Horario: v.horario, 
-            Estado: v.activo === true ? 'Activo' : 'Inactivo' 
+            Estado_activo: v.activo === true ? 'Activo' : 'Inactivo',
+            Estado_atencion: v.estado_abierto === true ? 'Atendiendo' : 'Cerrado',
+            Horario: v.horario,
+            Pedidos: allPedidos.filter(p => p.vendedor_id === v.id).length,
+            Ingresos: allPedidos.filter(p => p.vendedor_id === v.id).reduce((s, p) => s + (parseFloat(p.total) || 0), 0)
         }));
         downloadCSV(data, 'vendedores_want.csv');
     });
@@ -969,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
         const tbody = document.getElementById('vendedores-tbody');
         if (!tbody) return;
-        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay vendedores</td>'; return; }
+        if (!filtered.length) { tbody.innerHTML = '<td><td colspan="10" class="loading-text">No hay vendedores</td></tr>'; return; }
         const stats = {};
         allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
         tbody.innerHTML = filtered.map(v => `
@@ -977,9 +1095,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td>${v.id}</td>
                 <td><strong>${escapeHTML(v.nombre)}</strong></td>
                 <td>${escapeHTML(v.email || '-')}</td>
-                <td>${formatearRubrosParaLista(v.rubros)}</td>
                 <td>${v.telefono || '-'}</td>
+                <td>${escapeHTML(v.direccion || '-')}</td>
+                <td>${formatearRubrosParaLista(v.rubros)}</td>
                 <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
+                <td><span class="status-badge ${v.estado_abierto === true ? 'status-abierto' : 'status-cerrado'}">${v.estado_abierto === true ? 'Atendiendo' : 'Cerrado'}</span></td>
                 <td>${stats[v.id]?.pedidos || 0}</td>
                 <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
                 <td>

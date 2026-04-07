@@ -1,5 +1,5 @@
 // ===================================================
-// HOME - Lógica de la página principal (CON RUBROS)
+// HOME - Lógica de la página principal (CON ESTADO)
 // ===================================================
 
 let todosLosNegocios = [];
@@ -29,7 +29,6 @@ function escapeHTML(str) {
 function formatearRubros(rubros) {
     if (!rubros || rubros.length === 0) return '';
     
-    // Mostrar máximo 2 rubros, el resto con +X
     const rubrosMostrar = rubros.slice(0, 2);
     const resto = rubros.length - 2;
     let rubrosHTML = rubrosMostrar.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
@@ -37,6 +36,13 @@ function formatearRubros(rubros) {
         rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
     }
     return `<div class="rubros-container">${rubrosHTML}</div>`;
+}
+
+function getEstadoTexto(estadoAbierto) {
+    if (estadoAbierto === true || estadoAbierto === 'true' || estadoAbierto === 1) {
+        return '<span class="estado-abierto"><i class="fas fa-check-circle"></i> Atendiendo</span>';
+    }
+    return '<span class="estado-cerrado"><i class="fas fa-times-circle"></i> Cerrado</span>';
 }
 
 // ===================================================
@@ -114,15 +120,13 @@ function renderizarNegocios(vendedores) {
     }
     
     grid.innerHTML = vendedores.map(v => {
-        // Obtener rubros del vendedor
         const rubros = v.rubros || [];
+        const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        // Obtener productos preview
         const productosPreview = v.productos && v.productos.length > 0 
             ? v.productos.slice(0, 2).map(p => p.nombre).join(', ') 
             : '';
         
-        // Resaltar coincidencias en búsqueda
         const nombreResaltado = resaltarCoincidencia(v.nombre || 'Sin nombre', terminoBusquedaActual);
         const direccionResaltada = resaltarCoincidencia(v.direccion || 'Sin dirección', terminoBusquedaActual);
         
@@ -136,6 +140,7 @@ function renderizarNegocios(vendedores) {
                 </div>
                 <div class="negocio-info">
                     <h3 class="negocio-nombre">${nombreResaltado}</h3>
+                    <div class="negocio-estado">${getEstadoTexto(estadoAbierto)}</div>
                     ${formatearRubros(rubros)}
                     <p class="negocio-direccion">📍 ${direccionResaltada}</p>
                     <p class="negocio-horario">🕐 ${escapeHTML(v.horario || 'Sin horario')}</p>
@@ -199,7 +204,6 @@ function realizarBusqueda(termino) {
             const direccionMatch = negocio.direccion?.toLowerCase().includes(termino) || false;
             const horarioMatch = negocio.horario?.toLowerCase().includes(termino) || false;
             
-            // Búsqueda por rubros
             const rubrosMatch = (negocio.rubros && negocio.rubros.some(r => 
                 r.toLowerCase().includes(termino)
             )) || false;

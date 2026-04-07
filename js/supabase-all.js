@@ -1,5 +1,5 @@
 // ===================================================
-// SUPABASE - CON RUBROS Y MEJORAS
+// SUPABASE - VERSIÓN COMPLETA CON ESTADO Y RUBROS
 // ===================================================
 
 (function() {
@@ -13,26 +13,22 @@
     const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
     const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
     
-    // ===================================================
-    // 2. INICIALIZAR CLIENTE
-    // ===================================================
-    
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     window.supabaseClient = supabaseClient;
     
     // ===================================================
-    // 3. LISTA DE RUBROS DISPONIBLES
+    // 2. LISTA DE RUBROS DISPONIBLES (con Pancheria)
     // ===================================================
     
     window.RUBROS_DISPONIBLES = [
-        'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas',
+        'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas', 'Pancheria',
         'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
         'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
         'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
     ];
     
     // ===================================================
-    // 4. FUNCIONES DE API
+    // 3. FUNCIONES DE API
     // ===================================================
     
     window.callAPI = async function(action, data = {}, forceRefresh = false) {
@@ -114,15 +110,6 @@
                     return { success: true, vendedor: vendedor };
                     
                 case 'registrarVendedor':
-                    console.log('📝 Registrando vendedor:', { email: data.email, nombre: data.nombre });
-                    
-                    const { data: authReg, error: authRegError } = await supabaseClient.auth.signUp({
-                        email: data.email,
-                        password: data.password
-                    });
-                    if (authRegError) throw authRegError;
-                    
-                    // Convertir rubros a array si es string o mantener como array
                     let rubrosArray = data.rubros;
                     if (typeof rubrosArray === 'string') {
                         rubrosArray = rubrosArray.split(',').map(r => r.trim());
@@ -130,6 +117,12 @@
                     if (!rubrosArray || rubrosArray.length === 0) {
                         rubrosArray = [];
                     }
+                    
+                    const { data: authReg, error: authRegError } = await supabaseClient.auth.signUp({
+                        email: data.email,
+                        password: data.password
+                    });
+                    if (authRegError) throw authRegError;
                     
                     const { data: newVendedor, error: vendRegError } = await supabaseClient
                         .from('vendedores')
@@ -141,6 +134,7 @@
                             horario: data.horario,
                             logo_url: data.logo_url,
                             rubros: rubrosArray,
+                            estado_abierto: true,
                             activo: true
                         }])
                         .select()
@@ -158,7 +152,6 @@
                         logo_url: data.logo_url
                     };
                     
-                    // Si se enviaron rubros, actualizarlos
                     if (data.rubros !== undefined) {
                         let rubrosArray = data.rubros;
                         if (typeof rubrosArray === 'string') {
@@ -167,7 +160,10 @@
                         updateData.rubros = rubrosArray || [];
                     }
                     
-                    // Si se envió contraseña, actualizar en Auth
+                    if (data.estado_abierto !== undefined) {
+                        updateData.estado_abierto = data.estado_abierto === true || data.estado_abierto === 'true';
+                    }
+                    
                     if (data.password_hash) {
                         const { error: passError } = await supabaseClient.auth.updateUser({
                             password: data.password_hash
@@ -210,15 +206,9 @@
                         })
                         .eq('id', data.id);
                     if (prodUpdateError) throw prodUpdateError;
-                    
-                    // Si hay que eliminar imagen anterior (opcional)
-                    if (data.eliminarImagenAnterior && data.imagen_anterior_url) {
-                        await eliminarImagenCloudinary(data.imagen_anterior_url);
-                    }
                     return { success: true };
                     
                 case 'eliminarProducto':
-                    // Obtener la URL de la imagen antes de eliminar
                     const { data: productoAEliminar } = await supabaseClient
                         .from('productos')
                         .select('imagen_url')
@@ -231,7 +221,6 @@
                         .eq('id', data.productoId);
                     if (prodDeleteError) throw prodDeleteError;
                     
-                    // Eliminar imagen de Cloudinary si existe
                     if (productoAEliminar && productoAEliminar.imagen_url) {
                         await eliminarImagenCloudinary(productoAEliminar.imagen_url);
                     }
@@ -399,24 +388,13 @@
     };
     
     // ===================================================
-    // 5. ELIMINAR IMAGEN DE CLOUDINARY
+    // 4. ELIMINAR IMAGEN DE CLOUDINARY
     // ===================================================
     
     async function eliminarImagenCloudinary(imagenUrl) {
         if (!imagenUrl) return false;
-        
         try {
-            // Extraer public_id de la URL de Cloudinary
-            const urlParts = imagenUrl.split('/');
-            const filename = urlParts[urlParts.length - 1];
-            const publicId = filename.split('.')[0];
-            
-            // Llamar a Cloudinary Admin API (requiere autenticación)
-            // Nota: Esto normalmente requiere una función backend por seguridad
-            console.log(`🗑️ Intentando eliminar imagen: ${publicId}`);
-            
-            // Por ahora, solo registramos la intención de eliminar
-            // Para implementación completa, necesitarías un endpoint backend
+            console.log(`🗑️ Intentando eliminar imagen: ${imagenUrl}`);
             return true;
         } catch (error) {
             console.error('Error eliminando imagen de Cloudinary:', error);
@@ -428,7 +406,7 @@
     window.postAPI = window.callAPI;
     
     // ===================================================
-    // 6. NAVEGACIÓN ENTRE PANELES
+    // 5. NAVEGACIÓN ENTRE PANELES
     // ===================================================
     
     window.mostrarPanelLogin = function() {
@@ -458,5 +436,5 @@
         }
     };
     
-    console.log('✅ Supabase API con rubros y eliminación de imágenes inicializada');
+    console.log('✅ Supabase API con estado y rubros inicializada');
 })();

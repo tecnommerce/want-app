@@ -1336,3 +1336,67 @@ body {
     color: var(--primary);
     font-weight: 500;
 }
+/* ===================================================
+   MODAL SELECTOR DE RUBROS (ESTILO BOTONES)
+   =================================================== */
+
+.modal-help {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.rubros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 16px;
+}
+
+.btn-rubro {
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 40px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-700);
+    text-align: center;
+}
+
+.btn-rubro:hover {
+    border-color: var(--primary);
+    background: #FFF5EB;
+    transform: scale(1.02);
+}
+
+.btn-rubro.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.rubros-seleccionados-info {
+    background: var(--gray-100);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+}
+
+.rubros-seleccionados-info strong {
+    color: var(--gray-700);
+}
+
+#rubros-seleccionados-lista {
+    color: var(--primary);
+    font-weight: 500;
+}

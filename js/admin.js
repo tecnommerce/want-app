@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (versión completa con RUBROS)
+// ADMIN - Panel de vendedor (COMPLETO CON ESTADO Y MODAL RUBROS)
 // ===================================================
 
 console.log('🚀 admin.js cargado correctamente');
@@ -20,40 +20,76 @@ let productosTempEdit = [];
 let productosTempNuevo = [];
 
 // ===================================================
-// RUBROS - LISTA Y FUNCIONES
+// RUBROS - LISTA Y FUNCIONES (con Pancheria)
 // ===================================================
 
 const RUBROS_DISPONIBLES = [
-    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas', 'Pancheria', 
+    'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas', 'Pancheria',
     'Comida casera', 'Kiosco', 'Bebidas', 'Despensa', 'Supermercado',
     'Panadería', 'Verdulería', 'Pollería', 'Carnicería', 'Cafetería',
     'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
 ];
 
-function cargarCheckboxesRubros(containerId, rubrosSeleccionados = []) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
+// ===================================================
+// MODAL SELECTOR DE RUBROS
+// ===================================================
+
+let rubrosTemporales = [];
+let rubrosCallback = null;
+
+function abrirModalRubros(rubrosActuales, callback) {
+    rubrosTemporales = [...(rubrosActuales || [])];
+    rubrosCallback = callback;
     
-    container.innerHTML = '';
+    const grid = document.getElementById('rubros-grid-modal');
+    if (!grid) return;
     
-    RUBROS_DISPONIBLES.forEach(rubro => {
-        const label = document.createElement('label');
-        label.className = 'rubro-checkbox';
-        const isChecked = rubrosSeleccionados.includes(rubro);
-        label.innerHTML = `
-            <input type="checkbox" name="rubros" value="${rubro}" ${isChecked ? 'checked' : ''}>
-            <span>${rubro}</span>
-        `;
-        container.appendChild(label);
+    grid.innerHTML = RUBROS_DISPONIBLES.map(rubro => `
+        <button type="button" class="btn-rubro ${rubrosTemporales.includes(rubro) ? 'selected' : ''}" data-rubro="${rubro}">
+            ${rubro}
+        </button>
+    `).join('');
+    
+    actualizarListaRubrosSeleccionados();
+    
+    document.querySelectorAll('.btn-rubro').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const rubro = btn.getAttribute('data-rubro');
+            if (rubrosTemporales.includes(rubro)) {
+                rubrosTemporales = rubrosTemporales.filter(r => r !== rubro);
+                btn.classList.remove('selected');
+            } else {
+                rubrosTemporales.push(rubro);
+                btn.classList.add('selected');
+            }
+            actualizarListaRubrosSeleccionados();
+        });
     });
+    
+    document.getElementById('modal-rubros').classList.add('active');
 }
 
-function obtenerRubrosSeleccionados(containerId) {
-    const rubros = [];
-    document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).forEach(cb => {
-        rubros.push(cb.value);
-    });
-    return rubros;
+function actualizarListaRubrosSeleccionados() {
+    const listaSpan = document.getElementById('rubros-seleccionados-lista');
+    if (listaSpan) {
+        if (rubrosTemporales.length === 0) {
+            listaSpan.textContent = 'Ninguno';
+        } else {
+            listaSpan.textContent = rubrosTemporales.join(', ');
+        }
+    }
+}
+
+function cerrarModalRubros() {
+    document.getElementById('modal-rubros').classList.remove('active');
+    rubrosCallback = null;
+}
+
+function confirmarRubros() {
+    if (rubrosCallback) {
+        rubrosCallback(rubrosTemporales);
+    }
+    cerrarModalRubros();
 }
 
 // ===================================================
@@ -125,12 +161,13 @@ async function subirImagenACloudinary(file) {
 async function withLoading(button, callback) {
     if (!button) return await callback();
     const originalText = button.innerHTML;
+    const originalDisabled = button.disabled;
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + originalText.replace(/<i class="[^"]*"><\/i>\s*/, '');
     try {
         return await callback();
     } finally {
-        button.disabled = false;
+        button.disabled = originalDisabled;
         button.innerHTML = originalText;
     }
 }
@@ -180,6 +217,57 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.zIndex = '9999';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+}
+
+// ===================================================
+// ESTADO ABIERTO/CERRADO (TOGGLE SWITCH)
+// ===================================================
+
+async function toggleEstadoAbierto() {
+    if (!vendedorActual) return;
+    
+    const nuevoEstado = !vendedorActual.estado_abierto;
+    const btnToggle = document.getElementById('toggle-estado-btn');
+    
+    await withLoading(btnToggle, async () => {
+        try {
+            const response = await postAPI('actualizarVendedor', {
+                id: vendedorActual.id,
+                estado_abierto: nuevoEstado
+            });
+            
+            if (response && response.success) {
+                vendedorActual.estado_abierto = nuevoEstado;
+                actualizarUIEstadoAbierto();
+                mostrarToast(nuevoEstado ? 'Negocio abierto' : 'Negocio cerrado', 'success');
+            } else {
+                throw new Error(response?.error || 'Error');
+            }
+        } catch (error) {
+            mostrarToast('Error al cambiar estado', 'error');
+        }
+    });
+}
+
+function actualizarUIEstadoAbierto() {
+    const estadoAbierto = vendedorActual?.estado_abierto === true;
+    const toggleSwitch = document.getElementById('toggle-estado-switch');
+    const estadoTexto = document.getElementById('estado-abierto-texto');
+    const estadoBadge = document.getElementById('estado-abierto-badge');
+    
+    if (toggleSwitch) {
+        toggleSwitch.checked = estadoAbierto;
+    }
+    
+    if (estadoTexto) {
+        estadoTexto.textContent = estadoAbierto ? 'Abierto' : 'Cerrado';
+        estadoTexto.style.color = estadoAbierto ? '#10b981' : '#ef4444';
+    }
+    
+    if (estadoBadge) {
+        estadoBadge.className = `estado-badge-header ${estadoAbierto ? 'estado-abierto' : 'estado-cerrado'}`;
+        estadoBadge.innerHTML = estadoAbierto ? '<i class="fas fa-check-circle"></i> Atendiendo' : '<i class="fas fa-times-circle"></i> Cerrado';
+    }
 }
 
 // ===================================================
@@ -742,8 +830,10 @@ async function guardarProducto() {
 async function eliminarProducto(productoId) { const producto = productos.find(p => p.id === productoId); if (!producto) return; if (!confirm(`¿Eliminar "${producto.nombre}"?`)) return; try { const response = await postAPI('eliminarProducto', { productoId }); if (response.success) { mostrarToast('Producto eliminado', 'success'); await cargarProductos(true); } } catch (error) { mostrarToast('Error al eliminar', 'error'); } }
 
 // ===================================================
-// PERFIL (con RUBROS)
+// PERFIL (con Modal de Rubros)
 // ===================================================
+
+let rubrosTempPerfil = [];
 
 function abrirModalPerfil() { cargarPerfil(); document.getElementById('modal-perfil').classList.add('active'); }
 function cerrarModalPerfil() { document.getElementById('modal-perfil').classList.remove('active'); }
@@ -764,9 +854,34 @@ function cargarPerfil() {
     if (pnd) pnd.textContent = vendedorActual.nombre || '';
     if (ped) ped.textContent = vendedorActual.email || '';
     
-    // Cargar checkboxes de rubros en el perfil
+    // Mostrar rubros actuales como tags
     const rubrosActuales = vendedorActual.rubros || [];
-    cargarCheckboxesRubros('perfil-rubros-selector', rubrosActuales);
+    rubrosTempPerfil = [...rubrosActuales];
+    const rubrosContainer = document.getElementById('perfil-rubros-container');
+    if (rubrosContainer) {
+        if (rubrosActuales.length === 0) {
+            rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
+        } else {
+            rubrosContainer.innerHTML = rubrosActuales.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+        }
+    }
+    
+    // Configurar botón para abrir modal
+    const btnEditarRubros = document.getElementById('btn-editar-rubros');
+    if (btnEditarRubros) {
+        btnEditarRubros.onclick = () => {
+            abrirModalRubros(rubrosTempPerfil, (nuevosRubros) => {
+                rubrosTempPerfil = nuevosRubros;
+                if (rubrosContainer) {
+                    if (nuevosRubros.length === 0) {
+                        rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
+                    } else {
+                        rubrosContainer.innerHTML = nuevosRubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+                    }
+                }
+            });
+        };
+    }
     
     const logoPreview = document.getElementById('logo-preview');
     if (logoPreview && vendedorActual.logo_url) logoPreview.innerHTML = `<img src="${vendedorActual.logo_url}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">`;
@@ -790,8 +905,7 @@ async function actualizarPerfil() {
     const newPassword = document.getElementById('perfil-new-password')?.value || '';
     const logoFile = document.getElementById('perfil-logo')?.files[0];
     
-    // Obtener rubros seleccionados del perfil
-    const rubrosSeleccionados = obtenerRubrosSeleccionados('perfil-rubros-selector');
+    const rubrosSeleccionados = rubrosTempPerfil;
     
     let logoUrl = vendedorActual.logo_url;
     if (logoFile) { 
@@ -960,8 +1074,10 @@ function confirmarAgregarProducto() {
 }
 
 // ===================================================
-// REGISTRO Y LOGIN (con RUBROS)
+// REGISTRO Y LOGIN (con Modal de Rubros)
 // ===================================================
+
+let rubrosTempRegistro = [];
 
 async function registrarVendedorConLogo(nombre, email, telefono, direccion, horario, password, logoFile, rubros) {
     console.log('📝 Registrando vendedor:', { nombre, email, rubros });
@@ -1047,6 +1163,9 @@ async function iniciarPanel(vendedor) {
     const panelEmail = document.getElementById('panel-email');
     if (panelNombre) panelNombre.textContent = vendedor.nombre;
     if (panelEmail) panelEmail.textContent = vendedor.email;
+    
+    // Actualizar UI del estado abierto/cerrado
+    actualizarUIEstadoAbierto();
     
     await cargarPedidos();
     await cargarProductos();
@@ -1134,6 +1253,12 @@ async function iniciarPanel(vendedor) {
                 actualizarTotalNuevo();
             });
         });
+    }
+    
+    // Event listener para el toggle de estado
+    const toggleSwitch = document.getElementById('toggle-estado-switch');
+    if (toggleSwitch) {
+        toggleSwitch.addEventListener('change', toggleEstadoAbierto);
     }
     
     inicializarTabs();
@@ -1270,8 +1395,30 @@ function mostrarPanelLogin() {
 function mostrarPanelRegistro() { 
     document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active')); 
     document.getElementById('register-panel').classList.add('active'); 
-    // Cargar checkboxes de rubros en el registro
-    cargarCheckboxesRubros('rubros-selector', []);
+    
+    // Resetear rubros temporales
+    rubrosTempRegistro = [];
+    const rubrosContainer = document.getElementById('rubros-seleccionados-registro');
+    if (rubrosContainer) {
+        rubrosContainer.innerHTML = '<span class="rubro-placeholder">Ningún rubro seleccionado</span>';
+    }
+    
+    // Configurar botón de rubros
+    const btnRubrosRegistro = document.getElementById('btn-rubros-registro');
+    if (btnRubrosRegistro) {
+        btnRubrosRegistro.onclick = () => {
+            abrirModalRubros(rubrosTempRegistro, (nuevosRubros) => {
+                rubrosTempRegistro = nuevosRubros;
+                if (rubrosContainer) {
+                    if (nuevosRubros.length === 0) {
+                        rubrosContainer.innerHTML = '<span class="rubro-placeholder">Ningún rubro seleccionado</span>';
+                    } else {
+                        rubrosContainer.innerHTML = nuevosRubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+                    }
+                }
+            });
+        };
+    }
 }
 
 function mostrarPanelRecuperacion() { 
@@ -1280,7 +1427,7 @@ function mostrarPanelRecuperacion() {
 }
 
 // ===================================================
-// INICIALIZAR BUSCADOR
+// INICIALIZAR BUSCADOR (con botón limpiar corregido)
 // ===================================================
 
 function inicializarBuscador() {
@@ -1312,9 +1459,6 @@ function inicializarBuscador() {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM cargado, configurando event listeners');
-    
-    // Cargar checkboxes de rubros en el registro
-    cargarCheckboxesRubros('rubros-selector', []);
     
     // Cargar sesión guardada
     const sesion = cargarSesionGuardada();
@@ -1361,8 +1505,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password2 = document.getElementById('reg-password2')?.value || '';
             const logoFile = document.getElementById('reg-logo')?.files[0];
             
-            // OBTENER RUBROS SELECCIONADOS
-            const rubrosSeleccionados = obtenerRubrosSeleccionados('rubros-selector');
+            const rubrosSeleccionados = rubrosTempRegistro;
             
             if (password !== password2) { alert('Las contraseñas no coinciden'); return; }
             if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
@@ -1374,8 +1517,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Registro exitoso. Ahora podés iniciar sesión.'); 
                 mostrarPanelLogin(); 
                 registerForm.reset(); 
-                // Limpiar checkboxes
-                document.querySelectorAll('#rubros-selector input[type="checkbox"]').forEach(cb => cb.checked = false);
+                rubrosTempRegistro = [];
+                const rubrosContainer = document.getElementById('rubros-seleccionados-registro');
+                if (rubrosContainer) rubrosContainer.innerHTML = '<span class="rubro-placeholder">Ningún rubro seleccionado</span>';
                 document.getElementById('login-email').value = email;
             } else { 
                 alert(response?.error || 'Error al registrar'); 
@@ -1421,4 +1565,7 @@ window.mostrarPanelLogin = mostrarPanelLogin;
 window.cargarPedidos = cargarPedidos;
 window.cargarProductos = cargarProductos;
 window.cargarDeliveries = cargarDeliveries;
-window.cargarCheckboxesRubros = cargarCheckboxesRubros;
+window.abrirModalRubros = abrirModalRubros;
+window.cerrarModalRubros = cerrarModalRubros;
+window.confirmarRubros = confirmarRubros;
+window.toggleEstadoAbierto = toggleEstadoAbierto;

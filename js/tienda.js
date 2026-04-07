@@ -1,19 +1,16 @@
 // ===================================================
-// TIENDA - Lógica de catálogo y carrito
+// TIENDA - Lógica de catálogo y carrito (CON ESTADO)
 // ===================================================
 
-// Variables globales
 let vendedorActual = null;
 let productos = [];
 let carrito = [];
 
-// Obtener ID del vendedor desde la URL
 function obtenerVendedorId() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('vendedor');
 }
 
-// Cargar datos del vendedor y productos
 async function cargarTienda() {
     const vendedorId = obtenerVendedorId();
     
@@ -36,7 +33,6 @@ async function cargarTienda() {
             `;
         }
         
-        // Obtener vendedores y filtrar por ID (CORREGIDO: activo === true)
         const vendedoresRes = await callAPI('getVendedores');
         if (vendedoresRes.success) {
             vendedorActual = vendedoresRes.vendedores.find(v => 
@@ -49,7 +45,6 @@ async function cargarTienda() {
                     nombreNegocio.textContent = vendedorActual.nombre;
                 }
                 
-                // Mostrar logo del vendedor en el header
                 const logoHeader = document.getElementById('vendedor-logo-header');
                 const logoImg = document.getElementById('vendedor-logo-img');
                 if (logoHeader && logoImg && vendedorActual.logo_url) {
@@ -67,14 +62,12 @@ async function cargarTienda() {
             }
         }
         
-        // Obtener productos del vendedor
         const response = await callAPI('getProductos', { vendedorId: vendedorId });
         
         if (response.error) {
             throw new Error(response.error);
         }
         
-        // CORREGIDO: Filtrar productos disponibles (disponible === true)
         productos = (response.productos || []).filter(p => p.disponible === true);
         renderizarProductos();
         
@@ -93,11 +86,23 @@ async function cargarTienda() {
     }
 }
 
-// Renderizar productos en la grilla
 function renderizarProductos() {
     const grid = document.getElementById('productos-grid');
     
     if (!grid) return;
+    
+    const estadoAbierto = vendedorActual?.estado_abierto === true || vendedorActual?.estado_abierto === 'true' || vendedorActual?.estado_abierto === 1;
+    
+    if (!estadoAbierto) {
+        grid.innerHTML = `
+            <div class="negocio-cerrado-mensaje">
+                <i class="fas fa-store-slash" style="font-size: 3rem; color: #ef4444; margin-bottom: 15px;"></i>
+                <h3>Este comercio se encuentra cerrado en este momento</h3>
+                <p>Pronto volverá a estar disponible.</p>
+            </div>
+        `;
+        return;
+    }
     
     if (productos.length === 0) {
         grid.innerHTML = `
@@ -128,8 +133,14 @@ function renderizarProductos() {
     `).join('');
 }
 
-// Agregar producto al carrito
 function agregarAlCarrito(productoId) {
+    const estadoAbierto = vendedorActual?.estado_abierto === true || vendedorActual?.estado_abierto === 'true' || vendedorActual?.estado_abierto === 1;
+    
+    if (!estadoAbierto) {
+        mostrarToast('Este comercio se encuentra cerrado en este momento. Pronto volverá a estar disponible.', 'error');
+        return;
+    }
+    
     const producto = productos.find(p => p.id.toString() === productoId.toString());
     
     if (!producto) return;
@@ -257,7 +268,6 @@ function mostrarFormularioCliente() {
     document.getElementById('cliente-modal').classList.add('active');
 }
 
-// Confirmar pedido
 async function confirmarPedido() {
     const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
     const telefono = document.getElementById('cliente-telefono')?.value.trim() || '';
@@ -301,23 +311,19 @@ async function confirmarPedido() {
         fecha: new Date().toISOString()
     };
     
-    // Guardar en localStorage
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
     const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    // Guardar en Google Sheets / Supabase
     const resultadoSheets = await guardarPedidoEnSheets(pedido);
     
-    // Limpiar carrito y formulario
     carrito = [];
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
     document.getElementById('cliente-form').reset();
     document.getElementById('pedido-detalles').value = '';
     
-    // Cerrar modales
     document.getElementById('cliente-modal').classList.remove('active');
     document.getElementById('carrito-modal').classList.remove('active');
     
@@ -355,10 +361,6 @@ async function guardarPedidoEnSheets(pedido) {
         return { success: false, error: error.message };
     }
 }
-
-// ===================================================
-// TICKET DE CONFIRMACIÓN
-// ===================================================
 
 let datosClienteTemp = null;
 
@@ -463,10 +465,6 @@ function mostrarMensajeExito() {
     }, 3000);
 }
 
-// ===================================================
-// EVENT LISTENERS
-// ===================================================
-
 document.addEventListener('DOMContentLoaded', () => {
     cargarTienda();
     cargarCarritoDelVendedor();
@@ -553,10 +551,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
-// ===================================================
-// FUNCIONES UTILITARIAS
-// ===================================================
 
 function escapeHTML(str) {
     if (!str) return '';
