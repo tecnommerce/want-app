@@ -140,6 +140,22 @@ async function cargarUsuarioLogueado(usuarioId) {
     }
 }
 
+window.loginWithGoogle = async function() {
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: 'https://want-app-eta.vercel.app/index.html'
+            }
+        });
+        if (error) throw error;
+        return { success: true };
+    } catch (error) {
+        console.error('Error login con Google:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 // ===================================================
 // MANEJO DE PANTALLAS
 // ===================================================

@@ -142,19 +142,32 @@
     };
     
     window.obtenerUsuarioPorAuthId = async function(authId) {
-        try {
-            const { data, error } = await supabaseClient
-                .from('usuarios')
-                .select('*')
-                .eq('auth_id', authId)
-                .single();
-            
-            if (error) throw error;
-            return { success: true, usuario: data };
-        } catch (error) {
-            return { success: false, error: error.message };
+    try {
+        console.log('🔍 Buscando usuario con auth_id:', authId);
+        
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .eq('auth_id', authId)
+            .maybeSingle();  // Cambiar .single() por .maybeSingle()
+        
+        if (error) {
+            console.error('Error en consulta:', error);
+            throw error;
         }
-    };
+        
+        console.log('📦 Resultado:', data);
+        
+        if (data) {
+            return { success: true, usuario: data };
+        } else {
+            return { success: false, error: 'Usuario no encontrado' };
+        }
+    } catch (error) {
+        console.error('Error obteniendo usuario:', error);
+        return { success: false, error: error.message };
+    }
+};
     
     window.actualizarDatosUsuario = async function(usuarioId, updateData) {
         try {
