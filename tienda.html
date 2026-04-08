@@ -6,171 +6,144 @@
     <title>Want | Tienda</title>
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- HEADER SIMPLE - SIN AVATAR, SOLO LO ESENCIAL -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content" style="display: flex; align-items: center; justify-content: space-between;">
-                <a href="index.html" class="logo" style="font-size: 1.5rem; font-weight: 700; color: #FF5A00; text-decoration: none;">Want<span style="color: #FF7A00;">.</span></a>
-                
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="vendedor-info-header" style="display: flex; align-items: center; gap: 10px;">
-                        <div id="vendedor-logo-header" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: none;">
-                            <img src="" alt="Logo" id="vendedor-logo-img" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                        <p id="negocio-nombre" style="font-size: 0.9rem; font-weight: 500; color: #666; margin: 0;">Cargando negocio...</p>
-                    </div>
-                    
-                    <a href="#" class="cart-icon" id="cart-icon" style="position: relative; background: #f5f5f5; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FF5A00; font-size: 1.2rem; text-decoration: none;">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: #FF5A00; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <section class="productos-section" style="padding: 40px 0 80px;">
-            <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-                <div class="productos-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <h2 style="font-size: 1.5rem; color: #333;">Nuestros productos</h2>
-                </div>
-                
-                <!-- GRID DE PRODUCTOS - ESCRITORIO -->
-                <div class="productos-grid" id="productos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;">
-                    <div class="loading" style="text-align: center; padding: 50px; color: #888;">
-                        <div class="spinner" style="width: 35px; height: 35px; border: 3px solid #f0f0f0; border-top-color: #FF5A00; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px;"></div>
-                        <p>Cargando productos...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal del carrito -->
-    <div class="modal" id="carrito-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
-        <div class="modal-content" style="background: white; border-radius: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #eee;">
-                <h3 style="margin: 0;">Tu pedido</h3>
-                <button class="modal-close" id="cerrar-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div class="modal-body" id="carrito-items" style="padding: 20px;">
-                <p>No hay productos en el carrito</p>
-            </div>
-            <div class="modal-footer" style="padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;">
-                <div class="carrito-total" style="flex: 1;">
-                    <strong>Total:</strong> <span id="carrito-total">$0</span>
-                </div>
-                <button class="btn btn-primary btn-finalizar" id="finalizar-pedido" style="background: #FF5A00; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer;">Finalizar pedido</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal del formulario de cliente -->
-    <div class="modal" id="cliente-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
-        <div class="modal-content" style="background: white; border-radius: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #eee;">
-                <h3 style="margin: 0;">Completá tus datos</h3>
-                <button class="modal-close" id="cerrar-cliente-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div class="modal-body" style="padding: 20px;">
-                <button type="button" class="btn-usar-datos" id="btn-usar-mis-datos" style="background: #f0f0f0; border: none; padding: 12px; border-radius: 40px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-bottom: 16px;">
-                    <i class="fas fa-user-check"></i> Usar mis datos de envío
-                </button>
-                
-                <form id="cliente-form">
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Nombre completo *</label>
-                        <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Teléfono *</label>
-                        <input type="tel" id="cliente-telefono" placeholder="5491112345678" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
-                        <small style="display: block; margin-top: 5px; font-size: 0.7rem; color: #888;">📱 Importante: Número de WhatsApp correcto</small>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Dirección de entrega *</label>
-                        <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Método de pago *</label>
-                        <select id="metodo-pago" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
-                            <option value="">Seleccioná una opción</option>
-                            <option value="efectivo">💵 Efectivo</option>
-                            <option value="transferencia">🏦 Transferencia bancaria</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Detalles del pedido</label>
-                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido..." style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem; resize: vertical;"></textarea>
-                        <small style="display: block; margin-top: 5px; font-size: 0.7rem; color: #888;">📝 Indicaciones especiales</small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer" style="padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="btn btn-primary btn-block" id="btn-continuar-pago" style="background: #FF5A00; color: white; border: none; padding: 12px 24px; border-radius: 40px; cursor: pointer; width: 100%;">Continuar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de confirmación (ticket) -->
-    <div class="modal" id="confirmacion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
-        <div class="modal-content ticket-modal" style="background: white; border-radius: 24px; max-width: 550px; width: 95%; max-height: 80vh; overflow-y: auto;">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #eee;">
-                <h3 style="margin: 0;">Confirmá tu pedido</h3>
-                <button class="modal-close" id="cerrar-confirmacion-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div class="modal-body" style="padding: 20px;">
-                <div class="ticket-info" style="background: #f9f9f9; border-radius: 20px; padding: 20px;">
-                    <h4 style="margin-bottom: 15px; text-align: center;">Resumen del pedido</h4>
-                    <div class="ticket-section" style="background: white; border-radius: 16px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eee;">
-                        <p><strong>Nombre:</strong> <span id="confirm-nombre"></span></p>
-                        <p><strong>Teléfono:</strong> <span id="confirm-telefono"></span></p>
-                        <p><strong>Dirección:</strong> <span id="confirm-direccion"></span></p>
-                        <p><strong>Método de pago:</strong> <span id="confirm-pago"></span></p>
-                    </div>
-                    <div class="ticket-section" style="background: white; border-radius: 16px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eee;">
-                        <strong>Productos:</strong>
-                        <div id="confirm-productos" class="productos-lista" style="margin: 10px 0;"></div>
-                        <p class="ticket-total" style="text-align: right; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;"><strong>Total:</strong> <span id="confirm-total"></span></p>
-                    </div>
-                    <div class="ticket-section" id="confirm-detalles-section" style="background: white; border-radius: 16px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eee; display: none;">
-                        <strong>Detalles del pedido:</strong>
-                        <p id="confirm-detalles"></p>
-                    </div>
-                    <div class="ticket-warning" style="background: #FFF3E0; border-radius: 16px; padding: 12px 15px; font-size: 0.8rem; color: #FF9800; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-info-circle"></i>
-                        Verificá que tu número de WhatsApp sea correcto. El vendedor te confirmará tu pedido por ese medio.
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer ticket-footer" style="padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="btn btn-outline" id="btn-editar-pedido" style="background: transparent; border: 1px solid #FF5A00; color: #FF5A00; padding: 10px 20px; border-radius: 40px; cursor: pointer;">Editar pedido</button>
-                <button class="btn btn-primary" id="btn-enviar-pedido" style="background: #FF5A00; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer;">Confirmar y enviar</button>
-            </div>
-        </div>
-    </div>
-
-    <footer class="footer" style="background: white; border-top: 1px solid #eee; padding: 25px 0; text-align: center; color: #888; font-size: 0.8rem;">
-        <div class="container">
-            <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
-        </div>
-    </footer>
-
+    
     <style>
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        /* Estilos específicos para la tienda - NO AFECTAN index.html */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FF5A00;
+            text-decoration: none;
+        }
+        
+        .logo-dot {
+            color: #FF7A00;
+        }
+        
+        .vendedor-info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .vendedor-logo-header {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: none;
+        }
+        
+        .vendedor-logo-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .tagline {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666;
+            margin: 0;
+        }
+        
+        .cart-icon {
+            position: relative;
+            background: #f5f5f5;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FF5A00;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .cart-icon:hover {
+            background: #FF5A00;
+            color: white;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #FF5A00;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* PRODUCTOS - ESCRITORIO */
+        .productos-section {
+            padding: 40px 0 80px;
+        }
+        
+        .productos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .productos-header h2 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px;
+        }
+        
         .producto-card {
             background: white;
             border-radius: 16px;
@@ -203,6 +176,11 @@
             height: 100%;
             object-fit: contain;
             padding: 15px;
+        }
+        
+        .producto-imagen .placeholder-img {
+            font-size: 2.5rem;
+            color: #ccc;
         }
         
         .producto-info {
@@ -262,8 +240,385 @@
             color: white;
         }
         
-        /* MÓVIL - VISTA LISTA */
+        /* MODALES */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex !important;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        /* FORMULARIOS */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FF5A00;
+            box-shadow: 0 0 0 2px rgba(255,90,0,0.1);
+        }
+        
+        .input-help {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        /* BOTONES */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #FF5A00;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e04e00;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #FF5A00;
+            color: #FF5A00;
+        }
+        
+        .btn-outline:hover {
+            background: #FF5A00;
+            color: white;
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .btn-usar-datos {
+            background: #f0f0f0;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+        
+        .btn-usar-datos:hover {
+            background: #FF5A00;
+            color: white;
+        }
+        
+        /* CARRITO */
+        .carrito-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .carrito-item-info {
+            flex: 1;
+        }
+        
+        .carrito-item-nombre {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .carrito-item-precio {
+            font-size: 0.7rem;
+            color: #FF5A00;
+        }
+        
+        .carrito-item-cantidad {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .carrito-item-cantidad button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .carrito-item-total {
+            font-weight: 600;
+            min-width: 70px;
+            text-align: right;
+            font-size: 0.85rem;
+        }
+        
+        .btn-eliminar {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .carrito-total {
+            font-size: 1rem;
+            text-align: right;
+            margin-bottom: 12px;
+            flex: 1;
+        }
+        
+        /* TICKET */
+        .ticket-info {
+            background: #f9f9f9;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        
+        .ticket-section {
+            background: white;
+            border-radius: 16px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .ticket-section p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .productos-lista {
+            margin: 10px 0;
+        }
+        
+        .producto-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.85rem;
+        }
+        
+        .ticket-total {
+            text-align: right;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .ticket-warning {
+            background: #FFF3E0;
+            border-radius: 16px;
+            padding: 12px 15px;
+            font-size: 0.8rem;
+            color: #FF9800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ticket-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .ticket-footer .btn {
+            flex: 1;
+        }
+        
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+        
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #FF5A00;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            background: white;
+            border-top: 1px solid #eee;
+            padding: 25px 0;
+            text-align: center;
+            color: #888;
+            font-size: 0.8rem;
+        }
+        
+        /* NEGOCIO CERRADO */
+        .negocio-cerrado-mensaje {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #eee;
+        }
+        
+        .negocio-cerrado-mensaje h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .negocio-cerrado-mensaje p {
+            color: #666;
+        }
+        
+        /* RESPONSIVE MÓVIL */
         @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
+            
+            .tagline {
+                font-size: 0.8rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 120px;
+            }
+            
+            .vendedor-logo-header {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .cart-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            
+            /* PRODUCTOS EN LISTA MÓVIL */
             .productos-grid {
                 display: flex !important;
                 flex-direction: column;
@@ -318,39 +673,215 @@
                 font-size: 0.7rem;
                 width: auto;
             }
+            
+            /* MODALES MÓVIL */
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .modal-footer .btn {
+                width: 100%;
+            }
+            
+            .ticket-footer {
+                flex-direction: column;
+            }
+            
+            .carrito-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .carrito-item-cantidad {
+                order: 2;
+            }
+            
+            .carrito-item-total {
+                order: 3;
+                text-align: left;
+            }
+            
+            .btn-eliminar {
+                order: 4;
+                align-self: flex-end;
+            }
         }
         
-        /* Modal active */
-        .modal.active {
-            display: flex !important;
-        }
-        
-        .cart-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #FF5A00;
-            color: white;
-            font-size: 0.65rem;
-            font-weight: bold;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @media (max-width: 480px) {
+            .producto-imagen {
+                width: 60px !important;
+                height: 60px !important;
+            }
         }
     </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
+                
+                <div class="vendedor-info-header">
+                    <div class="vendedor-logo-header" id="vendedor-logo-header" style="display: none;">
+                        <img src="" alt="Logo" id="vendedor-logo-img">
+                    </div>
+                    <p class="tagline" id="negocio-nombre">Cargando negocio...</p>
+                </div>
+                
+                <a href="#" class="cart-icon" id="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="productos-section">
+            <div class="container">
+                <div class="productos-header">
+                    <h2>Nuestros productos</h2>
+                </div>
+                <div class="productos-grid" id="productos-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando productos...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal del carrito -->
+    <div class="modal" id="carrito-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tu pedido</h3>
+                <button class="modal-close" id="cerrar-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="carrito-items">
+                <p style="text-align: center; color: #666;">No hay productos en el carrito</p>
+            </div>
+            <div class="modal-footer">
+                <div class="carrito-total">
+                    <strong>Total:</strong> <span id="carrito-total">$0</span>
+                </div>
+                <button class="btn btn-primary" id="finalizar-pedido">Finalizar pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal del formulario de cliente -->
+    <div class="modal" id="cliente-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Completá tus datos</h3>
+                <button class="modal-close" id="cerrar-cliente-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn-usar-datos" id="btn-usar-mis-datos">
+                    <i class="fas fa-user-check"></i> Usar mis datos de envío
+                </button>
+                
+                <form id="cliente-form">
+                    <div class="form-group">
+                        <label>Nombre completo <span class="required">*</span></label>
+                        <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Teléfono <span class="required">*</span></label>
+                        <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
+                        <small class="input-help">📱 Importante: Número de WhatsApp correcto para recibir la confirmación</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Dirección de entrega <span class="required">*</span></label>
+                        <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Método de pago <span class="required">*</span></label>
+                        <select id="metodo-pago" required>
+                            <option value="">Seleccioná una opción</option>
+                            <option value="efectivo">💵 Efectivo</option>
+                            <option value="transferencia">🏦 Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Detalles del pedido</label>
+                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, sin TACC, etc."></textarea>
+                        <small class="input-help">📝 Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block" id="btn-continuar-pago">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación (ticket) -->
+    <div class="modal" id="confirmacion-modal">
+        <div class="modal-content ticket-modal">
+            <div class="modal-header">
+                <h3>Confirmá tu pedido</h3>
+                <button class="modal-close" id="cerrar-confirmacion-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info">
+                    <h4 style="margin-bottom: 15px; text-align: center;">Resumen del pedido</h4>
+                    <div class="ticket-section">
+                        <p><strong>Nombre:</strong> <span id="confirm-nombre"></span></p>
+                        <p><strong>Teléfono:</strong> <span id="confirm-telefono"></span></p>
+                        <p><strong>Dirección:</strong> <span id="confirm-direccion"></span></p>
+                        <p><strong>Método de pago:</strong> <span id="confirm-pago"></span></p>
+                    </div>
+                    <div class="ticket-section">
+                        <strong>Productos:</strong>
+                        <div id="confirm-productos" class="productos-lista"></div>
+                        <p class="ticket-total"><strong>Total:</strong> <span id="confirm-total"></span></p>
+                    </div>
+                    <div class="ticket-section" id="confirm-detalles-section" style="display: none;">
+                        <strong>Detalles del pedido:</strong>
+                        <p id="confirm-detalles"></p>
+                    </div>
+                    <div class="ticket-warning">
+                        <i class="fas fa-info-circle"></i>
+                        Verificá que tu número de WhatsApp sea correcto. El vendedor te confirmará tu pedido por ese medio.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer ticket-footer">
+                <button class="btn btn-outline" id="btn-editar-pedido">Editar pedido</button>
+                <button class="btn btn-primary" id="btn-enviar-pedido">Confirmar y enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
+        </div>
+    </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
 <script src="js/tienda.js"></script>
 
 <script>
-    // Asegurar que los modales funcionen
+    // Asegurar que los modales funcionen correctamente
     document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.closest('.modal').classList.remove('active');
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const modal = this.closest('.modal');
+            if (modal) modal.classList.remove('active');
         });
     });
     
