@@ -145,26 +145,30 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
     try {
         console.log('🔍 Buscando usuario con auth_id:', authId);
         
-        const { data, error } = await supabaseClient
+        // Usar .select() sin .single() para evitar error 406
+        const { data, error, status } = await supabaseClient
             .from('usuarios')
             .select('*')
             .eq('auth_id', authId);
         
+        console.log('📊 Status:', status);
+        console.log('📦 Data:', data);
+        
         if (error) {
-            console.error('Error en consulta:', error);
-            return { success: false, error: error.message };
+            console.error('❌ Error en consulta:', error);
+            return { success: false, error: error.message, status: status };
         }
         
-        console.log('📦 Resultado:', data);
-        
+        // Verificar si encontramos datos
         if (data && data.length > 0) {
+            console.log('✅ Usuario encontrado:', data[0]);
             return { success: true, usuario: data[0] };
         } else {
             console.log('⚠️ Usuario no encontrado, será creado');
-            return { success: false, error: 'Usuario no encontrado' };
+            return { success: false, error: 'Usuario no encontrado', notFound: true };
         }
     } catch (error) {
-        console.error('Error obteniendo usuario:', error);
+        console.error('❌ Error obteniendo usuario:', error);
         return { success: false, error: error.message };
     }
 };
