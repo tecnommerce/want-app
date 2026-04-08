@@ -24,8 +24,9 @@
                     </div>
                 </div>
 
+                <!-- Navegación escritorio -->
                 <div class="nav-desktop" id="nav-desktop">
-                    <a href="#" class="nav-link" id="contacto-link-desktop">Contacto</a>
+                    <button class="btn-mis-pedidos" id="mis-pedidos-desktop">Mis pedidos</button>
                     <div class="social-icons">
                         <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
                         <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
@@ -33,33 +34,40 @@
                     </div>
                 </div>
 
-                <div class="user-avatar" id="user-avatar" style="display: none;">
-                    <img src="" alt="Foto perfil" id="avatar-img" class="avatar-img">
-                    <span class="avatar-name" id="avatar-name"></span>
+                <!-- Avatar escritorio (con dropdown) -->
+                <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
+                    <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
+                    <span class="avatar-name" id="avatar-name-desktop"></span>
+                    <div class="avatar-dropdown" id="avatar-dropdown">
+                        <a href="#" id="mi-cuenta-desktop"><i class="fas fa-user-circle"></i> Mi cuenta</a>
+                        <a href="#" id="cerrar-sesion-desktop"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </div>
                 </div>
 
-                <button class="menu-toggle" id="menu-toggle" style="display: none;">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <!-- Avatar móvil (reemplaza menú hamburguesa) -->
+                <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
+                    <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
+                </div>
             </div>
         </div>
     </header>
 
+    <!-- Menú móvil -->
     <div class="mobile-menu" id="mobile-menu">
         <button class="menu-close" id="menu-close">
             <i class="fas fa-times"></i>
         </button>
         <div class="mobile-nav">
-            <a href="#" class="mobile-nav-link" id="mis-pedidos-link-mobile">
+            <a href="#" class="mobile-nav-link" id="mis-pedidos-mobile">
                 <i class="fas fa-box"></i> Mis pedidos
             </a>
-            <a href="#" class="mobile-nav-link" id="mi-cuenta-link-mobile">
+            <a href="#" class="mobile-nav-link" id="mi-cuenta-mobile">
                 <i class="fas fa-user-circle"></i> Mi cuenta
             </a>
-            <a href="#" class="mobile-nav-link" id="contacto-link-mobile">
+            <a href="#" class="mobile-nav-link" id="contacto-mobile">
                 <i class="fas fa-envelope"></i> Contacto
             </a>
-            <a href="#" class="mobile-nav-link" id="logout-link-mobile">
+            <a href="#" class="mobile-nav-link" id="logout-mobile">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </a>
         </div>
@@ -92,6 +100,7 @@
         </div>
     </div>
 
+    <!-- Pantalla de Login -->
     <div class="login-screen" id="login-screen">
         <div class="login-container">
             <div class="login-card">
@@ -119,6 +128,7 @@
         </div>
     </div>
 
+    <!-- Pantalla de Registro -->
     <div class="registro-screen" id="registro-screen" style="display: none;">
         <div class="registro-container">
             <div class="registro-card">
@@ -199,6 +209,7 @@
         </div>
     </div>
 
+    <!-- Contenido principal -->
     <div id="main-content" style="display: none;">
         <main>
             <section class="banners-section" id="banners-section" style="display: none;">
@@ -237,21 +248,6 @@
             </section>
         </main>
 
-        <section class="contacto-section" id="contacto-section" style="display: none;">
-            <div class="container">
-                <h2>Contacto</h2>
-                <div class="contacto-info">
-                    <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
-                    <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
-                    <div class="social-icons" style="justify-content: center; margin-top: 20px;">
-                        <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <footer class="footer">
             <div class="container">
                 <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
@@ -259,6 +255,7 @@
         </footer>
     </div>
 
+    <!-- Pantalla Mis Pedidos -->
     <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
         <div class="container">
             <div class="pedidos-header">
@@ -287,6 +284,7 @@
         </div>
     </div>
 
+    <!-- Pantalla Mi Cuenta -->
     <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
         <div class="container">
             <div class="cuenta-header">
@@ -370,6 +368,7 @@
         </div>
     </div>
 
+    <!-- Modal detalle pedido -->
     <div class="modal" id="modal-detalle-pedido">
         <div class="modal-content">
             <div class="modal-header">

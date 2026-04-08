@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Want | Tienda</title>
     
-    <!-- Favicon con W naranja -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
     
@@ -52,70 +51,74 @@
     </main>
 
     <!-- Modal del carrito -->
-<div class="modal" id="carrito-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Tu pedido</h3>
-            <button class="modal-close" id="cerrar-modal">&times;</button>
-        </div>
-        <div class="modal-body" id="carrito-items">
-            <p>No hay productos en el carrito</p>
-        </div>
-        <div class="modal-footer">
-            <div class="carrito-total">
-                <strong>Total:</strong> <span id="carrito-total">$0</span>
+    <div class="modal" id="carrito-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tu pedido</h3>
+                <button class="modal-close" id="cerrar-modal">&times;</button>
             </div>
-            <button class="btn btn-primary btn-finalizar" id="finalizar-pedido">Finalizar pedido</button>
+            <div class="modal-body" id="carrito-items">
+                <p>No hay productos en el carrito</p>
+            </div>
+            <div class="modal-footer">
+                <div class="carrito-total">
+                    <strong>Total:</strong> <span id="carrito-total">$0</span>
+                </div>
+                <button class="btn btn-primary btn-finalizar" id="finalizar-pedido">Finalizar pedido</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal del formulario de cliente - VERTICAL MEJORADO -->
-<div class="modal" id="cliente-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Completá tus datos</h3>
-            <button class="modal-close" id="cerrar-cliente-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="cliente-form">
-                <div class="form-group">
-                    <label for="cliente-nombre">Nombre completo <span class="required">*</span></label>
-                    <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required>
-                </div>
+    <!-- Modal del formulario de cliente -->
+    <div class="modal" id="cliente-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Completá tus datos</h3>
+                <button class="modal-close" id="cerrar-cliente-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn-usar-datos" id="btn-usar-mis-datos" style="margin-bottom: 16px; width: 100%;">
+                    <i class="fas fa-user-check"></i> Usar mis datos de envío
+                </button>
                 
-                <div class="form-group">
-                    <label for="cliente-telefono">Teléfono <span class="required">*</span></label>
-                    <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
-                    <small class="input-help">📱 Importante: Número de WhatsApp correcto para recibir la confirmación</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cliente-direccion">Dirección de entrega <span class="required">*</span></label>
-                    <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="metodo-pago">Método de pago <span class="required">*</span></label>
-                    <select id="metodo-pago" required>
-                        <option value="">Seleccioná una opción</option>
-                        <option value="efectivo">💵 Efectivo</option>
-                        <option value="transferencia">🏦 Transferencia bancaria</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="pedido-detalles">Detalles del pedido</label>
-                    <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, sin TACC, etc."></textarea>
-                    <small class="input-help">📝 Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary btn-block" id="btn-continuar-pago">Continuar</button>
+                <form id="cliente-form">
+                    <div class="form-group">
+                        <label for="cliente-nombre">Nombre completo <span class="required">*</span></label>
+                        <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cliente-telefono">Teléfono <span class="required">*</span></label>
+                        <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
+                        <small class="input-help">📱 Importante: Número de WhatsApp correcto para recibir la confirmación</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cliente-direccion">Dirección de entrega <span class="required">*</span></label>
+                        <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="metodo-pago">Método de pago <span class="required">*</span></label>
+                        <select id="metodo-pago" required>
+                            <option value="">Seleccioná una opción</option>
+                            <option value="efectivo">💵 Efectivo</option>
+                            <option value="transferencia">🏦 Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pedido-detalles">Detalles del pedido</label>
+                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, sin TACC, etc."></textarea>
+                        <small class="input-help">📝 Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block" id="btn-continuar-pago">Continuar</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Modal de confirmación (ticket) -->
     <div class="modal" id="confirmacion-modal">

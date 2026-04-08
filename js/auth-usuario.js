@@ -73,13 +73,11 @@ async function withLoading(button, callback) {
     const originalDisabled = button.disabled;
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + originalText.replace(/<i class="[^"]*"><\/i>\s*/, '');
-    button.classList.add('btn-loading');
     try {
         return await callback();
     } finally {
         button.disabled = originalDisabled;
         button.innerHTML = originalText;
-        button.classList.remove('btn-loading');
     }
 }
 
@@ -96,11 +94,59 @@ function cerrarModalContacto() {
 }
 
 // ===================================================
+// DROPDOWN AVATAR ESCRITORIO
+// ===================================================
+
+function toggleDropdown() {
+    const dropdown = document.getElementById('avatar-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('active');
+    }
+}
+
+function cerrarDropdown() {
+    const dropdown = document.getElementById('avatar-dropdown');
+    if (dropdown) {
+        dropdown.classList.remove('active');
+    }
+}
+
+// ===================================================
+// MENÚ MÓVIL
+// ===================================================
+
+let mobileMenu = null;
+let menuOverlay = null;
+
+function openMobileMenu() {
+    if (mobileMenu) mobileMenu.classList.add('active');
+    if (menuOverlay) menuOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+    if (mobileMenu) mobileMenu.classList.remove('active');
+    if (menuOverlay) menuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// ===================================================
 // INICIALIZACIÓN DE AUTENTICACIÓN
 // ===================================================
 
 async function initAuth() {
     console.log('🔐 Inicializando autenticación de usuarios...');
+    
+    mobileMenu = document.getElementById('mobile-menu');
+    menuOverlay = document.getElementById('menu-overlay');
+    
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        const avatarDesktop = document.getElementById('user-avatar-desktop');
+        if (avatarDesktop && !avatarDesktop.contains(e.target)) {
+            cerrarDropdown();
+        }
+    });
     
     if (typeof onAuthStateChange === 'function') {
         authSubscription = onAuthStateChange(async (event, session) => {
@@ -184,93 +230,65 @@ async function cargarUsuarioLogueado(usuarioId) {
 // ===================================================
 
 function mostrarPantallaLogin() {
-    const loginScreen = document.getElementById('login-screen');
-    const registroScreen = document.getElementById('registro-screen');
-    const mainContent = document.getElementById('main-content');
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    const searchContainer = document.getElementById('search-container');
-    const userAvatar = document.getElementById('user-avatar');
-    const menuToggle = document.getElementById('menu-toggle');
-    const navDesktop = document.getElementById('nav-desktop');
-    
-    if (loginScreen) loginScreen.style.display = 'flex';
-    if (registroScreen) registroScreen.style.display = 'none';
-    if (mainContent) mainContent.style.display = 'none';
-    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
-    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
-    if (searchContainer) searchContainer.style.display = 'none';
-    if (userAvatar) userAvatar.style.display = 'none';
-    if (menuToggle) menuToggle.style.display = 'none';
-    if (navDesktop) navDesktop.style.display = 'flex';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('registro-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'none';
+    document.getElementById('mis-pedidos-screen').style.display = 'none';
+    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    document.getElementById('search-container').style.display = 'none';
+    document.getElementById('user-avatar-desktop').style.display = 'none';
+    document.getElementById('user-avatar-mobile').style.display = 'none';
+    document.getElementById('nav-desktop').style.display = 'flex';
+    closeMobileMenu();
 }
 
 function mostrarPantallaRegistro(user) {
     window.usuarioAuth = user;
-    const loginScreen = document.getElementById('login-screen');
-    const registroScreen = document.getElementById('registro-screen');
-    const mainContent = document.getElementById('main-content');
-    
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (registroScreen) registroScreen.style.display = 'flex';
-    if (mainContent) mainContent.style.display = 'none';
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('registro-screen').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'none';
 }
 
 function mostrarPantallaPrincipal() {
-    const loginScreen = document.getElementById('login-screen');
-    const registroScreen = document.getElementById('registro-screen');
-    const mainContent = document.getElementById('main-content');
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    const searchContainer = document.getElementById('search-container');
-    const userAvatar = document.getElementById('user-avatar');
-    const menuToggle = document.getElementById('menu-toggle');
-    const navDesktop = document.getElementById('nav-desktop');
-    
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (registroScreen) registroScreen.style.display = 'none';
-    if (mainContent) mainContent.style.display = 'block';
-    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
-    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
-    if (searchContainer) searchContainer.style.display = 'block';
-    if (userAvatar) userAvatar.style.display = 'flex';
-    if (menuToggle) menuToggle.style.display = 'flex';
-    if (navDesktop) navDesktop.style.display = 'flex';
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('registro-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('mis-pedidos-screen').style.display = 'none';
+    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    document.getElementById('search-container').style.display = 'block';
+    document.getElementById('user-avatar-desktop').style.display = 'flex';
+    document.getElementById('user-avatar-mobile').style.display = 'flex';
+    document.getElementById('nav-desktop').style.display = 'flex';
+    closeMobileMenu();
     
     if (typeof cargarNegocios === 'function') cargarNegocios();
     if (typeof cargarBanners === 'function') cargarBanners();
 }
 
 function mostrarMisPedidos() {
-    const mainContent = document.getElementById('main-content');
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    
-    if (mainContent) mainContent.style.display = 'none';
-    if (misPedidosScreen) misPedidosScreen.style.display = 'block';
-    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    document.getElementById('main-content').style.display = 'none';
+    document.getElementById('mis-pedidos-screen').style.display = 'block';
+    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    cerrarDropdown();
+    closeMobileMenu();
     cargarPedidosUsuario();
 }
 
 function mostrarMiCuenta() {
-    const mainContent = document.getElementById('main-content');
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    
-    if (mainContent) mainContent.style.display = 'none';
-    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
-    if (miCuentaScreen) miCuentaScreen.style.display = 'block';
+    document.getElementById('main-content').style.display = 'none';
+    document.getElementById('mis-pedidos-screen').style.display = 'none';
+    document.getElementById('mi-cuenta-screen').style.display = 'block';
+    cerrarDropdown();
+    closeMobileMenu();
     cargarDatosUsuarioFormulario();
 }
 
 function volverAlHome() {
-    const mainContent = document.getElementById('main-content');
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    
-    if (mainContent) mainContent.style.display = 'block';
-    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
-    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('mis-pedidos-screen').style.display = 'none';
+    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    cerrarDropdown();
+    closeMobileMenu();
 }
 
 // ===================================================
@@ -280,18 +298,26 @@ function volverAlHome() {
 function cargarDatosUsuarioUI() {
     if (!usuarioActual) return;
     
-    const avatarImg = document.getElementById('avatar-img');
-    const avatarName = document.getElementById('avatar-name');
+    const avatarUrl = usuarioActual.foto_perfil || 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
     
-    if (avatarImg) {
-        avatarImg.src = usuarioActual.foto_perfil || 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
-        avatarImg.onerror = () => {
-            avatarImg.src = 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
+    // Escritorio
+    const avatarImgDesktop = document.getElementById('avatar-img-desktop');
+    const avatarNameDesktop = document.getElementById('avatar-name-desktop');
+    if (avatarImgDesktop) {
+        avatarImgDesktop.src = avatarUrl;
+        avatarImgDesktop.onerror = () => {
+            avatarImgDesktop.src = 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
         };
     }
+    if (avatarNameDesktop) avatarNameDesktop.textContent = usuarioActual.nombre;
     
-    if (avatarName) {
-        avatarName.textContent = usuarioActual.nombre;
+    // Móvil
+    const avatarImgMobile = document.getElementById('avatar-img-mobile');
+    if (avatarImgMobile) {
+        avatarImgMobile.src = avatarUrl;
+        avatarImgMobile.onerror = () => {
+            avatarImgMobile.src = 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
+        };
     }
 }
 
@@ -575,16 +601,34 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('registro-form')?.addEventListener('submit', registrarNuevoUsuario);
     document.getElementById('cuenta-form')?.addEventListener('submit', guardarDatosUsuario);
     
-    // Navegación
-    document.getElementById('mis-pedidos-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
-    document.getElementById('mi-cuenta-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
-    document.getElementById('logout-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
+    // Navegación escritorio
+    document.getElementById('mis-pedidos-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
+    document.getElementById('mi-cuenta-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
+    document.getElementById('cerrar-sesion-desktop')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
+    
+    // Avatar dropdown
+    const avatarDesktop = document.getElementById('user-avatar-desktop');
+    avatarDesktop?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+    });
+    
+    // Navegación móvil
+    document.getElementById('mis-pedidos-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
+    document.getElementById('mi-cuenta-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
+    document.getElementById('logout-mobile')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
+    document.getElementById('contacto-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarModalContacto(); });
+    
+    // Botones volver
     document.getElementById('back-to-home')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
     document.getElementById('back-to-home-cuenta')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
     
-    // Contacto
-    document.getElementById('contacto-link-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarModalContacto(); });
-    document.getElementById('contacto-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarModalContacto(); });
+    // Menú móvil
+    const avatarMobile = document.getElementById('user-avatar-mobile');
+    avatarMobile?.addEventListener('click', openMobileMenu);
+    
+    document.getElementById('menu-close')?.addEventListener('click', closeMobileMenu);
+    menuOverlay?.addEventListener('click', closeMobileMenu);
     
     // Tabs de pedidos
     document.querySelectorAll('.pedidos-tab').forEach(tab => {
@@ -596,19 +640,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('pedidos-historial-container').style.display = tabId === 'historial' ? 'block' : 'none';
         });
     });
-    
-    // Menú móvil
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    const menuClose = document.getElementById('menu-close');
-    
-    function openMenu() { mobileMenu?.classList.add('active'); menuOverlay?.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeMenu() { mobileMenu?.classList.remove('active'); menuOverlay?.classList.remove('active'); document.body.style.overflow = ''; }
-    
-    menuToggle?.addEventListener('click', openMenu);
-    menuClose?.addEventListener('click', closeMenu);
-    menuOverlay?.addEventListener('click', closeMenu);
     
     // Inicializar
     initAuth();
@@ -622,3 +653,4 @@ window.mostrarMiCuenta = mostrarMiCuenta;
 window.volverAlHome = volverAlHome;
 window.mostrarModalContacto = mostrarModalContacto;
 window.cerrarModalContacto = cerrarModalContacto;
+window.cerrarSesion = cerrarSesion;

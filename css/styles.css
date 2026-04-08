@@ -104,6 +104,23 @@ body {
     gap: 25px;
 }
 
+/* Botón Mis pedidos en escritorio */
+.btn-mis-pedidos {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-mis-pedidos:hover {
+    color: #FF5A00;
+}
+
 .nav-link {
     color: #333;
     text-decoration: none;
@@ -133,8 +150,8 @@ body {
     color: #FF5A00;
 }
 
-/* Avatar de usuario (logueado) */
-.user-avatar {
+/* Avatar de usuario (logueado) - SOLO ESCRITORIO */
+.user-avatar-desktop {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -143,15 +160,76 @@ body {
     background: #f5f5f5;
     border-radius: 40px;
     transition: all 0.3s;
+    position: relative;
 }
 
-.user-avatar:hover {
+.user-avatar-desktop:hover {
     background: #FF5A00;
     color: white;
 }
 
-.user-avatar:hover .avatar-name {
+.user-avatar-desktop:hover .avatar-name {
     color: white;
+}
+
+/* Menú desplegable del avatar en escritorio */
+.avatar-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    min-width: 200px;
+    z-index: 1000;
+    overflow: hidden;
+    display: none;
+}
+
+.avatar-dropdown.active {
+    display: block;
+}
+
+.avatar-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.avatar-dropdown a i {
+    width: 20px;
+    color: #FF5A00;
+}
+
+.avatar-dropdown a:hover {
+    background: #FFF5EB;
+}
+
+.avatar-dropdown hr {
+    margin: 0;
+    border: none;
+    border-top: 1px solid #eee;
+}
+
+/* Avatar móvil - SOLO MÓVIL (reemplaza menú hamburguesa) */
+.user-avatar-mobile {
+    display: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.user-avatar-mobile img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .avatar-img {
@@ -167,7 +245,7 @@ body {
     color: #333;
 }
 
-/* Botón menú hamburguesa - SOLO MÓVIL */
+/* Botón menú hamburguesa - SOLO MÓVIL (oculto por defecto) */
 .menu-toggle {
     display: none;
     background: none;
@@ -178,7 +256,6 @@ body {
     padding: 8px 12px;
     margin-left: auto;
     z-index: 1001;
-    position: relative;
 }
 
 /* Menú móvil (desplegable) */
@@ -210,6 +287,17 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
     color: #666;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
 }
 
 .mobile-nav {
@@ -259,6 +347,7 @@ body {
     font-size: 1.2rem;
     color: #666;
     transition: all 0.3s;
+    text-decoration: none;
 }
 
 .mobile-social .social-icon:hover {
@@ -442,7 +531,179 @@ body {
 }
 
 /* ===================================================
-   ESTADO ABIERTO/CERRADO - CON COLORES Y EFECTO
+   TIENDA - PRODUCTOS (MANTENER EL DISEÑO ORIGINAL)
+   =================================================== */
+.productos-section {
+    padding: 40px 0 80px;
+}
+
+.productos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.productos-header h2 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.cart-icon {
+    position: relative;
+    background: #f5f5f5;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FF5A00;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.cart-icon:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+.cart-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #FF5A00;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
+    align-items: stretch;
+}
+
+.producto-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 380px;
+}
+
+.producto-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.producto-imagen {
+    width: 100%;
+    height: 160px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.producto-imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #f8f8f8;
+    padding: 15px;
+}
+
+.producto-imagen .placeholder-img {
+    font-size: 2.5rem;
+    color: #ccc;
+    background: #f8f8f8;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.producto-info {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.producto-nombre {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1a1a1a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 40px;
+}
+
+.producto-descripcion {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 32px;
+}
+
+.producto-precio {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FF5A00;
+    margin-bottom: 12px;
+    margin-top: auto;
+}
+
+.btn-agregar {
+    width: 100%;
+    background: #f5f5f5;
+    color: #333;
+    border: none;
+    padding: 10px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.btn-agregar:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+/* ===================================================
+   ESTADO ABIERTO/CERRADO
    =================================================== */
 .estado-abierto {
     display: inline-flex;
@@ -633,6 +894,81 @@ body {
 }
 
 /* ===================================================
+   MODALES GENERALES
+   =================================================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* ===================================================
    FORMULARIOS Y BOTONES
    =================================================== */
 .form-group {
@@ -709,96 +1045,6 @@ body {
     width: 100%;
 }
 
-/* Botón de carga con spinner */
-.btn-loading {
-    position: relative;
-    pointer-events: none;
-    opacity: 0.7;
-}
-
-.btn-loading i {
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ===================================================
-   MODALES
-   =================================================== */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 3000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 24px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #999;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.modal-close:hover {
-    background: #fee2e2;
-    color: #ef4444;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 15px 20px;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
 /* ===================================================
    LOADING
    =================================================== */
@@ -816,6 +1062,10 @@ body {
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 12px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* ===================================================
@@ -1132,58 +1382,6 @@ body {
 }
 
 /* ===================================================
-   MODAL DETALLE PEDIDO
-   =================================================== */
-.detalle-seccion {
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.detalle-seccion strong {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.75rem;
-    color: #64748b;
-    text-transform: uppercase;
-}
-
-.detalle-seccion p {
-    font-size: 0.9rem;
-    color: #1e293b;
-}
-
-.detalle-productos {
-    margin-bottom: 16px;
-}
-
-.productos-lista-detalle {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 10px;
-    margin-top: 8px;
-}
-
-.producto-detalle-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 0.85rem;
-}
-
-.producto-detalle-item:last-child {
-    border-bottom: none;
-}
-
-.detalle-total {
-    text-align: right;
-    padding-top: 12px;
-    font-size: 1rem;
-    border-top: 2px solid #e2e8f0;
-}
-
-/* ===================================================
    PANTALLA MI CUENTA
    =================================================== */
 .cuenta-card {
@@ -1234,7 +1432,6 @@ body {
    RESPONSIVE - ESCRITORIO (estándar)
    =================================================== */
 @media (min-width: 769px) {
-    /* Desktop: grid normal */
     .negocios-grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
@@ -1243,9 +1440,9 @@ body {
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     }
     
-    /* Ocultar menú móvil en desktop */
     .mobile-menu,
-    .menu-overlay {
+    .menu-overlay,
+    .user-avatar-mobile {
         display: none !important;
     }
     
@@ -1262,30 +1459,26 @@ body {
         padding: 0 16px;
     }
     
-    /* Ocultar navegación desktop */
-    .nav-desktop {
-        display: none;
+    /* Ocultar avatar de escritorio en móvil */
+    .user-avatar-desktop {
+        display: none !important;
     }
     
-    /* Mostrar menú hamburguesa */
-    .menu-toggle {
+    /* Mostrar avatar móvil */
+    .user-avatar-mobile {
         display: flex !important;
         align-items: center;
         justify-content: center;
     }
     
-    /* Ocultar nombre en avatar en móvil */
-    .avatar-name {
-        display: none;
+    /* Ocultar navegación desktop */
+    .nav-desktop {
+        display: none !important;
     }
     
-    .user-avatar {
-        padding: 5px;
-        background: transparent;
-    }
-    
-    .user-avatar:hover {
-        background: transparent;
+    /* Ocultar menú hamburguesa tradicional */
+    .menu-toggle {
+        display: none !important;
     }
     
     /* Header más compacto */
@@ -1319,7 +1512,7 @@ body {
         font-size: 0.9rem;
     }
     
-    /* Vendedores en formato lista */
+    /* Vendedores en formato lista (manteniendo diseño) */
     .negocios-grid {
         display: flex;
         flex-direction: column;
@@ -1363,12 +1556,7 @@ body {
         display: none;
     }
     
-    .rubro-tag {
-        font-size: 0.55rem;
-        padding: 2px 8px;
-    }
-    
-    /* Productos en formato lista */
+    /* Productos en formato lista (manteniendo diseño) */
     .productos-grid {
         display: flex;
         flex-direction: column;
@@ -1381,6 +1569,7 @@ body {
         align-items: center;
         gap: 12px;
         padding: 12px;
+        min-height: auto;
     }
     
     .producto-imagen {
@@ -1403,16 +1592,13 @@ body {
     .producto-nombre {
         font-size: 0.85rem;
         margin-bottom: 4px;
+        min-height: auto;
     }
     
     .producto-descripcion {
         font-size: 0.7rem;
         margin-bottom: 6px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        min-height: auto;
     }
     
     .producto-precio {
