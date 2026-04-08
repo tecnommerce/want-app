@@ -141,26 +141,26 @@
         }
     };
     
-    window.obtenerUsuarioPorAuthId = async function(authId) {
+window.obtenerUsuarioPorAuthId = async function(authId) {
     try {
         console.log('🔍 Buscando usuario con auth_id:', authId);
         
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
-            .eq('auth_id', authId)
-            .maybeSingle();  // Cambiar .single() por .maybeSingle()
+            .eq('auth_id', authId);
         
         if (error) {
             console.error('Error en consulta:', error);
-            throw error;
+            return { success: false, error: error.message };
         }
         
         console.log('📦 Resultado:', data);
         
-        if (data) {
-            return { success: true, usuario: data };
+        if (data && data.length > 0) {
+            return { success: true, usuario: data[0] };
         } else {
+            console.log('⚠️ Usuario no encontrado, será creado');
             return { success: false, error: 'Usuario no encontrado' };
         }
     } catch (error) {
