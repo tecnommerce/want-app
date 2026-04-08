@@ -1841,3 +1841,483 @@ a.logo-link {
     background: #ef4444;
     color: white;
 }
+
+/* ===================================================
+   LOGIN Y REGISTRO DE USUARIOS
+   =================================================== */
+
+.login-screen, .registro-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #FF5A00 0%, #FF7A00 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.login-container, .registro-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.login-card, .registro-card {
+    background: white;
+    border-radius: 32px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    font-size: 2.5rem;
+    color: #FF5A00;
+    margin-bottom: 10px;
+}
+
+.login-header p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-google:hover {
+    background: #f5f5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-register {
+    background: #FF5A00;
+    color: white;
+    border: none;
+}
+
+.btn-register:hover {
+    background: #e04e00;
+}
+
+.login-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.login-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #eee;
+}
+
+.login-divider span {
+    background: white;
+    padding: 0 15px;
+    position: relative;
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.login-footer a {
+    color: #FF5A00;
+    text-decoration: none;
+}
+
+.registro-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.registro-header h2 {
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.registro-header p {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.info-box {
+    background: #FFF5EB;
+    border-radius: 12px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #FF5A00;
+}
+
+.info-box i {
+    font-size: 1.2rem;
+}
+
+/* ===================================================
+   HEADER CON AVATAR DE USUARIO
+   =================================================== */
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px 12px;
+    background: #f5f5f5;
+    border-radius: 40px;
+    transition: all 0.3s;
+}
+
+.user-avatar:hover {
+    background: #FF5A00;
+    color: white;
+}
+
+.avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* ===================================================
+   PANTALLA DE PEDIDOS DEL USUARIO
+   =================================================== */
+
+.pedidos-screen, .cuenta-screen {
+    padding: 80px 0 40px;
+    min-height: 100vh;
+    background: var(--gray-50);
+}
+
+.pedidos-header, .cuenta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn-back {
+    background: var(--gray-100);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.total-gastado {
+    background: linear-gradient(135deg, #FF5A00, #FF7A00);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.total-gastado span {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.total-gastado strong {
+    font-size: 1.2rem;
+}
+
+.pedidos-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 10px;
+}
+
+.pedidos-tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--gray-600);
+    border-radius: 30px;
+    transition: all 0.2s;
+}
+
+.pedidos-tab:hover {
+    color: var(--primary);
+}
+
+.pedidos-tab.active {
+    background: var(--primary);
+    color: white;
+}
+
+.pedidos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pedido-card {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.pedido-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.pedido-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.pedido-numero {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.pedido-estado {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.pedido-card-body {
+    margin-bottom: 12px;
+}
+
+.pedido-fecha, .pedido-negocio, .pedido-productos {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+}
+
+.pedido-total {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.9rem;
+    margin-top: 8px;
+}
+
+.pedido-card-footer {
+    text-align: right;
+}
+
+.btn-ver-detalle {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-ver-detalle:hover {
+    gap: 10px;
+}
+
+/* ===================================================
+   MODAL DETALLE PEDIDO
+   =================================================== */
+
+.detalle-seccion {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detalle-seccion strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+}
+
+.detalle-seccion p {
+    font-size: 0.9rem;
+    color: var(--gray-800);
+}
+
+.detalle-productos {
+    margin-bottom: 16px;
+}
+
+.productos-lista-detalle {
+    background: var(--gray-50);
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 8px;
+}
+
+.producto-detalle-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 0.85rem;
+}
+
+.producto-detalle-item:last-child {
+    border-bottom: none;
+}
+
+.detalle-total {
+    text-align: right;
+    padding-top: 12px;
+    font-size: 1rem;
+    border-top: 2px solid var(--gray-200);
+}
+
+.detalle-total strong {
+    font-size: 1rem;
+}
+
+/* ===================================================
+   PANTALLA MI CUENTA
+   =================================================== */
+
+.cuenta-card {
+    background: white;
+    border-radius: 24px;
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-md);
+}
+
+.cuenta-avatar {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.cuenta-avatar img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+}
+
+/* Botón para usar datos de envío */
+.btn-usar-datos {
+    background: #f0f0f0;
+    border: none;
+    padding: 12px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-usar-datos:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .login-card, .registro-card {
+        padding: 30px 20px;
+    }
+    
+    .pedidos-header, .cuenta-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .total-gastado {
+        justify-content: center;
+    }
+    
+    .btn-back {
+        width: fit-content;
+    }
+    
+    .cuenta-card {
+        padding: 20px;
+    }
+}

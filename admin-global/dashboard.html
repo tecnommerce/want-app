@@ -201,6 +201,38 @@
                 </div>
             </div>
 
+            <!-- Sección Usuarios - Agregar después de la sección Productos -->
+<div class="section-content" id="section-usuarios" style="display: none;">
+    <div class="page-content">
+        <div class="page-header">
+            <h2>Gestión de Usuarios</h2>
+            <div class="header-actions">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="search-usuario" placeholder="Buscar usuario..."></div>
+                <button class="btn-export" id="export-usuarios"><i class="fas fa-file-excel"></i> Exportar</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Total gastado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usuarios-tbody">
+                    <tr><td colspan="8" class="loading-text">Cargando usuarios...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
             <!-- Sección Web -->
             <div class="section-content" id="section-web" style="display: none;">
                 <div class="page-content">

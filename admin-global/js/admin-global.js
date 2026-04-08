@@ -1127,3 +1127,126 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('click', (e) => { if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('active'); });
     }
 });
+
+// ===================================================
+// GESTIÓN DE USUARIOS (ADMIN GLOBAL)
+// ===================================================
+
+let allUsuarios = [];
+
+async function cargarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Cargando usuarios...</td></tr>';
+    
+    try {
+        const response = await window.obtenerTodosUsuarios();
+        if (response.success) {
+            allUsuarios = response.usuarios || [];
+            renderizarUsuarios();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="loading-text">Error: ${error.message}</td></tr>`;
+    }
+}
+
+function renderizarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if (!tbody) return;
+    
+    if (allUsuarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay usuarios registrados</td>';
+        return;
+    }
+    
+    tbody.innerHTML = allUsuarios.map(u => `
+        <tr>
+            <td>${u.id.substring(0, 8)}...</td>
+            <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
+            <td>${escapeHTML(u.email)}</td>
+            <td><a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp-link">${u.telefono}</a></td>
+            <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
+            <td>${formatearPrecio(u.total_gastado || 0)}</td>
+            <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
+                <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
+             </td>
+         </tr>
+    `).join('');
+}
+
+async function suspenderUsuario(usuarioId, activo) {
+    if (!confirm(`¿${activo ? 'Habilitar' : 'Suspender'} este usuario?`)) return;
+    
+    const result = await window.suspenderUsuario(usuarioId, activo);
+    if (result.success) {
+        mostrarToast(`Usuario ${activo ? 'habilitado' : 'suspendido'}`, 'success');
+        await cargarUsuarios();
+    } else {
+        mostrarToast('Error al cambiar estado', 'error');
+    }
+}
+
+async function eliminarUsuario(usuarioId) {
+    if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
+    
+    const result = await window.eliminarUsuario(usuarioId);
+    if (result.success) {
+        mostrarToast('Usuario eliminado', 'success');
+        await cargarUsuarios();
+    } else {
+        mostrarToast('Error al eliminar usuario', 'error');
+    }
+}
+
+function editarUsuario(usuarioId) {
+    const usuario = allUsuarios.find(u => u.id === usuarioId);
+    if (!usuario) return;
+    
+    // Abrir modal con datos del usuario para editar
+    alert('Función de edición de usuario - Implementar según necesidades');
+}
+
+// Agregar búsqueda de usuarios
+document.getElementById('search-usuario')?.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const filtered = allUsuarios.filter(u => 
+        u.nombre?.toLowerCase().includes(term) || 
+        u.apellido?.toLowerCase().includes(term) || 
+        u.email?.toLowerCase().includes(term)
+    );
+    
+    const tbody = document.getElementById('usuarios-tbody');
+    if (!tbody) return;
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay usuarios</td>';
+        return;
+    }
+    
+    tbody.innerHTML = filtered.map(u => `
+        <tr>
+            <td>${u.id.substring(0, 8)}...</td>
+            <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
+            <td>${escapeHTML(u.email)}</td>
+            <td><a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp-link">${u.telefono}</a></td>
+            <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
+            <td>${formatearPrecio(u.total_gastado || 0)}</td>
+            <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
+                <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
+             </td>
+         </tr>
+    `).join('');
+});
+
+// Agregar navegación a usuarios en el menú
+document.querySelector('.nav-item[data-section="usuarios"]')?.addEventListener('click', () => {
+    cambiarSeccion('usuarios');
+    cargarUsuarios();
+});

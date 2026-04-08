@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Want | Pedidos simples a tus negocios favoritos</title>
     
-    <!-- Favicon con W naranja -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
     
@@ -13,41 +12,59 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header class="header">
+    <!-- Header - Se mostrará diferente según sesión -->
+    <header class="header" id="main-header">
         <div class="container">
             <div class="header-content">
                 <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
                 
-                <div class="search-container">
+                <div class="search-container" id="search-container" style="display: none;">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" placeholder="Buscar negocios..." id="search-input">
                     </div>
                 </div>
 
-                <div class="nav-desktop">
+                <div class="nav-desktop" id="nav-desktop">
                     <a href="#contacto" class="nav-link" id="contacto-link">Contacto</a>
                     <div class="social-icons">
-                        <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
                         <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/+543865747489" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
 
-                <button class="menu-toggle" id="menu-toggle">
+                <!-- Avatar de usuario (logueado) -->
+                <div class="user-avatar" id="user-avatar" style="display: none;">
+                    <img src="" alt="Foto perfil" id="avatar-img" class="avatar-img">
+                    <span class="avatar-name" id="avatar-name"></span>
+                </div>
+
+                <button class="menu-toggle" id="menu-toggle" style="display: none;">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Menú móvil -->
+    <!-- Menú móvil usuario logueado -->
     <div class="mobile-menu" id="mobile-menu">
         <button class="menu-close" id="menu-close">
             <i class="fas fa-times"></i>
         </button>
         <div class="mobile-nav">
-            <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">Contacto</a>
+            <a href="#" class="mobile-nav-link" id="mis-pedidos-link">
+                <i class="fas fa-box"></i> Mis pedidos
+            </a>
+            <a href="#" class="mobile-nav-link" id="mi-cuenta-link">
+                <i class="fas fa-user-circle"></i> Mi cuenta
+            </a>
+            <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">
+                <i class="fas fa-envelope"></i> Contacto
+            </a>
+            <a href="#" class="mobile-nav-link" id="logout-link">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </a>
         </div>
         <div class="mobile-social">
             <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
@@ -57,70 +74,310 @@
     </div>
     <div class="menu-overlay" id="menu-overlay"></div>
 
-    <main>
-        <!-- Sección de Banners -->
-        <section class="banners-section" id="banners-section" style="display: none;">
-            <div class="container">
-                <div class="banner-carousel">
-                    <div class="carousel-container">
-                        <div class="carousel-track" id="carousel-track">
-                            <!-- Los banners se cargarán dinámicamente -->
+    <!-- Pantalla de Login -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Want<span class="logo-dot">.</span></h1>
+                    <p>Pedidos simples a tus negocios favoritos</p>
+                </div>
+                
+                <div class="login-buttons">
+                    <button class="btn-google" id="login-google-btn">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
+                        Iniciar sesión con Google
+                    </button>
+                    <div class="login-divider"><span>o</span></div>
+                    <button class="btn-google btn-register" id="register-google-btn">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
+                        Registrarse con Google
+                    </button>
+                </div>
+                
+                <div class="login-footer">
+                    <span>Al continuar, aceptas nuestros <a href="#">Términos</a> y <a href="#">Política de privacidad</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Registro (Formulario de datos) -->
+    <div class="registro-screen" id="registro-screen" style="display: none;">
+        <div class="registro-container">
+            <div class="registro-card">
+                <div class="registro-header">
+                    <h2>Completa tus datos</h2>
+                    <p>Estos datos serán utilizados únicamente al momento de realizar pedidos</p>
+                </div>
+                
+                <form id="registro-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre *</label>
+                            <input type="text" id="reg-nombre" placeholder="Juan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellido *</label>
+                            <input type="text" id="reg-apellido" placeholder="Pérez" required>
                         </div>
                     </div>
-                    <button class="carousel-btn prev" id="carousel-prev">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="carousel-btn next" id="carousel-next">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <div class="carousel-dots" id="carousel-dots"></div>
+                    
+                    <div class="form-group">
+                        <label>Provincia *</label>
+                        <select id="reg-provincia" required>
+                            <option value="">Seleccionar provincia</option>
+                            <option value="Buenos Aires">Buenos Aires</option>
+                            <option value="CABA">CABA</option>
+                            <option value="Catamarca">Catamarca</option>
+                            <option value="Chaco">Chaco</option>
+                            <option value="Chubut">Chubut</option>
+                            <option value="Córdoba">Córdoba</option>
+                            <option value="Corrientes">Corrientes</option>
+                            <option value="Entre Ríos">Entre Ríos</option>
+                            <option value="Formosa">Formosa</option>
+                            <option value="Jujuy">Jujuy</option>
+                            <option value="La Pampa">La Pampa</option>
+                            <option value="La Rioja">La Rioja</option>
+                            <option value="Mendoza">Mendoza</option>
+                            <option value="Misiones">Misiones</option>
+                            <option value="Neuquén">Neuquén</option>
+                            <option value="Río Negro">Río Negro</option>
+                            <option value="Salta">Salta</option>
+                            <option value="San Juan">San Juan</option>
+                            <option value="San Luis">San Luis</option>
+                            <option value="Santa Cruz">Santa Cruz</option>
+                            <option value="Santa Fe">Santa Fe</option>
+                            <option value="Santiago del Estero">Santiago del Estero</option>
+                            <option value="Tierra del Fuego">Tierra del Fuego</option>
+                            <option value="Tucumán">Tucumán</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ciudad *</label>
+                        <input type="text" id="reg-ciudad" placeholder="Ej: Rosario" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Calle y número *</label>
+                        <input type="text" id="reg-direccion" placeholder="Av. Siempreviva 1234" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WhatsApp *</label>
+                        <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
+                        <small class="input-help">Incluye código de país sin el signo + (ej: 5491112345678)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Estos datos serán utilizados únicamente al momento de realizar pedidos para agilizar el proceso de envío.</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary btn-block">Guardar y continuar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal (oculto hasta login) -->
+    <div id="main-content" style="display: none;">
+        <main>
+            <!-- Sección de Banners -->
+            <section class="banners-section" id="banners-section" style="display: none;">
+                <div class="container">
+                    <div class="banner-carousel">
+                        <div class="carousel-container">
+                            <div class="carousel-track" id="carousel-track"></div>
+                        </div>
+                        <button class="carousel-btn prev" id="carousel-prev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="carousel-btn next" id="carousel-next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <div class="carousel-dots" id="carousel-dots"></div>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="hero">
-            <div class="container">
-                <h2>¿Qué querés pedir hoy?</h2>
-                <p>Elegí tu negocio favorito y hacé tu pedido en simples pasos</p>
-            </div>
-        </section>
+            <section class="hero">
+                <div class="container">
+                    <h2>¿Qué querés pedir hoy?</h2>
+                    <p>Elegí tu negocio favorito y hacé tu pedido en simples pasos</p>
+                </div>
+            </section>
 
-        <section class="negocios-section">
+            <section class="negocios-section">
+                <div class="container">
+                    <div class="negocios-grid" id="negocios-grid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Cargando negocios...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <section class="contacto-section" id="contacto-section" style="display: none;">
             <div class="container">
-                <div class="negocios-grid" id="negocios-grid">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Cargando negocios...</p>
+                <h2>Contacto</h2>
+                <div class="contacto-info">
+                    <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
+                    <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
+                    <div class="social-icons" style="justify-content: center; margin-top: 20px;">
+                        <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>
         </section>
-    </main>
 
-    <section class="contacto-section" id="contacto-section" style="display: none;">
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Pantalla de Mis Pedidos -->
+    <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
         <div class="container">
-            <h2>Contacto</h2>
-            <div class="contacto-info">
-                <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
-                <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
-                <div class="social-icons" style="justify-content: center; margin-top: 20px;">
-                    <a href="https://instagram.com/tu_usuario" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://wa.me/tu_numero" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+            <div class="pedidos-header">
+                <button class="btn-back" id="back-to-home">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2>Mis pedidos</h2>
+                <div class="total-gastado">
+                    <span>Total gastado:</span>
+                    <strong id="total-gastado-valor">$0</strong>
                 </div>
             </div>
+            
+            <div class="pedidos-tabs">
+                <button class="pedidos-tab active" data-tab="actuales">Pedidos actuales</button>
+                <button class="pedidos-tab" data-tab="historial">Historial</button>
+            </div>
+            
+            <div id="pedidos-actuales-container" class="pedidos-lista">
+                <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
+            </div>
+            
+            <div id="pedidos-historial-container" class="pedidos-lista" style="display: none;">
+                <div class="loading"><div class="spinner"></div><p>Cargando historial...</p></div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <footer class="footer">
+    <!-- Pantalla de Mi Cuenta -->
+    <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
         <div class="container">
-            <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
+            <div class="cuenta-header">
+                <button class="btn-back" id="back-to-home-cuenta">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2>Mi cuenta</h2>
+            </div>
+            
+            <div class="cuenta-card">
+                <div class="cuenta-avatar">
+                    <img src="" alt="Foto perfil" id="cuenta-avatar-img">
+                </div>
+                
+                <form id="cuenta-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre *</label>
+                            <input type="text" id="cuenta-nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellido *</label>
+                            <input type="text" id="cuenta-apellido" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="cuenta-email" readonly disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Provincia *</label>
+                        <select id="cuenta-provincia" required>
+                            <option value="">Seleccionar provincia</option>
+                            <option value="Buenos Aires">Buenos Aires</option>
+                            <option value="CABA">CABA</option>
+                            <option value="Catamarca">Catamarca</option>
+                            <option value="Chaco">Chaco</option>
+                            <option value="Chubut">Chubut</option>
+                            <option value="Córdoba">Córdoba</option>
+                            <option value="Corrientes">Corrientes</option>
+                            <option value="Entre Ríos">Entre Ríos</option>
+                            <option value="Formosa">Formosa</option>
+                            <option value="Jujuy">Jujuy</option>
+                            <option value="La Pampa">La Pampa</option>
+                            <option value="La Rioja">La Rioja</option>
+                            <option value="Mendoza">Mendoza</option>
+                            <option value="Misiones">Misiones</option>
+                            <option value="Neuquén">Neuquén</option>
+                            <option value="Río Negro">Río Negro</option>
+                            <option value="Salta">Salta</option>
+                            <option value="San Juan">San Juan</option>
+                            <option value="San Luis">San Luis</option>
+                            <option value="Santa Cruz">Santa Cruz</option>
+                            <option value="Santa Fe">Santa Fe</option>
+                            <option value="Santiago del Estero">Santiago del Estero</option>
+                            <option value="Tierra del Fuego">Tierra del Fuego</option>
+                            <option value="Tucumán">Tucumán</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ciudad *</label>
+                        <input type="text" id="cuenta-ciudad" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Calle y número *</label>
+                        <input type="text" id="cuenta-direccion" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WhatsApp *</label>
+                        <input type="tel" id="cuenta-telefono" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary btn-block">Guardar cambios</button>
+                </form>
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <!-- Modal de detalle de pedido -->
+    <div class="modal" id="modal-detalle-pedido">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="detalle-pedido-titulo">Detalle del pedido</h3>
+                <button class="modal-close" onclick="cerrarModalDetallePedido()">&times;</button>
+            </div>
+            <div class="modal-body" id="detalle-pedido-body">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="cerrarModalDetallePedido()">Cerrar</button>
+            </div>
+        </div>
+    </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
 <script src="js/home.js"></script>
+<script src="js/auth-usuario.js"></script>
 
 </body>
 </html>
