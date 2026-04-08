@@ -5,29 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Want | Tienda</title>
     
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- HEADER SIMPLE - SIN AVATAR, SOLO LO ESENCIAL -->
     <header class="header">
         <div class="container">
-            <div class="header-content">
-                <a href="index.html" class="logo-link">
-                    <h1 class="logo">Want<span class="logo-dot">.</span></h1>
-                </a>
-                <div class="vendedor-info-header">
-                    <div class="vendedor-logo-header" id="vendedor-logo-header" style="display: none;">
-                        <img src="" alt="Logo" id="vendedor-logo-img">
+            <div class="header-content" style="display: flex; align-items: center; justify-content: space-between;">
+                <a href="index.html" class="logo" style="font-size: 1.5rem; font-weight: 700; color: #FF5A00; text-decoration: none;">Want<span style="color: #FF7A00;">.</span></a>
+                
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="vendedor-info-header" style="display: flex; align-items: center; gap: 10px;">
+                        <div id="vendedor-logo-header" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: none;">
+                            <img src="" alt="Logo" id="vendedor-logo-img" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <p id="negocio-nombre" style="font-size: 0.9rem; font-weight: 500; color: #666; margin: 0;">Cargando negocio...</p>
                     </div>
-                    <p class="tagline" id="negocio-nombre">Cargando negocio...</p>
-                </div>
-                <div class="header-actions">
-                    <a href="#" class="cart-icon" id="cart-icon">
+                    
+                    <a href="#" class="cart-icon" id="cart-icon" style="position: relative; background: #f5f5f5; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FF5A00; font-size: 1.2rem; text-decoration: none;">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="cart-count">0</span>
+                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: #FF5A00; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
                     </a>
                 </div>
             </div>
@@ -35,14 +34,16 @@
     </header>
 
     <main>
-        <section class="productos-section">
-            <div class="container">
-                <div class="productos-header">
-                    <h2>Nuestros productos</h2>
+        <section class="productos-section" style="padding: 40px 0 80px;">
+            <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+                <div class="productos-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="font-size: 1.5rem; color: #333;">Nuestros productos</h2>
                 </div>
-                <div class="productos-grid" id="productos-grid">
-                    <div class="loading">
-                        <div class="spinner"></div>
+                
+                <!-- GRID DE PRODUCTOS - ESCRITORIO -->
+                <div class="productos-grid" id="productos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;">
+                    <div class="loading" style="text-align: center; padding: 50px; color: #888;">
+                        <div class="spinner" style="width: 35px; height: 35px; border: 3px solid #f0f0f0; border-top-color: #FF5A00; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px;"></div>
                         <p>Cargando productos...</p>
                     </div>
                 </div>
@@ -51,121 +52,315 @@
     </main>
 
     <!-- Modal del carrito -->
-    <div class="modal" id="carrito-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Tu pedido</h3>
-                <button class="modal-close" id="cerrar-modal">&times;</button>
+    <div class="modal" id="carrito-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: white; border-radius: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0;">Tu pedido</h3>
+                <button class="modal-close" id="cerrar-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
-            <div class="modal-body" id="carrito-items">
+            <div class="modal-body" id="carrito-items" style="padding: 20px;">
                 <p>No hay productos en el carrito</p>
             </div>
-            <div class="modal-footer">
-                <div class="carrito-total">
+            <div class="modal-footer" style="padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;">
+                <div class="carrito-total" style="flex: 1;">
                     <strong>Total:</strong> <span id="carrito-total">$0</span>
                 </div>
-                <button class="btn btn-primary btn-finalizar" id="finalizar-pedido">Finalizar pedido</button>
+                <button class="btn btn-primary btn-finalizar" id="finalizar-pedido" style="background: #FF5A00; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer;">Finalizar pedido</button>
             </div>
         </div>
     </div>
 
     <!-- Modal del formulario de cliente -->
-    <div class="modal" id="cliente-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Completá tus datos</h3>
-                <button class="modal-close" id="cerrar-cliente-modal">&times;</button>
+    <div class="modal" id="cliente-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: white; border-radius: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0;">Completá tus datos</h3>
+                <button class="modal-close" id="cerrar-cliente-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
-            <div class="modal-body">
-                <button type="button" class="btn-usar-datos" id="btn-usar-mis-datos" style="margin-bottom: 16px; width: 100%;">
+            <div class="modal-body" style="padding: 20px;">
+                <button type="button" class="btn-usar-datos" id="btn-usar-mis-datos" style="background: #f0f0f0; border: none; padding: 12px; border-radius: 40px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-bottom: 16px;">
                     <i class="fas fa-user-check"></i> Usar mis datos de envío
                 </button>
                 
                 <form id="cliente-form">
-                    <div class="form-group">
-                        <label for="cliente-nombre">Nombre completo <span class="required">*</span></label>
-                        <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Nombre completo *</label>
+                        <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="cliente-telefono">Teléfono <span class="required">*</span></label>
-                        <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
-                        <small class="input-help">📱 Importante: Número de WhatsApp correcto para recibir la confirmación</small>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Teléfono *</label>
+                        <input type="tel" id="cliente-telefono" placeholder="5491112345678" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
+                        <small style="display: block; margin-top: 5px; font-size: 0.7rem; color: #888;">📱 Importante: Número de WhatsApp correcto</small>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="cliente-direccion">Dirección de entrega <span class="required">*</span></label>
-                        <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Dirección de entrega *</label>
+                        <input type="text" id="cliente-direccion" placeholder="Calle, número, piso, localidad" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="metodo-pago">Método de pago <span class="required">*</span></label>
-                        <select id="metodo-pago" required>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Método de pago *</label>
+                        <select id="metodo-pago" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem;">
                             <option value="">Seleccioná una opción</option>
                             <option value="efectivo">💵 Efectivo</option>
                             <option value="transferencia">🏦 Transferencia bancaria</option>
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="pedido-detalles">Detalles del pedido</label>
-                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, sin TACC, etc."></textarea>
-                        <small class="input-help">📝 Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.85rem;">Detalles del pedido</label>
+                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido..." style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem; resize: vertical;"></textarea>
+                        <small style="display: block; margin-top: 5px; font-size: 0.7rem; color: #888;">📝 Indicaciones especiales</small>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary btn-block" id="btn-continuar-pago">Continuar</button>
+            <div class="modal-footer" style="padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-primary btn-block" id="btn-continuar-pago" style="background: #FF5A00; color: white; border: none; padding: 12px 24px; border-radius: 40px; cursor: pointer; width: 100%;">Continuar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de confirmación (ticket) -->
-    <div class="modal" id="confirmacion-modal">
-        <div class="modal-content ticket-modal">
-            <div class="modal-header">
-                <h3>Confirmá tu pedido</h3>
-                <button class="modal-close" id="cerrar-confirmacion-modal">&times;</button>
+    <div class="modal" id="confirmacion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
+        <div class="modal-content ticket-modal" style="background: white; border-radius: 24px; max-width: 550px; width: 95%; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0;">Confirmá tu pedido</h3>
+                <button class="modal-close" id="cerrar-confirmacion-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="ticket-info">
-                    <h4>Resumen del pedido</h4>
-                    <div class="ticket-section">
+            <div class="modal-body" style="padding: 20px;">
+                <div class="ticket-info" style="background: #f9f9f9; border-radius: 20px; padding: 20px;">
+                    <h4 style="margin-bottom: 15px; text-align: center;">Resumen del pedido</h4>
+                    <div class="ticket-section" style="background: white; border-radius: 16px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eee;">
                         <p><strong>Nombre:</strong> <span id="confirm-nombre"></span></p>
                         <p><strong>Teléfono:</strong> <span id="confirm-telefono"></span></p>
                         <p><strong>Dirección:</strong> <span id="confirm-direccion"></span></p>
                         <p><strong>Método de pago:</strong> <span id="confirm-pago"></span></p>
                     </div>
-                    <div class="ticket-section">
+                    <div class="ticket-section" style="background: white; border-radius: 16px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eee;">
                         <strong>Productos:</strong>
-                        <div id="confirm-productos" class="productos-lista"></div>
-                        <p class="ticket-total"><strong>Total:</strong> <span id="confirm-total"></span></p>
+                        <div id="confirm-productos" class="productos-lista" style="margin: 10px 0;"></div>
+                        <p class="ticket-total" style="text-align: right; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;"><strong>Total:</strong> <span id="confirm-total"></span></p>
                     </div>
-                    <div class="ticket-section" id="confirm-detalles-section" style="display: none;">
+                    <div class="ticket-section" id="confirm-detalles-section" style="background: white; border-radius: 16px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eee; display: none;">
                         <strong>Detalles del pedido:</strong>
                         <p id="confirm-detalles"></p>
                     </div>
-                    <div class="ticket-warning">
+                    <div class="ticket-warning" style="background: #FFF3E0; border-radius: 16px; padding: 12px 15px; font-size: 0.8rem; color: #FF9800; display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-info-circle"></i>
                         Verificá que tu número de WhatsApp sea correcto. El vendedor te confirmará tu pedido por ese medio.
                     </div>
                 </div>
             </div>
-            <div class="modal-footer ticket-footer">
-                <button class="btn btn-outline" id="btn-editar-pedido">Editar pedido</button>
-                <button class="btn btn-primary" id="btn-enviar-pedido">Confirmar y enviar</button>
+            <div class="modal-footer ticket-footer" style="padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-outline" id="btn-editar-pedido" style="background: transparent; border: 1px solid #FF5A00; color: #FF5A00; padding: 10px 20px; border-radius: 40px; cursor: pointer;">Editar pedido</button>
+                <button class="btn btn-primary" id="btn-enviar-pedido" style="background: #FF5A00; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer;">Confirmar y enviar</button>
             </div>
         </div>
     </div>
 
-    <footer class="footer">
+    <footer class="footer" style="background: white; border-top: 1px solid #eee; padding: 25px 0; text-align: center; color: #888; font-size: 0.8rem;">
         <div class="container">
             <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
         </div>
     </footer>
 
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Estilos específicos para la tienda - NO AFECTAN index.html */
+        .producto-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .producto-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .producto-imagen {
+            width: 100%;
+            height: 160px;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .producto-imagen img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 15px;
+        }
+        
+        .producto-info {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .producto-nombre {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1a1a1a;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .producto-descripcion {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .producto-precio {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #FF5A00;
+            margin-bottom: 12px;
+            margin-top: auto;
+        }
+        
+        .btn-agregar {
+            width: 100%;
+            background: #f5f5f5;
+            color: #333;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-agregar:hover {
+            background: #FF5A00;
+            color: white;
+        }
+        
+        /* MÓVIL - VISTA LISTA */
+        @media (max-width: 768px) {
+            .productos-grid {
+                display: flex !important;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .producto-card {
+                display: flex !important;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+                padding: 12px;
+                min-height: auto;
+            }
+            
+            .producto-imagen {
+                width: 70px !important;
+                height: 70px !important;
+                flex-shrink: 0;
+                border-radius: 12px;
+            }
+            
+            .producto-imagen img {
+                padding: 0;
+                border-radius: 12px;
+            }
+            
+            .producto-info {
+                flex: 1;
+                padding: 0;
+            }
+            
+            .producto-nombre {
+                font-size: 0.85rem;
+                margin-bottom: 4px;
+                min-height: auto;
+            }
+            
+            .producto-descripcion {
+                font-size: 0.7rem;
+                margin-bottom: 6px;
+                min-height: auto;
+            }
+            
+            .producto-precio {
+                font-size: 0.85rem;
+                margin-bottom: 6px;
+            }
+            
+            .btn-agregar {
+                padding: 5px 12px;
+                font-size: 0.7rem;
+                width: auto;
+            }
+        }
+        
+        /* Modal active */
+        .modal.active {
+            display: flex !important;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #FF5A00;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
 <script src="js/tienda.js"></script>
+
+<script>
+    // Asegurar que los modales funcionen
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.modal').classList.remove('active');
+        });
+    });
+    
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+</script>
 </body>
 </html>
