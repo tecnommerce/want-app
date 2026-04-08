@@ -13,7 +13,15 @@
     const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
     const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
     
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Cliente Supabase con headers correctos
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+    });
     window.supabaseClient = supabaseClient;
     
     // ===================================================
@@ -53,6 +61,7 @@
             if (error) throw error;
             return user;
         } catch (error) {
+            console.error('Error getting current user:', error);
             return null;
         }
     };
@@ -65,34 +74,72 @@
             sessionStorage.removeItem('want_usuario_sesion');
             return { success: true };
         } catch (error) {
+            console.error('Error signing out:', error);
             return { success: false, error: error.message };
         }
     };
     
     window.onAuthStateChange = function(callback) {
         return supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state change:', event, session?.user?.email);
             callback(event, session);
         });
     };
     
     // ===================================================
-    // 4. FUNCIONES DE USUARIO
+    // 4. FUNCIONES DE USUARIO (CORREGIDAS - SIN ERROR 406)
     // ===================================================
+    
+    window.obtenerUsuarioPorAuthId = async function(authId) {
+        try {
+            console.log('🔍 Buscando usuario con auth_id:', authId);
+            
+            // Usar .select() sin .single() para evitar error 406
+            const { data, error, status } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .eq('auth_id', authId);
+            
+            console.log('📊 Status:', status);
+            
+            if (error) {
+                console.error('❌ Error en consulta:', error);
+                return { success: false, error: error.message, status: status };
+            }
+            
+            // Verificar si encontramos datos
+            if (data && data.length > 0) {
+                console.log('✅ Usuario encontrado:', data[0]);
+                return { success: true, usuario: data[0] };
+            } else {
+                console.log('⚠️ Usuario no encontrado, será creado');
+                return { success: false, error: 'Usuario no encontrado', notFound: true };
+            }
+        } catch (error) {
+            console.error('❌ Error obteniendo usuario:', error);
+            return { success: false, error: error.message };
+        }
+    };
     
     window.crearOActualizarUsuario = async function(usuarioData) {
         try {
-            // Verificar si el usuario ya existe
-            const { data: existingUser, error: findError } = await supabaseClient
+            console.log('📝 Creando/actualizando usuario:', usuarioData.email);
+            
+            // Primero verificar si el usuario ya existe
+            const { data: existingUsers, error: findError } = await supabaseClient
                 .from('usuarios')
                 .select('*')
-                .eq('auth_id', usuarioData.auth_id)
-                .single();
+                .eq('auth_id', usuarioData.auth_id);
             
-            if (findError && findError.code !== 'PGRST116') {
+            if (findError) {
+                console.error('❌ Error al buscar usuario:', findError);
                 throw findError;
             }
             
+            const existingUser = existingUsers && existingUsers.length > 0 ? existingUsers[0] : null;
+            
             if (existingUser) {
+                console.log('📝 Usuario existe, actualizando:', existingUser.id);
                 // Actualizar usuario existente
                 const { data, error } = await supabaseClient
                     .from('usuarios')
@@ -106,13 +153,18 @@
                         foto_perfil: usuarioData.foto_perfil,
                         updated_at: new Date()
                     })
-                    .eq('auth_id', usuarioData.auth_id)
-                    .select()
-                    .single();
+                    .eq('id', existingUser.id)
+                    .select();
                 
-                if (error) throw error;
-                return { success: true, usuario: data, isNew: false };
+                if (error) {
+                    console.error('❌ Error al actualizar:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Usuario actualizado:', data?.[0]?.email);
+                return { success: true, usuario: data?.[0] || existingUser, isNew: false };
             } else {
+                console.log('📝 Usuario nuevo, creando...');
                 // Crear nuevo usuario
                 const { data, error } = await supabaseClient
                     .from('usuarios')
@@ -129,52 +181,26 @@
                         total_gastado: 0,
                         activo: true
                     }])
-                    .select()
-                    .single();
+                    .select();
                 
-                if (error) throw error;
-                return { success: true, usuario: data, isNew: true };
+                if (error) {
+                    console.error('❌ Error al crear:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Usuario creado:', data?.[0]?.email);
+                return { success: true, usuario: data?.[0], isNew: true };
             }
         } catch (error) {
-            console.error('Error creando/actualizando usuario:', error);
+            console.error('❌ Error en crearOActualizarUsuario:', error);
             return { success: false, error: error.message };
         }
     };
     
-window.obtenerUsuarioPorAuthId = async function(authId) {
-    try {
-        console.log('🔍 Buscando usuario con auth_id:', authId);
-        
-        // Usar .select() sin .single() para evitar error 406
-        const { data, error, status } = await supabaseClient
-            .from('usuarios')
-            .select('*')
-            .eq('auth_id', authId);
-        
-        console.log('📊 Status:', status);
-        console.log('📦 Data:', data);
-        
-        if (error) {
-            console.error('❌ Error en consulta:', error);
-            return { success: false, error: error.message, status: status };
-        }
-        
-        // Verificar si encontramos datos
-        if (data && data.length > 0) {
-            console.log('✅ Usuario encontrado:', data[0]);
-            return { success: true, usuario: data[0] };
-        } else {
-            console.log('⚠️ Usuario no encontrado, será creado');
-            return { success: false, error: 'Usuario no encontrado', notFound: true };
-        }
-    } catch (error) {
-        console.error('❌ Error obteniendo usuario:', error);
-        return { success: false, error: error.message };
-    }
-};
-    
     window.actualizarDatosUsuario = async function(usuarioId, updateData) {
         try {
+            console.log('📝 Actualizando usuario:', usuarioId);
+            
             const { data, error } = await supabaseClient
                 .from('usuarios')
                 .update({
@@ -182,18 +208,22 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                     updated_at: new Date()
                 })
                 .eq('id', usuarioId)
-                .select()
-                .single();
+                .select();
             
             if (error) throw error;
-            return { success: true, usuario: data };
+            
+            console.log('✅ Usuario actualizado');
+            return { success: true, usuario: data?.[0] };
         } catch (error) {
+            console.error('❌ Error actualizando usuario:', error);
             return { success: false, error: error.message };
         }
     };
     
     window.obtenerPedidosUsuario = async function(usuarioId) {
         try {
+            console.log('📦 Obteniendo pedidos del usuario:', usuarioId);
+            
             const { data, error } = await supabaseClient
                 .from('pedidos')
                 .select('*')
@@ -201,66 +231,109 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                 .order('fecha', { ascending: false });
             
             if (error) throw error;
-            return { success: true, pedidos: data };
+            
+            // Cargar productos de cada pedido
+            for (const pedido of (data || [])) {
+                const { data: prodPedido } = await supabaseClient
+                    .from('productos_pedido')
+                    .select(`
+                        cantidad,
+                        precio_unitario,
+                        productos (id, nombre, precio)
+                    `)
+                    .eq('pedido_id', pedido.id);
+                
+                if (prodPedido && prodPedido.length > 0) {
+                    pedido.productos = prodPedido.map(pp => ({
+                        id: pp.productos.id,
+                        nombre: pp.productos.nombre,
+                        precio: pp.precio_unitario,
+                        cantidad: pp.cantidad
+                    }));
+                } else {
+                    pedido.productos = [];
+                }
+            }
+            
+            console.log(`✅ ${data?.length || 0} pedidos encontrados`);
+            return { success: true, pedidos: data || [] };
         } catch (error) {
+            console.error('❌ Error obteniendo pedidos:', error);
             return { success: false, error: error.message };
         }
     };
     
     window.obtenerTodosUsuarios = async function() {
         try {
+            console.log('📋 Obteniendo todos los usuarios');
+            
             const { data, error } = await supabaseClient
                 .from('usuarios')
                 .select('*')
                 .order('created_at', { ascending: false });
             
             if (error) throw error;
-            return { success: true, usuarios: data };
+            
+            console.log(`✅ ${data?.length || 0} usuarios encontrados`);
+            return { success: true, usuarios: data || [] };
         } catch (error) {
+            console.error('❌ Error obteniendo usuarios:', error);
             return { success: false, error: error.message };
         }
     };
     
     window.suspenderUsuario = async function(usuarioId, activo) {
         try {
+            console.log('🔒 Suspendiendo/habilitando usuario:', usuarioId, activo);
+            
             const { error } = await supabaseClient
                 .from('usuarios')
                 .update({ activo: activo })
                 .eq('id', usuarioId);
             
             if (error) throw error;
+            
+            console.log('✅ Estado actualizado');
             return { success: true };
         } catch (error) {
+            console.error('❌ Error suspendiendo usuario:', error);
             return { success: false, error: error.message };
         }
     };
     
     window.eliminarUsuario = async function(usuarioId) {
         try {
+            console.log('🗑️ Eliminando usuario:', usuarioId);
+            
             const { error } = await supabaseClient
                 .from('usuarios')
                 .delete()
                 .eq('id', usuarioId);
             
             if (error) throw error;
+            
+            console.log('✅ Usuario eliminado');
             return { success: true };
         } catch (error) {
+            console.error('❌ Error eliminando usuario:', error);
             return { success: false, error: error.message };
         }
     };
     
     window.actualizarTotalGastado = async function(usuarioId, monto) {
         try {
+            console.log('💰 Actualizando total gastado:', usuarioId, monto);
+            
             // Obtener usuario actual
-            const { data: usuario, error: findError } = await supabaseClient
+            const { data: existingUsers, error: findError } = await supabaseClient
                 .from('usuarios')
                 .select('total_gastado')
-                .eq('id', usuarioId)
-                .single();
+                .eq('id', usuarioId);
             
             if (findError) throw findError;
             
-            const nuevoTotal = (usuario.total_gastado || 0) + monto;
+            const usuario = existingUsers?.[0];
+            const nuevoTotal = (usuario?.total_gastado || 0) + monto;
             
             const { error } = await supabaseClient
                 .from('usuarios')
@@ -268,8 +341,11 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                 .eq('id', usuarioId);
             
             if (error) throw error;
+            
+            console.log('✅ Total gastado actualizado:', nuevoTotal);
             return { success: true, total_gastado: nuevoTotal };
         } catch (error) {
+            console.error('❌ Error actualizando total gastado:', error);
             return { success: false, error: error.message };
         }
     };
@@ -320,7 +396,7 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                     const { data: pedidos, error: pedError } = await pedidosQuery.order('fecha', { ascending: false });
                     if (pedError) throw pedError;
                     
-                    for (const pedido of pedidos) {
+                    for (const pedido of (pedidos || [])) {
                         const { data: prodPedido } = await supabaseClient
                             .from('productos_pedido')
                             .select(`
@@ -341,7 +417,7 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                             pedido.productos = [];
                         }
                     }
-                    return { success: true, pedidos: pedidos };
+                    return { success: true, pedidos: pedidos || [] };
                     
                 case 'crearPedido':
                     const { data: ultimoPedido } = await supabaseClient
@@ -364,7 +440,8 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                             total: data.total,
                             estado: 'preparando',
                             numero_orden: numeroOrden,
-                            usuario_id: data.usuario_id || null
+                            usuario_id: data.usuario_id || null,
+                            vendedor_nombre: data.vendedor_nombre || null
                         }])
                         .select()
                         .single();
@@ -394,6 +471,14 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                         .update({ estado: data.estado })
                         .eq('id', data.pedidoId);
                     if (estadoError) throw estadoError;
+                    return { success: true };
+                    
+                case 'cancelarPedido':
+                    const { error: cancelError } = await supabaseClient
+                        .from('pedidos')
+                        .delete()
+                        .eq('id', data.pedidoId);
+                    if (cancelError) throw cancelError;
                     return { success: true };
                     
                 case 'getDeliveries':
@@ -624,14 +709,6 @@ window.obtenerUsuarioPorAuthId = async function(authId) {
                     if (productoAEliminar && productoAEliminar.imagen_url) {
                         await eliminarImagenCloudinary(productoAEliminar.imagen_url);
                     }
-                    return { success: true };
-                    
-                case 'cancelarPedido':
-                    const { error: cancelError } = await supabaseClient
-                        .from('pedidos')
-                        .delete()
-                        .eq('id', data.pedidoId);
-                    if (cancelError) throw cancelError;
                     return { success: true };
                     
                 default:

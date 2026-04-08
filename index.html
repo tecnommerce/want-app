@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header - Se mostrará diferente según sesión -->
     <header class="header" id="main-header">
         <div class="container">
             <div class="header-content">
@@ -26,7 +25,7 @@
                 </div>
 
                 <div class="nav-desktop" id="nav-desktop">
-                    <a href="#contacto" class="nav-link" id="contacto-link">Contacto</a>
+                    <a href="#" class="nav-link" id="contacto-link-desktop">Contacto</a>
                     <div class="social-icons">
                         <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
                         <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
@@ -34,7 +33,6 @@
                     </div>
                 </div>
 
-                <!-- Avatar de usuario (logueado) -->
                 <div class="user-avatar" id="user-avatar" style="display: none;">
                     <img src="" alt="Foto perfil" id="avatar-img" class="avatar-img">
                     <span class="avatar-name" id="avatar-name"></span>
@@ -47,22 +45,21 @@
         </div>
     </header>
 
-    <!-- Menú móvil usuario logueado -->
     <div class="mobile-menu" id="mobile-menu">
         <button class="menu-close" id="menu-close">
             <i class="fas fa-times"></i>
         </button>
         <div class="mobile-nav">
-            <a href="#" class="mobile-nav-link" id="mis-pedidos-link">
+            <a href="#" class="mobile-nav-link" id="mis-pedidos-link-mobile">
                 <i class="fas fa-box"></i> Mis pedidos
             </a>
-            <a href="#" class="mobile-nav-link" id="mi-cuenta-link">
+            <a href="#" class="mobile-nav-link" id="mi-cuenta-link-mobile">
                 <i class="fas fa-user-circle"></i> Mi cuenta
             </a>
-            <a href="#contacto" class="mobile-nav-link" id="contacto-link-mobile">
+            <a href="#" class="mobile-nav-link" id="contacto-link-mobile">
                 <i class="fas fa-envelope"></i> Contacto
             </a>
-            <a href="#" class="mobile-nav-link" id="logout-link">
+            <a href="#" class="mobile-nav-link" id="logout-link-mobile">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </a>
         </div>
@@ -74,7 +71,27 @@
     </div>
     <div class="menu-overlay" id="menu-overlay"></div>
 
-    <!-- Pantalla de Login -->
+    <!-- Modal de Contacto -->
+    <div class="modal contacto-modal" id="contacto-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> Contacto</h3>
+                <button class="modal-close" onclick="cerrarModalContacto()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="contacto-info-modal">
+                    <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
+                    <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
+                    <div class="contacto-social-modal">
+                        <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://wa.me/+543865747489" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="login-screen" id="login-screen">
         <div class="login-container">
             <div class="login-card">
@@ -102,7 +119,6 @@
         </div>
     </div>
 
-    <!-- Pantalla de Registro (Formulario de datos) -->
     <div class="registro-screen" id="registro-screen" style="display: none;">
         <div class="registro-container">
             <div class="registro-card">
@@ -177,16 +193,14 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn-primary btn-block">Guardar y continuar</button>
+                    <button type="submit" class="btn btn-primary btn-block" id="btn-registrar-usuario">Guardar y continuar</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Contenido principal (oculto hasta login) -->
     <div id="main-content" style="display: none;">
         <main>
-            <!-- Sección de Banners -->
             <section class="banners-section" id="banners-section" style="display: none;">
                 <div class="container">
                     <div class="banner-carousel">
@@ -245,7 +259,6 @@
         </footer>
     </div>
 
-    <!-- Pantalla de Mis Pedidos -->
     <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
         <div class="container">
             <div class="pedidos-header">
@@ -274,7 +287,6 @@
         </div>
     </div>
 
-    <!-- Pantalla de Mi Cuenta -->
     <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
         <div class="container">
             <div class="cuenta-header">
@@ -352,24 +364,21 @@
                         <input type="tel" id="cuenta-telefono" required>
                     </div>
                     
-                    <button type="submit" class="btn-primary btn-block">Guardar cambios</button>
+                    <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-cuenta">Guardar cambios</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal de detalle de pedido -->
     <div class="modal" id="modal-detalle-pedido">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="detalle-pedido-titulo">Detalle del pedido</h3>
                 <button class="modal-close" onclick="cerrarModalDetallePedido()">&times;</button>
             </div>
-            <div class="modal-body" id="detalle-pedido-body">
-                <!-- Contenido dinámico -->
-            </div>
+            <div class="modal-body" id="detalle-pedido-body"></div>
             <div class="modal-footer">
-                <button class="btn-outline" onclick="cerrarModalDetallePedido()">Cerrar</button>
+                <button class="btn btn-outline" onclick="cerrarModalDetallePedido()">Cerrar</button>
             </div>
         </div>
     </div>

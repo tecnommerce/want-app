@@ -64,22 +64,55 @@ function escapeHTML(str) {
 }
 
 // ===================================================
+// EFECTOS DE CARGA EN BOTONES
+// ===================================================
+
+async function withLoading(button, callback) {
+    if (!button) return await callback();
+    const originalText = button.innerHTML;
+    const originalDisabled = button.disabled;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + originalText.replace(/<i class="[^"]*"><\/i>\s*/, '');
+    button.classList.add('btn-loading');
+    try {
+        return await callback();
+    } finally {
+        button.disabled = originalDisabled;
+        button.innerHTML = originalText;
+        button.classList.remove('btn-loading');
+    }
+}
+
+// ===================================================
+// MODAL DE CONTACTO
+// ===================================================
+
+function mostrarModalContacto() {
+    document.getElementById('contacto-modal').classList.add('active');
+}
+
+function cerrarModalContacto() {
+    document.getElementById('contacto-modal').classList.remove('active');
+}
+
+// ===================================================
 // INICIALIZACIÓN DE AUTENTICACIÓN
 // ===================================================
 
 async function initAuth() {
-    // Escuchar cambios de autenticación
-    authSubscription = onAuthStateChange(async (event, session) => {
-        console.log('Auth event:', event, session);
-        
-        if (event === 'SIGNED_IN' && session) {
-            await handleUserLogin(session.user);
-        } else if (event === 'SIGNED_OUT') {
-            handleUserLogout();
-        }
-    });
+    console.log('🔐 Inicializando autenticación de usuarios...');
     
-    // Verificar si hay sesión guardada
+    if (typeof onAuthStateChange === 'function') {
+        authSubscription = onAuthStateChange(async (event, session) => {
+            console.log('Auth event:', event, session?.user?.email);
+            if (event === 'SIGNED_IN' && session) {
+                await handleUserLogin(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                handleUserLogout();
+            }
+        });
+    }
+    
     const sessionGuardada = localStorage.getItem('want_usuario_sesion');
     if (sessionGuardada) {
         try {
@@ -91,33 +124,37 @@ async function initAuth() {
         } catch (e) {}
     }
     
-    // Verificar sesión activa de Supabase
-    const user = await getCurrentUser();
-    if (user) {
-        await handleUserLogin(user);
+    if (typeof getCurrentUser === 'function') {
+        const user = await getCurrentUser();
+        if (user) {
+            await handleUserLogin(user);
+            return;
+        }
     }
+    
+    mostrarPantallaLogin();
 }
 
 async function handleUserLogin(user) {
-    console.log('Usuario logueado:', user);
+    console.log('👤 Usuario logueado:', user.email);
     
-    // Verificar si el usuario ya existe en nuestra tabla
-    const result = await obtenerUsuarioPorAuthId(user.id);
-    
-    if (result.success && result.usuario) {
-        // Usuario ya existe, cargar sus datos
-        usuarioActual = result.usuario;
-        localStorage.setItem('want_usuario_sesion', JSON.stringify({
-            id: usuarioActual.id,
-            email: usuarioActual.email,
-            nombre: usuarioActual.nombre
-        }));
-        mostrarPantallaPrincipal();
-        cargarDatosUsuarioUI();
-        cargarPedidosUsuario();
-    } else {
-        // Usuario nuevo, mostrar formulario de registro
-        mostrarPantallaRegistro(user);
+    if (typeof obtenerUsuarioPorAuthId === 'function') {
+        const result = await obtenerUsuarioPorAuthId(user.id);
+        
+        if (result.success && result.usuario) {
+            usuarioActual = result.usuario;
+            localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                id: usuarioActual.id,
+                email: usuarioActual.email,
+                nombre: usuarioActual.nombre
+            }));
+            mostrarPantallaPrincipal();
+            cargarDatosUsuarioUI();
+            cargarPedidosUsuario();
+        } else {
+            window.usuarioAuth = user;
+            mostrarPantallaRegistro(user);
+        }
     }
 }
 
@@ -129,94 +166,111 @@ function handleUserLogout() {
 }
 
 async function cargarUsuarioLogueado(usuarioId) {
-    const result = await obtenerUsuarioPorAuthId(usuarioId);
-    if (result.success && result.usuario) {
-        usuarioActual = result.usuario;
-        mostrarPantallaPrincipal();
-        cargarDatosUsuarioUI();
-        cargarPedidosUsuario();
-    } else {
-        mostrarPantallaLogin();
+    if (typeof obtenerUsuarioPorAuthId === 'function') {
+        const result = await obtenerUsuarioPorAuthId(usuarioId);
+        if (result.success && result.usuario) {
+            usuarioActual = result.usuario;
+            mostrarPantallaPrincipal();
+            cargarDatosUsuarioUI();
+            cargarPedidosUsuario();
+        } else {
+            mostrarPantallaLogin();
+        }
     }
 }
-
-window.loginWithGoogle = async function() {
-    try {
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: 'https://want-app-eta.vercel.app/index.html'
-            }
-        });
-        if (error) throw error;
-        return { success: true };
-    } catch (error) {
-        console.error('Error login con Google:', error);
-        return { success: false, error: error.message };
-    }
-};
 
 // ===================================================
 // MANEJO DE PANTALLAS
 // ===================================================
 
 function mostrarPantallaLogin() {
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('registro-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
-    document.getElementById('search-container').style.display = 'none';
-    document.getElementById('user-avatar').style.display = 'none';
-    document.getElementById('menu-toggle').style.display = 'none';
-    document.getElementById('nav-desktop').style.display = 'flex';
+    const loginScreen = document.getElementById('login-screen');
+    const registroScreen = document.getElementById('registro-screen');
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
+    const userAvatar = document.getElementById('user-avatar');
+    const menuToggle = document.getElementById('menu-toggle');
+    const navDesktop = document.getElementById('nav-desktop');
+    
+    if (loginScreen) loginScreen.style.display = 'flex';
+    if (registroScreen) registroScreen.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'none';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    if (searchContainer) searchContainer.style.display = 'none';
+    if (userAvatar) userAvatar.style.display = 'none';
+    if (menuToggle) menuToggle.style.display = 'none';
+    if (navDesktop) navDesktop.style.display = 'flex';
 }
 
 function mostrarPantallaRegistro(user) {
     window.usuarioAuth = user;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('registro-screen').style.display = 'flex';
-    document.getElementById('main-content').style.display = 'none';
+    const loginScreen = document.getElementById('login-screen');
+    const registroScreen = document.getElementById('registro-screen');
+    const mainContent = document.getElementById('main-content');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (registroScreen) registroScreen.style.display = 'flex';
+    if (mainContent) mainContent.style.display = 'none';
 }
 
 function mostrarPantallaPrincipal() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('registro-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'block';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
-    document.getElementById('search-container').style.display = 'block';
-    document.getElementById('user-avatar').style.display = 'flex';
-    document.getElementById('menu-toggle').style.display = 'flex';
-    document.getElementById('nav-desktop').style.display = 'none';
+    const loginScreen = document.getElementById('login-screen');
+    const registroScreen = document.getElementById('registro-screen');
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
+    const userAvatar = document.getElementById('user-avatar');
+    const menuToggle = document.getElementById('menu-toggle');
+    const navDesktop = document.getElementById('nav-desktop');
     
-    // Recargar datos
-    if (typeof cargarNegocios === 'function') {
-        cargarNegocios();
-    }
-    if (typeof cargarBanners === 'function') {
-        cargarBanners();
-    }
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (registroScreen) registroScreen.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'block';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    if (searchContainer) searchContainer.style.display = 'block';
+    if (userAvatar) userAvatar.style.display = 'flex';
+    if (menuToggle) menuToggle.style.display = 'flex';
+    if (navDesktop) navDesktop.style.display = 'flex';
+    
+    if (typeof cargarNegocios === 'function') cargarNegocios();
+    if (typeof cargarBanners === 'function') cargarBanners();
 }
 
 function mostrarMisPedidos() {
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('mis-pedidos-screen').style.display = 'block';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    
+    if (mainContent) mainContent.style.display = 'none';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'block';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
     cargarPedidosUsuario();
 }
 
 function mostrarMiCuenta() {
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'block';
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    
+    if (mainContent) mainContent.style.display = 'none';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'block';
     cargarDatosUsuarioFormulario();
 }
 
 function volverAlHome() {
-    document.getElementById('main-content').style.display = 'block';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    
+    if (mainContent) mainContent.style.display = 'block';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
 }
 
 // ===================================================
@@ -260,39 +314,42 @@ function cargarDatosUsuarioFormulario() {
 
 async function guardarDatosUsuario(e) {
     e.preventDefault();
+    const btn = document.getElementById('btn-guardar-cuenta');
     
-    const updateData = {
-        nombre: document.getElementById('cuenta-nombre').value.trim(),
-        apellido: document.getElementById('cuenta-apellido').value.trim(),
-        provincia: document.getElementById('cuenta-provincia').value,
-        ciudad: document.getElementById('cuenta-ciudad').value.trim(),
-        direccion: document.getElementById('cuenta-direccion').value.trim(),
-        telefono: document.getElementById('cuenta-telefono').value.trim()
-    };
-    
-    // Validaciones
-    if (!updateData.nombre || !updateData.apellido || !updateData.provincia || 
-        !updateData.ciudad || !updateData.direccion || !updateData.telefono) {
-        mostrarToast('Completá todos los campos', 'error');
-        return;
-    }
-    
-    const telefonoLimpio = updateData.telefono.replace(/\D/g, '');
-    if (!telefonoLimpio.match(/^\d{10,15}$/)) {
-        mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
-        return;
-    }
-    updateData.telefono = telefonoLimpio;
-    
-    const result = await actualizarDatosUsuario(usuarioActual.id, updateData);
-    
-    if (result.success) {
-        usuarioActual = result.usuario;
-        mostrarToast('Datos actualizados correctamente', 'success');
-        cargarDatosUsuarioUI();
-    } else {
-        mostrarToast('Error al actualizar datos', 'error');
-    }
+    await withLoading(btn, async () => {
+        const updateData = {
+            nombre: document.getElementById('cuenta-nombre').value.trim(),
+            apellido: document.getElementById('cuenta-apellido').value.trim(),
+            provincia: document.getElementById('cuenta-provincia').value,
+            ciudad: document.getElementById('cuenta-ciudad').value.trim(),
+            direccion: document.getElementById('cuenta-direccion').value.trim(),
+            telefono: document.getElementById('cuenta-telefono').value.trim()
+        };
+        
+        if (!updateData.nombre || !updateData.apellido || !updateData.provincia || 
+            !updateData.ciudad || !updateData.direccion || !updateData.telefono) {
+            mostrarToast('Completá todos los campos', 'error');
+            return;
+        }
+        
+        const telefonoLimpio = updateData.telefono.replace(/\D/g, '');
+        if (!telefonoLimpio.match(/^\d{10,15}$/)) {
+            mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
+            return;
+        }
+        updateData.telefono = telefonoLimpio;
+        
+        if (typeof actualizarDatosUsuario === 'function') {
+            const result = await actualizarDatosUsuario(usuarioActual.id, updateData);
+            if (result.success) {
+                usuarioActual = result.usuario;
+                mostrarToast('Datos actualizados correctamente', 'success');
+                cargarDatosUsuarioUI();
+            } else {
+                mostrarToast('Error al actualizar datos', 'error');
+            }
+        }
+    });
 }
 
 // ===================================================
@@ -302,19 +359,17 @@ async function guardarDatosUsuario(e) {
 async function cargarPedidosUsuario() {
     if (!usuarioActual) return;
     
-    const result = await obtenerPedidosUsuario(usuarioActual.id);
-    
-    if (result.success) {
-        pedidosUsuario = result.pedidos || [];
-        renderizarPedidosUsuario();
-        actualizarTotalGastado();
-    } else {
-        console.error('Error cargando pedidos:', result.error);
+    if (typeof obtenerPedidosUsuario === 'function') {
+        const result = await obtenerPedidosUsuario(usuarioActual.id);
+        if (result.success) {
+            pedidosUsuario = result.pedidos || [];
+            renderizarPedidosUsuario();
+            actualizarTotalGastado();
+        }
     }
 }
 
 function renderizarPedidosUsuario() {
-    // Separar pedidos actuales (no entregados) y historial (entregados)
     const pedidosActuales = pedidosUsuario.filter(p => p.estado !== 'entregado');
     const pedidosHistorial = pedidosUsuario.filter(p => p.estado === 'entregado');
     
@@ -327,12 +382,7 @@ function renderizarListaPedidos(pedidos, containerId) {
     if (!container) return;
     
     if (!pedidos || pedidos.length === 0) {
-        container.innerHTML = `
-            <div class="sin-pedidos">
-                <i class="fas fa-inbox"></i>
-                <p>No hay pedidos en esta sección</p>
-            </div>
-        `;
+        container.innerHTML = `<div class="sin-pedidos"><i class="fas fa-inbox"></i><p>No hay pedidos en esta sección</p></div>`;
         return;
     }
     
@@ -345,18 +395,14 @@ function renderizarListaPedidos(pedidos, containerId) {
         if (pedido.productos && pedido.productos.length > 0) {
             const primeros = pedido.productos.slice(0, 2);
             productosResumen = primeros.map(pr => `${pr.cantidad}x ${pr.nombre}`).join(', ');
-            if (pedido.productos.length > 2) {
-                productosResumen += ` +${pedido.productos.length - 2} más`;
-            }
+            if (pedido.productos.length > 2) productosResumen += ` +${pedido.productos.length - 2} más`;
         }
         
         return `
             <div class="pedido-card" onclick="verDetallePedido(${pedido.id})">
                 <div class="pedido-card-header">
                     <span class="pedido-numero">Pedido #${pedido.numero_orden || pedido.id}</span>
-                    <span class="pedido-estado" style="background: ${estadoColor}20; color: ${estadoColor};">
-                        ${estadoTexto}
-                    </span>
+                    <span class="pedido-estado" style="background: ${estadoColor}20; color: ${estadoColor};">${estadoTexto}</span>
                 </div>
                 <div class="pedido-card-body">
                     <div class="pedido-fecha">📅 ${fecha}</div>
@@ -365,9 +411,7 @@ function renderizarListaPedidos(pedidos, containerId) {
                     <div class="pedido-total">💰 ${formatearPrecio(pedido.total)}</div>
                 </div>
                 <div class="pedido-card-footer">
-                    <button class="btn-ver-detalle" onclick="event.stopPropagation(); verDetallePedido(${pedido.id})">
-                        Ver detalle <i class="fas fa-chevron-right"></i>
-                    </button>
+                    <button class="btn-ver-detalle" onclick="event.stopPropagation(); verDetallePedido(${pedido.id})">Ver detalle <i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         `;
@@ -375,14 +419,9 @@ function renderizarListaPedidos(pedidos, containerId) {
 }
 
 function actualizarTotalGastado() {
-    const totalGastado = pedidosUsuario
-        .filter(p => p.estado === 'entregado')
-        .reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
-    
+    const totalGastado = pedidosUsuario.filter(p => p.estado === 'entregado').reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     const totalElement = document.getElementById('total-gastado-valor');
-    if (totalElement) {
-        totalElement.textContent = formatearPrecio(totalGastado);
-    }
+    if (totalElement) totalElement.textContent = formatearPrecio(totalGastado);
 }
 
 function verDetallePedido(pedidoId) {
@@ -400,12 +439,7 @@ function verDetallePedido(pedidoId) {
             <div class="detalle-productos">
                 <strong>Productos:</strong>
                 <div class="productos-lista-detalle">
-                    ${pedido.productos.map(pr => `
-                        <div class="producto-detalle-item">
-                            <span>${pr.cantidad}x ${escapeHTML(pr.nombre)}</span>
-                            <span>${formatearPrecio(pr.precio * pr.cantidad)}</span>
-                        </div>
-                    `).join('')}
+                    ${pedido.productos.map(pr => `<div class="producto-detalle-item"><span>${pr.cantidad}x ${escapeHTML(pr.nombre)}</span><span>${formatearPrecio(pr.precio * pr.cantidad)}</span></div>`).join('')}
                 </div>
             </div>
         `;
@@ -413,44 +447,19 @@ function verDetallePedido(pedidoId) {
     
     let detallesHTML = '';
     if (pedido.detalles && pedido.detalles.trim()) {
-        detallesHTML = `
-            <div class="detalle-seccion">
-                <strong>📝 Detalles adicionales:</strong>
-                <p>${escapeHTML(pedido.detalles)}</p>
-            </div>
-        `;
+        detallesHTML = `<div class="detalle-seccion"><strong>📝 Detalles adicionales:</strong><p>${escapeHTML(pedido.detalles)}</p></div>`;
     }
     
     document.getElementById('detalle-pedido-titulo').textContent = `Pedido #${pedido.numero_orden || pedido.id}`;
     document.getElementById('detalle-pedido-body').innerHTML = `
-        <div class="detalle-estado" style="background: ${estadoColor}20; color: ${estadoColor}; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 16px;">
-            <strong>${estadoTexto}</strong>
-        </div>
-        <div class="detalle-seccion">
-            <strong>📅 Fecha:</strong>
-            <p>${fecha}</p>
-        </div>
-        <div class="detalle-seccion">
-            <strong>👤 Cliente:</strong>
-            <p>${escapeHTML(pedido.cliente_nombre)}</p>
-        </div>
-        <div class="detalle-seccion">
-            <strong>📞 Teléfono:</strong>
-            <p>${pedido.cliente_telefono}</p>
-        </div>
-        <div class="detalle-seccion">
-            <strong>📍 Dirección de entrega:</strong>
-            <p>${escapeHTML(pedido.direccion)}</p>
-        </div>
-        <div class="detalle-seccion">
-            <strong>💳 Método de pago:</strong>
-            <p>${metodoPago}</p>
-        </div>
-        ${productosHTML}
-        ${detallesHTML}
-        <div class="detalle-total">
-            <strong>Total:</strong> ${formatearPrecio(pedido.total)}
-        </div>
+        <div class="detalle-estado" style="background: ${estadoColor}20; color: ${estadoColor}; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 16px;"><strong>${estadoTexto}</strong></div>
+        <div class="detalle-seccion"><strong>📅 Fecha:</strong><p>${fecha}</p></div>
+        <div class="detalle-seccion"><strong>👤 Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre)}</p></div>
+        <div class="detalle-seccion"><strong>📞 Teléfono:</strong><p>${pedido.cliente_telefono}</p></div>
+        <div class="detalle-seccion"><strong>📍 Dirección:</strong><p>${escapeHTML(pedido.direccion)}</p></div>
+        <div class="detalle-seccion"><strong>💳 Método de pago:</strong><p>${metodoPago}</p></div>
+        ${productosHTML}${detallesHTML}
+        <div class="detalle-total"><strong>Total:</strong> ${formatearPrecio(pedido.total)}</div>
     `;
     
     document.getElementById('modal-detalle-pedido').classList.add('active');
@@ -466,58 +475,62 @@ function cerrarModalDetallePedido() {
 
 async function registrarNuevoUsuario(e) {
     e.preventDefault();
+    const btn = document.getElementById('btn-registrar-usuario');
     
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const apellido = document.getElementById('reg-apellido').value.trim();
-    const provincia = document.getElementById('reg-provincia').value;
-    const ciudad = document.getElementById('reg-ciudad').value.trim();
-    const direccion = document.getElementById('reg-direccion').value.trim();
-    let telefono = document.getElementById('reg-telefono').value.trim();
-    
-    // Validaciones
-    if (!nombre || !apellido || !provincia || !ciudad || !direccion || !telefono) {
-        mostrarToast('Completá todos los campos', 'error');
-        return;
-    }
-    
-    telefono = telefono.replace(/\D/g, '');
-    if (!telefono.match(/^\d{10,15}$/)) {
-        mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
-        return;
-    }
-    
-    const user = window.usuarioAuth;
-    if (!user) {
-        mostrarToast('Error de autenticación. Por favor, intentá nuevamente.', 'error');
-        return;
-    }
-    
-    const result = await crearOActualizarUsuario({
-        auth_id: user.id,
-        email: user.email,
-        nombre: nombre,
-        apellido: apellido,
-        provincia: provincia,
-        ciudad: ciudad,
-        direccion: direccion,
-        telefono: telefono,
-        foto_perfil: user.user_metadata?.avatar_url || null
+    await withLoading(btn, async () => {
+        const nombre = document.getElementById('reg-nombre').value.trim();
+        const apellido = document.getElementById('reg-apellido').value.trim();
+        const provincia = document.getElementById('reg-provincia').value;
+        const ciudad = document.getElementById('reg-ciudad').value.trim();
+        const direccion = document.getElementById('reg-direccion').value.trim();
+        let telefono = document.getElementById('reg-telefono').value.trim();
+        
+        if (!nombre || !apellido || !provincia || !ciudad || !direccion || !telefono) {
+            mostrarToast('Completá todos los campos', 'error');
+            return;
+        }
+        
+        telefono = telefono.replace(/\D/g, '');
+        if (!telefono.match(/^\d{10,15}$/)) {
+            mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
+            return;
+        }
+        
+        const user = window.usuarioAuth;
+        if (!user) {
+            mostrarToast('Error de autenticación', 'error');
+            return;
+        }
+        
+        if (typeof crearOActualizarUsuario === 'function') {
+            const result = await crearOActualizarUsuario({
+                auth_id: user.id,
+                email: user.email,
+                nombre: nombre,
+                apellido: apellido,
+                provincia: provincia,
+                ciudad: ciudad,
+                direccion: direccion,
+                telefono: telefono,
+                foto_perfil: user.user_metadata?.avatar_url || null
+            });
+            
+            if (result.success) {
+                usuarioActual = result.usuario;
+                localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                    id: usuarioActual.id,
+                    email: usuarioActual.email,
+                    nombre: usuarioActual.nombre
+                }));
+                mostrarToast('¡Registro completado!', 'success');
+                mostrarPantallaPrincipal();
+                cargarDatosUsuarioUI();
+                cargarPedidosUsuario();
+            } else {
+                mostrarToast('Error al guardar datos', 'error');
+            }
+        }
     });
-    
-    if (result.success) {
-        usuarioActual = result.usuario;
-        localStorage.setItem('want_usuario_sesion', JSON.stringify({
-            id: usuarioActual.id,
-            email: usuarioActual.email,
-            nombre: usuarioActual.nombre
-        }));
-        mostrarToast('¡Registro completado!', 'success');
-        mostrarPantallaPrincipal();
-        cargarDatosUsuarioUI();
-        cargarPedidosUsuario();
-    } else {
-        mostrarToast('Error al guardar datos', 'error');
-    }
 }
 
 // ===================================================
@@ -525,113 +538,87 @@ async function registrarNuevoUsuario(e) {
 // ===================================================
 
 async function cerrarSesion() {
-    const result = await signOut();
-    if (result.success) {
-        mostrarToast('Sesión cerrada', 'info');
-        handleUserLogout();
-    } else {
-        mostrarToast('Error al cerrar sesión', 'error');
+    if (typeof signOut === 'function') {
+        const result = await signOut();
+        if (result.success) {
+            mostrarToast('Sesión cerrada', 'info');
+            handleUserLogout();
+        } else {
+            mostrarToast('Error al cerrar sesión', 'error');
+        }
     }
 }
 
 // ===================================================
-// EVENT LISTENERS Y INICIALIZACIÓN
+// EVENT LISTENERS E INICIALIZACIÓN
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM cargado - Inicializando auth-usuario.js');
+    
     // Botones de login
-    const loginBtn = document.getElementById('login-google-btn');
-    const registerBtn = document.getElementById('register-google-btn');
-    
-    if (loginBtn) {
-        loginBtn.addEventListener('click', async () => {
+    document.getElementById('login-google-btn')?.addEventListener('click', async () => {
+        if (typeof loginWithGoogle === 'function') {
             const result = await loginWithGoogle();
-            if (!result.success) {
-                mostrarToast('Error al iniciar sesión', 'error');
-            }
-        });
-    }
+            if (!result.success) mostrarToast('Error al iniciar sesión', 'error');
+        }
+    });
     
-    if (registerBtn) {
-        registerBtn.addEventListener('click', async () => {
+    document.getElementById('register-google-btn')?.addEventListener('click', async () => {
+        if (typeof loginWithGoogle === 'function') {
             const result = await loginWithGoogle();
-            if (!result.success) {
-                mostrarToast('Error al registrar', 'error');
-            }
-        });
-    }
+            if (!result.success) mostrarToast('Error al registrar', 'error');
+        }
+    });
     
-    // Formulario de registro
-    const registroForm = document.getElementById('registro-form');
-    if (registroForm) {
-        registroForm.addEventListener('submit', registrarNuevoUsuario);
-    }
-    
-    // Formulario de cuenta
-    const cuentaForm = document.getElementById('cuenta-form');
-    if (cuentaForm) {
-        cuentaForm.addEventListener('submit', guardarDatosUsuario);
-    }
+    // Formularios
+    document.getElementById('registro-form')?.addEventListener('submit', registrarNuevoUsuario);
+    document.getElementById('cuenta-form')?.addEventListener('submit', guardarDatosUsuario);
     
     // Navegación
-    const misPedidosLink = document.getElementById('mis-pedidos-link');
-    const miCuentaLink = document.getElementById('mi-cuenta-link');
-    const backToHome = document.getElementById('back-to-home');
-    const backToHomeCuenta = document.getElementById('back-to-home-cuenta');
-    const logoutLink = document.getElementById('logout-link');
+    document.getElementById('mis-pedidos-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
+    document.getElementById('mi-cuenta-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
+    document.getElementById('logout-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
+    document.getElementById('back-to-home')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
+    document.getElementById('back-to-home-cuenta')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
     
-    if (misPedidosLink) {
-        misPedidosLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarMisPedidos();
-        });
-    }
-    
-    if (miCuentaLink) {
-        miCuentaLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarMiCuenta();
-        });
-    }
-    
-    if (backToHome) {
-        backToHome.addEventListener('click', (e) => {
-            e.preventDefault();
-            volverAlHome();
-        });
-    }
-    
-    if (backToHomeCuenta) {
-        backToHomeCuenta.addEventListener('click', (e) => {
-            e.preventDefault();
-            volverAlHome();
-        });
-    }
-    
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            cerrarSesion();
-        });
-    }
+    // Contacto
+    document.getElementById('contacto-link-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarModalContacto(); });
+    document.getElementById('contacto-link-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarModalContacto(); });
     
     // Tabs de pedidos
-    const tabs = document.querySelectorAll('.pedidos-tab');
-    tabs.forEach(tab => {
+    document.querySelectorAll('.pedidos-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
-            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.pedidos-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
             document.getElementById('pedidos-actuales-container').style.display = tabId === 'actuales' ? 'block' : 'none';
             document.getElementById('pedidos-historial-container').style.display = tabId === 'historial' ? 'block' : 'none';
         });
     });
     
-    // Inicializar autenticación
+    // Menú móvil
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuClose = document.getElementById('menu-close');
+    
+    function openMenu() { mobileMenu?.classList.add('active'); menuOverlay?.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeMenu() { mobileMenu?.classList.remove('active'); menuOverlay?.classList.remove('active'); document.body.style.overflow = ''; }
+    
+    menuToggle?.addEventListener('click', openMenu);
+    menuClose?.addEventListener('click', closeMenu);
+    menuOverlay?.addEventListener('click', closeMenu);
+    
+    // Inicializar
     initAuth();
 });
 
 // Funciones globales
 window.verDetallePedido = verDetallePedido;
 window.cerrarModalDetallePedido = cerrarModalDetallePedido;
+window.mostrarMisPedidos = mostrarMisPedidos;
+window.mostrarMiCuenta = mostrarMiCuenta;
+window.volverAlHome = volverAlHome;
+window.mostrarModalContacto = mostrarModalContacto;
+window.cerrarModalContacto = cerrarModalContacto;
