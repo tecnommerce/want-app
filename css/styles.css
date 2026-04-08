@@ -1723,3 +1723,121 @@ a.logo-link {
         font-size: 0.8rem;
     }
 }
+/* ===================================================
+   ESTADO ABIERTO/CERRADO - CON COLORES Y EFECTO
+   =================================================== */
+
+/* Estado Abierto - Atendiendo (Verde) */
+.estado-abierto {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    transition: all 0.3s ease;
+}
+
+.estado-abierto i {
+    font-size: 0.65rem;
+}
+
+/* Efecto hover sutil */
+.estado-abierto:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+/* Estado Cerrado - Cerrado (Rojo) */
+.estado-cerrado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+    transition: all 0.3s ease;
+}
+
+.estado-cerrado i {
+    font-size: 0.65rem;
+}
+
+/* Efecto hover sutil */
+.estado-cerrado:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+}
+
+/* Versión simplificada para móvil (sin hover por temas táctiles) */
+@media (max-width: 768px) {
+    .estado-abierto,
+    .estado-cerrado {
+        padding: 3px 10px;
+        font-size: 0.65rem;
+    }
+    
+    .estado-abierto:hover,
+    .estado-cerrado:hover {
+        transform: none;
+    }
+}
+/* ===================================================
+   MEJORAS VISUALES PARA ESTADOS EN TARJETAS
+   =================================================== */
+
+/* Asegurar que los estados se vean bien en las tarjetas */
+.negocio-estado {
+    margin: 8px 0;
+}
+
+.negocio-estado .estado-abierto,
+.negocio-estado .estado-cerrado {
+    display: inline-flex;
+}
+
+/* Efecto de pulsación al cargar la página (sutil) */
+@keyframes estadoPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.estado-abierto,
+.estado-cerrado {
+    animation: estadoPulse 0.5s ease-out;
+}
+
+/* Versión en el header de tienda si aplica */
+.vendedor-estado {
+    margin-top: 8px;
+}
+
+/* Para el panel de vendedor (admin) - mantener consistencia */
+.estado-badge-header.estado-abierto {
+    background: #10b981;
+    color: white;
+}
+
+.estado-badge-header.estado-cerrado {
+    background: #ef4444;
+    color: white;
+}
