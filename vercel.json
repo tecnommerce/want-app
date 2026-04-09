@@ -2,8 +2,36 @@
   "version": 2,
   "routes": [
     {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/index.html",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/tienda.html",
+      "dest": "/tienda.html"
+    },
+    {
+      "src": "/admin.html",
+      "dest": "/admin.html"
+    },
+    {
       "src": "/admin-global/(.*)",
       "dest": "/admin-global/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/js/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
       "src": "/(.*)",
