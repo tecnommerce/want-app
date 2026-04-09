@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Want | Iniciar sesión</title>
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-screen" id="login-screen" style="display: flex;">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Want<span class="logo-dot">.</span></h1>
+                    <p>Pedidos simples a tus negocios favoritos</p>
+                </div>
+                
+                <div class="login-buttons">
+                    <button class="btn-google" id="login-google-btn">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
+                        Iniciar sesión con Google
+                    </button>
+                    <div class="login-divider"><span>o</span></div>
+                    <button class="btn-google btn-register" id="register-google-btn">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
+                        Registrarse con Google
+                    </button>
+                </div>
+                
+                <div class="login-footer">
+                    <span>Al continuar, aceptas nuestros <a href="#">Términos</a> y <a href="#">Política de privacidad</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="registro-screen" id="registro-screen" style="display: none;">
+        <div class="registro-container">
+            <div class="registro-card">
+                <div class="registro-header">
+                    <h2>Completa tus datos</h2>
+                    <p>Estos datos serán utilizados únicamente al momento de realizar pedidos</p>
+                </div>
+                
+                <form id="registro-form">
+                    <div class="form-group">
+                        <label>Nombre completo <span class="required">*</span></label>
+                        <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Provincia <span class="required">*</span></label>
+                        <select id="reg-provincia" required>
+                            <option value="">Seleccionar provincia</option>
+                            <option value="Buenos Aires">Buenos Aires</option>
+                            <option value="CABA">CABA</option>
+                            <option value="Catamarca">Catamarca</option>
+                            <option value="Chaco">Chaco</option>
+                            <option value="Chubut">Chubut</option>
+                            <option value="Córdoba">Córdoba</option>
+                            <option value="Corrientes">Corrientes</option>
+                            <option value="Entre Ríos">Entre Ríos</option>
+                            <option value="Formosa">Formosa</option>
+                            <option value="Jujuy">Jujuy</option>
+                            <option value="La Pampa">La Pampa</option>
+                            <option value="La Rioja">La Rioja</option>
+                            <option value="Mendoza">Mendoza</option>
+                            <option value="Misiones">Misiones</option>
+                            <option value="Neuquén">Neuquén</option>
+                            <option value="Río Negro">Río Negro</option>
+                            <option value="Salta">Salta</option>
+                            <option value="San Juan">San Juan</option>
+                            <option value="San Luis">San Luis</option>
+                            <option value="Santa Cruz">Santa Cruz</option>
+                            <option value="Santa Fe">Santa Fe</option>
+                            <option value="Santiago del Estero">Santiago del Estero</option>
+                            <option value="Tierra del Fuego">Tierra del Fuego</option>
+                            <option value="Tucumán">Tucumán</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ciudad <span class="required">*</span></label>
+                        <select id="reg-ciudad" required>
+                            <option value="">Seleccionar ciudad</option>
+                            <option value="Juan Bautista Alberdi">Juan Bautista Alberdi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Calle y número <span class="required">*</span></label>
+                        <input type="text" id="reg-direccion" placeholder="Ej: Av. Siempreviva 1234" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WhatsApp <span class="required">*</span></label>
+                        <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
+                        <small class="input-help">📱 Incluye código de país sin el signo + (ej: 5491112345678)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Estos datos serán utilizados únicamente al momento de realizar pedidos para agilizar el proceso de envío.</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="btn-registrar-usuario">Guardar y continuar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-all.js"></script>
+<script src="js/auth-usuario.js"></script>
+
+<script>
+    // Verificar si ya está logueado, redirigir a index.html
+    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+    if (sessionGuardada) {
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>
