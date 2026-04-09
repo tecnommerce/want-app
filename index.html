@@ -141,7 +141,7 @@
         </footer>
     </div>
 
-    <!-- Pantalla Mis Pedidos (modal-like dentro del mismo index) -->
+    <!-- Pantalla Mis Pedidos -->
     <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
         <div class="container">
             <div class="pedidos-header">
@@ -170,7 +170,7 @@
         </div>
     </div>
 
-    <!-- Pantalla Mi Cuenta (modal-like dentro del mismo index) -->
+    <!-- Pantalla Mi Cuenta -->
     <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
         <div class="container">
             <div class="cuenta-header">
@@ -271,15 +271,19 @@
 <script src="js/auth-usuario.js"></script>
 
 <script>
-    // VERIFICAR SESIÓN AL CARGAR index.html
+    // ===================================================
+    // REDIRECCIÓN: Si no hay sesión, ir a login.html
+    // ===================================================
     (function() {
         const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+        console.log('🔍 index.html - Session guardada:', sessionGuardada ? 'SÍ' : 'NO');
+        
         if (!sessionGuardada) {
-            // No hay sesión, redirigir a login
+            console.log('🔴 No hay sesión, redirigiendo a login.html');
             window.location.href = 'login.html';
-            return;
+        } else {
+            console.log('✅ Sesión encontrada, mostrando home');
         }
-        console.log('✅ Sesión encontrada en index.html');
     })();
     
     window.cerrarModalContacto = function() {
@@ -290,3 +294,5 @@
         document.getElementById('modal-detalle-pedido').classList.remove('active');
     };
 </script>
+</body>
+</html>
