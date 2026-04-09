@@ -419,51 +419,51 @@
                     }
                     return { success: true, pedidos: pedidos || [] };
                     
-                case 'crearPedido':
-                    const { data: ultimoPedido } = await supabaseClient
-                        .from('pedidos')
-                        .select('numero_orden')
-                        .eq('vendedor_id', data.vendedor_id)
-                        .order('numero_orden', { ascending: false })
-                        .limit(1);
-                    const numeroOrden = (ultimoPedido && ultimoPedido[0]?.numero_orden || 0) + 1;
-                    
-                    const { data: pedidoNuevo, error: pedCreateError } = await supabaseClient
-                        .from('pedidos')
-                        .insert([{
-                            vendedor_id: data.vendedor_id,
-                            cliente_nombre: data.cliente_nombre,
-                            cliente_telefono: data.cliente_telefono,
-                            direccion: data.direccion,
-                            metodo_pago: data.metodo_pago,
-                            detalles: data.detalles || '',
-                            total: data.total,
-                            estado: 'preparando',
-                            numero_orden: numeroOrden,
-                            usuario_id: data.usuario_id || null,
-                            vendedor_nombre: data.vendedor_nombre || null
-                        }])
-                        .select()
-                        .single();
-                    if (pedCreateError) throw pedCreateError;
-                    
-                    for (const producto of data.productos) {
-                        await supabaseClient
-                            .from('productos_pedido')
-                            .insert([{
-                                pedido_id: pedidoNuevo.id,
-                                producto_id: producto.id,
-                                cantidad: producto.cantidad,
-                                precio_unitario: producto.precio
-                            }]);
-                    }
-                    
-                    // Actualizar total gastado del usuario
-                    if (data.usuario_id) {
-                        await window.actualizarTotalGastado(data.usuario_id, data.total);
-                    }
-                    
-                    return { success: true, pedidoId: pedidoNuevo.id, numeroOrden: numeroOrden };
+case 'crearPedido':
+    const { data: ultimoPedido } = await supabaseClient
+        .from('pedidos')
+        .select('numero_orden')
+        .eq('vendedor_id', data.vendedor_id)
+        .order('numero_orden', { ascending: false })
+        .limit(1);
+    const numeroOrden = (ultimoPedido && ultimoPedido[0]?.numero_orden || 0) + 1;
+    
+    const { data: pedidoNuevo, error: pedCreateError } = await supabaseClient
+        .from('pedidos')
+        .insert([{
+            vendedor_id: data.vendedor_id,
+            cliente_nombre: data.cliente_nombre,
+            cliente_telefono: data.cliente_telefono,
+            direccion: data.direccion,
+            metodo_pago: data.metodo_pago,
+            detalles: data.detalles || '',
+            total: data.total,
+            estado: 'preparando',
+            numero_orden: numeroOrden,
+            usuario_id: data.usuario_id || null
+            // vendedor_nombre: data.vendedor_nombre || null  // <--- ELIMINAR O COMENTAR ESTA LÍNEA
+        }])
+        .select()
+        .single();
+    if (pedCreateError) throw pedCreateError;
+    
+    for (const producto of data.productos) {
+        await supabaseClient
+            .from('productos_pedido')
+            .insert([{
+                pedido_id: pedidoNuevo.id,
+                producto_id: producto.id,
+                cantidad: producto.cantidad,
+                precio_unitario: producto.precio
+            }]);
+    }
+    
+    // Actualizar total gastado del usuario
+    if (data.usuario_id) {
+        await window.actualizarTotalGastado(data.usuario_id, data.total);
+    }
+    
+    return { success: true, pedidoId: pedidoNuevo.id, numeroOrden: numeroOrden };
                     
                 case 'actualizarEstado':
                     const { error: estadoError } = await supabaseClient
