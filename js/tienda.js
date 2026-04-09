@@ -771,3 +771,130 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarAvatarEnTienda();
     configurarAvatarEventos();
 });
+
+// ===================================================
+// AVATAR Y FOTO DE PERFIL EN TIENDA.HTML
+// ===================================================
+
+async function cargarAvatarEnTienda() {
+    console.log('🖼️ Cargando avatar en tienda...');
+    
+    // Obtener usuario actual
+    let usuario = window.usuarioActual;
+    
+    if (!usuario) {
+        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+        if (sessionGuardada) {
+            try {
+                const userData = JSON.parse(sessionGuardada);
+                const result = await obtenerUsuarioPorAuthId(userData.id);
+                if (result.success && result.usuario) {
+                    usuario = result.usuario;
+                    window.usuarioActual = usuario;
+                }
+            } catch (e) {}
+        }
+    }
+    
+    if (!usuario) {
+        console.log('⚠️ No hay usuario logueado');
+        return;
+    }
+    
+    console.log('✅ Usuario encontrado:', usuario.email);
+    
+    // Mostrar contenedores del avatar
+    const avatarDesktop = document.getElementById('user-avatar-desktop');
+    const avatarMobile = document.getElementById('user-avatar-mobile');
+    
+    if (avatarDesktop) avatarDesktop.style.display = 'flex';
+    if (avatarMobile) avatarMobile.style.display = 'flex';
+    
+    // Cargar foto de perfil (desde Google o generada)
+    const avatarImgDesktop = document.getElementById('avatar-img-desktop');
+    const avatarImgMobile = document.getElementById('avatar-img-mobile');
+    const avatarName = document.getElementById('avatar-name-desktop');
+    
+    const nombre = usuario.nombre || 'Usuario';
+    const apellido = usuario.apellido || '';
+    const nombreCompleto = `${nombre} ${apellido}`.trim();
+    
+    // Usar foto de Google si existe, si no, generar avatar
+    let fotoUrl = usuario.foto_perfil;
+    if (!fotoUrl) {
+        fotoUrl = `https://ui-avatars.com/api/?background=FF5A00&color=fff&name=${encodeURIComponent(nombreCompleto)}&length=2&size=36&font-size=18`;
+    }
+    
+    if (avatarImgDesktop) avatarImgDesktop.src = fotoUrl;
+    if (avatarImgMobile) avatarImgMobile.src = fotoUrl;
+    if (avatarName) avatarName.textContent = nombre;
+    
+    console.log('✅ Avatar cargado con foto:', fotoUrl);
+}
+
+function configurarAvatarEventosTienda() {
+    const avatarDesktop = document.getElementById('user-avatar-desktop');
+    const dropdown = document.getElementById('avatar-dropdown');
+    
+    if (avatarDesktop && dropdown) {
+        // Abrir/cerrar dropdown al hacer clic
+        avatarDesktop.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('active');
+        });
+    }
+    
+    // Cerrar sesión
+    const cerrarSesionBtn = document.getElementById('cerrar-sesion-desktop-tienda');
+    if (cerrarSesionBtn) {
+        cerrarSesionBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (typeof cerrarSesion === 'function') {
+                await cerrarSesion();
+            } else {
+                localStorage.removeItem('want_usuario_sesion');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+    
+    // Mi cuenta
+    const miCuentaBtn = document.getElementById('mi-cuenta-desktop-tienda');
+    if (miCuentaBtn) {
+        miCuentaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'index.html#mi-cuenta';
+        });
+    }
+    
+    // Inicio
+    const inicioBtn = document.querySelector('#avatar-dropdown a[href="index.html"]');
+    if (inicioBtn) {
+        inicioBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'index.html';
+        });
+    }
+    
+    // Mis pedidos
+    const misPedidosBtn = document.querySelector('#avatar-dropdown a[href="index.html#mis-pedidos"]');
+    if (misPedidosBtn) {
+        misPedidosBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'index.html#mis-pedidos';
+        });
+    }
+}
+
+// Inicializar avatar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        cargarAvatarEnTienda();
+        configurarAvatarEventosTienda();
+    }, 500);
+});
