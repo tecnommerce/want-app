@@ -1746,3 +1746,71 @@ body {
         line-height: 1.4;
     }
 }
+.user-avatar-desktop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px 12px;
+    background: #f5f5f5;
+    border-radius: 40px;
+    position: relative;
+}
+
+.user-avatar-mobile {
+    display: none;
+    cursor: pointer;
+}
+
+.avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.avatar-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    min-width: 180px;
+    display: none;
+    z-index: 1000;
+}
+
+.avatar-dropdown.active {
+    display: block;
+}
+
+.avatar-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.avatar-dropdown a:hover {
+    background: #FFF5EB;
+}
+
+@media (max-width: 768px) {
+    .user-avatar-desktop {
+        display: none !important;
+    }
+    .user-avatar-mobile {
+        display: flex !important;
+    }
+}
