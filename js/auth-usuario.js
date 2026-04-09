@@ -1,6 +1,5 @@
 // ===================================================
 // AUTENTICACIÓN DE USUARIOS - WANT
-// (CON SESSION MANAGER INTEGRADO)
 // ===================================================
 
 let usuarioActual = null;
@@ -101,7 +100,11 @@ function mostrarMiCuenta() {
     if (mainContent) mainContent.style.display = 'none';
     if (misPedidosScreen) misPedidosScreen.style.display = 'none';
     if (miCuentaScreen) miCuentaScreen.style.display = 'block';
-    cargarDatosUsuarioFormulario();
+    
+    // Forzar carga de datos antes de mostrar el formulario
+    forzarCargaDatosUsuario().then(() => {
+        cargarDatosUsuarioFormulario();
+    });
 }
 
 function volverAlHome() {
@@ -127,24 +130,77 @@ function cerrarModalContacto() {
 }
 
 // ===================================================
-// INICIALIZACIÓN DE AUTENTICACIÓN (usando Session Manager)
+// FORZAR RECARGA DE DATOS DEL USUARIO (NUEVA FUNCIÓN)
+// ===================================================
+
+async function forzarCargaDatosUsuario() {
+    console.log('🔄 Forzando carga de datos de usuario...');
+    
+    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+    if (!sessionGuardada) {
+        console.log('⚠️ No hay sesión guardada');
+        return false;
+    }
+    
+    try {
+        const userData = JSON.parse(sessionGuardada);
+        const result = await obtenerUsuarioPorAuthId(userData.id);
+        
+        if (result.success && result.usuario) {
+            usuarioActual = result.usuario;
+            console.log('✅ Usuario recargado:', usuarioActual.email);
+            cargarDatosUsuarioUI();
+            return true;
+        }
+    } catch (error) {
+        console.error('Error forzando carga:', error);
+    }
+    
+    return false;
+}
+
+// ===================================================
+// INICIALIZACIÓN DE AUTENTICACIÓN
 // ===================================================
 
 async function initAuth() {
-    console.log('🔐 initAuth llamada - delegando a SessionManager');
+    console.log('🔐 Inicializando autenticación de usuarios...');
+    console.log('📍 URL actual:', window.location.href);
+    console.log('📍 Pathname:', window.location.pathname);
     
-    // Verificar si SessionManager está disponible
-    if (typeof SessionManager !== 'undefined' && SessionManager.init) {
-        const result = await SessionManager.init();
-        console.log('📊 SessionManager result:', result);
-        return result;
+    const isLoginPage = window.location.pathname === '/login.html' || window.location.pathname === '/login';
+    
+    console.log('¿Es login page?', isLoginPage);
+    
+    if (typeof getCurrentUser === 'function') {
+        const user = await getCurrentUser();
+        console.log('Usuario de Supabase:', user?.email);
+        
+        if (user) {
+            const result = await obtenerUsuarioPorAuthId(user.id);
+            if (result.success && result.usuario) {
+                usuarioActual = result.usuario;
+                localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                    id: usuarioActual.id,
+                    email: usuarioActual.email,
+                    nombre: usuarioActual.nombre
+                }));
+                console.log('✅ Sesión encontrada en Supabase');
+                
+                if (isLoginPage) {
+                    window.location.href = 'index.html';
+                } else {
+                    mostrarPantallaPrincipal();
+                    cargarDatosUsuarioUI();
+                    cargarPedidosUsuario();
+                }
+                return;
+            }
+        }
     }
     
-    // Fallback si SessionManager no está disponible
-    console.warn('⚠️ SessionManager no disponible, usando método alternativo');
-    
-    const isLoginPage = window.location.pathname.includes('login.html');
     const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+    console.log('Session guardada en localStorage:', sessionGuardada ? 'SÍ' : 'NO');
     
     if (sessionGuardada) {
         try {
@@ -153,6 +209,8 @@ async function initAuth() {
                 const result = await obtenerUsuarioPorAuthId(userData.id);
                 if (result.success && result.usuario) {
                     usuarioActual = result.usuario;
+                    console.log('✅ Sesión restaurada desde localStorage:', usuarioActual.email);
+                    
                     if (isLoginPage) {
                         window.location.href = 'index.html';
                     } else {
@@ -160,138 +218,72 @@ async function initAuth() {
                         cargarDatosUsuarioUI();
                         cargarPedidosUsuario();
                     }
-                    return { success: true, usuario: usuarioActual };
+                    return;
                 }
             }
         } catch (e) {
+            console.error('Error restaurando sesión:', e);
             localStorage.removeItem('want_usuario_sesion');
         }
     }
     
-    if (!isLoginPage) {
-        window.location.href = 'login.html';
+    if (isLoginPage) {
+        console.log('📱 Página de login - esperando acción del usuario');
+        return;
     }
     
-    return { success: false };
+    console.log('🔴 No hay sesión, redirigiendo a login.html');
+    window.location.href = 'login.html';
 }
 
-// ===================================================
-// FUNCIONES DE AUTENTICACIÓN PARA LOGIN.HTML
-// ===================================================
-
-async function iniciarLoginConGoogle() {
-    if (typeof loginWithGoogle === 'function') {
-        const result = await loginWithGoogle();
-        if (!result.success) {
-            mostrarToast('Error al iniciar sesión', 'error');
-        }
-    }
-}
-
-async function iniciarRegistroConGoogle() {
-    if (typeof loginWithGoogle === 'function') {
-        const result = await loginWithGoogle();
-        if (!result.success) {
-            mostrarToast('Error al registrar', 'error');
-        }
-    }
-}
-
-async function registrarNuevoUsuario(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-registrar-usuario');
+async function handleUserLogin(user) {
+    console.log('👤 Usuario logueado:', user.email);
     
-    await withLoading(btn, async () => {
-        const nombreCompleto = document.getElementById('reg-nombre').value.trim();
-        const provincia = document.getElementById('reg-provincia').value;
-        const ciudad = document.getElementById('reg-ciudad').value;
-        const direccion = document.getElementById('reg-direccion').value.trim();
-        let telefono = document.getElementById('reg-telefono').value.trim();
+    if (typeof obtenerUsuarioPorAuthId === 'function') {
+        const result = await obtenerUsuarioPorAuthId(user.id);
         
-        if (!nombreCompleto || !provincia || !ciudad || !direccion || !telefono) {
-            mostrarToast('Completá todos los campos', 'error');
-            return;
-        }
-        
-        telefono = telefono.replace(/\D/g, '');
-        if (!telefono.match(/^\d{10,15}$/)) {
-            mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
-            return;
-        }
-        
-        const nombreParts = nombreCompleto.split(' ');
-        const nombre = nombreParts[0];
-        const apellido = nombreParts.slice(1).join(' ');
-        
-        if (!apellido) {
-            mostrarToast('Ingresá nombre y apellido completo (ej: Juan Pérez)', 'error');
-            return;
-        }
-        
-        const user = window.usuarioAuth;
-        if (!user) {
-            mostrarToast('Error de autenticación', 'error');
-            return;
-        }
-        
-        if (typeof crearOActualizarUsuario === 'function') {
-            const result = await crearOActualizarUsuario({
-                auth_id: user.id,
-                email: user.email,
-                nombre: nombre,
-                apellido: apellido,
-                provincia: provincia,
-                ciudad: ciudad,
-                direccion: direccion,
-                telefono: telefono,
-                foto_perfil: user.user_metadata?.avatar_url || null
-            });
-            
-            if (result.success) {
-                localStorage.setItem('want_usuario_sesion', JSON.stringify({
-                    id: result.usuario.id,
-                    email: result.usuario.email,
-                    nombre: result.usuario.nombre,
-                    timestamp: Date.now()
-                }));
-                mostrarToast('¡Registro completado!', 'success');
-                window.location.href = 'index.html';
-            } else {
-                if (result.conflict === 'email') {
-                    mostrarToast('Este email ya está registrado', 'error');
-                } else {
-                    mostrarToast(result.error || 'Error al guardar datos', 'error');
-                }
-            }
-        }
-    });
-}
-
-// ===================================================
-// CIERRE DE SESIÓN (usando Session Manager)
-// ===================================================
-
-async function cerrarSesion() {
-    if (typeof SessionManager !== 'undefined' && SessionManager.cerrarSesion) {
-        await SessionManager.cerrarSesion();
-        mostrarToast('Sesión cerrada', 'info');
-        window.location.href = 'login.html';
-    } else if (typeof signOut === 'function') {
-        const result = await signOut();
-        if (result.success) {
-            localStorage.removeItem('want_usuario_sesion');
-            sessionStorage.removeItem('vendedor_sesion');
-            mostrarToast('Sesión cerrada', 'info');
-            window.location.href = 'login.html';
+        if (result.success && result.usuario) {
+            usuarioActual = result.usuario;
+            localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                id: usuarioActual.id,
+                email: usuarioActual.email,
+                nombre: usuarioActual.nombre
+            }));
+            window.location.href = 'index.html';
         } else {
-            mostrarToast('Error al cerrar sesión', 'error');
+            window.usuarioAuth = user;
+            window.location.href = 'login.html#registro';
         }
     }
 }
 
-// ===================================================
-// CARGA DE DATOS DEL USUARIO
-// ===================================================
+function handleUserLogout() {
+    usuarioActual = null;
+    localStorage.removeItem('want_usuario_sesion');
+    sessionStorage.removeItem('want_usuario_sesion');
+    window.location.href = 'login.html';
+}
+
+function mostrarPantallaPrincipal() {
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
+    const userAvatarDesktop = document.getElementById('user-avatar-desktop');
+    const userAvatarMobile = document.getElementById('user-avatar-mobile');
+    const navDesktop = document.getElementById('nav-desktop');
+    
+    if (mainContent) mainContent.style.display = 'block';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    if (searchContainer) searchContainer.style.display = 'block';
+    if (userAvatarDesktop) userAvatarDesktop.style.display = 'flex';
+    if (userAvatarMobile) userAvatarMobile.style.display = 'flex';
+    if (navDesktop) navDesktop.style.display = 'flex';
+    
+    if (typeof cargarNegocios === 'function') cargarNegocios();
+    if (typeof cargarBanners === 'function') cargarBanners();
+}
 
 function cargarDatosUsuarioUI() {
     if (!usuarioActual) return;
@@ -381,8 +373,7 @@ async function guardarDatosUsuario(e) {
             localStorage.setItem('want_usuario_sesion', JSON.stringify({
                 id: usuarioActual.id,
                 email: usuarioActual.email,
-                nombre: usuarioActual.nombre,
-                timestamp: Date.now()
+                nombre: usuarioActual.nombre
             }));
             mostrarToast('Datos actualizados correctamente', 'success');
             cargarDatosUsuarioUI();
@@ -391,10 +382,6 @@ async function guardarDatosUsuario(e) {
         }
     });
 }
-
-// ===================================================
-// PEDIDOS DEL USUARIO
-// ===================================================
 
 async function cargarPedidosUsuario() {
     if (!usuarioActual) return;
@@ -507,33 +494,111 @@ function cerrarModalDetallePedido() {
     document.getElementById('modal-detalle-pedido').classList.remove('active');
 }
 
-// ===================================================
-// MOSTRAR PANTALLA PRINCIPAL (fallback)
-// ===================================================
-
-function mostrarPantallaPrincipal() {
-    const mainContent = document.getElementById('main-content');
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    const searchContainer = document.getElementById('search-container');
-    const userAvatarDesktop = document.getElementById('user-avatar-desktop');
-    const userAvatarMobile = document.getElementById('user-avatar-mobile');
-    const navDesktop = document.getElementById('nav-desktop');
-    
-    if (mainContent) mainContent.style.display = 'block';
-    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
-    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
-    if (searchContainer) searchContainer.style.display = 'block';
-    if (userAvatarDesktop) userAvatarDesktop.style.display = 'flex';
-    if (userAvatarMobile) userAvatarMobile.style.display = 'flex';
-    if (navDesktop) navDesktop.style.display = 'flex';
-    
-    if (typeof cargarNegocios === 'function') cargarNegocios();
-    if (typeof cargarBanners === 'function') cargarBanners();
+async function cerrarSesion() {
+    if (typeof signOut === 'function') {
+        const result = await signOut();
+        if (result.success) {
+            mostrarToast('Sesión cerrada', 'info');
+            handleUserLogout();
+        } else {
+            mostrarToast('Error al cerrar sesión', 'error');
+        }
+    }
 }
 
 // ===================================================
-// EVENT LISTENERS (se ejecutan después de cargar el DOM)
+// FUNCIONES PARA LOGIN.HTML
+// ===================================================
+
+async function iniciarLoginConGoogle() {
+    if (typeof loginWithGoogle === 'function') {
+        const result = await loginWithGoogle();
+        if (!result.success) {
+            mostrarToast('Error al iniciar sesión', 'error');
+        }
+    }
+}
+
+async function iniciarRegistroConGoogle() {
+    if (typeof loginWithGoogle === 'function') {
+        const result = await loginWithGoogle();
+        if (!result.success) {
+            mostrarToast('Error al registrar', 'error');
+        }
+    }
+}
+
+async function registrarNuevoUsuario(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-registrar-usuario');
+    
+    await withLoading(btn, async () => {
+        const nombreCompleto = document.getElementById('reg-nombre').value.trim();
+        const provincia = document.getElementById('reg-provincia').value;
+        const ciudad = document.getElementById('reg-ciudad').value;
+        const direccion = document.getElementById('reg-direccion').value.trim();
+        let telefono = document.getElementById('reg-telefono').value.trim();
+        
+        if (!nombreCompleto || !provincia || !ciudad || !direccion || !telefono) {
+            mostrarToast('Completá todos los campos', 'error');
+            return;
+        }
+        
+        telefono = telefono.replace(/\D/g, '');
+        if (!telefono.match(/^\d{10,15}$/)) {
+            mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
+            return;
+        }
+        
+        const nombreParts = nombreCompleto.split(' ');
+        const nombre = nombreParts[0];
+        const apellido = nombreParts.slice(1).join(' ');
+        
+        if (!apellido) {
+            mostrarToast('Ingresá nombre y apellido completo (ej: Juan Pérez)', 'error');
+            return;
+        }
+        
+        const user = window.usuarioAuth;
+        if (!user) {
+            mostrarToast('Error de autenticación', 'error');
+            return;
+        }
+        
+        if (typeof crearOActualizarUsuario === 'function') {
+            const result = await crearOActualizarUsuario({
+                auth_id: user.id,
+                email: user.email,
+                nombre: nombre,
+                apellido: apellido,
+                provincia: provincia,
+                ciudad: ciudad,
+                direccion: direccion,
+                telefono: telefono,
+                foto_perfil: user.user_metadata?.avatar_url || null
+            });
+            
+            if (result.success) {
+                localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                    id: result.usuario.id,
+                    email: result.usuario.email,
+                    nombre: result.usuario.nombre
+                }));
+                mostrarToast('¡Registro completado!', 'success');
+                window.location.href = 'index.html';
+            } else {
+                if (result.conflict === 'email') {
+                    mostrarToast('Este email ya está registrado', 'error');
+                } else {
+                    mostrarToast(result.error || 'Error al guardar datos', 'error');
+                }
+            }
+        }
+    });
+}
+
+// ===================================================
+// EVENT LISTENERS
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -542,9 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLoginPage = window.location.pathname.includes('login.html');
     const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname === '';
     
-    // Configurar eventos según la página
     if (isLoginPage) {
-        // Login page - configurar botones de Google
         const loginBtn = document.getElementById('login-google-btn');
         const registerBtn = document.getElementById('register-google-btn');
         const registroForm = document.getElementById('registro-form');
@@ -559,7 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
             registroForm.addEventListener('submit', registrarNuevoUsuario);
         }
         
-        // Mostrar registro si viene con hash
         if (window.location.hash === '#registro') {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('registro-screen').style.display = 'flex';
@@ -570,7 +632,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (isIndexPage) {
-        // Index page - configurar navegación
         const logoHome = document.getElementById('logo-home');
         if (logoHome) {
             logoHome.addEventListener('click', (e) => {
@@ -579,7 +640,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Navegación escritorio
         document.getElementById('mis-pedidos-desktop')?.addEventListener('click', (e) => {
             e.preventDefault();
             mostrarMisPedidos();
@@ -595,7 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cerrarSesion();
         });
         
-        // Avatar dropdown
         const avatarDesktop = document.getElementById('user-avatar-desktop');
         if (avatarDesktop) {
             avatarDesktop.addEventListener('click', (e) => {
@@ -610,7 +669,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dropdown) dropdown.classList.remove('active');
         });
         
-        // Navegación móvil
         document.getElementById('mis-pedidos-mobile')?.addEventListener('click', (e) => {
             e.preventDefault();
             mostrarMisPedidos();
@@ -631,7 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarModalContacto();
         });
         
-        // Botones volver
         document.getElementById('back-to-home')?.addEventListener('click', (e) => {
             e.preventDefault();
             volverAlHome();
@@ -642,7 +699,6 @@ document.addEventListener('DOMContentLoaded', () => {
             volverAlHome();
         });
         
-        // Menú móvil
         const avatarMobile = document.getElementById('user-avatar-mobile');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuOverlay = document.getElementById('menu-overlay');
@@ -672,10 +728,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Formulario de cuenta
         document.getElementById('cuenta-form')?.addEventListener('submit', guardarDatosUsuario);
         
-        // Tabs de pedidos
         document.querySelectorAll('.pedidos-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
@@ -689,13 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Inicializar autenticación (solo si no hay SessionManager o como respaldo)
-    if (typeof SessionManager === 'undefined') {
-        console.log('⚠️ SessionManager no detectado, usando initAuth directamente');
-        initAuth();
-    } else {
-        console.log('✅ SessionManager detectado, la inicialización se hará desde allí');
-    }
+    initAuth();
 });
 
 // Funciones globales
@@ -707,7 +755,4 @@ window.volverAlHome = volverAlHome;
 window.mostrarModalContacto = mostrarModalContacto;
 window.cerrarModalContacto = cerrarModalContacto;
 window.cerrarSesion = cerrarSesion;
-window.initAuth = initAuth;
-window.mostrarPantallaPrincipal = mostrarPantallaPrincipal;
-window.cargarDatosUsuarioUI = cargarDatosUsuarioUI;
-window.cargarPedidosUsuario = cargarPedidosUsuario;
+window.forzarCargaDatosUsuario = forzarCargaDatosUsuario;
