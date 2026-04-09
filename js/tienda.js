@@ -118,7 +118,6 @@ function renderizarProductos() {
     
     grid.innerHTML = productos.map(producto => {
         const descripcion = producto.descripcion || 'Sin descripción';
-        // En móvil, mostrar descripción con límite de 60 caracteres
         const descripcionCorta = isMobile && descripcion.length > 60 
             ? descripcion.substring(0, 60) + '...' 
             : descripcion;
@@ -143,7 +142,6 @@ function renderizarProductos() {
         `;
     }).join('');
     
-    // Agregar event listener para redimensionar
     if (!window.productosResizedListener) {
         window.addEventListener('resize', () => {
             if (productos.length > 0) {
@@ -289,19 +287,13 @@ function mostrarFormularioCliente() {
     document.getElementById('cliente-modal').classList.add('active');
 }
 
-// ===================================================
-// FUNCIÓN PARA CARGAR DATOS DEL USUARIO EN EL FORMULARIO
-// ===================================================
-
 function cargarDatosUsuarioEnFormulario() {
-    // Verificar si hay un usuario logueado
     const usuarioGuardado = localStorage.getItem('want_usuario_sesion');
     if (!usuarioGuardado) {
         mostrarToast('No hay sesión activa. Inicia sesión para usar tus datos.', 'error');
         return;
     }
     
-    // Intentar obtener los datos del usuario desde la variable global o cargarlos
     if (typeof window.usuarioActual !== 'undefined' && window.usuarioActual) {
         const usuario = window.usuarioActual;
         document.getElementById('cliente-nombre').value = `${usuario.nombre} ${usuario.apellido}`;
@@ -309,37 +301,29 @@ function cargarDatosUsuarioEnFormulario() {
         document.getElementById('cliente-direccion').value = `${usuario.direccion}, ${usuario.ciudad}, ${usuario.provincia}`;
         mostrarToast('Datos cargados desde tu perfil', 'success');
     } else {
-        // Intentar cargar desde la API
         cargarUsuarioDesdeAPI();
     }
 }
 
 async function cargarUsuarioDesdeAPI() {
     try {
-        const user = await getCurrentUser();
-        if (user) {
-            const result = await obtenerUsuarioPorAuthId(user.id);
+        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+        if (sessionGuardada) {
+            const userData = JSON.parse(sessionGuardada);
+            const result = await obtenerUsuarioPorAuthId(userData.id);
             if (result.success && result.usuario) {
                 window.usuarioActual = result.usuario;
                 document.getElementById('cliente-nombre').value = `${result.usuario.nombre} ${result.usuario.apellido}`;
                 document.getElementById('cliente-telefono').value = result.usuario.telefono;
                 document.getElementById('cliente-direccion').value = `${result.usuario.direccion}, ${result.usuario.ciudad}, ${result.usuario.provincia}`;
                 mostrarToast('Datos cargados desde tu perfil', 'success');
-            } else {
-                mostrarToast('No se encontraron datos de perfil. Completá tus datos en "Mi cuenta".', 'error');
             }
-        } else {
-            mostrarToast('Inicia sesión para usar tus datos guardados.', 'error');
         }
     } catch (error) {
         console.error('Error cargando usuario:', error);
         mostrarToast('Error al cargar tus datos', 'error');
     }
 }
-
-// ===================================================
-// FUNCIONES DEL PEDIDO
-// ===================================================
 
 async function confirmarPedido() {
     const nombre = document.getElementById('cliente-nombre')?.value.trim() || '';
@@ -366,7 +350,6 @@ async function confirmarPedido() {
     
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     
-    // Obtener ID del usuario si está logueado
     let usuarioId = null;
     const usuarioGuardado = localStorage.getItem('want_usuario_sesion');
     if (usuarioGuardado) {
@@ -414,17 +397,11 @@ async function confirmarPedido() {
     document.getElementById('carrito-modal').classList.remove('active');
     
     if (resultado && resultado.success) {
-        mostrarToast('¡Pedido enviado correctamente! El vendedor lo recibirá en su panel.', 'success');
-        
-        // Redirigir a Mis Pedidos si el usuario está logueado
-        if (usuarioId) {
+        mostrarToast('¡Pedido enviado correctamente!', 'success');
+        if (usuarioId && typeof mostrarMisPedidos === 'function') {
             setTimeout(() => {
-                if (typeof mostrarMisPedidos === 'function') {
-                    mostrarMisPedidos();
-                } else if (window.location.pathname.includes('tienda.html')) {
-                    window.location.href = 'index.html#mis-pedidos';
-                }
-            }, 2000);
+                mostrarMisPedidos();
+            }, 1500);
         }
     } else {
         mostrarToast('¡Pedido guardado localmente! Se sincronizará automáticamente.', 'success');
@@ -434,6 +411,7 @@ async function confirmarPedido() {
 async function guardarPedidoEnSupabase(pedido) {
     try {
         console.log('📤 Intentando guardar en Supabase...');
+        console.log('📦 Datos del pedido:', pedido);
         
         const response = await postAPI('crearPedido', {
             cliente_nombre: pedido.cliente_nombre,
@@ -444,12 +422,15 @@ async function guardarPedidoEnSupabase(pedido) {
             vendedor_id: pedido.vendedor_id,
             productos: pedido.productos,
             total: pedido.total,
-            usuario_id: pedido.usuario_id || null
+            usuario_id: pedido.usuario_id || null,
+            vendedor_nombre: pedido.vendedor_nombre || null
         });
+        
+        console.log('📥 Respuesta de Supabase:', response);
         
         if (response && response.success) {
             console.log('✅ Pedido guardado en Supabase. ID:', response.pedidoId);
-            return { success: true };
+            return { success: true, pedidoId: response.pedidoId };
         } else {
             console.error('❌ Error al guardar en Supabase:', response?.error || 'Error desconocido');
             return { success: false, error: response?.error };
@@ -510,13 +491,13 @@ async function enviarPedido() {
     const total = datosClienteTemp.total;
     const telefonoLimpio = datosClienteTemp.telefono.replace(/\D/g, '');
     
-    // Obtener ID del usuario si está logueado
     let usuarioId = null;
     const usuarioGuardado = localStorage.getItem('want_usuario_sesion');
     if (usuarioGuardado) {
         try {
             const userData = JSON.parse(usuarioGuardado);
             usuarioId = userData.id;
+            console.log('📝 Usuario ID para el pedido:', usuarioId);
         } catch (e) {}
     }
     
@@ -539,13 +520,16 @@ async function enviarPedido() {
         usuario_id: usuarioId
     };
     
+    console.log('📦 Pedido a enviar:', pedido);
+    
     // Guardar en localStorage como respaldo
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
     const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    await guardarPedidoEnSupabase(pedido);
+    // Guardar en Supabase
+    const resultado = await guardarPedidoEnSupabase(pedido);
     
     carrito = [];
     guardarCarritoDelVendedor();
@@ -557,13 +541,28 @@ async function enviarPedido() {
     btnEnviar.disabled = false;
     btnEnviar.innerHTML = originalText;
     
-    mostrarMensajeExito(usuarioId);
+    if (resultado && resultado.success) {
+        mostrarMensajeExito(usuarioId);
+    } else {
+        mostrarToast('Error al enviar el pedido. Intente nuevamente.', 'error');
+        btnEnviar.disabled = false;
+        btnEnviar.innerHTML = originalText;
+    }
 }
 
 function mostrarMensajeExito(usuarioId) {
     const mensaje = document.createElement('div');
     mensaje.className = 'toast-success';
-    mensaje.innerHTML = '<i class="fas fa-check-circle"></i> ¡Tu pedido fue enviado correctamente! El vendedor te confirmará tu pedido por WhatsApp.';
+    mensaje.style.position = 'fixed';
+    mensaje.style.bottom = '20px';
+    mensaje.style.left = '50%';
+    mensaje.style.transform = 'translateX(-50%)';
+    mensaje.style.backgroundColor = '#10b981';
+    mensaje.style.color = 'white';
+    mensaje.style.padding = '12px 24px';
+    mensaje.style.borderRadius = '50px';
+    mensaje.style.zIndex = '9999';
+    mensaje.innerHTML = '<i class="fas fa-check-circle"></i> ¡Tu pedido fue enviado correctamente!';
     document.body.appendChild(mensaje);
     
     document.getElementById('cliente-form').reset();
@@ -571,7 +570,6 @@ function mostrarMensajeExito(usuarioId) {
     
     setTimeout(() => {
         mensaje.remove();
-        // Redirigir a Mis Pedidos si el usuario está logueado
         if (usuarioId && typeof mostrarMisPedidos === 'function') {
             mostrarMisPedidos();
         } else if (usuarioId) {
@@ -579,12 +577,8 @@ function mostrarMensajeExito(usuarioId) {
         } else {
             window.location.href = 'index.html';
         }
-    }, 3000);
+    }, 2000);
 }
-
-// ===================================================
-// UTILIDADES
-// ===================================================
 
 function escapeHTML(str) {
     if (!str) return '';
@@ -615,10 +609,6 @@ function mostrarToast(mensaje, tipo = 'info') {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
-
-// ===================================================
-// INICIALIZACIÓN
-// ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarTienda();
@@ -678,7 +668,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Botón para usar datos del usuario
     const btnUsarMisDatos = document.getElementById('btn-usar-mis-datos');
     if (btnUsarMisDatos) {
         btnUsarMisDatos.addEventListener('click', cargarDatosUsuarioEnFormulario);
@@ -713,7 +702,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Funciones globales
 window.agregarAlCarrito = agregarAlCarrito;
 window.modificarCantidad = modificarCantidad;
 window.eliminarDelCarrito = eliminarDelCarrito;
