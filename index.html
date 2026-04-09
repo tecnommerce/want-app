@@ -271,10 +271,16 @@
 <script src="js/auth-usuario.js"></script>
 
 <script>
-    // Redirigir a login si no hay sesión
-    if (!localStorage.getItem('want_usuario_sesion')) {
-        window.location.href = 'login.html';
-    }
+    // VERIFICAR SESIÓN AL CARGAR index.html
+    (function() {
+        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+        if (!sessionGuardada) {
+            // No hay sesión, redirigir a login
+            window.location.href = 'login.html';
+            return;
+        }
+        console.log('✅ Sesión encontrada en index.html');
+    })();
     
     window.cerrarModalContacto = function() {
         document.getElementById('contacto-modal').classList.remove('active');
@@ -284,5 +290,3 @@
         document.getElementById('modal-detalle-pedido').classList.remove('active');
     };
 </script>
-</body>
-</html>
