@@ -130,7 +130,7 @@ function cerrarModalContacto() {
 }
 
 // ===================================================
-// FORZAR RECARGA DE DATOS DEL USUARIO (NUEVA FUNCIÓN)
+// FORZAR RECARGA DE DATOS DEL USUARIO
 // ===================================================
 
 async function forzarCargaDatosUsuario() {
@@ -160,81 +160,8 @@ async function forzarCargaDatosUsuario() {
 }
 
 // ===================================================
-// INICIALIZACIÓN DE AUTENTICACIÓN
+// FUNCIONES DE AUTENTICACIÓN (sin initAuth automático)
 // ===================================================
-
-async function initAuth() {
-    console.log('🔐 Inicializando autenticación de usuarios...');
-    console.log('📍 URL actual:', window.location.href);
-    console.log('📍 Pathname:', window.location.pathname);
-    
-    const isLoginPage = window.location.pathname === '/login.html' || window.location.pathname === '/login';
-    
-    console.log('¿Es login page?', isLoginPage);
-    
-    if (typeof getCurrentUser === 'function') {
-        const user = await getCurrentUser();
-        console.log('Usuario de Supabase:', user?.email);
-        
-        if (user) {
-            const result = await obtenerUsuarioPorAuthId(user.id);
-            if (result.success && result.usuario) {
-                usuarioActual = result.usuario;
-                localStorage.setItem('want_usuario_sesion', JSON.stringify({
-                    id: usuarioActual.id,
-                    email: usuarioActual.email,
-                    nombre: usuarioActual.nombre
-                }));
-                console.log('✅ Sesión encontrada en Supabase');
-                
-                if (isLoginPage) {
-                    window.location.href = 'index.html';
-                } else {
-                    mostrarPantallaPrincipal();
-                    cargarDatosUsuarioUI();
-                    cargarPedidosUsuario();
-                }
-                return;
-            }
-        }
-    }
-    
-    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
-    console.log('Session guardada en localStorage:', sessionGuardada ? 'SÍ' : 'NO');
-    
-    if (sessionGuardada) {
-        try {
-            const userData = JSON.parse(sessionGuardada);
-            if (userData && userData.id) {
-                const result = await obtenerUsuarioPorAuthId(userData.id);
-                if (result.success && result.usuario) {
-                    usuarioActual = result.usuario;
-                    console.log('✅ Sesión restaurada desde localStorage:', usuarioActual.email);
-                    
-                    if (isLoginPage) {
-                        window.location.href = 'index.html';
-                    } else {
-                        mostrarPantallaPrincipal();
-                        cargarDatosUsuarioUI();
-                        cargarPedidosUsuario();
-                    }
-                    return;
-                }
-            }
-        } catch (e) {
-            console.error('Error restaurando sesión:', e);
-            localStorage.removeItem('want_usuario_sesion');
-        }
-    }
-    
-    if (isLoginPage) {
-        console.log('📱 Página de login - esperando acción del usuario');
-        return;
-    }
-    
-    console.log('🔴 No hay sesión, redirigiendo a login.html');
-    window.location.href = 'login.html';
-}
 
 async function handleUserLogin(user) {
     console.log('👤 Usuario logueado:', user.email);
@@ -598,7 +525,7 @@ async function registrarNuevoUsuario(e) {
 }
 
 // ===================================================
-// EVENT LISTENERS
+// EVENT LISTENERS (sin initAuth automático)
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -743,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    initAuth();
+    // NOTA: initAuth() NO se llama aquí porque session-manager.js se encarga
 });
 
 // Funciones globales
@@ -756,3 +683,7 @@ window.mostrarModalContacto = mostrarModalContacto;
 window.cerrarModalContacto = cerrarModalContacto;
 window.cerrarSesion = cerrarSesion;
 window.forzarCargaDatosUsuario = forzarCargaDatosUsuario;
+window.handleUserLogin = handleUserLogin;
+window.mostrarPantallaPrincipal = mostrarPantallaPrincipal;
+window.cargarDatosUsuarioUI = cargarDatosUsuarioUI;
+window.cargarPedidosUsuario = cargarPedidosUsuario;
