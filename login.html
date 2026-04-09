@@ -116,14 +116,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
+<script src="js/session-manager.js"></script>
 <script src="js/auth-usuario.js"></script>
 
 <script>
-    // Verificar si ya está logueado, redirigir a index.html
-    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
-    if (sessionGuardada) {
-        window.location.href = 'index.html';
-    }
+    // Inicializar usando Session Manager
+    (async function() {
+        const result = await initWantSession();
+        console.log('📊 Login - Resultado:', result);
+        
+        // Si ya hay sesión, redirigir a index
+        if (result.success) {
+            window.location.href = 'index.html';
+        }
+    })();
 </script>
 </body>
 </html>

@@ -267,10 +267,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
+<script src="js/session-manager.js"></script>
 <script src="js/home.js"></script>
 <script src="js/auth-usuario.js"></script>
 
 <script>
+    // Inicializar usando Session Manager
+    (async function() {
+        const result = await initWantSession();
+        console.log('📊 Index - Resultado:', result);
+        
+        if (!result.success && !window.location.pathname.includes('login.html')) {
+            // No debería pasar, pero por seguridad
+            window.location.href = 'login.html';
+        }
+    })();
+    
     window.cerrarModalContacto = function() {
         document.getElementById('contacto-modal').classList.remove('active');
     };
