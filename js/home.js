@@ -312,9 +312,6 @@ function inicializarMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const menuOverlay = document.getElementById('menu-overlay');
     const menuClose = document.getElementById('menu-close');
-    const contactoLink = document.getElementById('contacto-link');
-    const contactoLinkMobile = document.getElementById('contacto-link-mobile');
-    const contactoSection = document.getElementById('contacto-section');
 
     function openMenu() {
         if (mobileMenu) mobileMenu.classList.add('active');
@@ -331,18 +328,6 @@ function inicializarMenu() {
     if (menuToggle) menuToggle.addEventListener('click', openMenu);
     if (menuClose) menuClose.addEventListener('click', closeMenu);
     if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-
-    function mostrarContacto(e) {
-        e.preventDefault();
-        closeMenu();
-        if (contactoSection) {
-            contactoSection.style.display = 'block';
-            contactoSection.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    if (contactoLink) contactoLink.addEventListener('click', mostrarContacto);
-    if (contactoLinkMobile) contactoLinkMobile.addEventListener('click', mostrarContacto);
 }
 
 // ===================================================
