@@ -966,3 +966,202 @@ document.addEventListener('DOMContentLoaded', () => {
         configurarMenuMovilTienda();
     }, 500);
 });
+
+// ===================================================
+// AVATAR Y MENÚ MÓVIL COMPLETO PARA TIENDA.HTML
+// ===================================================
+
+async function cargarAvatarEnTienda() {
+    console.log('🖼️ Cargando avatar en tienda...');
+    
+    let usuario = window.usuarioActual;
+    
+    if (!usuario) {
+        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+        if (sessionGuardada) {
+            try {
+                const userData = JSON.parse(sessionGuardada);
+                const result = await obtenerUsuarioPorAuthId(userData.id);
+                if (result.success && result.usuario) {
+                    usuario = result.usuario;
+                    window.usuarioActual = usuario;
+                }
+            } catch (e) {}
+        }
+    }
+    
+    if (!usuario) {
+        console.log('⚠️ No hay usuario logueado');
+        return;
+    }
+    
+    console.log('✅ Usuario encontrado:', usuario.email);
+    
+    // Mostrar contenedores del avatar
+    const avatarDesktop = document.getElementById('user-avatar-desktop');
+    const avatarMobile = document.getElementById('user-avatar-mobile');
+    
+    if (avatarDesktop) avatarDesktop.style.display = 'flex';
+    if (avatarMobile) avatarMobile.style.display = 'flex';
+    
+    // Cargar foto de perfil
+    const avatarImgDesktop = document.getElementById('avatar-img-desktop');
+    const avatarImgMobile = document.getElementById('avatar-img-mobile');
+    const avatarName = document.getElementById('avatar-name-desktop');
+    
+    const nombre = usuario.nombre || 'Usuario';
+    const apellido = usuario.apellido || '';
+    const nombreCompleto = `${nombre} ${apellido}`.trim();
+    
+    let fotoUrl = usuario.foto_perfil;
+    if (!fotoUrl) {
+        fotoUrl = `https://ui-avatars.com/api/?background=FF5A00&color=fff&name=${encodeURIComponent(nombreCompleto)}&length=2&size=36&font-size=18`;
+    }
+    
+    if (avatarImgDesktop) avatarImgDesktop.src = fotoUrl;
+    if (avatarImgMobile) avatarImgMobile.src = fotoUrl;
+    if (avatarName) avatarName.textContent = nombre;
+    
+    console.log('✅ Avatar cargado');
+}
+
+function configurarAvatarEventosTienda() {
+    // ========== ESCRITORIO ==========
+    const avatarDesktop = document.getElementById('user-avatar-desktop');
+    const dropdown = document.getElementById('avatar-dropdown');
+    
+    if (avatarDesktop && dropdown) {
+        avatarDesktop.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+        
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('active');
+        });
+    }
+    
+    // ========== MÓVIL ==========
+    const avatarMobile = document.getElementById('user-avatar-mobile');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuClose = document.getElementById('menu-close');
+    
+    console.log('📱 Configurando menú móvil...');
+    console.log('avatarMobile encontrado:', !!avatarMobile);
+    console.log('mobileMenu encontrado:', !!mobileMenu);
+    
+    function openMobileMenu() {
+        console.log('🔓 Abriendo menú móvil');
+        if (mobileMenu) mobileMenu.classList.add('active');
+        if (menuOverlay) menuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeMobileMenu() {
+        console.log('🔒 Cerrando menú móvil');
+        if (mobileMenu) mobileMenu.classList.remove('active');
+        if (menuOverlay) menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    if (avatarMobile) {
+        // Eliminar event listeners anteriores para evitar duplicados
+        const newAvatarMobile = avatarMobile.cloneNode(true);
+        avatarMobile.parentNode.replaceChild(newAvatarMobile, avatarMobile);
+        
+        newAvatarMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🖱️ Click en avatar móvil');
+            openMobileMenu();
+        });
+        
+        // Actualizar referencia
+        document.getElementById('user-avatar-mobile').src = newAvatarMobile.src;
+    } else {
+        console.log('❌ avatarMobile NO encontrado');
+    }
+    
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMobileMenu);
+    }
+    
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeMobileMenu);
+    }
+    
+    // Opciones del menú móvil
+    const miCuentaMobile = document.getElementById('mi-cuenta-mobile-tienda');
+    const logoutMobile = document.getElementById('logout-mobile-tienda');
+    const misPedidosMobile = document.querySelector('#mobile-menu a[href="index.html#mis-pedidos"]');
+    const inicioMobile = document.querySelector('#mobile-menu a[href="index.html"]');
+    
+    if (miCuentaMobile) {
+        miCuentaMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeMobileMenu();
+            window.location.href = 'index.html#mi-cuenta';
+        });
+    }
+    
+    if (logoutMobile) {
+        logoutMobile.addEventListener('click', async (e) => {
+            e.preventDefault();
+            closeMobileMenu();
+            if (typeof cerrarSesion === 'function') {
+                await cerrarSesion();
+            } else {
+                localStorage.removeItem('want_usuario_sesion');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+    
+    if (misPedidosMobile) {
+        misPedidosMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeMobileMenu();
+            window.location.href = 'index.html#mis-pedidos';
+        });
+    }
+    
+    if (inicioMobile) {
+        inicioMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeMobileMenu();
+            window.location.href = 'index.html';
+        });
+    }
+    
+    // Cerrar sesión escritorio
+    const cerrarSesionBtn = document.getElementById('cerrar-sesion-desktop-tienda');
+    if (cerrarSesionBtn) {
+        cerrarSesionBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (typeof cerrarSesion === 'function') {
+                await cerrarSesion();
+            } else {
+                localStorage.removeItem('want_usuario_sesion');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+    
+    // Mi cuenta escritorio
+    const miCuentaBtn = document.getElementById('mi-cuenta-desktop-tienda');
+    if (miCuentaBtn) {
+        miCuentaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'index.html#mi-cuenta';
+        });
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        cargarAvatarEnTienda();
+        configurarAvatarEventosTienda();
+    }, 500);
+});
