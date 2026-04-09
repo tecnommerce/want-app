@@ -710,3 +710,64 @@ window.modificarCantidad = modificarCantidad;
 window.eliminarDelCarrito = eliminarDelCarrito;
 window.confirmarPedido = confirmarPedido;
 window.cargarDatosUsuarioEnFormulario = cargarDatosUsuarioEnFormulario;
+
+// Avatar en tienda.html
+function mostrarAvatarEnTienda() {
+    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+    if (!sessionGuardada) return;
+    try {
+        const userData = JSON.parse(sessionGuardada);
+        if (userData && userData.id) {
+            const avatarDesktop = document.getElementById('user-avatar-desktop');
+            const avatarMobile = document.getElementById('user-avatar-mobile');
+            if (avatarDesktop) avatarDesktop.style.display = 'flex';
+            if (avatarMobile) avatarMobile.style.display = 'flex';
+            const avatarImgDesktop = document.getElementById('avatar-img-desktop');
+            const avatarImgMobile = document.getElementById('avatar-img-mobile');
+            const avatarName = document.getElementById('avatar-name-desktop');
+            const nombre = userData.nombre || 'Usuario';
+            const avatarUrl = `https://ui-avatars.com/api/?background=FF5A00&color=fff&name=${encodeURIComponent(nombre)}`;
+            if (avatarImgDesktop) avatarImgDesktop.src = avatarUrl;
+            if (avatarImgMobile) avatarImgMobile.src = avatarUrl;
+            if (avatarName) avatarName.textContent = nombre;
+        }
+    } catch (e) {}
+}
+
+function configurarAvatarEventos() {
+    const avatarDesktop = document.getElementById('user-avatar-desktop');
+    const dropdown = document.getElementById('avatar-dropdown');
+    if (avatarDesktop && dropdown) {
+        avatarDesktop.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('active');
+        });
+    }
+    const cerrarSesionBtn = document.getElementById('cerrar-sesion-desktop');
+    if (cerrarSesionBtn) {
+        cerrarSesionBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (typeof cerrarSesion === 'function') {
+                await cerrarSesion();
+            } else {
+                localStorage.removeItem('want_usuario_sesion');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+    const miCuentaBtn = document.getElementById('mi-cuenta-desktop');
+    if (miCuentaBtn) {
+        miCuentaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'index.html#mi-cuenta';
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarAvatarEnTienda();
+    configurarAvatarEventos();
+});
