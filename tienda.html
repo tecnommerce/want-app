@@ -722,24 +722,40 @@
 </head>
 <body>
     <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
-                
-                <div class="vendedor-info-header">
-                    <div class="vendedor-logo-header" id="vendedor-logo-header" style="display: none;">
-                        <img src="" alt="Logo" id="vendedor-logo-img">
-                    </div>
-                    <p class="tagline" id="negocio-nombre">Cargando negocio...</p>
+    <div class="container">
+        <div class="header-content">
+            <a href="index.html" class="logo-link">
+                <h1 class="logo">Want<span class="logo-dot">.</span></h1>
+            </a>
+            <div class="vendedor-info-header">
+                <div class="vendedor-logo-header" id="vendedor-logo-header" style="display: none;">
+                    <img src="" alt="Logo" id="vendedor-logo-img">
                 </div>
-                
+                <p class="tagline" id="negocio-nombre">Cargando negocio...</p>
+            </div>
+            <div class="header-actions">
+                <!-- AVATAR ESCRITORIO -->
+                <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
+                    <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
+                    <span class="avatar-name" id="avatar-name-desktop"></span>
+                    <div class="avatar-dropdown" id="avatar-dropdown">
+                        <a href="index.html" id="mi-cuenta-desktop"><i class="fas fa-user-circle"></i> Mi cuenta</a>
+                        <a href="#" id="cerrar-sesion-desktop"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </div>
+                </div>
+                <!-- AVATAR MÓVIL -->
+                <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
+                    <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
+                </div>
+                <!-- CARRITO -->
                 <a href="#" class="cart-icon" id="cart-icon">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cart-count">0</span>
                 </a>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
     <main>
         <section class="productos-section">
@@ -873,25 +889,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
+<script src="js/session-manager.js"></script>
 <script src="js/tienda.js"></script>
+<script src="js/auth-usuario.js"></script>
 
 <script>
-    // Asegurar que los modales funcionen correctamente
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const modal = this.closest('.modal');
-            if (modal) modal.classList.remove('active');
-        });
-    });
-    
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-            }
-        });
-    });
+    // Sincronizar usuario al cargar tienda.html
+    (async function() {
+        // Esperar a que session-manager inicialice
+        if (typeof initWantSession === 'function') {
+            await initWantSession();
+        }
+        // Forzar carga de usuario actual
+        if (typeof forzarCargaDatosUsuario === 'function') {
+            await forzarCargaDatosUsuario();
+        }
+        // Si hay usuario, cargar tienda
+        if (typeof window.usuarioActual !== 'undefined' && window.usuarioActual) {
+            console.log('✅ Usuario disponible en tienda:', window.usuarioActual.email);
+        }
+    })();
 </script>
+
 </body>
 </html>

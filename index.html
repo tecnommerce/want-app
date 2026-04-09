@@ -278,10 +278,18 @@
         console.log('📊 Index - Resultado:', result);
         
         if (!result.success && !window.location.pathname.includes('login.html')) {
-            // No debería pasar, pero por seguridad
             window.location.href = 'login.html';
         }
     })();
+    
+    // Redirigir a Mis Pedidos si viene con #mis-pedidos
+    if (window.location.hash === '#mis-pedidos') {
+        setTimeout(() => {
+            if (typeof mostrarMisPedidos === 'function') {
+                mostrarMisPedidos();
+            }
+        }, 500);
+    }
     
     window.cerrarModalContacto = function() {
         document.getElementById('contacto-modal').classList.remove('active');
@@ -291,7 +299,6 @@
         document.getElementById('modal-detalle-pedido').classList.remove('active');
     };
 </script>
-
 
 </body>
 </html>

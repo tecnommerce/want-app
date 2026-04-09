@@ -288,21 +288,38 @@ function mostrarFormularioCliente() {
 }
 
 function cargarDatosUsuarioEnFormulario() {
-    const usuarioGuardado = localStorage.getItem('want_usuario_sesion');
-    if (!usuarioGuardado) {
+    console.log('📝 Intentando cargar datos del usuario...');
+    
+    // Intentar obtener usuario desde window (global)
+    let usuario = window.usuarioActual;
+    
+    // Si no está, intentar desde localStorage
+    if (!usuario) {
+        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+        if (sessionGuardada) {
+            try {
+                const userData = JSON.parse(sessionGuardada);
+                usuario = userData;
+                console.log('📦 Usuario desde localStorage:', usuario.email);
+            } catch (e) {}
+        }
+    }
+    
+    if (!usuario) {
         mostrarToast('No hay sesión activa. Inicia sesión para usar tus datos.', 'error');
         return;
     }
     
-    if (typeof window.usuarioActual !== 'undefined' && window.usuarioActual) {
-        const usuario = window.usuarioActual;
-        document.getElementById('cliente-nombre').value = `${usuario.nombre} ${usuario.apellido}`;
-        document.getElementById('cliente-telefono').value = usuario.telefono;
-        document.getElementById('cliente-direccion').value = `${usuario.direccion}, ${usuario.ciudad}, ${usuario.provincia}`;
-        mostrarToast('Datos cargados desde tu perfil', 'success');
-    } else {
-        cargarUsuarioDesdeAPI();
-    }
+    // Cargar datos en el formulario
+    const nombreInput = document.getElementById('cliente-nombre');
+    const telefonoInput = document.getElementById('cliente-telefono');
+    const direccionInput = document.getElementById('cliente-direccion');
+    
+    if (nombreInput) nombreInput.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
+    if (telefonoInput) telefonoInput.value = usuario.telefono || '';
+    if (direccionInput) direccionInput.value = `${usuario.direccion || ''}, ${usuario.ciudad || ''}, ${usuario.provincia || ''}`;
+    
+    mostrarToast('Datos cargados desde tu perfil', 'success');
 }
 
 async function cargarUsuarioDesdeAPI() {
@@ -553,15 +570,6 @@ async function enviarPedido() {
 function mostrarMensajeExito(usuarioId) {
     const mensaje = document.createElement('div');
     mensaje.className = 'toast-success';
-    mensaje.style.position = 'fixed';
-    mensaje.style.bottom = '20px';
-    mensaje.style.left = '50%';
-    mensaje.style.transform = 'translateX(-50%)';
-    mensaje.style.backgroundColor = '#10b981';
-    mensaje.style.color = 'white';
-    mensaje.style.padding = '12px 24px';
-    mensaje.style.borderRadius = '50px';
-    mensaje.style.zIndex = '9999';
     mensaje.innerHTML = '<i class="fas fa-check-circle"></i> ¡Tu pedido fue enviado correctamente!';
     document.body.appendChild(mensaje);
     
@@ -570,13 +578,8 @@ function mostrarMensajeExito(usuarioId) {
     
     setTimeout(() => {
         mensaje.remove();
-        if (usuarioId && typeof mostrarMisPedidos === 'function') {
-            mostrarMisPedidos();
-        } else if (usuarioId) {
-            window.location.href = 'index.html#mis-pedidos';
-        } else {
-            window.location.href = 'index.html';
-        }
+        // Redirigir a Mis Pedidos
+        window.location.href = 'index.html#mis-pedidos';
     }, 2000);
 }
 
