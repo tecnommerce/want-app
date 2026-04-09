@@ -131,12 +131,46 @@ function cerrarModalContacto() {
 
 async function initAuth() {
     console.log('🔐 Inicializando autenticación de usuarios...');
+    console.log('📍 URL actual:', window.location.href);
+    console.log('📍 Pathname:', window.location.pathname);
     
-    // Verificar si estamos en login.html
-    const isLoginPage = window.location.pathname.includes('login.html');
+    // Verificar si estamos en login.html (COMPARACIÓN EXACTA)
+    const isLoginPage = window.location.pathname === '/login.html' || window.location.pathname === '/login';
     
-    // PRIMERO: Verificar sesión guardada en localStorage
+    console.log('¿Es login page?', isLoginPage);
+    
+    // PRIMERO: Verificar sesión activa en Supabase (MÁS IMPORTANTE)
+    if (typeof getCurrentUser === 'function') {
+        const user = await getCurrentUser();
+        console.log('Usuario de Supabase:', user?.email);
+        
+        if (user) {
+            // Hay sesión activa en Supabase, guardar y mostrar home
+            const result = await obtenerUsuarioPorAuthId(user.id);
+            if (result.success && result.usuario) {
+                usuarioActual = result.usuario;
+                localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                    id: usuarioActual.id,
+                    email: usuarioActual.email,
+                    nombre: usuarioActual.nombre
+                }));
+                console.log('✅ Sesión encontrada en Supabase');
+                
+                if (isLoginPage) {
+                    window.location.href = 'index.html';
+                } else {
+                    mostrarPantallaPrincipal();
+                    cargarDatosUsuarioUI();
+                    cargarPedidosUsuario();
+                }
+                return;
+            }
+        }
+    }
+    
+    // SEGUNDO: Verificar sesión guardada en localStorage
     const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+    console.log('Session guardada en localStorage:', sessionGuardada ? 'SÍ' : 'NO');
     
     if (sessionGuardada) {
         try {
@@ -145,18 +179,15 @@ async function initAuth() {
                 const result = await obtenerUsuarioPorAuthId(userData.id);
                 if (result.success && result.usuario) {
                     usuarioActual = result.usuario;
-                    console.log('✅ Sesión restaurada:', usuarioActual.email);
+                    console.log('✅ Sesión restaurada desde localStorage:', usuarioActual.email);
                     
-                    // Si estamos en login.html, redirigir a index.html
                     if (isLoginPage) {
                         window.location.href = 'index.html';
-                        return;
+                    } else {
+                        mostrarPantallaPrincipal();
+                        cargarDatosUsuarioUI();
+                        cargarPedidosUsuario();
                     }
-                    
-                    // Si estamos en index.html, mostrar la pantalla principal
-                    mostrarPantallaPrincipal();
-                    cargarDatosUsuarioUI();
-                    cargarPedidosUsuario();
                     return;
                 }
             }
@@ -166,18 +197,15 @@ async function initAuth() {
         }
     }
     
-    // Si estamos en login.html y no hay sesión, no hacemos nada más
+    // Si estamos en login.html y no hay sesión, no hacemos nada
     if (isLoginPage) {
         console.log('📱 Página de login - esperando acción del usuario');
         return;
     }
     
     // Si NO estamos en login.html y no hay sesión, redirigir a login
-    if (!sessionGuardada) {
-        console.log('🔴 No hay sesión, redirigiendo a login.html');
-        window.location.href = 'login.html';
-        return;
-    }
+    console.log('🔴 No hay sesión, redirigiendo a login.html');
+    window.location.href = 'login.html';
 }
 
 async function handleUserLogin(user) {
