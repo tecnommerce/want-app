@@ -898,3 +898,71 @@ document.addEventListener('DOMContentLoaded', () => {
         configurarAvatarEventosTienda();
     }, 500);
 });
+// ===================================================
+// MENÚ MÓVIL EN TIENDA.HTML
+// ===================================================
+
+function configurarMenuMovilTienda() {
+    const avatarMobile = document.getElementById('user-avatar-mobile');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuClose = document.getElementById('menu-close');
+    
+    function openMenu() {
+        if (mobileMenu) mobileMenu.classList.add('active');
+        if (menuOverlay) menuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeMenu() {
+        if (mobileMenu) mobileMenu.classList.remove('active');
+        if (menuOverlay) menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    if (avatarMobile) {
+        avatarMobile.addEventListener('click', openMenu);
+    }
+    
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMenu);
+    }
+    
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeMenu);
+    }
+    
+    // Opciones del menú móvil
+    const miCuentaMobile = document.getElementById('mi-cuenta-mobile-tienda');
+    const logoutMobile = document.getElementById('logout-mobile-tienda');
+    
+    if (miCuentaMobile) {
+        miCuentaMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeMenu();
+            window.location.href = 'index.html#mi-cuenta';
+        });
+    }
+    
+    if (logoutMobile) {
+        logoutMobile.addEventListener('click', async (e) => {
+            e.preventDefault();
+            closeMenu();
+            if (typeof cerrarSesion === 'function') {
+                await cerrarSesion();
+            } else {
+                localStorage.removeItem('want_usuario_sesion');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+}
+
+// Llamar a la función después de cargar el avatar
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        cargarAvatarEnTienda();
+        configurarAvatarEventosTienda();
+        configurarMenuMovilTienda();
+    }, 500);
+});
