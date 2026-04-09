@@ -670,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-// ===================================================
+/// ===================================================
 // FUNCIÓN PARA RECIBIR USUARIO DESDE SESSION-MANAGER
 // ===================================================
 
@@ -694,6 +694,22 @@ window.setUsuarioActual = function(usuario) {
     if (misPedidosScreen && misPedidosScreen.style.display === 'block') {
         cargarPedidosUsuario();
     }
+};
+
+// Escuchar evento personalizado de SessionManager
+document.addEventListener('usuarioActualizado', (event) => {
+    console.log('📢 Evento usuarioActualizado recibido:', event.detail?.usuario);
+    if (event.detail && event.detail.usuario) {
+        usuarioActual = event.detail.usuario;
+        cargarDatosUsuarioUI();
+    }
+});
+
+// Función para cuando se cierra la sesión
+window.onSessionClosed = function() {
+    console.log('🔴 Sesión cerrada por SessionManager');
+    usuarioActual = null;
+    window.location.href = 'login.html';
 };
 
 });
