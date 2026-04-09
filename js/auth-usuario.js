@@ -670,7 +670,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // NOTA: initAuth() NO se llama aquí porque session-manager.js se encarga
+// ===================================================
+// FUNCIÓN PARA RECIBIR USUARIO DESDE SESSION-MANAGER
+// ===================================================
+
+window.setUsuarioActual = function(usuario) {
+    console.log('📝 Recibiendo usuario desde SessionManager:', usuario?.email);
+    if (!usuario) return;
+    
+    usuarioActual = usuario;
+    
+    // Actualizar UI si es necesario
+    cargarDatosUsuarioUI();
+    
+    // Si estamos en Mi Cuenta, recargar el formulario
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    if (miCuentaScreen && miCuentaScreen.style.display === 'block') {
+        cargarDatosUsuarioFormulario();
+    }
+    
+    // Si estamos en Mis Pedidos, recargar pedidos
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    if (misPedidosScreen && misPedidosScreen.style.display === 'block') {
+        cargarPedidosUsuario();
+    }
+};
+
 });
 
 // Funciones globales
