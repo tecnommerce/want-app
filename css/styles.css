@@ -42,7 +42,6 @@ body {
     gap: 20px;
 }
 
-/* Logo */
 .logo {
     font-size: 1.8rem;
     font-weight: 700;
@@ -50,13 +49,13 @@ body {
     text-decoration: none;
     letter-spacing: -0.5px;
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .logo-dot {
     color: #FF7A00;
 }
 
-/* Buscador */
 .search-container {
     flex: 1;
     max-width: 500px;
@@ -93,18 +92,12 @@ body {
     outline: none;
 }
 
-.search-box input::placeholder {
-    color: #aaa;
-}
-
-/* Navegación escritorio */
 .nav-desktop {
     display: flex;
     align-items: center;
     gap: 25px;
 }
 
-/* Botón Mis pedidos en escritorio */
 .btn-mis-pedidos {
     color: #333;
     text-decoration: none;
@@ -118,19 +111,6 @@ body {
 }
 
 .btn-mis-pedidos:hover {
-    color: #FF5A00;
-}
-
-.nav-link {
-    color: #333;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: color 0.3s;
-    cursor: pointer;
-}
-
-.nav-link:hover {
     color: #FF5A00;
 }
 
@@ -150,7 +130,6 @@ body {
     color: #FF5A00;
 }
 
-/* Avatar de usuario (logueado) - SOLO ESCRITORIO */
 .user-avatar-desktop {
     display: flex;
     align-items: center;
@@ -172,7 +151,6 @@ body {
     color: white;
 }
 
-/* Menú desplegable del avatar en escritorio */
 .avatar-dropdown {
     position: absolute;
     top: 100%;
@@ -212,13 +190,6 @@ body {
     background: #FFF5EB;
 }
 
-.avatar-dropdown hr {
-    margin: 0;
-    border: none;
-    border-top: 1px solid #eee;
-}
-
-/* Avatar móvil - SOLO MÓVIL (reemplaza menú hamburguesa) */
 .user-avatar-mobile {
     display: none;
     cursor: pointer;
@@ -245,20 +216,6 @@ body {
     color: #333;
 }
 
-/* Botón menú hamburguesa - SOLO MÓVIL (oculto por defecto) */
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    color: #FF5A00;
-    cursor: pointer;
-    padding: 8px 12px;
-    margin-left: auto;
-    z-index: 1001;
-}
-
-/* Menú móvil (desplegable) */
 .mobile-menu {
     position: fixed;
     top: 0;
@@ -355,7 +312,6 @@ body {
     color: white;
 }
 
-/* Overlay */
 .menu-overlay {
     position: fixed;
     top: 0;
@@ -371,9 +327,6 @@ body {
     display: block;
 }
 
-/* ===================================================
-   MODAL DE CONTACTO
-   =================================================== */
 .contacto-modal .modal-content {
     max-width: 450px;
 }
@@ -419,9 +372,6 @@ body {
     color: white;
 }
 
-/* ===================================================
-   HERO
-   =================================================== */
 .hero {
     text-align: center;
     padding: 50px 0 40px;
@@ -441,9 +391,6 @@ body {
     margin: 0 auto;
 }
 
-/* ===================================================
-   NEGOCIOS GRID
-   =================================================== */
 .negocios-section {
     padding: 40px 0 80px;
 }
@@ -454,7 +401,6 @@ body {
     gap: 25px;
 }
 
-/* Tarjeta de negocio */
 .negocio-card {
     background: white;
     border-radius: 20px;
@@ -530,9 +476,6 @@ body {
     gap: 5px;
 }
 
-/* ===================================================
-   TIENDA - PRODUCTOS (MANTENER EL DISEÑO ORIGINAL)
-   =================================================== */
 .productos-section {
     padding: 40px 0 80px;
 }
@@ -702,9 +645,6 @@ body {
     color: white;
 }
 
-/* ===================================================
-   ESTADO ABIERTO/CERRADO
-   =================================================== */
 .estado-abierto {
     display: inline-flex;
     align-items: center;
@@ -753,9 +693,6 @@ body {
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
 
-/* ===================================================
-   RUBROS TAGS
-   =================================================== */
 .rubros-container {
     display: flex;
     flex-wrap: wrap;
@@ -778,9 +715,6 @@ body {
     color: #666;
 }
 
-/* ===================================================
-   BANNERS CARRUSEL
-   =================================================== */
 .banners-section {
     margin: 20px 0 30px;
     width: 100%;
@@ -893,9 +827,6 @@ body {
     border-radius: 10px;
 }
 
-/* ===================================================
-   MODALES GENERALES
-   =================================================== */
 .modal {
     display: none;
     position: fixed;
@@ -968,9 +899,6 @@ body {
     justify-content: flex-end;
 }
 
-/* ===================================================
-   FORMULARIOS Y BOTONES
-   =================================================== */
 .form-group {
     margin-bottom: 16px;
 }
@@ -1045,9 +973,6 @@ body {
     width: 100%;
 }
 
-/* ===================================================
-   LOADING
-   =================================================== */
 .loading {
     text-align: center;
     padding: 50px;
@@ -1068,9 +993,6 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* ===================================================
-   FOOTER
-   =================================================== */
 .footer {
     background: white;
     border-top: 1px solid #eee;
@@ -1080,9 +1002,6 @@ body {
     font-size: 0.8rem;
 }
 
-/* ===================================================
-   LOGIN Y REGISTRO
-   =================================================== */
 .login-screen, .registro-screen {
     position: fixed;
     top: 0;
@@ -1215,9 +1134,6 @@ body {
     color: #FF5A00;
 }
 
-/* ===================================================
-   PANTALLA DE PEDIDOS DEL USUARIO
-   =================================================== */
 .pedidos-screen, .cuenta-screen {
     padding: 80px 0 40px;
     min-height: 100vh;
@@ -1381,9 +1297,6 @@ body {
     gap: 10px;
 }
 
-/* ===================================================
-   PANTALLA MI CUENTA
-   =================================================== */
 .cuenta-card {
     background: white;
     border-radius: 24px;
@@ -1429,7 +1342,7 @@ body {
 }
 
 /* ===================================================
-   RESPONSIVE - ESCRITORIO (estándar)
+   ESCRITORIO (estándar)
    =================================================== */
 @media (min-width: 769px) {
     .negocios-grid {
@@ -1452,36 +1365,27 @@ body {
 }
 
 /* ===================================================
-   RESPONSIVE - MÓVIL (vista lista)
+   MÓVIL (vista lista y ajustes específicos)
    =================================================== */
 @media (max-width: 768px) {
     .container {
         padding: 0 16px;
     }
     
-    /* Ocultar avatar de escritorio en móvil */
     .user-avatar-desktop {
         display: none !important;
     }
     
-    /* Mostrar avatar móvil */
     .user-avatar-mobile {
         display: flex !important;
         align-items: center;
         justify-content: center;
     }
     
-    /* Ocultar navegación desktop */
     .nav-desktop {
         display: none !important;
     }
     
-    /* Ocultar menú hamburguesa tradicional */
-    .menu-toggle {
-        display: none !important;
-    }
-    
-    /* Header más compacto */
     .logo {
         font-size: 1.4rem;
     }
@@ -1499,7 +1403,6 @@ body {
         padding: 6px 8px;
     }
     
-    /* Hero más compacto */
     .hero {
         padding: 35px 0 30px;
     }
@@ -1512,7 +1415,6 @@ body {
         font-size: 0.9rem;
     }
     
-    /* Vendedores en formato lista (manteniendo diseño) */
     .negocios-grid {
         display: flex;
         flex-direction: column;
@@ -1556,7 +1458,6 @@ body {
         display: none;
     }
     
-    /* Productos en formato lista (manteniendo diseño) */
     .productos-grid {
         display: flex;
         flex-direction: column;
@@ -1612,7 +1513,6 @@ body {
         width: auto;
     }
     
-    /* Banners móvil */
     .banner-carousel {
         border-radius: 12px;
     }
@@ -1641,31 +1541,148 @@ body {
         width: 20px;
     }
     
-    /* Pedidos móvil */
-    .pedidos-header, .cuenta-header {
-        flex-direction: column;
-        align-items: stretch;
+    /* ===================================================
+       MIS PEDIDOS Y MI CUENTA - SOLO MÓVIL
+       (MEJORAS SOLICITADAS)
+    =================================================== */
+    
+    /* Mis pedidos - total gastado al lado del título */
+    .pedidos-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
     }
     
-    .total-gastado {
-        justify-content: center;
+    .pedidos-header h2 {
+        font-size: 1.2rem;
+        margin: 0;
+        order: 2;
+        flex: 1;
+        text-align: center;
     }
     
-    .btn-back {
-        width: fit-content;
+    .pedidos-header .btn-back {
+        order: 1;
+        margin: 0;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        border: 1.5px solid #FF5A00;
+        color: #FF5A00;
+        background: white;
+        border-radius: 40px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+    
+    .pedidos-header .btn-back i {
+        font-size: 0.7rem;
+    }
+    
+    .pedidos-header .btn-back:active {
+        transform: scale(0.96);
+    }
+    
+    .pedidos-header .total-gastado {
+        order: 3;
+        padding: 5px 12px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        margin: 0;
+        border-radius: 40px;
+    }
+    
+    .pedidos-header .total-gastado span {
+        font-size: 0.65rem;
+    }
+    
+    .pedidos-header .total-gastado strong {
+        font-size: 0.85rem;
+    }
+    
+    /* Mi cuenta - botón volver alineado con la foto de perfil */
+    .cuenta-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 10px;
+    }
+    
+    .cuenta-header .btn-back {
+        order: 1;
+        margin: 0;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        border: 1.5px solid #FF5A00;
+        color: #FF5A00;
+        background: white;
+        border-radius: 40px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    
+    .cuenta-header .btn-back:active {
+        transform: scale(0.96);
+    }
+    
+    .cuenta-header h2 {
+        order: 2;
+        font-size: 1.2rem;
+        margin: 0;
+        text-align: center;
+        flex: 1;
+    }
+    
+    /* Avatar más compacto en móvil */
+    .cuenta-avatar {
+        margin-bottom: 20px;
+    }
+    
+    .cuenta-avatar img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    /* Formularios más compactos */
+    .registro-card, .login-card {
+        padding: 25px 20px;
     }
     
     .cuenta-card {
-        padding: 20px;
+        padding: 20px 15px;
     }
     
-    .form-row {
-        flex-direction: column;
-        gap: 12px;
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group label {
+        font-size: 0.75rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
     }
 }
 
-/* Pantallas muy pequeñas */
 @media (max-width: 480px) {
     .negocio-logo {
         width: 60px;
@@ -1681,5 +1698,27 @@ body {
         width: 28px;
         height: 28px;
         font-size: 0.75rem;
+    }
+    
+    .pedidos-header h2 {
+        font-size: 1rem;
+    }
+    
+    .pedidos-header .total-gastado {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+    }
+    
+    .pedidos-header .total-gastado strong {
+        font-size: 0.75rem;
+    }
+    
+    .cuenta-header h2 {
+        font-size: 1rem;
+    }
+    
+    .cuenta-avatar img {
+        width: 60px;
+        height: 60px;
     }
 }

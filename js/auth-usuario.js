@@ -63,10 +63,6 @@ function escapeHTML(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// ===================================================
-// EFECTOS DE CARGA EN BOTONES
-// ===================================================
-
 async function withLoading(button, callback) {
     if (!button) return await callback();
     const originalText = button.innerHTML;
@@ -81,39 +77,25 @@ async function withLoading(button, callback) {
     }
 }
 
-// ===================================================
-// MODAL DE CONTACTO
-// ===================================================
-
 function mostrarModalContacto() {
-    document.getElementById('contacto-modal').classList.add('active');
+    const modal = document.getElementById('contacto-modal');
+    if (modal) modal.classList.add('active');
 }
 
 function cerrarModalContacto() {
-    document.getElementById('contacto-modal').classList.remove('active');
+    const modal = document.getElementById('contacto-modal');
+    if (modal) modal.classList.remove('active');
 }
-
-// ===================================================
-// DROPDOWN AVATAR ESCRITORIO
-// ===================================================
 
 function toggleDropdown() {
     const dropdown = document.getElementById('avatar-dropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('active');
-    }
+    if (dropdown) dropdown.classList.toggle('active');
 }
 
 function cerrarDropdown() {
     const dropdown = document.getElementById('avatar-dropdown');
-    if (dropdown) {
-        dropdown.classList.remove('active');
-    }
+    if (dropdown) dropdown.classList.remove('active');
 }
-
-// ===================================================
-// MENÚ MÓVIL
-// ===================================================
 
 let mobileMenu = null;
 let menuOverlay = null;
@@ -130,17 +112,12 @@ function closeMobileMenu() {
     document.body.style.overflow = '';
 }
 
-// ===================================================
-// INICIALIZACIÓN DE AUTENTICACIÓN
-// ===================================================
-
 async function initAuth() {
     console.log('🔐 Inicializando autenticación de usuarios...');
     
     mobileMenu = document.getElementById('mobile-menu');
     menuOverlay = document.getElementById('menu-overlay');
     
-    // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', (e) => {
         const avatarDesktop = document.getElementById('user-avatar-desktop');
         if (avatarDesktop && !avatarDesktop.contains(e.target)) {
@@ -225,40 +202,60 @@ async function cargarUsuarioLogueado(usuarioId) {
     }
 }
 
-// ===================================================
-// MANEJO DE PANTALLAS
-// ===================================================
-
 function mostrarPantallaLogin() {
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('registro-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
-    document.getElementById('search-container').style.display = 'none';
-    document.getElementById('user-avatar-desktop').style.display = 'none';
-    document.getElementById('user-avatar-mobile').style.display = 'none';
-    document.getElementById('nav-desktop').style.display = 'flex';
+    const loginScreen = document.getElementById('login-screen');
+    const registroScreen = document.getElementById('registro-screen');
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
+    const userAvatarDesktop = document.getElementById('user-avatar-desktop');
+    const userAvatarMobile = document.getElementById('user-avatar-mobile');
+    const navDesktop = document.getElementById('nav-desktop');
+    
+    if (loginScreen) loginScreen.style.display = 'flex';
+    if (registroScreen) registroScreen.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'none';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    if (searchContainer) searchContainer.style.display = 'none';
+    if (userAvatarDesktop) userAvatarDesktop.style.display = 'none';
+    if (userAvatarMobile) userAvatarMobile.style.display = 'none';
+    if (navDesktop) navDesktop.style.display = 'flex';
     closeMobileMenu();
 }
 
 function mostrarPantallaRegistro(user) {
     window.usuarioAuth = user;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('registro-screen').style.display = 'flex';
-    document.getElementById('main-content').style.display = 'none';
+    const loginScreen = document.getElementById('login-screen');
+    const registroScreen = document.getElementById('registro-screen');
+    const mainContent = document.getElementById('main-content');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (registroScreen) registroScreen.style.display = 'flex';
+    if (mainContent) mainContent.style.display = 'none';
 }
 
 function mostrarPantallaPrincipal() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('registro-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'block';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
-    document.getElementById('search-container').style.display = 'block';
-    document.getElementById('user-avatar-desktop').style.display = 'flex';
-    document.getElementById('user-avatar-mobile').style.display = 'flex';
-    document.getElementById('nav-desktop').style.display = 'flex';
+    const loginScreen = document.getElementById('login-screen');
+    const registroScreen = document.getElementById('registro-screen');
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
+    const userAvatarDesktop = document.getElementById('user-avatar-desktop');
+    const userAvatarMobile = document.getElementById('user-avatar-mobile');
+    const navDesktop = document.getElementById('nav-desktop');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (registroScreen) registroScreen.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'block';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    if (searchContainer) searchContainer.style.display = 'block';
+    if (userAvatarDesktop) userAvatarDesktop.style.display = 'flex';
+    if (userAvatarMobile) userAvatarMobile.style.display = 'flex';
+    if (navDesktop) navDesktop.style.display = 'flex';
     closeMobileMenu();
     
     if (typeof cargarNegocios === 'function') cargarNegocios();
@@ -266,41 +263,48 @@ function mostrarPantallaPrincipal() {
 }
 
 function mostrarMisPedidos() {
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('mis-pedidos-screen').style.display = 'block';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    
+    if (mainContent) mainContent.style.display = 'none';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'block';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
     cerrarDropdown();
     closeMobileMenu();
     cargarPedidosUsuario();
 }
 
 function mostrarMiCuenta() {
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'block';
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    
+    if (mainContent) mainContent.style.display = 'none';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'block';
     cerrarDropdown();
     closeMobileMenu();
     cargarDatosUsuarioFormulario();
 }
 
 function volverAlHome() {
-    document.getElementById('main-content').style.display = 'block';
-    document.getElementById('mis-pedidos-screen').style.display = 'none';
-    document.getElementById('mi-cuenta-screen').style.display = 'none';
+    const mainContent = document.getElementById('main-content');
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    
+    if (mainContent) mainContent.style.display = 'block';
+    if (misPedidosScreen) misPedidosScreen.style.display = 'none';
+    if (miCuentaScreen) miCuentaScreen.style.display = 'none';
     cerrarDropdown();
     closeMobileMenu();
 }
-
-// ===================================================
-// CARGA DE DATOS DEL USUARIO
-// ===================================================
 
 function cargarDatosUsuarioUI() {
     if (!usuarioActual) return;
     
     const avatarUrl = usuarioActual.foto_perfil || 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
     
-    // Escritorio
     const avatarImgDesktop = document.getElementById('avatar-img-desktop');
     const avatarNameDesktop = document.getElementById('avatar-name-desktop');
     if (avatarImgDesktop) {
@@ -311,7 +315,6 @@ function cargarDatosUsuarioUI() {
     }
     if (avatarNameDesktop) avatarNameDesktop.textContent = usuarioActual.nombre;
     
-    // Móvil
     const avatarImgMobile = document.getElementById('avatar-img-mobile');
     if (avatarImgMobile) {
         avatarImgMobile.src = avatarUrl;
@@ -324,15 +327,23 @@ function cargarDatosUsuarioUI() {
 function cargarDatosUsuarioFormulario() {
     if (!usuarioActual) return;
     
-    document.getElementById('cuenta-nombre').value = usuarioActual.nombre || '';
-    document.getElementById('cuenta-apellido').value = usuarioActual.apellido || '';
-    document.getElementById('cuenta-email').value = usuarioActual.email || '';
-    document.getElementById('cuenta-provincia').value = usuarioActual.provincia || '';
-    document.getElementById('cuenta-ciudad').value = usuarioActual.ciudad || '';
-    document.getElementById('cuenta-direccion').value = usuarioActual.direccion || '';
-    document.getElementById('cuenta-telefono').value = usuarioActual.telefono || '';
+    const nombreCompleto = `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
     
+    const nombreInput = document.getElementById('cuenta-nombre');
+    const emailInput = document.getElementById('cuenta-email');
+    const provinciaSelect = document.getElementById('cuenta-provincia');
+    const ciudadSelect = document.getElementById('cuenta-ciudad');
+    const direccionInput = document.getElementById('cuenta-direccion');
+    const telefonoInput = document.getElementById('cuenta-telefono');
     const avatarImg = document.getElementById('cuenta-avatar-img');
+    
+    if (nombreInput) nombreInput.value = nombreCompleto;
+    if (emailInput) emailInput.value = usuarioActual.email || '';
+    if (provinciaSelect) provinciaSelect.value = usuarioActual.provincia || '';
+    if (ciudadSelect) ciudadSelect.value = usuarioActual.ciudad || '';
+    if (direccionInput) direccionInput.value = usuarioActual.direccion || '';
+    if (telefonoInput) telefonoInput.value = usuarioActual.telefono || '';
+    
     if (avatarImg) {
         avatarImg.src = usuarioActual.foto_perfil || 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(usuarioActual.nombre);
     }
@@ -343,27 +354,56 @@ async function guardarDatosUsuario(e) {
     const btn = document.getElementById('btn-guardar-cuenta');
     
     await withLoading(btn, async () => {
-        const updateData = {
-            nombre: document.getElementById('cuenta-nombre').value.trim(),
-            apellido: document.getElementById('cuenta-apellido').value.trim(),
-            provincia: document.getElementById('cuenta-provincia').value,
-            ciudad: document.getElementById('cuenta-ciudad').value.trim(),
-            direccion: document.getElementById('cuenta-direccion').value.trim(),
-            telefono: document.getElementById('cuenta-telefono').value.trim()
-        };
+        const nombreCompleto = document.getElementById('cuenta-nombre')?.value.trim() || '';
+        const provincia = document.getElementById('cuenta-provincia')?.value || '';
+        const ciudad = document.getElementById('cuenta-ciudad')?.value || '';
+        const direccion = document.getElementById('cuenta-direccion')?.value.trim() || '';
+        let telefono = document.getElementById('cuenta-telefono')?.value.trim() || '';
         
-        if (!updateData.nombre || !updateData.apellido || !updateData.provincia || 
-            !updateData.ciudad || !updateData.direccion || !updateData.telefono) {
-            mostrarToast('Completá todos los campos', 'error');
+        if (!nombreCompleto) {
+            mostrarToast('Ingresá tu nombre completo', 'error');
+            return;
+        }
+        if (!provincia) {
+            mostrarToast('Seleccioná tu provincia', 'error');
+            return;
+        }
+        if (!ciudad) {
+            mostrarToast('Seleccioná tu ciudad', 'error');
+            return;
+        }
+        if (!direccion) {
+            mostrarToast('Ingresá tu dirección', 'error');
+            return;
+        }
+        if (!telefono) {
+            mostrarToast('Ingresá tu número de WhatsApp', 'error');
             return;
         }
         
-        const telefonoLimpio = updateData.telefono.replace(/\D/g, '');
+        const nombreParts = nombreCompleto.split(' ');
+        const nombre = nombreParts[0] || '';
+        const apellido = nombreParts.slice(1).join(' ') || '';
+        
+        if (!apellido) {
+            mostrarToast('Ingresá tu nombre y apellido completo', 'error');
+            return;
+        }
+        
+        const telefonoLimpio = telefono.replace(/\D/g, '');
         if (!telefonoLimpio.match(/^\d{10,15}$/)) {
             mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
             return;
         }
-        updateData.telefono = telefonoLimpio;
+        
+        const updateData = {
+            nombre: nombre,
+            apellido: apellido,
+            provincia: provincia,
+            ciudad: ciudad,
+            direccion: direccion,
+            telefono: telefonoLimpio
+        };
         
         if (typeof actualizarDatosUsuario === 'function') {
             const result = await actualizarDatosUsuario(usuarioActual.id, updateData);
@@ -377,10 +417,6 @@ async function guardarDatosUsuario(e) {
         }
     });
 }
-
-// ===================================================
-// PEDIDOS DEL USUARIO
-// ===================================================
 
 async function cargarPedidosUsuario() {
     if (!usuarioActual) return;
@@ -476,49 +512,76 @@ function verDetallePedido(pedidoId) {
         detallesHTML = `<div class="detalle-seccion"><strong>📝 Detalles adicionales:</strong><p>${escapeHTML(pedido.detalles)}</p></div>`;
     }
     
-    document.getElementById('detalle-pedido-titulo').textContent = `Pedido #${pedido.numero_orden || pedido.id}`;
-    document.getElementById('detalle-pedido-body').innerHTML = `
-        <div class="detalle-estado" style="background: ${estadoColor}20; color: ${estadoColor}; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 16px;"><strong>${estadoTexto}</strong></div>
-        <div class="detalle-seccion"><strong>📅 Fecha:</strong><p>${fecha}</p></div>
-        <div class="detalle-seccion"><strong>👤 Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre)}</p></div>
-        <div class="detalle-seccion"><strong>📞 Teléfono:</strong><p>${pedido.cliente_telefono}</p></div>
-        <div class="detalle-seccion"><strong>📍 Dirección:</strong><p>${escapeHTML(pedido.direccion)}</p></div>
-        <div class="detalle-seccion"><strong>💳 Método de pago:</strong><p>${metodoPago}</p></div>
-        ${productosHTML}${detallesHTML}
-        <div class="detalle-total"><strong>Total:</strong> ${formatearPrecio(pedido.total)}</div>
-    `;
+    const tituloElement = document.getElementById('detalle-pedido-titulo');
+    const bodyElement = document.getElementById('detalle-pedido-body');
     
-    document.getElementById('modal-detalle-pedido').classList.add('active');
+    if (tituloElement) tituloElement.textContent = `Pedido #${pedido.numero_orden || pedido.id}`;
+    if (bodyElement) {
+        bodyElement.innerHTML = `
+            <div class="detalle-estado" style="background: ${estadoColor}20; color: ${estadoColor}; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 16px;"><strong>${estadoTexto}</strong></div>
+            <div class="detalle-seccion"><strong>📅 Fecha:</strong><p>${fecha}</p></div>
+            <div class="detalle-seccion"><strong>👤 Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre)}</p></div>
+            <div class="detalle-seccion"><strong>📞 Teléfono:</strong><p>${pedido.cliente_telefono}</p></div>
+            <div class="detalle-seccion"><strong>📍 Dirección:</strong><p>${escapeHTML(pedido.direccion)}</p></div>
+            <div class="detalle-seccion"><strong>💳 Método de pago:</strong><p>${metodoPago}</p></div>
+            ${productosHTML}${detallesHTML}
+            <div class="detalle-total"><strong>Total:</strong> ${formatearPrecio(pedido.total)}</div>
+        `;
+    }
+    
+    const modal = document.getElementById('modal-detalle-pedido');
+    if (modal) modal.classList.add('active');
 }
 
 function cerrarModalDetallePedido() {
-    document.getElementById('modal-detalle-pedido').classList.remove('active');
+    const modal = document.getElementById('modal-detalle-pedido');
+    if (modal) modal.classList.remove('active');
 }
-
-// ===================================================
-// REGISTRO DE NUEVO USUARIO
-// ===================================================
 
 async function registrarNuevoUsuario(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-registrar-usuario');
     
     await withLoading(btn, async () => {
-        const nombre = document.getElementById('reg-nombre').value.trim();
-        const apellido = document.getElementById('reg-apellido').value.trim();
+        const nombreCompleto = document.getElementById('reg-nombre').value.trim();
         const provincia = document.getElementById('reg-provincia').value;
-        const ciudad = document.getElementById('reg-ciudad').value.trim();
+        const ciudad = document.getElementById('reg-ciudad').value;
         const direccion = document.getElementById('reg-direccion').value.trim();
         let telefono = document.getElementById('reg-telefono').value.trim();
         
-        if (!nombre || !apellido || !provincia || !ciudad || !direccion || !telefono) {
-            mostrarToast('Completá todos los campos', 'error');
+        if (!nombreCompleto) {
+            mostrarToast('Ingresá tu nombre completo', 'error');
+            return;
+        }
+        if (!provincia) {
+            mostrarToast('Seleccioná tu provincia', 'error');
+            return;
+        }
+        if (!ciudad) {
+            mostrarToast('Seleccioná tu ciudad', 'error');
+            return;
+        }
+        if (!direccion) {
+            mostrarToast('Ingresá tu dirección', 'error');
+            return;
+        }
+        if (!telefono) {
+            mostrarToast('Ingresá tu número de WhatsApp', 'error');
             return;
         }
         
         telefono = telefono.replace(/\D/g, '');
         if (!telefono.match(/^\d{10,15}$/)) {
             mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
+            return;
+        }
+        
+        const nombreParts = nombreCompleto.split(' ');
+        const nombre = nombreParts[0];
+        const apellido = nombreParts.slice(1).join(' ');
+        
+        if (!apellido) {
+            mostrarToast('Ingresá nombre y apellido completo (ej: Juan Pérez)', 'error');
             return;
         }
         
@@ -553,15 +616,18 @@ async function registrarNuevoUsuario(e) {
                 cargarDatosUsuarioUI();
                 cargarPedidosUsuario();
             } else {
-                mostrarToast('Error al guardar datos', 'error');
+                if (result.conflict === 'email') {
+                    mostrarToast(result.error || 'Este email ya está registrado', 'error');
+                    setTimeout(() => {
+                        if (typeof signOut === 'function') signOut();
+                    }, 3000);
+                } else {
+                    mostrarToast(result.error || 'Error al guardar datos', 'error');
+                }
             }
         }
     });
 }
-
-// ===================================================
-// CIERRE DE SESIÓN
-// ===================================================
 
 async function cerrarSesion() {
     if (typeof signOut === 'function') {
@@ -582,66 +648,166 @@ async function cerrarSesion() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM cargado - Inicializando auth-usuario.js');
     
-    // Botones de login
-    document.getElementById('login-google-btn')?.addEventListener('click', async () => {
-        if (typeof loginWithGoogle === 'function') {
-            const result = await loginWithGoogle();
-            if (!result.success) mostrarToast('Error al iniciar sesión', 'error');
-        }
-    });
+    // ===================================================
+    // LOGO - VOLVER AL HOME SIN CERRAR SESIÓN (MUY IMPORTANTE)
+    // ===================================================
+    const logoHome = document.getElementById('logo-home');
+    if (logoHome) {
+        logoHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            volverAlHome();
+        });
+    }
     
-    document.getElementById('register-google-btn')?.addEventListener('click', async () => {
-        if (typeof loginWithGoogle === 'function') {
-            const result = await loginWithGoogle();
-            if (!result.success) mostrarToast('Error al registrar', 'error');
-        }
-    });
+    // Botones de login
+    const loginGoogleBtn = document.getElementById('login-google-btn');
+    const registerGoogleBtn = document.getElementById('register-google-btn');
+    
+    if (loginGoogleBtn) {
+        loginGoogleBtn.addEventListener('click', async () => {
+            if (typeof loginWithGoogle === 'function') {
+                const result = await loginWithGoogle();
+                if (!result.success) mostrarToast('Error al iniciar sesión', 'error');
+            }
+        });
+    }
+    
+    if (registerGoogleBtn) {
+        registerGoogleBtn.addEventListener('click', async () => {
+            if (typeof loginWithGoogle === 'function') {
+                const result = await loginWithGoogle();
+                if (!result.success) mostrarToast('Error al registrar', 'error');
+            }
+        });
+    }
     
     // Formularios
-    document.getElementById('registro-form')?.addEventListener('submit', registrarNuevoUsuario);
-    document.getElementById('cuenta-form')?.addEventListener('submit', guardarDatosUsuario);
+    const registroForm = document.getElementById('registro-form');
+    const cuentaForm = document.getElementById('cuenta-form');
+    
+    if (registroForm) registroForm.addEventListener('submit', registrarNuevoUsuario);
+    if (cuentaForm) cuentaForm.addEventListener('submit', guardarDatosUsuario);
     
     // Navegación escritorio
-    document.getElementById('mis-pedidos-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
-    document.getElementById('mi-cuenta-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
-    document.getElementById('cerrar-sesion-desktop')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
+    const misPedidosDesktop = document.getElementById('mis-pedidos-desktop');
+    const miCuentaDesktop = document.getElementById('mi-cuenta-desktop');
+    const cerrarSesionDesktop = document.getElementById('cerrar-sesion-desktop');
+    
+    if (misPedidosDesktop) {
+        misPedidosDesktop.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarMisPedidos();
+        });
+    }
+    
+    if (miCuentaDesktop) {
+        miCuentaDesktop.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarMiCuenta();
+        });
+    }
+    
+    if (cerrarSesionDesktop) {
+        cerrarSesionDesktop.addEventListener('click', (e) => {
+            e.preventDefault();
+            cerrarSesion();
+        });
+    }
     
     // Avatar dropdown
     const avatarDesktop = document.getElementById('user-avatar-desktop');
-    avatarDesktop?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown();
-    });
+    if (avatarDesktop) {
+        avatarDesktop.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown();
+        });
+    }
     
     // Navegación móvil
-    document.getElementById('mis-pedidos-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
-    document.getElementById('mi-cuenta-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
-    document.getElementById('logout-mobile')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
-    document.getElementById('contacto-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarModalContacto(); });
+    const misPedidosMobile = document.getElementById('mis-pedidos-mobile');
+    const miCuentaMobile = document.getElementById('mi-cuenta-mobile');
+    const logoutMobile = document.getElementById('logout-mobile');
+    const contactoMobile = document.getElementById('contacto-mobile');
+    
+    if (misPedidosMobile) {
+        misPedidosMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarMisPedidos();
+        });
+    }
+    
+    if (miCuentaMobile) {
+        miCuentaMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarMiCuenta();
+        });
+    }
+    
+    if (logoutMobile) {
+        logoutMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            cerrarSesion();
+        });
+    }
+    
+    if (contactoMobile) {
+        contactoMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarModalContacto();
+        });
+    }
     
     // Botones volver
-    document.getElementById('back-to-home')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
-    document.getElementById('back-to-home-cuenta')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
+    const backToHome = document.getElementById('back-to-home');
+    const backToHomeCuenta = document.getElementById('back-to-home-cuenta');
+    
+    if (backToHome) {
+        backToHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            volverAlHome();
+        });
+    }
+    
+    if (backToHomeCuenta) {
+        backToHomeCuenta.addEventListener('click', (e) => {
+            e.preventDefault();
+            volverAlHome();
+        });
+    }
     
     // Menú móvil
     const avatarMobile = document.getElementById('user-avatar-mobile');
-    avatarMobile?.addEventListener('click', openMobileMenu);
+    const menuClose = document.getElementById('menu-close');
     
-    document.getElementById('menu-close')?.addEventListener('click', closeMobileMenu);
-    menuOverlay?.addEventListener('click', closeMobileMenu);
+    if (avatarMobile) {
+        avatarMobile.addEventListener('click', openMobileMenu);
+    }
+    
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMobileMenu);
+    }
+    
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeMobileMenu);
+    }
     
     // Tabs de pedidos
-    document.querySelectorAll('.pedidos-tab').forEach(tab => {
+    const pedidosTabs = document.querySelectorAll('.pedidos-tab');
+    pedidosTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
-            document.querySelectorAll('.pedidos-tab').forEach(t => t.classList.remove('active'));
+            pedidosTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById('pedidos-actuales-container').style.display = tabId === 'actuales' ? 'block' : 'none';
-            document.getElementById('pedidos-historial-container').style.display = tabId === 'historial' ? 'block' : 'none';
+            
+            const actualesContainer = document.getElementById('pedidos-actuales-container');
+            const historialContainer = document.getElementById('pedidos-historial-container');
+            
+            if (actualesContainer) actualesContainer.style.display = tabId === 'actuales' ? 'block' : 'none';
+            if (historialContainer) historialContainer.style.display = tabId === 'historial' ? 'block' : 'none';
         });
     });
     
-    // Inicializar
+    // Inicializar autenticación
     initAuth();
 });
 

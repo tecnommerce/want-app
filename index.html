@@ -15,7 +15,7 @@
     <header class="header" id="main-header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">Want<span class="logo-dot">.</span></a>
+                <a href="#" class="logo" id="logo-home">Want<span class="logo-dot">.</span></a>
                 
                 <div class="search-container" id="search-container" style="display: none;">
                     <div class="search-box">
@@ -24,7 +24,6 @@
                     </div>
                 </div>
 
-                <!-- Navegación escritorio -->
                 <div class="nav-desktop" id="nav-desktop">
                     <button class="btn-mis-pedidos" id="mis-pedidos-desktop">Mis pedidos</button>
                     <div class="social-icons">
@@ -34,7 +33,6 @@
                     </div>
                 </div>
 
-                <!-- Avatar escritorio (con dropdown) -->
                 <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
                     <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
                     <span class="avatar-name" id="avatar-name-desktop"></span>
@@ -44,7 +42,6 @@
                     </div>
                 </div>
 
-                <!-- Avatar móvil (reemplaza menú hamburguesa) -->
                 <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
                     <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
                 </div>
@@ -52,7 +49,6 @@
         </div>
     </header>
 
-    <!-- Menú móvil -->
     <div class="mobile-menu" id="mobile-menu">
         <button class="menu-close" id="menu-close">
             <i class="fas fa-times"></i>
@@ -79,7 +75,6 @@
     </div>
     <div class="menu-overlay" id="menu-overlay"></div>
 
-    <!-- Modal de Contacto -->
     <div class="modal contacto-modal" id="contacto-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -100,7 +95,6 @@
         </div>
     </div>
 
-    <!-- Pantalla de Login -->
     <div class="login-screen" id="login-screen">
         <div class="login-container">
             <div class="login-card">
@@ -128,7 +122,6 @@
         </div>
     </div>
 
-    <!-- Pantalla de Registro -->
     <div class="registro-screen" id="registro-screen" style="display: none;">
         <div class="registro-container">
             <div class="registro-card">
@@ -138,19 +131,13 @@
                 </div>
                 
                 <form id="registro-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nombre *</label>
-                            <input type="text" id="reg-nombre" placeholder="Juan" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Apellido *</label>
-                            <input type="text" id="reg-apellido" placeholder="Pérez" required>
-                        </div>
+                    <div class="form-group">
+                        <label>Nombre completo <span class="required">*</span></label>
+                        <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>Provincia *</label>
+                        <label>Provincia <span class="required">*</span></label>
                         <select id="reg-provincia" required>
                             <option value="">Seleccionar provincia</option>
                             <option value="Buenos Aires">Buenos Aires</option>
@@ -181,19 +168,22 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Ciudad *</label>
-                        <input type="text" id="reg-ciudad" placeholder="Ej: Rosario" required>
+                        <label>Ciudad <span class="required">*</span></label>
+                        <select id="reg-ciudad" required>
+                            <option value="">Seleccionar ciudad</option>
+                            <option value="Juan Bautista Alberdi">Juan Bautista Alberdi</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
-                        <label>Calle y número *</label>
-                        <input type="text" id="reg-direccion" placeholder="Av. Siempreviva 1234" required>
+                        <label>Calle y número <span class="required">*</span></label>
+                        <input type="text" id="reg-direccion" placeholder="Ej: Av. Siempreviva 1234" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>WhatsApp *</label>
+                        <label>WhatsApp <span class="required">*</span></label>
                         <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
-                        <small class="input-help">Incluye código de país sin el signo + (ej: 5491112345678)</small>
+                        <small class="input-help">📱 Incluye código de país sin el signo + (ej: 5491112345678)</small>
                     </div>
                     
                     <div class="form-group">
@@ -209,7 +199,6 @@
         </div>
     </div>
 
-    <!-- Contenido principal -->
     <div id="main-content" style="display: none;">
         <main>
             <section class="banners-section" id="banners-section" style="display: none;">
@@ -255,7 +244,6 @@
         </footer>
     </div>
 
-    <!-- Pantalla Mis Pedidos -->
     <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
         <div class="container">
             <div class="pedidos-header">
@@ -284,7 +272,6 @@
         </div>
     </div>
 
-    <!-- Pantalla Mi Cuenta -->
     <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
         <div class="container">
             <div class="cuenta-header">
@@ -300,15 +287,9 @@
                 </div>
                 
                 <form id="cuenta-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nombre *</label>
-                            <input type="text" id="cuenta-nombre" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Apellido *</label>
-                            <input type="text" id="cuenta-apellido" required>
-                        </div>
+                    <div class="form-group">
+                        <label>Nombre completo <span class="required">*</span></label>
+                        <input type="text" id="cuenta-nombre" placeholder="Ej: Juan Pérez" required>
                     </div>
                     
                     <div class="form-group">
@@ -317,7 +298,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Provincia *</label>
+                        <label>Provincia <span class="required">*</span></label>
                         <select id="cuenta-provincia" required>
                             <option value="">Seleccionar provincia</option>
                             <option value="Buenos Aires">Buenos Aires</option>
@@ -348,17 +329,20 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Ciudad *</label>
-                        <input type="text" id="cuenta-ciudad" required>
+                        <label>Ciudad <span class="required">*</span></label>
+                        <select id="cuenta-ciudad" required>
+                            <option value="">Seleccionar ciudad</option>
+                            <option value="Juan Bautista Alberdi">Juan Bautista Alberdi</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
-                        <label>Calle y número *</label>
+                        <label>Calle y número <span class="required">*</span></label>
                         <input type="text" id="cuenta-direccion" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>WhatsApp *</label>
+                        <label>WhatsApp <span class="required">*</span></label>
                         <input type="tel" id="cuenta-telefono" required>
                     </div>
                     
@@ -368,7 +352,6 @@
         </div>
     </div>
 
-    <!-- Modal detalle pedido -->
     <div class="modal" id="modal-detalle-pedido">
         <div class="modal-content">
             <div class="modal-header">
@@ -387,5 +370,16 @@
 <script src="js/home.js"></script>
 <script src="js/auth-usuario.js"></script>
 
+<script>
+    window.cerrarModalContacto = function() {
+        const modal = document.getElementById('contacto-modal');
+        if (modal) modal.classList.remove('active');
+    };
+    
+    window.cerrarModalDetallePedido = function() {
+        const modal = document.getElementById('modal-detalle-pedido');
+        if (modal) modal.classList.remove('active');
+    };
+</script>
 </body>
 </html>
