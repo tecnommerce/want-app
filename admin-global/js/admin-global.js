@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN GLOBAL - Versión Supabase (SIN GRÁFICO, CON RUBROS)
+// ADMIN GLOBAL - Versión Supabase (CON GESTIÓN DE USUARIOS)
 // ===================================================
 
 // ===================================================
@@ -9,6 +9,7 @@
 let allVendedores = [];
 let allPedidos = [];
 let allProductos = [];
+let allUsuarios = [];
 let banners = [];
 
 // Lista de rubros disponibles (con Pancheria)
@@ -19,8 +20,245 @@ const RUBROS_DISPONIBLES = [
     'Bar', 'Restaurante', 'Bar y café', 'Heladería', 'Farmacia', 'Mascotas'
 ];
 
-// Variables para rubros en edición
-let rubrosTempEditVendedor = [];
+// ===================================================
+// UTILITARIAS
+// ===================================================
+
+function formatearPrecio(precio) {
+    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
+}
+
+function formatearFecha(fechaISO) {
+    if (!fechaISO) return 'N/A';
+    const fecha = new Date(fechaISO);
+    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function getEstadoTexto(estado) {
+    const textos = { 'preparando': 'Nuevo', 'en preparacion': 'En preparación', 'en camino': 'En camino', 'entregado': 'Entregado' };
+    return textos[estado] || estado || 'Nuevo';
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function formatearRubrosParaLista(rubros) {
+    if (!rubros || rubros.length === 0) return '-';
+    return rubros.slice(0, 2).join(', ') + (rubros.length > 2 ? ` +${rubros.length - 2}` : '');
+}
+
+function mostrarToast(mensaje, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.textContent = mensaje;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '50px';
+    toast.style.zIndex = '9999';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+async function withLoading(button, callback) {
+    if (!button) return await callback();
+    const originalText = button.innerHTML;
+    const originalDisabled = button.disabled;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    try {
+        return await callback();
+    } finally {
+        button.disabled = originalDisabled;
+        button.innerHTML = originalText;
+    }
+}
+
+// ===================================================
+// FUNCIONES DE USUARIOS
+// ===================================================
+
+async function cargarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="loading-text">Cargando usuarios...</td></tr>';
+    
+    try {
+        const response = await window.obtenerTodosUsuarios();
+        if (response.success) {
+            allUsuarios = response.usuarios || [];
+            renderizarUsuarios();
+            actualizarTopUsuarios();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="loading-text">Error: ${error.message}</td></tr>`;
+    }
+}
+
+function renderizarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if (!tbody) return;
+    
+    if (allUsuarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay usuarios registrados</td></tr>';
+        return;
+    }
+    
+    // Calcular pedidos por usuario
+    const pedidosPorUsuario = {};
+    allPedidos.forEach(p => {
+        if (p.usuario_id) {
+            if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
+            pedidosPorUsuario[p.usuario_id]++;
+        }
+    });
+    
+    tbody.innerHTML = allUsuarios.map(u => `
+        <tr>
+            <td>${u.id.substring(0, 8)}...</td>
+            <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
+            <td>${escapeHTML(u.email)}</td>
+            <td><a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp-link" style="color: #25D366;">${u.telefono}</a></td>
+            <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
+            <td>${formatearPrecio(u.total_gastado || 0)}</td>
+            <td>${pedidosPorUsuario[u.id] || 0}</td>
+            <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
+                <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
+                <a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp" style="background: #25D366; color: white; padding: 6px 10px; border-radius: 40px; display: inline-block; text-decoration: none; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+              </td>
+        </tr>
+    `).join('');
+}
+
+function actualizarTopUsuarios() {
+    const topUsuarios = [...allUsuarios]
+        .sort((a, b) => (b.total_gastado || 0) - (a.total_gastado || 0))
+        .slice(0, 5);
+    
+    const topUsuariosContainer = document.getElementById('top-usuarios-list');
+    if (topUsuariosContainer) {
+        if (topUsuarios.length === 0) {
+            topUsuariosContainer.innerHTML = '<p class="loading-text">No hay datos</p>';
+        } else {
+            topUsuariosContainer.innerHTML = topUsuarios.map(u => `
+                <div class="top-item">
+                    <span>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</span>
+                    <span>${formatearPrecio(u.total_gastado || 0)}</span>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+function editarUsuario(usuarioId) {
+    const usuario = allUsuarios.find(u => u.id === usuarioId);
+    if (!usuario) return;
+    
+    document.getElementById('edit-usuario-id').value = usuario.id;
+    document.getElementById('edit-usuario-nombre').value = usuario.nombre || '';
+    document.getElementById('edit-usuario-apellido').value = usuario.apellido || '';
+    document.getElementById('edit-usuario-email').value = usuario.email || '';
+    document.getElementById('edit-usuario-telefono').value = usuario.telefono || '';
+    document.getElementById('edit-usuario-provincia').value = usuario.provincia || '';
+    document.getElementById('edit-usuario-ciudad').value = usuario.ciudad || '';
+    document.getElementById('edit-usuario-direccion').value = usuario.direccion || '';
+    document.getElementById('edit-usuario-activo').value = usuario.activo === true ? 'SI' : 'NO';
+    
+    document.getElementById('modal-editar-usuario').classList.add('active');
+}
+
+async function guardarEditarUsuario() {
+    const btn = document.getElementById('guardar-editar-usuario');
+    await withLoading(btn, async () => {
+        const data = {
+            id: document.getElementById('edit-usuario-id').value,
+            nombre: document.getElementById('edit-usuario-nombre').value.trim(),
+            apellido: document.getElementById('edit-usuario-apellido').value.trim(),
+            email: document.getElementById('edit-usuario-email').value.trim(),
+            telefono: document.getElementById('edit-usuario-telefono').value.trim(),
+            provincia: document.getElementById('edit-usuario-provincia').value.trim(),
+            ciudad: document.getElementById('edit-usuario-ciudad').value.trim(),
+            direccion: document.getElementById('edit-usuario-direccion').value.trim(),
+            activo: document.getElementById('edit-usuario-activo').value === 'SI'
+        };
+        
+        try {
+            const result = await window.actualizarDatosUsuario(data.id, data);
+            if (result.success) {
+                mostrarToast('Usuario actualizado', 'success');
+                cerrarModal('modal-editar-usuario');
+                await cargarUsuarios();
+            } else {
+                mostrarToast(result.error || 'Error al actualizar', 'error');
+            }
+        } catch (error) {
+            mostrarToast('Error al actualizar', 'error');
+        }
+    });
+}
+
+async function suspenderUsuario(usuarioId, activo) {
+    if (!confirm(`¿${activo ? 'Habilitar' : 'Suspender'} este usuario?`)) return;
+    
+    const result = await window.suspenderUsuario(usuarioId, activo);
+    if (result.success) {
+        mostrarToast(`Usuario ${activo ? 'habilitado' : 'suspendido'}`, 'success');
+        await cargarUsuarios();
+    } else {
+        mostrarToast('Error al cambiar estado', 'error');
+    }
+}
+
+async function eliminarUsuario(usuarioId) {
+    if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer y eliminará todos sus pedidos.')) return;
+    
+    const result = await window.eliminarUsuario(usuarioId);
+    if (result.success) {
+        mostrarToast('Usuario eliminado', 'success');
+        await cargarUsuarios();
+        await cargarTodosLosDatos();
+    } else {
+        mostrarToast('Error al eliminar usuario', 'error');
+    }
+}
+
+async function exportarUsuarios() {
+    const btn = document.getElementById('export-usuarios');
+    await withLoading(btn, async () => {
+        const pedidosPorUsuario = {};
+        allPedidos.forEach(p => {
+            if (p.usuario_id) {
+                if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
+                pedidosPorUsuario[p.usuario_id]++;
+            }
+        });
+        
+        const data = allUsuarios.map(u => ({
+            ID: u.id,
+            Nombre: u.nombre,
+            Apellido: u.apellido,
+            Email: u.email,
+            Telefono: u.telefono,
+            Provincia: u.provincia,
+            Ciudad: u.ciudad,
+            Direccion: u.direccion,
+            Total_Gastado: u.total_gastado || 0,
+            Pedidos: pedidosPorUsuario[u.id] || 0,
+            Estado: u.activo === true ? 'Activo' : 'Suspendido',
+            Registrado: u.created_at
+        }));
+        downloadCSV(data, 'usuarios_want.csv');
+    });
+}
 
 // ===================================================
 // FUNCIONES DE API CON SUPABASE
@@ -225,164 +463,6 @@ async function postAPI(action, data = {}) {
 }
 
 // ===================================================
-// UTILITARIAS
-// ===================================================
-
-function formatearPrecio(precio) {
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(precio);
-}
-
-function formatearFecha(fechaISO) {
-    if (!fechaISO) return 'N/A';
-    const fecha = new Date(fechaISO);
-    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-function getEstadoTexto(estado) {
-    const textos = { 'preparando': 'Nuevo', 'en preparacion': 'En preparación', 'en camino': 'En camino', 'entregado': 'Entregado' };
-    return textos[estado] || estado || 'Nuevo';
-}
-
-function escapeHTML(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function formatearRubrosParaLista(rubros) {
-    if (!rubros || rubros.length === 0) return '-';
-    return rubros.slice(0, 2).join(', ') + (rubros.length > 2 ? ` +${rubros.length - 2}` : '');
-}
-
-function mostrarToast(mensaje, tipo = 'info') {
-    const toast = document.createElement('div');
-    toast.textContent = mensaje;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
-    toast.style.color = 'white';
-    toast.style.padding = '12px 24px';
-    toast.style.borderRadius = '50px';
-    toast.style.zIndex = '9999';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-
-async function withLoading(button, callback) {
-    if (!button) return await callback();
-    const originalText = button.innerHTML;
-    const originalDisabled = button.disabled;
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    try {
-        return await callback();
-    } finally {
-        button.disabled = originalDisabled;
-        button.innerHTML = originalText;
-    }
-}
-
-// ===================================================
-// CLOUDINARY
-// ===================================================
-
-const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
-const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
-
-async function subirImagenACloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        return data.secure_url || null;
-    } catch (error) {
-        console.error('Error subir imagen:', error);
-        return null;
-    }
-}
-
-// ===================================================
-// MODAL SELECTOR DE RUBROS PARA ADMIN
-// ===================================================
-
-function abrirModalRubrosAdmin(rubrosActuales, callback) {
-    const rubrosTemporales = [...(rubrosActuales || [])];
-    const rubrosLista = RUBROS_DISPONIBLES;
-    
-    const rubrosHTML = rubrosLista.map(rubro => `
-        <label class="rubro-checkbox-modal">
-            <input type="checkbox" value="${rubro}" ${rubrosTemporales.includes(rubro) ? 'checked' : ''}>
-            <span>${rubro}</span>
-        </label>
-    `).join('');
-    
-    const modalContent = `
-        <div class="modal" id="modal-rubros-admin" style="display: flex;">
-            <div class="modal-content" style="max-width: 500px;">
-                <div class="modal-header">
-                    <h3><i class="fas fa-tags"></i> Seleccionar rubros</h3>
-                    <button class="modal-close" onclick="cerrarModalRubrosAdmin()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-help">Selecciona uno o varios rubros para el negocio:</p>
-                    <div class="rubros-grid-modal" id="rubros-grid-modal-admin">
-                        ${rubrosHTML}
-                    </div>
-                    <div class="rubros-seleccionados-info">
-                        <strong>Rubros seleccionados:</strong> <span id="rubros-seleccionados-lista-admin">${rubrosTemporales.join(', ') || 'Ninguno'}</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-outline" onclick="cerrarModalRubrosAdmin()">Cancelar</button>
-                    <button class="btn-primary" id="btn-confirmar-rubros-admin">Confirmar selección</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const existingModal = document.getElementById('modal-rubros-admin');
-    if (existingModal) existingModal.remove();
-    
-    document.body.insertAdjacentHTML('beforeend', modalContent);
-    
-    const modal = document.getElementById('modal-rubros-admin');
-    const listaSpan = document.getElementById('rubros-seleccionados-lista-admin');
-    
-    const updateLista = () => {
-        const seleccionados = [];
-        document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]:checked').forEach(cb => {
-            seleccionados.push(cb.value);
-        });
-        listaSpan.textContent = seleccionados.length ? seleccionados.join(', ') : 'Ninguno';
-    };
-    
-    document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', updateLista);
-    });
-    
-    document.getElementById('btn-confirmar-rubros-admin').onclick = () => {
-        const seleccionados = [];
-        document.querySelectorAll('#rubros-grid-modal-admin input[type="checkbox"]:checked').forEach(cb => {
-            seleccionados.push(cb.value);
-        });
-        callback(seleccionados);
-        cerrarModalRubrosAdmin();
-    };
-}
-
-function cerrarModalRubrosAdmin() {
-    const modal = document.getElementById('modal-rubros-admin');
-    if (modal) modal.remove();
-}
-
-// ===================================================
 // CARGA DE DATOS
 // ===================================================
 
@@ -397,6 +477,8 @@ async function cargarTodosLosDatos() {
         
         const productosRes = await callAPI('getAllProductos');
         if (productosRes.success) allProductos = productosRes.productos || [];
+        
+        await cargarUsuarios();
         
         actualizarDashboard();
         renderizarVendedores();
@@ -419,6 +501,7 @@ async function actualizarDatosManual() {
             if (pedidosRes.success) allPedidos = pedidosRes.pedidos || [];
             const productosRes = await callAPI('getAllProductos');
             if (productosRes.success) allProductos = productosRes.productos || [];
+            await cargarUsuarios();
             actualizarDashboard(); 
             renderizarVendedores(); 
             renderizarPedidos(); 
@@ -430,21 +513,16 @@ async function actualizarDatosManual() {
 }
 
 // ===================================================
-// DASHBOARD (SIN GRÁFICO)
+// DASHBOARD
 // ===================================================
 
 function actualizarDashboard() {
     document.getElementById('total-vendedores').textContent = allVendedores.length;
+    document.getElementById('total-usuarios').textContent = allUsuarios.length;
     document.getElementById('total-pedidos').textContent = allPedidos.length;
     document.getElementById('total-productos').textContent = allProductos.length;
     const ingresos = allPedidos.reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     document.getElementById('total-ingresos').textContent = formatearPrecio(ingresos);
-    
-    // Ocultar el gráfico si existe
-    const chartContainer = document.getElementById('ventas-chart')?.parentElement?.parentElement;
-    if (chartContainer) {
-        chartContainer.style.display = 'none';
-    }
     
     const ventasPorVendedor = {};
     allPedidos.forEach(p => { const nombre = p.vendedor_nombre || 'Desconocido'; ventasPorVendedor[nombre] = (ventasPorVendedor[nombre] || 0) + (parseFloat(p.total) || 0); });
@@ -470,7 +548,7 @@ function actualizarDashboard() {
 }
 
 // ===================================================
-// VENDEDORES (CON RUBROS Y ESTADO)
+// VENDEDORES
 // ===================================================
 
 function renderizarVendedores() {
@@ -495,8 +573,8 @@ function renderizarVendedores() {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-            </td>
-        </tr>
+              </td>
+          </tr>
     `).join('');
 }
 
@@ -513,14 +591,11 @@ function editarVendedor(id) {
     document.getElementById('edit-vendedor-activo').value = v.activo === true ? 'SI' : 'NO';
     document.getElementById('edit-vendedor-estado').value = v.estado_abierto === true ? 'abierto' : 'cerrado';
     
-    // Mostrar rubros actuales
-    const rubrosActuales = v.rubros || [];
-    rubrosTempEditVendedor = [...rubrosActuales];
     const rubrosContainer = document.getElementById('edit-vendedor-rubros');
     if (rubrosContainer) {
         rubrosContainer.innerHTML = RUBROS_DISPONIBLES.map(rubro => `
             <label class="rubro-checkbox">
-                <input type="checkbox" value="${rubro}" ${rubrosActuales.includes(rubro) ? 'checked' : ''}>
+                <input type="checkbox" value="${rubro}" ${(v.rubros || []).includes(rubro) ? 'checked' : ''}>
                 <span>${rubro}</span>
             </label>
         `).join('');
@@ -532,7 +607,6 @@ function editarVendedor(id) {
 async function guardarEditarVendedor() {
     const btn = document.getElementById('guardar-editar-vendedor');
     await withLoading(btn, async () => {
-        // Obtener rubros seleccionados
         const rubrosSeleccionados = [];
         document.querySelectorAll('#edit-vendedor-rubros input[type="checkbox"]:checked').forEach(cb => {
             rubrosSeleccionados.push(cb.value);
@@ -597,7 +671,6 @@ async function toggleVendedorStatus(id, button) {
             }
         }
     } catch (error) {
-        console.error('Error:', error);
         mostrarToast('Error al cambiar estado', 'error');
         if (button) {
             button.disabled = false;
@@ -792,7 +865,7 @@ async function confirmarEliminarPedido() {
 }
 
 // ===================================================
-// WEB - BANNERS
+// BANNERS
 // ===================================================
 
 async function cargarBanners() {
@@ -890,7 +963,20 @@ async function guardarBanner() {
     
     if (imagenFile) {
         mostrarToast('Subiendo imagen...', 'info');
-        imagenUrl = await subirImagenACloudinary(imagenFile);
+        const formData = new FormData();
+        formData.append('file', imagenFile);
+        formData.append('upload_preset', 'want_productos');
+        try {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/dlsmvyz8r/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            imagenUrl = data.secure_url;
+        } catch (error) {
+            mostrarToast('Error al subir imagen', 'error');
+            return;
+        }
         if (!imagenUrl) {
             mostrarToast('Error al subir imagen', 'error');
             return;
@@ -984,6 +1070,35 @@ async function exportarVendedores() {
     });
 }
 
+async function exportarUsuarios() {
+    const btn = document.getElementById('export-usuarios');
+    await withLoading(btn, async () => {
+        const pedidosPorUsuario = {};
+        allPedidos.forEach(p => {
+            if (p.usuario_id) {
+                if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
+                pedidosPorUsuario[p.usuario_id]++;
+            }
+        });
+        
+        const data = allUsuarios.map(u => ({
+            ID: u.id,
+            Nombre: u.nombre,
+            Apellido: u.apellido,
+            Email: u.email,
+            Telefono: u.telefono,
+            Provincia: u.provincia,
+            Ciudad: u.ciudad,
+            Direccion: u.direccion,
+            Total_Gastado: u.total_gastado || 0,
+            Pedidos: pedidosPorUsuario[u.id] || 0,
+            Estado: u.activo === true ? 'Activo' : 'Suspendido',
+            Registrado: u.created_at
+        }));
+        downloadCSV(data, 'usuarios_want.csv');
+    });
+}
+
 async function exportarPedidos() {
     const btn = document.getElementById('export-pedidos');
     await withLoading(btn, async () => {
@@ -1030,6 +1145,9 @@ function cambiarSeccion(seccionId) {
         cargarBanners();
         if (allVendedores.length === 0) cargarTodosLosDatos();
     }
+    if (seccionId === 'usuarios') {
+        cargarUsuarios();
+    }
 }
 
 // ===================================================
@@ -1071,6 +1189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
     
+    // Buscador de vendedores
     document.getElementById('search-vendedor')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
@@ -1095,19 +1214,61 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                     <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                     <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-                </td>
+                  </td>
+              </tr>
+        `).join('');
+    });
+    
+    // Buscador de usuarios
+    document.getElementById('search-usuario')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const pedidosPorUsuario = {};
+        allPedidos.forEach(p => {
+            if (p.usuario_id) {
+                if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
+                pedidosPorUsuario[p.usuario_id]++;
+            }
+        });
+        
+        const filtered = allUsuarios.filter(u => 
+            u.nombre?.toLowerCase().includes(term) || 
+            u.apellido?.toLowerCase().includes(term) || 
+            u.email?.toLowerCase().includes(term)
+        );
+        const tbody = document.getElementById('usuarios-tbody');
+        if (!tbody) return;
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay usuarios</td>'; return; }
+        tbody.innerHTML = filtered.map(u => `
+            <tr>
+                <td>${u.id.substring(0, 8)}...</td>
+                <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
+                <td>${escapeHTML(u.email)}</td>
+                <td><a href="https://wa.me/${u.telefono}" target="_blank" style="color: #25D366;">${u.telefono}</a></td>
+                <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
+                <td>${formatearPrecio(u.total_gastado || 0)}</td>
+                <td>${pedidosPorUsuario[u.id] || 0}</td>
+                <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
+                    <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
+                    <a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp" style="background: #25D366; color: white; padding: 6px 10px; border-radius: 40px; display: inline-block; text-decoration: none; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                  </td>
               </tr>
         `).join('');
     });
     
     document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
+    document.getElementById('export-usuarios')?.addEventListener('click', exportarUsuarios);
     document.getElementById('export-pedidos')?.addEventListener('click', exportarPedidos);
     document.getElementById('export-productos')?.addEventListener('click', exportarProductos);
     
     document.getElementById('guardar-editar-vendedor')?.addEventListener('click', guardarEditarVendedor);
+    document.getElementById('guardar-editar-usuario')?.addEventListener('click', guardarEditarUsuario);
     document.getElementById('guardar-editar-producto')?.addEventListener('click', guardarEditarProducto);
     document.getElementById('guardar-editar-pedido')?.addEventListener('click', guardarEditarPedido);
     document.getElementById('confirmar-eliminar-vendedor')?.addEventListener('click', confirmarEliminarVendedor);
+    document.getElementById('confirmar-eliminar-usuario')?.addEventListener('click', confirmarEliminarUsuario);
     document.getElementById('confirmar-eliminar-producto')?.addEventListener('click', confirmarEliminarProducto);
     document.getElementById('confirmar-eliminar-pedido')?.addEventListener('click', confirmarEliminarPedido);
     
@@ -1126,127 +1287,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
         document.addEventListener('click', (e) => { if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('active'); });
     }
-});
-
-// ===================================================
-// GESTIÓN DE USUARIOS (ADMIN GLOBAL)
-// ===================================================
-
-let allUsuarios = [];
-
-async function cargarUsuarios() {
-    const tbody = document.getElementById('usuarios-tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="loading-text">Cargando usuarios...</td></tr>';
-    
-    try {
-        const response = await window.obtenerTodosUsuarios();
-        if (response.success) {
-            allUsuarios = response.usuarios || [];
-            renderizarUsuarios();
-        } else {
-            throw new Error(response.error);
-        }
-    } catch (error) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="loading-text">Error: ${error.message}</td></tr>`;
-    }
-}
-
-function renderizarUsuarios() {
-    const tbody = document.getElementById('usuarios-tbody');
-    if (!tbody) return;
-    
-    if (allUsuarios.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay usuarios registrados</td>';
-        return;
-    }
-    
-    tbody.innerHTML = allUsuarios.map(u => `
-        <tr>
-            <td>${u.id.substring(0, 8)}...</td>
-            <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
-            <td>${escapeHTML(u.email)}</td>
-            <td><a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp-link">${u.telefono}</a></td>
-            <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
-            <td>${formatearPrecio(u.total_gastado || 0)}</td>
-            <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
-            <td>
-                <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
-                <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
-             </td>
-         </tr>
-    `).join('');
-}
-
-async function suspenderUsuario(usuarioId, activo) {
-    if (!confirm(`¿${activo ? 'Habilitar' : 'Suspender'} este usuario?`)) return;
-    
-    const result = await window.suspenderUsuario(usuarioId, activo);
-    if (result.success) {
-        mostrarToast(`Usuario ${activo ? 'habilitado' : 'suspendido'}`, 'success');
-        await cargarUsuarios();
-    } else {
-        mostrarToast('Error al cambiar estado', 'error');
-    }
-}
-
-async function eliminarUsuario(usuarioId) {
-    if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
-    
-    const result = await window.eliminarUsuario(usuarioId);
-    if (result.success) {
-        mostrarToast('Usuario eliminado', 'success');
-        await cargarUsuarios();
-    } else {
-        mostrarToast('Error al eliminar usuario', 'error');
-    }
-}
-
-function editarUsuario(usuarioId) {
-    const usuario = allUsuarios.find(u => u.id === usuarioId);
-    if (!usuario) return;
-    
-    // Abrir modal con datos del usuario para editar
-    alert('Función de edición de usuario - Implementar según necesidades');
-}
-
-// Agregar búsqueda de usuarios
-document.getElementById('search-usuario')?.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const filtered = allUsuarios.filter(u => 
-        u.nombre?.toLowerCase().includes(term) || 
-        u.apellido?.toLowerCase().includes(term) || 
-        u.email?.toLowerCase().includes(term)
-    );
-    
-    const tbody = document.getElementById('usuarios-tbody');
-    if (!tbody) return;
-    
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="loading-text">No hay usuarios</td>';
-        return;
-    }
-    
-    tbody.innerHTML = filtered.map(u => `
-        <tr>
-            <td>${u.id.substring(0, 8)}...</td>
-            <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
-            <td>${escapeHTML(u.email)}</td>
-            <td><a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp-link">${u.telefono}</a></td>
-            <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
-            <td>${formatearPrecio(u.total_gastado || 0)}</td>
-            <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
-            <td>
-                <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
-                <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
-             </td>
-         </tr>
-    `).join('');
-});
-
-// Agregar navegación a usuarios en el menú
-document.querySelector('.nav-item[data-section="usuarios"]')?.addEventListener('click', () => {
-    cambiarSeccion('usuarios');
-    cargarUsuarios();
 });

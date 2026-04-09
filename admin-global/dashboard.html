@@ -7,7 +7,6 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/admin-global.css">
-    <!-- Chart.js eliminado porque no se usa (el JS lo oculta) -->
 </head>
 <body>
     <div class="admin-wrapper">
@@ -22,6 +21,9 @@
                 </button>
                 <button class="nav-item" data-section="vendedores">
                     <i class="fas fa-store"></i> Vendedores
+                </button>
+                <button class="nav-item" data-section="usuarios">
+                    <i class="fas fa-users"></i> Usuarios
                 </button>
                 <button class="nav-item" data-section="pedidos">
                     <i class="fas fa-box"></i> Pedidos
@@ -69,6 +71,13 @@
                             </div>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-info">
+                                <h3 id="total-usuarios">0</h3>
+                                <p>Usuarios</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-box"></i></div>
                             <div class="stat-info">
                                 <h3 id="total-pedidos">0</h3>
@@ -91,14 +100,6 @@
                         </div>
                     </div>
 
-                    <!-- Charts row oculto por JS, se mantiene por si acaso -->
-                    <div class="charts-row" style="display: none;">
-                        <div class="chart-card">
-                            <h3>Ventas por día (últimos 7 días)</h3>
-                            <canvas id="ventas-chart" width="400" height="300"></canvas>
-                        </div>
-                    </div>
-
                     <div class="lists-row">
                         <div class="list-card">
                             <h3>Top 5 Vendedores</h3>
@@ -108,6 +109,10 @@
                             <h3>Top 5 Productos más vendidos</h3>
                             <div id="top-productos-list" class="top-list"></div>
                         </div>
+                        <div class="list-card">
+                            <h3>Top 5 Usuarios (más gastado)</h3>
+                            <div id="top-usuarios-list" class="top-list"></div>
+                        </div>
                     </div>
 
                     <div class="recent-orders">
@@ -115,14 +120,14 @@
                         <div class="table-responsive">
                             <table class="data-table">
                                 <thead><tr><th>ID</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
-                                <tbody id="recent-orders-tbody"><tr><td colspan="6" class="loading-text">Cargando...</td></tr>
-                             </table>
+                                <tbody id="recent-orders-tbody"><tr><td colspan="6" class="loading-text">Cargando...</td></tr></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sección Vendedores - CON COLUMNAS CORREGIDAS -->
+            <!-- Sección Vendedores -->
             <div class="section-content" id="section-vendedores" style="display: none;">
                 <div class="page-content">
                     <div class="page-header">
@@ -149,9 +154,41 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="vendedores-tbody"><tr><td colspan="11" class="loading-text">Cargando vendedores...</td></tr>
+                            <tbody id="vendedores-tbody"><td><td colspan="11" class="loading-text">Cargando vendedores...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Usuarios (NUEVA) -->
+            <div class="section-content" id="section-usuarios" style="display: none;">
+                <div class="page-content">
+                    <div class="page-header">
+                        <h2>Gestión de Usuarios</h2>
+                        <div class="header-actions">
+                            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="search-usuario" placeholder="Buscar usuario..."></div>
+                            <button class="btn-export" id="export-usuarios"><i class="fas fa-file-excel"></i> Exportar</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Dirección</th>
+                                    <th>Total gastado</th>
+                                    <th>Pedidos</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-tbody">
+                                <tr><td colspan="9" class="loading-text">Cargando usuarios...</td></tr>
                             </tbody>
-                         </table>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -173,9 +210,8 @@
                     <div class="table-responsive">
                         <table class="data-table">
                             <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Productos</th><th>Acciones</th></tr></thead>
-                            <tbody id="pedidos-tbody"><tr><td colspan="8" class="loading-text">Cargando pedidos...</td></tr>
-                            </tbody>
-                         </table>
+                            <tbody id="pedidos-tbody"><tr><td colspan="8" class="loading-text">Cargando pedidos...</td></tr></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -194,44 +230,11 @@
                     <div class="table-responsive">
                         <table class="data-table">
                             <thead><tr><th>ID</th><th>Imagen</th><th>Nombre</th><th>Vendedor</th><th>Precio</th><th>Ventas</th><th>Disponible</th><th>Acciones</th></tr></thead>
-                            <tbody id="productos-tbody"><tr><td colspan="8" class="loading-text">Cargando productos...</td></tr>
-                            </tbody>
-                         </table>
+                            <tbody id="productos-tbody"><tr><td colspan="8" class="loading-text">Cargando productos...</td></tr></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <!-- Sección Usuarios - Agregar después de la sección Productos -->
-<div class="section-content" id="section-usuarios" style="display: none;">
-    <div class="page-content">
-        <div class="page-header">
-            <h2>Gestión de Usuarios</h2>
-            <div class="header-actions">
-                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="search-usuario" placeholder="Buscar usuario..."></div>
-                <button class="btn-export" id="export-usuarios"><i class="fas fa-file-excel"></i> Exportar</button>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Dirección</th>
-                        <th>Total gastado</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="usuarios-tbody">
-                    <tr><td colspan="8" class="loading-text">Cargando usuarios...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 
             <!-- Sección Web -->
             <div class="section-content" id="section-web" style="display: none;">
@@ -270,7 +273,7 @@
                                 <tbody id="banners-tbody">
                                     <tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>
                                 </tbody>
-                             </table>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -304,45 +307,14 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-vendedor-id">
-                <div class="form-group">
-                    <label>Nombre</label>
-                    <input type="text" id="edit-vendedor-nombre" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="edit-vendedor-email" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="tel" id="edit-vendedor-telefono" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Dirección</label>
-                    <input type="text" id="edit-vendedor-direccion" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Horario</label>
-                    <input type="text" id="edit-vendedor-horario" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Rubro(s) del negocio</label>
-                    <div class="rubros-selector" id="edit-vendedor-rubros"></div>
-                    <small class="input-help">Selecciona uno o varios rubros</small>
-                </div>
-                <div class="form-group">
-                    <label>Estado (Activo/Inactivo)</label>
-                    <select id="edit-vendedor-activo" class="form-control">
-                        <option value="SI">Activo</option>
-                        <option value="NO">Inactivo</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Estado de Atención</label>
-                    <select id="edit-vendedor-estado" class="form-control">
-                        <option value="abierto">Abierto (Atendiendo)</option>
-                        <option value="cerrado">Cerrado</option>
-                    </select>
-                </div>
+                <div class="form-group"><label>Nombre</label><input type="text" id="edit-vendedor-nombre" class="form-control"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="edit-vendedor-email" class="form-control"></div>
+                <div class="form-group"><label>Teléfono</label><input type="tel" id="edit-vendedor-telefono" class="form-control"></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="edit-vendedor-direccion" class="form-control"></div>
+                <div class="form-group"><label>Horario</label><input type="text" id="edit-vendedor-horario" class="form-control"></div>
+                <div class="form-group"><label>Rubro(s) del negocio</label><div class="rubros-selector" id="edit-vendedor-rubros"></div></div>
+                <div class="form-group"><label>Estado</label><select id="edit-vendedor-activo" class="form-control"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></div>
+                <div class="form-group"><label>Estado de Atención</label><select id="edit-vendedor-estado" class="form-control"><option value="abierto">Abierto</option><option value="cerrado">Cerrado</option></select></div>
             </div>
             <div class="modal-footer">
                 <button class="btn-primary" id="guardar-editar-vendedor">Guardar</button>
@@ -351,14 +323,35 @@
         </div>
     </div>
 
+    <div class="modal" id="modal-editar-usuario">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Usuario</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-usuario-id">
+                <div class="form-group"><label>Nombre</label><input type="text" id="edit-usuario-nombre" class="form-control"></div>
+                <div class="form-group"><label>Apellido</label><input type="text" id="edit-usuario-apellido" class="form-control"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="edit-usuario-email" class="form-control"></div>
+                <div class="form-group"><label>Teléfono</label><input type="tel" id="edit-usuario-telefono" class="form-control"></div>
+                <div class="form-group"><label>Provincia</label><input type="text" id="edit-usuario-provincia" class="form-control"></div>
+                <div class="form-group"><label>Ciudad</label><input type="text" id="edit-usuario-ciudad" class="form-control"></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="edit-usuario-direccion" class="form-control"></div>
+                <div class="form-group"><label>Estado</label><select id="edit-usuario-activo" class="form-control"><option value="SI">Activo</option><option value="NO">Suspendido</option></select></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-editar-usuario">Guardar</button>
+                <button class="btn-secondary modal-close">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="modal-confirmar-vendedor"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este vendedor? Se eliminarán todos sus productos y pedidos.</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-vendedor">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
-
+    <div class="modal" id="modal-confirmar-usuario"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este usuario? Se eliminarán todos sus pedidos.</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-usuario">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
     <div class="modal" id="modal-editar-producto"><div class="modal-content"><div class="modal-header"><h3>Editar Producto</h3><button class="modal-close">&times;</button></div><div class="modal-body"><input type="hidden" id="edit-producto-id"><div class="form-group"><label>Nombre</label><input type="text" id="edit-producto-nombre" class="form-control"></div><div class="form-group"><label>Descripción</label><textarea id="edit-producto-descripcion" class="form-control"></textarea></div><div class="form-group"><label>Precio</label><input type="number" id="edit-producto-precio" class="form-control" step="100"></div><div class="form-group"><label>Disponible</label><select id="edit-producto-disponible" class="form-control"><option value="SI">Sí</option><option value="NO">No</option></select></div></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-producto">Guardar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
-
     <div class="modal" id="modal-confirmar-producto"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este producto?</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-producto">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
-
     <div class="modal" id="modal-editar-pedido"><div class="modal-content"><div class="modal-header"><h3>Editar Pedido</h3><button class="modal-close">&times;</button></div><div class="modal-body"><input type="hidden" id="edit-pedido-id"><div class="form-group"><label>Cliente</label><input type="text" id="edit-pedido-cliente" class="form-control"></div><div class="form-group"><label>Teléfono</label><input type="tel" id="edit-pedido-telefono" class="form-control"></div><div class="form-group"><label>Dirección</label><input type="text" id="edit-pedido-direccion" class="form-control"></div><div class="form-group"><label>Total</label><input type="text" id="edit-pedido-total" class="form-control" readonly></div><div class="form-group"><label>Estado</label><select id="edit-pedido-estado" class="form-control"><option value="preparando">Nuevo</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregado</option></select></div></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-pedido">Guardar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
-
     <div class="modal" id="modal-confirmar-pedido"><div class="modal-content small"><div class="modal-header"><h3>Confirmar eliminación</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>¿Eliminar este pedido?</p></div><div class="modal-footer"><button class="btn-danger" id="confirmar-eliminar-pedido">Eliminar</button><button class="btn-secondary modal-close">Cancelar</button></div></div></div>
 
     <!-- Modal para banner -->
@@ -371,40 +364,12 @@
             <div class="modal-body">
                 <form id="banner-form">
                     <input type="hidden" id="banner-id">
-                    <div class="form-group">
-                        <label>Título (opcional)</label>
-                        <input type="text" id="banner-titulo" class="form-control" placeholder="Ej: Ofertas especiales">
-                    </div>
-                    <div class="form-group">
-                        <label>Imagen *</label>
-                        <input type="file" id="banner-imagen" accept="image/*" class="form-control">
-                        <div id="banner-imagen-preview" class="image-preview" style="margin-top: 10px;"></div>
-                        <small class="input-help">Recomendado: 1200x400px para mejor visualización</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Enlace (opcional)</label>
-                        <input type="url" id="banner-link" class="form-control" placeholder="https://...">
-                        <small class="input-help">URL a donde irá el usuario al hacer clic</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Orden</label>
-                        <input type="number" id="banner-orden" class="form-control" value="999">
-                        <small class="input-help">Número menor = aparece primero</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select id="banner-activo" class="form-control">
-                            <option value="SI">Activo</option>
-                            <option value="NO">Inactivo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Vendedor específico (opcional)</label>
-                        <select id="banner-vendedor" class="form-control">
-                            <option value="">Todos los vendedores</option>
-                        </select>
-                        <small class="input-help">Si seleccionas un vendedor, el banner solo se mostrará en su tienda</small>
-                    </div>
+                    <div class="form-group"><label>Título (opcional)</label><input type="text" id="banner-titulo" class="form-control" placeholder="Ej: Ofertas especiales"></div>
+                    <div class="form-group"><label>Imagen *</label><input type="file" id="banner-imagen" accept="image/*" class="form-control"><div id="banner-imagen-preview" class="image-preview" style="margin-top: 10px;"></div><small class="input-help">Recomendado: 1200x400px</small></div>
+                    <div class="form-group"><label>Enlace (opcional)</label><input type="url" id="banner-link" class="form-control" placeholder="https://..."></div>
+                    <div class="form-group"><label>Orden</label><input type="number" id="banner-orden" class="form-control" value="999"></div>
+                    <div class="form-group"><label>Estado</label><select id="banner-activo" class="form-control"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></div>
+                    <div class="form-group"><label>Vendedor específico (opcional)</label><select id="banner-vendedor" class="form-control"><option value="">Todos los vendedores</option></select></div>
                 </form>
             </div>
             <div class="modal-footer">
