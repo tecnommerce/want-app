@@ -60,7 +60,7 @@
             color: #FF7A00;
         }
         
-        /* SECCIÓN PERFIL DEL VENDEDOR - REDISEÑADA */
+        /* SECCIÓN PERFIL DEL VENDEDOR */
         .vendedor-perfil-section {
             background: white;
             border-radius: 20px;
@@ -159,7 +159,8 @@
             gap: 15px;
         }
         
-        .cart-icon {
+        /* Icono carrito desktop (se oculta en móvil) */
+        .cart-icon-desktop {
             position: relative;
             background: #f5f5f5;
             width: 42px;
@@ -174,7 +175,7 @@
             transition: all 0.3s;
         }
         
-        .cart-icon:hover {
+        .cart-icon-desktop:hover {
             background: #FF5A00;
             color: white;
         }
@@ -195,7 +196,7 @@
             justify-content: center;
         }
         
-        /* AVATAR USUARIO - ESCRITORIO */
+        /* AVATAR USUARIO */
         .user-avatar-desktop {
             position: relative;
             cursor: pointer;
@@ -263,7 +264,6 @@
             color: #FF5A00;
         }
         
-        /* AVATAR USUARIO - MÓVIL */
         .user-avatar-mobile {
             display: none;
             cursor: pointer;
@@ -360,9 +360,61 @@
             text-decoration: none;
         }
         
+        /* BOTÓN FLOTANTE CARRITO (MÓVIL) */
+        .cart-floating-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 350px;
+            background: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .cart-floating-btn:hover {
+            background: #16a34a;
+            transform: translateX(-50%) scale(1.02);
+        }
+        
+        .cart-floating-btn .cart-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cart-floating-btn .cart-info i {
+            font-size: 1.3rem;
+        }
+        
+        .cart-floating-btn .cart-count-floating {
+            background: white;
+            color: #22c55e;
+            border-radius: 30px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .cart-floating-btn .cart-total-floating {
+            font-weight: bold;
+        }
+        
         /* PRODUCTOS */
         .productos-section {
-            padding: 0 0 80px;
+            padding: 0 0 100px;
         }
         
         .productos-header {
@@ -643,7 +695,7 @@
             color: white;
         }
         
-        /* CARRITO */
+        /* CARRITO MODAL */
         .carrito-item {
             display: flex;
             justify-content: space-between;
@@ -813,7 +865,6 @@
             color: #666;
         }
         
-        /* Toast responsive */
         .toast-success, .toast-error, .toast-info {
             position: fixed;
             bottom: 20px;
@@ -866,10 +917,9 @@
                 text-align: center;
             }
             
-            .cart-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
+            /* Ocultar carrito desktop en móvil */
+            .cart-icon-desktop {
+                display: none !important;
             }
             
             /* Ocultar avatar desktop en móvil */
@@ -906,9 +956,10 @@
                 min-height: auto;
             }
             
+            /* IMÁGENES MÁS GRANDES EN MÓVIL */
             .producto-imagen {
-                width: 100px !important;
-                height: 100px !important;
+                width: 120px !important;
+                height: 120px !important;
                 flex-shrink: 0;
                 border-radius: 12px;
             }
@@ -924,7 +975,7 @@
             }
             
             .producto-nombre {
-                font-size: 0.85rem;
+                font-size: 0.9rem;
                 margin-bottom: 4px;
             }
             
@@ -934,12 +985,12 @@
             }
             
             .producto-precio {
-                font-size: 0.85rem;
+                font-size: 0.9rem;
                 margin-bottom: 6px;
             }
             
             .btn-agregar {
-                padding: 5px 12px;
+                padding: 6px 12px;
                 font-size: 0.7rem;
                 width: auto;
             }
@@ -999,6 +1050,12 @@
             .user-avatar-desktop {
                 display: flex !important;
             }
+            .cart-icon-desktop {
+                display: flex !important;
+            }
+            .cart-floating-btn {
+                display: none !important;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1011,9 +1068,10 @@
                 font-size: 1.2rem;
             }
             
+            /* IMÁGENES AÚN MÁS GRANDES EN PANTALLAS MUY PEQUEÑAS */
             .producto-imagen {
-                width: 80px !important;
-                height: 80px !important;
+                width: 110px !important;
+                height: 110px !important;
             }
         }
     </style>
@@ -1044,8 +1102,8 @@
                         <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
                     </div>
                     
-                    <!-- CARRITO -->
-                    <a href="#" class="cart-icon" id="cart-icon">
+                    <!-- CARRITO DESKTOP -->
+                    <a href="#" class="cart-icon-desktop" id="cart-icon-desktop">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="cart-count">0</span>
                     </a>
@@ -1081,9 +1139,19 @@
     </div>
     <div class="menu-overlay" id="menu-overlay"></div>
 
+    <!-- BOTÓN FLOTANTE CARRITO (MÓVIL) -->
+    <button class="cart-floating-btn" id="cart-floating-btn" style="display: none;">
+        <div class="cart-info">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count-floating" id="cart-count-floating">0</span>
+            <span>Ver pedido</span>
+        </div>
+        <span class="cart-total-floating" id="cart-total-floating">$0</span>
+    </button>
+
     <main>
         <div class="container">
-            <!-- PERFIL DEL VENDEDOR - REDISEÑADO -->
+            <!-- PERFIL DEL VENDEDOR -->
             <div class="vendedor-perfil-section" id="vendedor-perfil-section" style="display: none;">
                 <div class="perfil-principal">
                     <div class="vendedor-logo-grande" id="vendedor-logo-grande">
@@ -1248,12 +1316,10 @@
         }
         if (typeof window.usuarioActual !== 'undefined' && window.usuarioActual) {
             console.log('✅ Usuario disponible en tienda:', window.usuarioActual.email);
-            // Actualizar avatar
             cargarDatosUsuarioUI();
         }
     })();
     
-    // Función para cargar datos del usuario en el avatar (desde auth-usuario.js)
     function cargarDatosUsuarioUI() {
         if (!window.usuarioActual) return;
         
@@ -1277,14 +1343,13 @@
             };
         }
         
-        // Mostrar el avatar en desktop y móvil
         const avatarDesktop = document.getElementById('user-avatar-desktop');
         const avatarMobile = document.getElementById('user-avatar-mobile');
         if (avatarDesktop) avatarDesktop.style.display = 'flex';
         if (avatarMobile) avatarMobile.style.display = 'flex';
     }
     
-    // Configurar eventos del avatar
+    // Configurar eventos
     document.addEventListener('DOMContentLoaded', function() {
         // Avatar desktop - toggle dropdown
         const avatarDesktop = document.getElementById('user-avatar-desktop');
@@ -1297,7 +1362,6 @@
             });
         }
         
-        // Cerrar dropdown al hacer clic fuera
         document.addEventListener('click', function() {
             if (dropdown) dropdown.classList.remove('active');
         });
@@ -1367,6 +1431,18 @@
             cerrarSesionDesktop.addEventListener('click', function(e) {
                 e.preventDefault();
                 if (typeof cerrarSesion === 'function') cerrarSesion();
+            });
+        }
+        
+        // Botón flotante carrito
+        const cartFloatingBtn = document.getElementById('cart-floating-btn');
+        if (cartFloatingBtn) {
+            cartFloatingBtn.addEventListener('click', function() {
+                if (typeof renderizarCarrito === 'function') {
+                    renderizarCarrito();
+                }
+                const carritoModal = document.getElementById('carrito-modal');
+                if (carritoModal) carritoModal.classList.add('active');
             });
         }
     });
