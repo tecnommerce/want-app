@@ -45,6 +45,10 @@
             gap: 20px;
         }
         
+        .logo-link {
+            text-decoration: none;
+        }
+        
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
@@ -56,69 +60,103 @@
             color: #FF7A00;
         }
         
-        .vendedor-info-header {
+        /* SECCIÓN PERFIL DEL VENDEDOR - REDISEÑADA */
+        .vendedor-perfil-section {
+            background: white;
+            border-radius: 20px;
+            margin: 20px 0 30px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        
+        .perfil-principal {
             display: flex;
             align-items: center;
-            gap: 15px;
-            flex: 1;
+            gap: 25px;
+            flex-wrap: wrap;
         }
         
-        .vendedor-logo-header {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
+        .vendedor-logo-grande {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
             overflow: hidden;
             background: #f0f0f0;
-            display: none;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .vendedor-logo-header img {
+        .vendedor-logo-grande img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
         
-        .negocio-info-detalles {
+        .vendedor-info-principal {
             flex: 1;
         }
         
-        .tagline {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
+        .vendedor-nombre {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
         }
         
-        .negocio-descripcion {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 6px;
-            line-height: 1.4;
-        }
-        
-        .negocio-rubros {
+        .vendedor-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 6px;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
-        .negocio-rubros .rubro-tag {
+        .vendedor-rubros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .rubro-tag {
             background: #FFF5EB;
             color: #FF5A00;
-            font-size: 0.65rem;
-            padding: 3px 10px;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .vendedor-horario {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #666;
+            background: #f8f9fa;
+            padding: 5px 12px;
             border-radius: 20px;
         }
         
-        .negocio-horario {
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 6px;
+        .vendedor-horario i {
+            color: #FF5A00;
+            font-size: 0.75rem;
+        }
+        
+        .vendedor-descripcion {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.5;
+            margin-top: 5px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+        
+        /* HEADER ACTIONS */
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 15px;
         }
         
         .cart-icon {
@@ -157,133 +195,7 @@
             justify-content: center;
         }
         
-        /* PRODUCTOS - ESCRITORIO */
-        .productos-section {
-            padding: 40px 0 80px;
-        }
-        
-        .productos-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        .productos-header h2 {
-            font-size: 1.5rem;
-            color: #333;
-        }
-        
-        .productos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-        
-        .producto-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        
-        .producto-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        
-        /* IMAGEN DE PRODUCTO MÁS GRANDE */
-        .producto-imagen {
-            width: 100%;
-            height: 220px;
-            background: #f8f8f8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        .producto-imagen img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 20px;
-        }
-        
-        .producto-imagen .placeholder-img {
-            font-size: 3rem;
-            color: #ccc;
-        }
-        
-        .producto-info {
-            padding: 16px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .producto-nombre {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #1a1a1a;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .producto-descripcion {
-            font-size: 0.75rem;
-            color: #888;
-            margin-bottom: 10px;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .producto-precio {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #FF5A00;
-            margin-bottom: 12px;
-            margin-top: auto;
-        }
-        
-        .btn-agregar {
-            width: 100%;
-            background: #f5f5f5;
-            color: #333;
-            border: none;
-            padding: 10px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-agregar:hover {
-            background: #FF5A00;
-            color: white;
-        }
-        
-        /* AVATAR */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
+        /* AVATAR USUARIO */
         .user-avatar-desktop {
             display: flex;
             align-items: center;
@@ -342,6 +254,112 @@
         
         .avatar-dropdown a:hover {
             background: #FFF5EB;
+        }
+        
+        /* PRODUCTOS */
+        .productos-section {
+            padding: 0 0 80px;
+        }
+        
+        .productos-header {
+            margin-bottom: 25px;
+        }
+        
+        .productos-header h2 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .producto-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .producto-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .producto-imagen {
+            width: 100%;
+            height: 220px;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .producto-imagen img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 20px;
+        }
+        
+        .producto-imagen .placeholder-img {
+            font-size: 3rem;
+            color: #ccc;
+        }
+        
+        .producto-info {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .producto-nombre {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1a1a1a;
+        }
+        
+        .producto-descripcion {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .producto-precio {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #FF5A00;
+            margin-bottom: 12px;
+            margin-top: auto;
+        }
+        
+        .btn-agregar {
+            width: 100%;
+            background: #f5f5f5;
+            color: #333;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-agregar:hover {
+            background: #FF5A00;
+            color: white;
         }
         
         /* MENÚ MÓVIL */
@@ -805,31 +823,34 @@
                 font-size: 1.3rem;
             }
             
-            .vendedor-logo-header {
-                width: 40px;
-                height: 40px;
+            .vendedor-perfil-section {
+                padding: 20px;
+                margin: 15px 0 20px;
             }
             
-            .tagline {
+            .perfil-principal {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .vendedor-logo-grande {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .vendedor-nombre {
+                font-size: 1.4rem;
+            }
+            
+            .vendedor-meta {
+                justify-content: center;
+            }
+            
+            .vendedor-descripcion {
                 font-size: 0.85rem;
-            }
-            
-            .negocio-descripcion {
-                font-size: 0.7rem;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-            
-            .negocio-rubros .rubro-tag {
-                font-size: 0.55rem;
-                padding: 2px 8px;
-            }
-            
-            .negocio-horario {
-                font-size: 0.6rem;
+                text-align: center;
             }
             
             .cart-icon {
@@ -890,13 +911,11 @@
             .producto-nombre {
                 font-size: 0.85rem;
                 margin-bottom: 4px;
-                min-height: auto;
             }
             
             .producto-descripcion {
                 font-size: 0.7rem;
                 margin-bottom: 6px;
-                min-height: auto;
             }
             
             .producto-precio {
@@ -959,6 +978,15 @@
         }
         
         @media (max-width: 480px) {
+            .vendedor-logo-grande {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .vendedor-nombre {
+                font-size: 1.2rem;
+            }
+            
             .producto-imagen {
                 width: 80px !important;
                 height: 80px !important;
@@ -973,18 +1001,6 @@
                 <a href="index.html" class="logo-link">
                     <h1 class="logo">Want<span class="logo-dot">.</span></h1>
                 </a>
-                
-                <div class="vendedor-info-header">
-                    <div class="vendedor-logo-header" id="vendedor-logo-header" style="display: none;">
-                        <img src="" alt="Logo" id="vendedor-logo-img">
-                    </div>
-                    <div class="negocio-info-detalles">
-                        <p class="tagline" id="negocio-nombre">Cargando negocio...</p>
-                        <div class="negocio-rubros" id="negocio-rubros" style="display: none;"></div>
-                        <p class="negocio-horario" id="negocio-horario" style="display: none;"></p>
-                        <p class="negocio-descripcion" id="negocio-descripcion" style="display: none;"></p>
-                    </div>
-                </div>
                 
                 <div class="header-actions">
                     <!-- AVATAR ESCRITORIO -->
@@ -1042,8 +1058,28 @@
     <div class="menu-overlay" id="menu-overlay"></div>
 
     <main>
-        <section class="productos-section">
-            <div class="container">
+        <div class="container">
+            <!-- PERFIL DEL VENDEDOR - REDISEÑADO -->
+            <div class="vendedor-perfil-section" id="vendedor-perfil-section" style="display: none;">
+                <div class="perfil-principal">
+                    <div class="vendedor-logo-grande" id="vendedor-logo-grande">
+                        <img src="" alt="Logo del negocio" id="vendedor-logo-grande-img">
+                    </div>
+                    <div class="vendedor-info-principal">
+                        <h1 class="vendedor-nombre" id="vendedor-nombre-tienda">Cargando...</h1>
+                        <div class="vendedor-meta">
+                            <div class="vendedor-rubros" id="vendedor-rubros-tienda"></div>
+                            <div class="vendedor-horario" id="vendedor-horario-tienda">
+                                <i class="fas fa-clock"></i> <span>Cargando...</span>
+                            </div>
+                        </div>
+                        <div class="vendedor-descripcion" id="vendedor-descripcion-tienda"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCTOS -->
+            <section class="productos-section">
                 <div class="productos-header">
                     <h2>Nuestros productos</h2>
                 </div>
@@ -1053,8 +1089,8 @@
                         <p>Cargando productos...</p>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </main>
 
     <!-- Modal del carrito -->
