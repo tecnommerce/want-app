@@ -2,1554 +2,801 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
-    <title>Want | Pedidos simples a tus negocios favoritos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Want | Panel de Vendedor</title>
     
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
-    
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* ===================================================
-           ESTILOS DE NOTIFICACIONES
-           =================================================== */
-        .notificaciones-container {
-            position: relative;
-        }
-        
-        .btn-notificaciones {
-            background: #f5f5f5;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 1.2rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-notificaciones:hover {
-            background: #FF5A00;
-            color: white;
-        }
-        
-        .notificaciones-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ef4444;
-            color: white;
-            font-size: 0.6rem;
-            font-weight: bold;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* PANEL NOTIFICACIONES ESCRITORIO */
-        .notificaciones-panel {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 10px;
-            width: 380px;
-            max-width: calc(100vw - 40px);
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            z-index: 1001;
-            display: none;
-            overflow: hidden;
-        }
-        
-        .notificaciones-panel.active {
-            display: block;
-            animation: fadeInDown 0.2s ease;
-        }
-        
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* PANEL NOTIFICACIONES MÓVIL - LATERAL */
-        @media (max-width: 768px) {
-            .notificaciones-panel {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                bottom: 0;
-                left: auto;
-                width: 85%;
-                max-width: 320px;
-                height: 100vh;
-                border-radius: 0;
-                margin-top: 0;
-                background: white;
-                z-index: 10000;
-                transition: right 0.3s ease;
-                animation: none;
-                box-shadow: -5px 0 20px rgba(0,0,0,0.15);
-            }
-            
-            .notificaciones-panel.active {
-                right: 0;
-                display: block !important;
-            }
-            
-            .notificaciones-header {
-                position: sticky;
-                top: 0;
-                background: #FF5A00;
-                z-index: 10;
-                border-radius: 0;
-            }
-            
-            .btn-cerrar-notif-mobile {
-                display: inline-flex !important;
-                align-items: center;
-                gap: 5px;
-                background: rgba(255,255,255,0.2);
-                border: none;
-                color: white;
-                padding: 6px 12px;
-                border-radius: 30px;
-                font-size: 0.7rem;
-                cursor: pointer;
-            }
-            
-            .notificaciones-lista {
-                max-height: calc(100vh - 70px);
-                overflow-y: auto;
-            }
-            
-            .btn-notificaciones {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-            }
-        }
-        
-        .notificaciones-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #FF5A00;
-            color: white;
-            font-weight: 600;
-        }
-        
-        .btn-cerrar-notif-mobile {
-            display: none;
-        }
-        
-        .btn-limpiar-notif {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            cursor: pointer;
-        }
-        
-        .notificaciones-lista {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .notificacion-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .notificacion-item:hover {
-            background: #f9f9f9;
-        }
-        
-        .notificacion-item.leida {
-            opacity: 0.7;
-        }
-        
-        .notificacion-icono {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .notificacion-contenido {
-            flex: 1;
-        }
-        
-        .notificacion-mensaje {
-            font-size: 0.85rem;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        
-        .notificacion-fecha {
-            font-size: 0.65rem;
-            color: #999;
-        }
-        
-        .notificacion-eliminar {
-            background: none;
-            border: none;
-            color: #ccc;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .notificacion-eliminar:hover {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-        
-        .notificaciones-vacio {
-            text-align: center;
-            padding: 50px 20px;
-            color: #999;
-        }
-        
-        .notificaciones-vacio i {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            color: #ddd;
-        }
-        
-        .notificacion-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #333;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 10000;
-            font-size: 0.85rem;
-            transition: transform 0.3s ease;
-            max-width: 90%;
-        }
-        
-        .notificacion-toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-        
-        .notificacion-toast.success { background: #10b981; }
-        .notificacion-toast.error { background: #ef4444; }
-        .notificacion-toast.info { background: #FF5A00; }
-        
-        /* OVERLAY PARA MÓVIL */
-        .notificaciones-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 9999;
-            display: none;
-        }
-        
-        .notificaciones-overlay.active {
-            display: block;
-        }
-        
-        /* HEADER ACTIONS */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .user-avatar-desktop {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 5px 12px;
-            background: #f5f5f5;
-            border-radius: 40px;
-            position: relative;
-        }
-        
-        .user-avatar-mobile {
-            display: none;
-            cursor: pointer;
-        }
-        
-        .avatar-img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .avatar-name {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #333;
-        }
-        
-        .avatar-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 10px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            min-width: 200px;
-            z-index: 1000;
-            overflow: hidden;
-            display: none;
-        }
-        
-        .avatar-dropdown.active {
-            display: block;
-        }
-        
-        .avatar-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            text-decoration: none;
-            color: #333;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        
-        .avatar-dropdown a i {
-            width: 20px;
-            color: #FF5A00;
-        }
-        
-        /* HEADER CONTENT - NUEVO ORDEN */
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-        
-        .logo {
-            order: 1;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #FF5A00;
-            text-decoration: none;
-        }
-        
-        .logo-dot {
-            color: #FF7A00;
-        }
-        
-        .header-actions {
-            order: 2;
-        }
-        
-        .search-container {
-            order: 3;
-            width: 100%;
-            margin-top: 12px;
-            margin-bottom: 0;
-        }
-        
-        .search-box {
-            display: flex;
-            align-items: center;
-            background: #f5f5f5;
-            border-radius: 30px;
-            padding: 8px 16px;
-            border: 1px solid transparent;
-        }
-        
-        .search-box:focus-within {
-            background: white;
-            border-color: #FF5A00;
-            box-shadow: 0 0 0 3px rgba(255,90,0,0.1);
-        }
-        
-        .search-box i {
-            color: #999;
-        }
-        
-        .search-box input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 8px 12px;
-            font-size: 0.95rem;
-            outline: none;
-        }
-        
-        /* En escritorio, el buscador vuelve a su posición original */
-        @media (min-width: 769px) {
-            .header-content {
-                flex-wrap: nowrap;
-            }
-            
-            .search-container {
-                order: 2;
-                width: auto;
-                margin-top: 0;
-                flex: 1;
-                margin: 0 20px;
-            }
-            
-            .header-actions {
-                order: 3;
-            }
-            
-            .user-avatar-mobile {
-                display: none !important;
-            }
-            
-            .user-avatar-desktop {
-                display: flex !important;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .user-avatar-desktop {
-                display: none !important;
-            }
-            .user-avatar-mobile {
-                display: flex !important;
-            }
-            
-            .logo {
-                font-size: 1.4rem;
-            }
-            
-            .search-container {
-                position: sticky;
-                top: 60px;
-                background: white;
-                z-index: 999;
-                padding: 8px 0;
-            }
-            
-            .notificacion-toast {
-                bottom: 80px;
-                font-size: 0.75rem;
-                padding: 10px 16px;
-            }
-        }
-        
-        /* NAV DESKTOP */
-        .nav-desktop {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-        
-        .btn-mis-pedidos {
-            color: #333;
-            font-weight: 500;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .social-icons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .social-icon {
-            color: #666;
-            font-size: 1.1rem;
-            text-decoration: none;
-        }
-        
-        /* HERO */
-        .hero {
-            text-align: center;
-            padding: 50px 0 40px;
-            background: linear-gradient(135deg, #FFF5EB 0%, #FFFFFF 100%);
-        }
-        
-        .hero h2 {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-        
-        .hero p {
-            font-size: 1.1rem;
-            color: #666;
-        }
-        
-        /* NEGOCIOS */
-        .negocios-section {
-            padding: 40px 0 80px;
-        }
-        
-        .negocios-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-        
-        .negocio-card {
-            display: flex;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        .negocio-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        
-        .negocio-logo {
-            width: 100px;
-            height: 100px;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        .negocio-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .negocio-logo .placeholder-logo {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #FF5A00;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .negocio-info {
-            flex: 1;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .negocio-nombre {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-        
-        .negocio-estado-rubros {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .estado-abierto, .estado-cerrado {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-weight: 600;
-        }
-        
-        .estado-abierto {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
-        .estado-cerrado {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-        
-        .rubros-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        
-        .rubro-tag {
-            background: #FFF5EB;
-            color: #FF5A00;
-            font-size: 0.7rem;
-            font-weight: 500;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-        
-        .negocio-horario {
-            font-size: 0.7rem;
-            color: #888;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        /* BANNERS */
-        .banners-section {
-            margin: 20px 0 30px;
-        }
-        
-        .banner-carousel {
-            position: relative;
-            width: 100%;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        
-        .carousel-container {
-            overflow: hidden;
-        }
-        
-        .carousel-track {
-            display: flex;
-            transition: transform 0.5s ease-in-out;
-        }
-        
-        .banner-slide {
-            flex: 0 0 100%;
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .banner-slide img {
-            width: 100%;
-            display: block;
-        }
-        
-        .carousel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            background: rgba(0,0,0,0.5);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            color: white;
-            z-index: 10;
-        }
-        
-        .carousel-btn.prev { left: 15px; }
-        .carousel-btn.next { right: 15px; }
-        
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px;
-            background: rgba(0,0,0,0.3);
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-        
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.5);
-            cursor: pointer;
-        }
-        
-        .dot.active {
-            background: #FF5A00;
-            width: 24px;
-            border-radius: 10px;
-        }
-        
-        /* LOADING */
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #888;
-        }
-        
-        .spinner {
-            width: 35px;
-            height: 35px;
-            border: 3px solid #f0f0f0;
-            border-top-color: #FF5A00;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 12px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .footer {
-            background: white;
-            border-top: 1px solid #eee;
-            padding: 25px 0;
-            text-align: center;
-            color: #888;
-            font-size: 0.8rem;
-        }
-        
-        /* MODALES */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 24px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .modal-footer {
-            padding: 15px 20px;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-        
-        /* BOTONES */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: #FF5A00;
-            color: white;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #FF5A00;
-            color: #FF5A00;
-        }
-        
-        .btn-block {
-            width: 100%;
-        }
-        
-        /* MIS PEDIDOS */
-        .pedidos-screen {
-            padding: 20px 0 40px;
-            min-height: 100vh;
-            background: #f8f9fa;
-        }
-        
-        .pedidos-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-        
-        .pedidos-header .btn-back {
-            background: white;
-            border: 1px solid #FF5A00;
-            color: #FF5A00;
-            padding: 8px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-        
-        .total-gastado {
-            background: linear-gradient(135deg, #FF5A00, #FF7A00);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .pedidos-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: white;
-            padding: 5px;
-            border-radius: 50px;
-            display: inline-flex;
-        }
-        
-        .pedidos-tab {
-            background: none;
-            border: none;
-            padding: 8px 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            color: #666;
-            border-radius: 40px;
-        }
-        
-        .pedidos-tab.active {
-            background: #FF5A00;
-            color: white;
-        }
-        
-        .pedidos-lista {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .pedido-card {
-            background: white;
-            border-radius: 20px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-            cursor: pointer;
-        }
-        
-        .pedido-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .pedido-numero {
-            font-weight: 700;
-            color: #FF5A00;
-        }
-        
-        .pedido-estado {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            background: #FFF3CD;
-            color: #D97706;
-        }
-        
-        .pedido-card-body {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        
-        .pedido-fecha, .pedido-negocio, .pedido-productos {
-            font-size: 0.75rem;
-            color: #666;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .pedido-total {
-            font-weight: 700;
-            color: #FF5A00;
-            margin-top: 6px;
-            text-align: right;
-        }
-        
-        .btn-ver-detalle {
-            background: none;
-            border: none;
-            color: #FF5A00;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        /* MI CUENTA */
-        .cuenta-screen {
-            padding: 20px 0 40px;
-            min-height: 100vh;
-            background: #f8f9fa;
-        }
-        
-        .cuenta-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .cuenta-header .btn-back {
-            background: white;
-            border: 1px solid #FF5A00;
-            color: #FF5A00;
-            padding: 8px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-        
-        .cuenta-card {
-            background: white;
-            border-radius: 24px;
-            padding: 25px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .cuenta-avatar {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .cuenta-avatar img {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #FF5A00;
-        }
-        
-        .cuenta-card .form-group {
-            margin-bottom: 14px;
-        }
-        
-        .cuenta-card .form-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .cuenta-card .form-group input,
-        .cuenta-card .form-group select {
-            padding: 10px 12px;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 0.9rem;
-        }
-        
-        .required {
-            color: #ef4444;
-        }
-        
-        /* MOBILE MENU */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 280px;
-            height: 100vh;
-            background: white;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
-            z-index: 2000;
-            transition: right 0.3s ease;
-            padding: 70px 25px 30px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .mobile-menu.active {
-            right: 0;
-        }
-        
-        .menu-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1500;
-            display: none;
-        }
-        
-        .menu-overlay.active {
-            display: block;
-        }
-        
-        .mobile-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .mobile-nav-link {
-            font-size: 1rem;
-            color: #333;
-            text-decoration: none;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-        
-        .mobile-nav-link i {
-            width: 24px;
-            color: #FF5A00;
-        }
-        
-        .mobile-social {
-            display: flex;
-            gap: 25px;
-            justify-content: center;
-        }
-        
-        .mobile-social .social-icon {
-            width: 40px;
-            height: 40px;
-            background: #f5f5f5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #666;
-            text-decoration: none;
-        }
-        
-        /* TOAST */
-        .toast-success, .toast-error, .toast-info {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            border-radius: 50px;
-            z-index: 9999;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 768px) {
-            .toast-success, .toast-error, .toast-info {
-                padding: 10px 16px;
-                font-size: 0.75rem;
-                white-space: normal;
-                text-align: center;
-                max-width: 90%;
-                bottom: 80px;
-            }
-            
-            .negocios-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .negocio-card {
-                padding: 10px;
-                align-items: center;
-            }
-            
-            .negocio-logo {
-                width: 70px;
-                height: 70px;
-                border-radius: 16px;
-            }
-            
-            .negocio-info {
-                padding: 0 0 0 12px;
-            }
-            
-            .negocio-nombre {
-                font-size: 0.95rem;
-            }
-            
-            .estado-abierto, .estado-cerrado {
-                font-size: 0.6rem;
-                padding: 3px 8px;
-            }
-            
-            .rubro-tag {
-                font-size: 0.6rem;
-                padding: 3px 8px;
-            }
-            
-            .negocio-horario {
-                font-size: 0.65rem;
-            }
-            
-            .hero {
-                padding: 35px 0 30px;
-            }
-            
-            .hero h2 {
-                font-size: 1.5rem;
-            }
-            
-            .hero p {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
 </head>
 <body>
-    <header class="header" id="main-header">
+    <!-- HEADER ADMIN -->
+    <header class="header-admin" id="header-admin" style="display: none;">
         <div class="container">
             <div class="header-content">
-                <a href="#" class="logo" id="logo-home">Want<span class="logo-dot">.</span></a>
-                
-                <div class="search-container" id="search-container">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Buscar negocios, productos, rubros..." id="search-input">
+                <div class="header-logo-estado">
+                    <div class="header-logo">
+                        <img src="" alt="Logo" id="header-logo-img" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; display: none;">
+                        <span class="logo" id="header-nombre-negocio"></span>
+                    </div>
+                    <div class="estado-toggle-header">
+                        <span class="estado-label" id="estado-abierto-texto">Abierto</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-estado-switch">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="estado-badge-header" id="estado-abierto-badge">
+                            <i class="fas fa-check-circle"></i> Atendiendo
+                        </span>
                     </div>
                 </div>
-
-                <div class="nav-desktop" id="nav-desktop">
-                    <button class="btn-mis-pedidos" id="mis-pedidos-desktop">Mis pedidos</button>
-                    <div class="social-icons">
-                        <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/+543865747489" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-
                 <div class="header-actions">
-                    <!-- NOTIFICACIONES -->
-                    <div class="notificaciones-container">
-                        <button class="btn-notificaciones" id="notificaciones-btn" onclick="window.toggleNotificaciones()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notificaciones-count" id="notificaciones-count">0</span>
-                        </button>
-                        <div class="notificaciones-panel" id="notificaciones-panel">
-                            <div class="notificaciones-header">
-                                <span>Notificaciones</span>
-                                <div>
-                                    <button class="btn-cerrar-notif-mobile" id="btn-cerrar-notif-mobile" onclick="window.cerrarPanelNotificaciones()">
-                                        <i class="fas fa-arrow-right"></i> Cerrar
-                                    </button>
-                                    <button class="btn-limpiar-notif" id="btn-limpiar-notif" onclick="window.limpiarTodasNotificaciones()">
-                                        <i class="fas fa-trash-alt"></i> Limpiar
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notificaciones-lista" id="notificaciones-lista">
-                                <div class="notificaciones-vacio">
-                                    <i class="fas fa-bell-slash"></i>
-                                    <p>No hay notificaciones</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="notificaciones-overlay" id="notificaciones-overlay" onclick="window.cerrarPanelNotificaciones()"></div>
-                    </div>
-
-                    <!-- AVATAR ESCRITORIO -->
-                    <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
-                        <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
-                        <span class="avatar-name" id="avatar-name-desktop"></span>
-                        <div class="avatar-dropdown" id="avatar-dropdown">
-                            <a href="#" id="mi-cuenta-desktop"><i class="fas fa-user-circle"></i> Mi cuenta</a>
-                            <a href="#" id="cerrar-sesion-desktop"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
-                        </div>
-                    </div>
-
-                    <!-- AVATAR MÓVIL -->
-                    <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
-                        <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
-                    </div>
+                    <button class="header-btn" id="btn-open-profile" title="Mi perfil">
+                        <i class="fas fa-user-circle"></i> Perfil
+                    </button>
+                    <button class="btn-icon" id="btn-refresh" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-icon" id="btn-logout" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                    <button class="menu-toggle-admin" id="menu-toggle-admin">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- MENÚ MÓVIL -->
-    <div class="mobile-menu" id="mobile-menu">
-        <button class="menu-close" id="menu-close">
-            <i class="fas fa-times"></i>
+<div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
+    <button class="menu-close" id="menu-close-admin">
+        <i class="fas fa-times"></i>
+    </button>
+    <div class="mobile-nav-admin">
+        <button class="mobile-tab-btn active" data-tab="pedidos">
+            <i class="fas fa-box"></i> Pedidos
         </button>
-        <div class="mobile-nav">
-            <a href="#" class="mobile-nav-link" id="mis-pedidos-mobile">
-                <i class="fas fa-box"></i> Mis pedidos
-            </a>
-            <a href="#" class="mobile-nav-link" id="mi-cuenta-mobile">
-                <i class="fas fa-user-circle"></i> Mi cuenta
-            </a>
-            <a href="#" class="mobile-nav-link" id="logout-mobile">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </a>
-        </div>
-        <div class="mobile-social">
-            <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-            <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://wa.me/+543865747489" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-        </div>
+        <button class="mobile-tab-btn" data-tab="productos">
+            <i class="fas fa-pizza-slice"></i> Productos
+        </button>
+        <button class="mobile-tab-btn" data-tab="delivery">
+            <i class="fas fa-truck"></i> Delivery
+        </button>
+        <button class="mobile-tab-btn" data-tab="reportes">
+            <i class="fas fa-chart-line"></i> Reportes
+        </button>
+        <button class="mobile-logout-btn" id="mobile-logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </button>
     </div>
-    <div class="menu-overlay" id="menu-overlay"></div>
+</div>
+<div class="menu-overlay-admin" id="menu-overlay-admin" style="display: none;"></div>
 
-    <!-- MODAL CONTACTO -->
-    <div class="modal contacto-modal" id="contacto-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-envelope"></i> Contacto</h3>
-                <button class="modal-close" onclick="cerrarModalContacto()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="contacto-info-modal">
-                    <p><i class="fas fa-envelope"></i> hola@want.com.ar</p>
-                    <p><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</p>
-                    <div class="contacto-social-modal">
-                        <a href="https://instagram.com/want.go_" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://facebook.com/tu_pagina" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/+543865747489" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+    <!-- MAIN CONTENT -->
+    <main>
+        <div class="container">
+            <!-- PANTALLA DE LOGIN/REGISTRO -->
+            <div class="admin-auth" id="admin-auth">
+                <div class="auth-card">
+                    <div class="auth-logo">
+                        <h1 class="auth-logo-text">Want</h1>
+                        <p class="auth-subtitle">Panel de vendedores</p>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CONTENIDO PRINCIPAL (HOME DE VENDEDORES) -->
-    <div id="main-content">
-        <main>
-            <section class="banners-section" id="banners-section" style="display: none;">
-                <div class="container">
-                    <div class="banner-carousel">
-                        <div class="carousel-container">
-                            <div class="carousel-track" id="carousel-track"></div>
+                    
+                    <!-- PANEL LOGIN -->
+                    <div class="auth-panel active" id="login-panel">
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="login-email" placeholder="tu@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="login-password" placeholder="••••••••" required>
+                                    <button type="button" class="toggle-password" data-target="login-password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group remember-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="remember-me"> Recordarme
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                        </form>
+                        <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
+                        <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
+                        <div class="auth-links">
+                            <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
                         </div>
-                        <button class="carousel-btn prev" id="carousel-prev">
-                            <i class="fas fa-chevron-left"></i>
+                    </div>
+
+                    <!-- PANEL REGISTRO -->
+                    <div class="auth-panel" id="register-panel">
+                        <button class="back-to-login" id="back-to-login">
+                            <i class="fas fa-arrow-left"></i> Volver al inicio
                         </button>
-                        <button class="carousel-btn next" id="carousel-next">
-                            <i class="fas fa-chevron-right"></i>
+                        <form id="register-form">
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Nombre del negocio *</label>
+                                    <input type="text" id="reg-nombre" required>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Email *</label>
+                                    <input type="email" id="reg-email" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Teléfono *</label>
+                                    <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Dirección *</label>
+                                    <input type="text" id="reg-direccion" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Rubro(s) del negocio *</label>
+                                <div class="rubros-selector" id="rubros-selector-registro"></div>
+                                <small class="input-help">Puedes seleccionar uno o varios rubros</small>
+                                <div class="rubros-seleccionados-info">
+                                    <strong>Rubros seleccionados:</strong> <span id="rubros-lista-registro">Ninguno</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Horario de atención</label>
+                                <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo del negocio</label>
+                                <input type="file" id="reg-logo" accept="image/*">
+                                <div id="reg-logo-preview" class="image-preview"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Contraseña *</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="reg-password" required>
+                                        <button type="button" class="toggle-password" data-target="reg-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Confirmar *</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="reg-password2" required>
+                                        <button type="button" class="toggle-password" data-target="reg-password2">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                        </form>
+                    </div>
+
+                    <!-- PANEL RECUPERAR CONTRASEÑA -->
+                    <div class="auth-panel" id="recover-panel">
+                        <button class="back-to-login" id="back-to-login-recover">
+                            <i class="fas fa-arrow-left"></i> Volver al inicio
                         </button>
-                        <div class="carousel-dots" id="carousel-dots"></div>
+                        <form id="recover-form">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="recover-email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Enviar código</button>
+                        </form>
+                        <div id="recover-code-section" style="display: none;">
+                            <div class="form-group">
+                                <label>Código de recuperación</label>
+                                <input type="text" id="recover-code" placeholder="Ingresa el código de 6 dígitos">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Nueva contraseña</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="recover-new-password">
+                                        <button type="button" class="toggle-password" data-target="recover-new-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Confirmar</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="recover-new-password2">
+                                        <button type="button" class="toggle-password" data-target="recover-new-password2">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-block" id="btn-reset-password">Restablecer contraseña</button>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <section class="hero">
-                <div class="container">
-                    <h2>¿Qué querés pedir hoy?</h2>
-                    <p>Elegí tu negocio favorito y hacé tu pedido en simples pasos</p>
+            <!-- PANEL ADMIN (después de login) -->
+            <div class="admin-panel" id="admin-panel" style="display: none;">
+                <!-- MÉTRICAS -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="metric-info">
+                            <h3 id="ventas-hoy">$0</h3>
+                            <p>Ventas hoy</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-week"></i></div>
+                        <div class="metric-info">
+                            <h3 id="ventas-semana">$0</h3>
+                            <p>Ventas esta semana</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="metric-info">
+                            <h3 id="ventas-mes">$0</h3>
+                            <p>Ventas este mes</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="metric-info">
+                            <h3 id="pedidos-entregados">0</h3>
+                            <p>Pedidos entregados</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-truck"></i></div>
+                        <div class="metric-info">
+                            <h3 id="pedidos-pendientes">0</h3>
+                            <p>Pedidos pendientes</p>
+                        </div>
+                    </div>
                 </div>
-            </section>
 
-            <section class="negocios-section">
-                <div class="container">
-                    <div class="negocios-grid" id="negocios-grid">
+                <!-- TABS -->
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="pedidos">
+                        <i class="fas fa-box"></i> Pedidos
+                        <span class="tab-badge" id="badge-pedidos">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="productos">
+                        <i class="fas fa-pizza-slice"></i> Productos
+                        <span class="tab-badge" id="badge-productos">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="delivery">
+                        <i class="fas fa-truck"></i> Delivery
+                        <span class="tab-badge" id="badge-delivery">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="reportes">
+                        <i class="fas fa-chart-line"></i> Reportes
+                    </button>
+                </div>
+
+                <!-- TAB PEDIDOS -->
+                <div class="tab-content active" id="tab-pedidos">
+                    <div class="filtros-buscador">
+                        <div class="filtros-pedidos">
+                            <button class="filtro-btn active" data-estado="preparando">
+                                <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
+                            </button>
+                            <button class="filtro-btn" data-estado="en preparacion">
+                                <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
+                            </button>
+                            <button class="filtro-btn" data-estado="en camino">
+                                <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
+                            </button>
+                            <button class="filtro-btn" data-estado="entregado">
+                                <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
+                            </button>
+                        </div>
+                        <div class="buscador-container">
+                            <div class="buscador-input">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
+                            </div>
+                            <div class="buscador-buttons">
+                                <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
+                                    <i class="fas fa-times"></i> Limpiar
+                                </button>
+                                <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
+                                    <i class="fas fa-plus-circle"></i> Nuevo pedido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pedidos-container" id="pedidos-container">
                         <div class="loading">
                             <div class="spinner"></div>
-                            <p>Cargando negocios...</p>
+                            <p>Cargando pedidos...</p>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; 2026 Want - Pedidos simples y rápidos</p>
-            </div>
-        </footer>
-    </div>
+                <!-- TAB PRODUCTOS -->
+                <div class="tab-content" id="tab-productos">
+                    <div class="productos-header-actions">
+                        <button class="btn-primary" id="btn-agregar-producto">
+                            <i class="fas fa-plus"></i> Agregar producto
+                        </button>
+                    </div>
+                    <div class="productos-admin-grid" id="productos-admin-grid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Cargando productos...</p>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- PANTALLA MIS PEDIDOS -->
-    <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
-        <div class="container">
-            <div class="pedidos-header">
-                <button class="btn-back" id="back-to-home">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <h2>Mis pedidos</h2>
-                <div class="total-gastado">
-                    <span>Total gastado:</span>
-                    <strong id="total-gastado-valor">$0</strong>
+                <!-- TAB DELIVERY -->
+                <div class="tab-content" id="tab-delivery">
+                    <div class="delivery-header-actions">
+                        <button class="btn-primary" id="btn-agregar-delivery">
+                            <i class="fas fa-plus"></i> Agregar delivery
+                        </button>
+                    </div>
+                    <div class="delivery-grid" id="delivery-grid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Cargando deliveries...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB REPORTES -->
+                <div class="tab-content" id="tab-reportes">
+                    <div class="reportes-container">
+                        <div class="reportes-section">
+                            <h3 class="reportes-titulo"><i class="fas fa-chart-simple"></i> Resumen de ventas</h3>
+                            <div class="reportes-metrics">
+                                <div class="reporte-card">
+                                    <div class="reporte-icon"><i class="fas fa-calendar-day"></i></div>
+                                    <div class="reporte-info">
+                                        <h4>Ventas hoy</h4>
+                                        <p id="reporte-ventas-hoy">$0</p>
+                                    </div>
+                                </div>
+                                <div class="reporte-card">
+                                    <div class="reporte-icon"><i class="fas fa-calendar-week"></i></div>
+                                    <div class="reporte-info">
+                                        <h4>Ventas esta semana</h4>
+                                        <p id="reporte-ventas-semana">$0</p>
+                                    </div>
+                                </div>
+                                <div class="reporte-card">
+                                    <div class="reporte-icon"><i class="fas fa-calendar-alt"></i></div>
+                                    <div class="reporte-info">
+                                        <h4>Ventas este mes</h4>
+                                        <p id="reporte-ventas-mes">$0</p>
+                                    </div>
+                                </div>
+                                <div class="reporte-card">
+                                    <div class="reporte-icon"><i class="fas fa-check-circle"></i></div>
+                                    <div class="reporte-info">
+                                        <h4>Pedidos entregados</h4>
+                                        <p id="reporte-pedidos-entregados">0</p>
+                                    </div>
+                                </div>
+                                <div class="reporte-card">
+                                    <div class="reporte-icon"><i class="fas fa-clock"></i></div>
+                                    <div class="reporte-info">
+                                        <h4>Pedidos pendientes</h4>
+                                        <p id="reporte-pedidos-pendientes">0</p>
+                                    </div>
+                                </div>
+                                <div class="reporte-card">
+                                    <div class="reporte-icon"><i class="fas fa-truck"></i></div>
+                                    <div class="reporte-info">
+                                        <h4>Total pedidos</h4>
+                                        <p id="reporte-total-pedidos">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reportes-section">
+                            <h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top productos más vendidos</h3>
+                            <div id="reporte-top-productos" class="reportes-lista">
+                                <div class="loading-small">Cargando...</div>
+                            </div>
+                        </div>
+                        <div class="reportes-section">
+                            <h3 class="reportes-titulo"><i class="fas fa-chart-line"></i> Ventas por día (últimos 7 días)</h3>
+                            <div id="reporte-ventas-dias" class="reportes-dias">
+                                <div class="loading-small">Cargando...</div>
+                            </div>
+                        </div>
+                        <div class="reportes-section">
+                            <h3 class="reportes-titulo"><i class="fas fa-history"></i> Últimos 10 pedidos</h3>
+                            <div id="reporte-ultimos-pedidos" class="reportes-pedidos-lista">
+                                <div class="loading-small">Cargando...</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="pedidos-tabs">
-                <button class="pedidos-tab active" data-tab="actuales">Pedidos actuales</button>
-                <button class="pedidos-tab" data-tab="historial">Historial</button>
+        </div>
+    </main>
+
+    <!-- =================================================== -->
+    <!-- MODALES -->
+    <!-- =================================================== -->
+
+    <!-- MODAL RUBROS -->
+    <div class="modal" id="modal-rubros">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-tags"></i> Seleccionar rubros</h3>
+                <button class="modal-close" onclick="cerrarModalRubros()">&times;</button>
             </div>
-            
-            <div id="pedidos-actuales-container" class="pedidos-lista">
-                <div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>
+            <div class="modal-body">
+                <p class="modal-help">Selecciona uno o varios rubros para tu negocio:</p>
+                <div class="rubros-grid" id="rubros-grid-modal"></div>
+                <div class="rubros-seleccionados-info">
+                    <strong>Rubros seleccionados:</strong> <span id="rubros-seleccionados-lista">Ninguno</span>
+                </div>
             </div>
-            
-            <div id="pedidos-historial-container" class="pedidos-lista" style="display: none;">
-                <div class="loading"><div class="spinner"></div><p>Cargando historial...</p></div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="cerrarModalRubros()">Cancelar</button>
+                <button class="btn-primary" id="btn-confirmar-rubros">Confirmar selección</button>
             </div>
         </div>
     </div>
 
-    <!-- PANTALLA MI CUENTA -->
-    <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
-        <div class="container">
-            <div class="cuenta-header">
-                <button class="btn-back" id="back-to-home-cuenta">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <h2>Mi cuenta</h2>
+    <!-- MODAL PERFIL (REDISEÑADO) -->
+    <div class="modal" id="modal-perfil">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-circle"></i> Mi perfil</h3>
+                <button class="modal-close" onclick="cerrarModalPerfil()">&times;</button>
             </div>
-            
-            <div class="cuenta-card">
-                <div class="cuenta-avatar">
-                    <img src="" alt="Foto perfil" id="cuenta-avatar-img">
+            <div class="modal-body">
+                <!-- HEADER PERFIL CON AVATAR -->
+                <div class="perfil-header">
+                    <div class="perfil-avatar" id="perfil-avatar-container">
+                        <div id="perfil-avatar-img" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <button type="button" class="btn-cambiar-avatar" id="btn-cambiar-logo" title="Cambiar logo">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <input type="file" id="perfil-logo-input" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="perfil-info">
+                        <h3 id="perfil-nombre-display"></h3>
+                        <p id="perfil-email-display"></p>
+                    </div>
                 </div>
-                
-                <form id="cuenta-form">
-                    <div class="form-group">
-                        <label>Nombre completo <span class="required">*</span></label>
-                        <input type="text" id="cuenta-nombre" placeholder="Ej: Juan Pérez" required>
+
+                <!-- FORMULARIO PERFIL -->
+                <form id="perfil-form" class="perfil-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre del negocio</label>
+                            <input type="text" id="perfil-nombre" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono (WhatsApp)</label>
+                            <input type="tel" id="perfil-telefono" class="form-control">
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="cuenta-email" readonly disabled>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            <input type="text" id="perfil-direccion" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Horario de atención</label>
+                            <input type="text" id="perfil-horario" class="form-control">
+                        </div>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label>Provincia <span class="required">*</span></label>
-                        <select id="cuenta-provincia" required>
-                            <option value="">Seleccionar provincia</option>
-                            <option value="Buenos Aires">Buenos Aires</option>
-                            <option value="CABA">CABA</option>
-                            <option value="Catamarca">Catamarca</option>
-                            <option value="Chaco">Chaco</option>
-                            <option value="Chubut">Chubut</option>
-                            <option value="Córdoba">Córdoba</option>
-                            <option value="Corrientes">Corrientes</option>
-                            <option value="Entre Ríos">Entre Ríos</option>
-                            <option value="Formosa">Formosa</option>
-                            <option value="Jujuy">Jujuy</option>
-                            <option value="La Pampa">La Pampa</option>
-                            <option value="La Rioja">La Rioja</option>
-                            <option value="Mendoza">Mendoza</option>
-                            <option value="Misiones">Misiones</option>
-                            <option value="Neuquén">Neuquén</option>
-                            <option value="Río Negro">Río Negro</option>
-                            <option value="Salta">Salta</option>
-                            <option value="San Juan">San Juan</option>
-                            <option value="San Luis">San Luis</option>
-                            <option value="Santa Cruz">Santa Cruz</option>
-                            <option value="Santa Fe">Santa Fe</option>
-                            <option value="Santiago del Estero">Santiago del Estero</option>
-                            <option value="Tierra del Fuego">Tierra del Fuego</option>
-                            <option value="Tucumán">Tucumán</option>
-                        </select>
+                        <label>Rubro(s) del negocio</label>
+                        <div id="perfil-rubros-container" class="rubros-tags-container"></div>
+                        <button type="button" class="btn-outline" id="btn-editar-rubros" style="margin-top: 8px; font-size: 12px; padding: 6px 12px;">
+                            <i class="fas fa-edit"></i> Editar rubros
+                        </button>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label>Ciudad <span class="required">*</span></label>
-                        <select id="cuenta-ciudad" required>
-                            <option value="">Seleccionar ciudad</option>
-                            <option value="Juan Bautista Alberdi">Juan Bautista Alberdi</option>
-                        </select>
+                        <label>Descripción del negocio</label>
+                        <textarea id="perfil-descripcion" rows="3" class="form-control" placeholder="Describe tu negocio, especialidades, horarios, etc."></textarea>
+                        <small class="input-help">Esta descripción se mostrará en tu tienda para que los clientes te conozcan mejor.</small>
+                        <div style="margin-top: 8px;">
+                            <button type="button" id="btn-guardar-descripcion" class="btn-outline" style="font-size: 12px; padding: 6px 12px;">
+                                <i class="fas fa-save"></i> Guardar solo descripción
+                            </button>
+                            <span id="descripcion-status" style="margin-left: 10px; font-size: 12px;"></span>
+                        </div>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label>Calle y número <span class="required">*</span></label>
-                        <input type="text" id="cuenta-direccion" required>
+                        <label>Cambiar contraseña</label>
+                        <input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar">
                     </div>
-                    
-                    <div class="form-group">
-                        <label>WhatsApp <span class="required">*</span></label>
-                        <input type="tel" id="cuenta-telefono" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-cuenta">Guardar cambios</button>
+
+                    <button type="submit" class="btn-primary btn-save">Guardar todos los cambios</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DETALLE PEDIDO -->
-    <div class="modal" id="modal-detalle-pedido">
-        <div class="modal-content">
+    <!-- MODAL PRODUCTO -->
+    <div class="modal" id="modal-producto">
+        <div class="modal-content modal-producto">
             <div class="modal-header">
-                <h3 id="detalle-pedido-titulo">Detalle del pedido</h3>
-                <button class="modal-close" onclick="cerrarModalDetallePedido()">&times;</button>
+                <h3 id="modal-producto-title">Nuevo producto</h3>
+                <button class="modal-close" onclick="cerrarModalProducto()">&times;</button>
             </div>
-            <div class="modal-body" id="detalle-pedido-body"></div>
+            <div class="modal-body">
+                <form id="producto-form">
+                    <input type="hidden" id="producto-id">
+                    <div class="form-group">
+                        <label>Nombre del producto *</label>
+                        <input type="text" id="producto-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="producto-descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio *</label>
+                        <input type="number" id="producto-precio" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Imagen del producto</label>
+                        <input type="file" id="producto-imagen" accept="image/*">
+                        <div id="producto-imagen-preview" class="image-preview"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Disponible</label>
+                        <select id="producto-disponible">
+                            <option value="SI">Sí</option>
+                            <option value="NO">No</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="cerrarModalDetallePedido()">Cerrar</button>
+                <button class="btn-primary" id="guardar-producto">Guardar producto</button>
+                <button class="btn-outline" onclick="cerrarModalProducto()">Cancelar</button>
             </div>
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-all.js"></script>
-<script src="js/session-manager.js"></script>
-<script src="js/home.js"></script>
-<script src="js/auth-usuario.js"></script>
+    <!-- MODAL DELIVERY -->
+    <div class="modal" id="modal-delivery">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-delivery-title">Nuevo delivery</h3>
+                <button class="modal-close" onclick="cerrarModalDelivery()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="delivery-form">
+                    <input type="hidden" id="delivery-id">
+                    <div class="form-group">
+                        <label>Nombre del delivery *</label>
+                        <input type="text" id="delivery-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp *</label>
+                        <input type="tel" id="delivery-telefono" placeholder="5491112345678" required>
+                        <small class="input-help">Ejemplo: 5491112345678 (código país + número)</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-delivery">Guardar delivery</button>
+                <button class="btn-outline" onclick="cerrarModalDelivery()">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-    // Inicializar usando Session Manager
-    (async function() {
-        const result = await initWantSession();
-        console.log('📊 Index - Resultado:', result);
-        
-        if (!result.success && !window.location.pathname.includes('login.html')) {
-            window.location.href = 'login.html';
-        }
-    })();
-    
-    // Redirigir a Mis Pedidos si viene con #mis-pedidos
-    if (window.location.hash === '#mis-pedidos') {
-        setTimeout(() => {
-            if (typeof mostrarMisPedidos === 'function') {
-                mostrarMisPedidos();
-            }
-        }, 500);
-    }
-    
-    window.cerrarModalContacto = function() {
-        document.getElementById('contacto-modal').classList.remove('active');
-    };
-    
-    window.cerrarModalDetallePedido = function() {
-        document.getElementById('modal-detalle-pedido').classList.remove('active');
-    };
-    
-    // Función para cerrar menú móvil
-    function closeMobileMenu() {
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuOverlay = document.getElementById('menu-overlay');
-        if (mobileMenu) mobileMenu.classList.remove('active');
-        if (menuOverlay) menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    
-    // Configurar eventos del menú móvil
-    document.addEventListener('DOMContentLoaded', function() {
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuOverlay = document.getElementById('menu-overlay');
-        const menuClose = document.getElementById('menu-close');
-        
-        if (menuClose) {
-            menuClose.addEventListener('click', closeMobileMenu);
-        }
-        
-        if (menuOverlay) {
-            menuOverlay.addEventListener('click', closeMobileMenu);
-        }
-        
-        const avatarMobile = document.getElementById('user-avatar-mobile');
-        if (avatarMobile) {
-            avatarMobile.addEventListener('click', function() {
-                if (mobileMenu) mobileMenu.classList.add('active');
-                if (menuOverlay) menuOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            });
-        }
-    });
-</script>
+    <!-- MODAL EDITAR PEDIDO -->
+    <div class="modal" id="modal-editar-pedido">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Editar pedido #<span id="edit-pedido-id-display"></span></h3>
+                <button class="modal-close" onclick="cerrarModalEditarPedido()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editar-pedido-form">
+                    <input type="hidden" id="edit-pedido-id">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Nombre del cliente *</label>
+                            <input type="text" id="edit-cliente-nombre" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>Teléfono *</label>
+                            <input type="tel" id="edit-cliente-telefono" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección de entrega *</label>
+                        <input type="text" id="edit-direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Detalles del pedido</label>
+                        <textarea id="edit-detalles" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Método de pago</label>
+                        <select id="edit-metodo-pago">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado del pedido</label>
+                        <select id="edit-estado">
+                            <option value="preparando">Nuevo</option>
+                            <option value="en preparacion">En preparación</option>
+                            <option value="en camino">En camino</option>
+                            <option value="entregado">Entregado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Productos</label>
+                        <div id="productos-editar-container" class="productos-seleccion"></div>
+                        <button type="button" class="btn-outline" id="btn-agregar-producto-editar" style="width: 100%; margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Agregar producto
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="text" id="edit-total" readonly style="background: var(--gray-50); font-weight: bold; color: var(--primary);">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-editar-pedido">Guardar cambios</button>
+                <button class="btn-outline" onclick="cerrarModalEditarPedido()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO PEDIDO -->
+    <div class="modal" id="modal-nuevo-pedido">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Crear nuevo pedido</h3>
+                <button class="modal-close" onclick="cerrarModalNuevoPedido()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="nuevo-pedido-form">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Nombre del cliente *</label>
+                            <input type="text" id="nuevo-cliente-nombre" required>
+                        </div>
+                        <div class="form-group half">
+                            <label>Teléfono *</label>
+                            <input type="tel" id="nuevo-cliente-telefono" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección de entrega *</label>
+                        <input type="text" id="nuevo-direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Detalles del pedido</label>
+                        <textarea id="nuevo-detalles" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Método de pago</label>
+                        <select id="nuevo-metodo-pago">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Productos</label>
+                        <div id="productos-nuevo-container" class="productos-seleccion"></div>
+                        <button type="button" class="btn-outline" id="btn-agregar-producto-nuevo" style="width: 100%; margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Agregar producto
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="text" id="nuevo-total" readonly style="background: var(--gray-50); font-weight: bold; color: var(--primary);">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="guardar-nuevo-pedido">Crear pedido</button>
+                <button class="btn-outline" onclick="cerrarModalNuevoPedido()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SELECCIONAR PRODUCTO -->
+    <div class="modal" id="modal-seleccionar-producto">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Seleccionar producto</h3>
+                <button class="modal-close" onclick="cerrarModalSeleccionarProducto()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Producto</label>
+                    <select id="select-producto" class="form-control">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="select-cantidad" value="1" min="1" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-confirmar-agregar-producto">Agregar</button>
+                <button class="btn-outline" onclick="cerrarModalSeleccionarProducto()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TIEMPO ENTREGA -->
+    <div class="modal" id="modal-tiempo-entrega">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Tiempo estimado de entrega</h3>
+                <button class="modal-close" id="cerrar-modal-tiempo">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
+                    <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
+                <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ASIGNAR DELIVERY -->
+    <div class="modal" id="modal-asignar-delivery">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Asignar delivery</h3>
+                <button class="modal-close" onclick="cerrarModalAsignarDelivery()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Seleccionar delivery</label>
+                    <select id="select-delivery" class="form-control">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div id="info-pedido-asignar" style="margin-top: 16px; padding: 12px; background: var(--gray-50); border-radius: var(--radius-md);">
+                    <p><strong>Pedido #<span id="asignar-pedido-id"></span></strong></p>
+                    <p>Cliente: <span id="asignar-cliente-nombre"></span></p>
+                    <p>Total: <span id="asignar-total"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-enviar-delivery">Enviar al delivery</button>
+                <button class="btn-outline" onclick="cerrarModalAsignarDelivery()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-all.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
