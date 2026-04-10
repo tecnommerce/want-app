@@ -1274,51 +1274,84 @@ cargarDescripcionExistente();
 // FUNCIÓN: GUARDAR SOLO LA DESCRIPCIÓN
 // ===================================================
 async function guardarSoloDescripcion() {
-    console.log('🖊️ Guardando solo la descripción...');
+    console.log('🖊️ Botón guardar descripción clickeado');
     
-    // Obtener el ID del vendedor desde localStorage
-    const vendedorId = localStorage.getItem('vendedorId');
+    // 🔥 PROBAR DIFERENTES FORMAS DE OBTENER EL ID DEL VENDEDOR
+    let vendedorId = localStorage.getItem('vendedorId');
+    
+    // Si no funciona, probar con otras claves
+    if (!vendedorId) vendedorId = localStorage.getItem('vendedor_id');
+    if (!vendedorId) vendedorId = localStorage.getItem('vendedor-id');
+    if (!vendedorId) vendedorId = sessionStorage.getItem('vendedorId');
+    if (!vendedorId) vendedorId = sessionStorage.getItem('vendedor_id');
+    
+    // Si hay un objeto vendedor guardado
+    const vendedorObj = localStorage.getItem('vendedor');
+    if (!vendedorId && vendedorObj) {
+        try {
+            const vendedor = JSON.parse(vendedorObj);
+            vendedorId = vendedor.id;
+        } catch(e) {}
+    }
+    
+    // Si hay un objeto usuario
+    const usuarioObj = localStorage.getItem('usuario');
+    if (!vendedorId && usuarioObj) {
+        try {
+            const usuario = JSON.parse(usuarioObj);
+            vendedorId = usuario.id;
+        } catch(e) {}
+    }
+    
+    console.log('Vendedor ID encontrado:', vendedorId);
+    
+    const descripcion = document.getElementById('perfil-descripcion').value;
+    const statusSpan = document.getElementById('descripcion-status');
+    
     if (!vendedorId) {
-        console.error('❌ No se encontró ID del vendedor');
-        mostrarMensajeDescripcion('❌ Error: No hay sesión activa', 'red');
+        console.error('❌ No se encontró ID del vendedor en localStorage');
+        console.log('📦 Contenido de localStorage:', {...localStorage});
+        
+        if (statusSpan) {
+            statusSpan.innerHTML = '❌ Error: No hay sesión activa';
+            statusSpan.style.color = 'red';
+        }
         return;
     }
     
-    // Obtener el texto de la descripción
-    const descripcionTextarea = document.getElementById('descripcionVendedor');
-    if (!descripcionTextarea) {
-        console.error('❌ No se encontró el campo descripcionVendedor');
-        mostrarMensajeDescripcion('❌ Error: Campo de descripción no encontrado', 'red');
-        return;
+    if (statusSpan) {
+        statusSpan.innerHTML = '💾 Guardando...';
+        statusSpan.style.color = '#007bff';
     }
-    
-    const descripcion = descripcionTextarea.value;
-    
-    // Mostrar mensaje de guardando
-    mostrarMensajeDescripcion('💾 Guardando descripción...', 'blue');
     
     try {
-        // Llamar a la API solo con la descripción
         const result = await window.callAPI('actualizarVendedor', {
             id: parseInt(vendedorId),
             descripcion: descripcion
         });
         
-        console.log('📡 Respuesta de la API:', result);
+        console.log('Respuesta de la API:', result);
         
         if (result.success) {
-            mostrarMensajeDescripcion('✅ ¡Descripción guardada correctamente!', 'green');
-            // Limpiar el mensaje después de 3 segundos
-            setTimeout(() => {
-                const statusSpan = document.getElementById('descripcionStatus');
-                if (statusSpan) statusSpan.innerHTML = '';
-            }, 3000);
+            if (statusSpan) {
+                statusSpan.innerHTML = '✅ ¡Descripción guardada!';
+                statusSpan.style.color = 'green';
+                setTimeout(() => {
+                    if (statusSpan) statusSpan.innerHTML = '';
+                }, 3000);
+            }
         } else {
-            mostrarMensajeDescripcion('❌ Error: ' + (result.error || 'No se pudo guardar'), 'red');
+            if (statusSpan) {
+                statusSpan.innerHTML = '❌ Error: ' + (result.error || 'No se pudo guardar');
+                statusSpan.style.color = 'red';
+            }
         }
     } catch (error) {
-        console.error('❌ Error al guardar descripción:', error);
-        mostrarMensajeDescripcion('❌ Error de conexión: ' + error.message, 'red');
+        console.error('Error guardando descripción:', error);
+        if (statusSpan) {
+            statusSpan.innerHTML = '❌ Error de conexión';
+            statusSpan.style.color = 'red';
+        }
     }
 }
 
