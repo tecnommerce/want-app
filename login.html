@@ -2,14 +2,216 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
     <title>Want | Iniciar sesión</title>
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Estilos adicionales para el login */
+        .login-screen, .registro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #FF5A00 0%, #FF7A00 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .login-container, .registro-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+        
+        .login-card, .registro-card {
+            background: white;
+            border-radius: 32px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            font-size: 2.5rem;
+            color: #FF5A00;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .login-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-google:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .btn-google:active {
+            transform: scale(0.98);
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .btn-register {
+            background: #FF5A00;
+            color: white;
+            border: none;
+        }
+        
+        .btn-register:hover {
+            background: #e04e00;
+        }
+        
+        .login-divider {
+            text-align: center;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .login-divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #eee;
+        }
+        
+        .login-divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #999;
+            font-size: 0.8rem;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+        
+        .login-footer a {
+            color: #FF5A00;
+            text-decoration: none;
+        }
+        
+        .registro-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .registro-header h2 {
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        
+        .registro-header p {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .info-box {
+            background: #FFF5EB;
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: #FF5A00;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid white;
+            border-top-color: #FF5A00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 480px) {
+            .login-card, .registro-card {
+                padding: 30px 20px;
+            }
+            
+            .login-header h1 {
+                font-size: 2rem;
+            }
+            
+            .btn-google {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Pantalla de carga -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Pantalla de Login -->
     <div class="login-screen" id="login-screen" style="display: flex;">
         <div class="login-container">
             <div class="login-card">
@@ -37,6 +239,7 @@
         </div>
     </div>
 
+    <!-- Pantalla de Registro (completar datos) -->
     <div class="registro-screen" id="registro-screen" style="display: none;">
         <div class="registro-container">
             <div class="registro-card">
@@ -120,14 +323,251 @@
 <script src="js/auth-usuario.js"></script>
 
 <script>
-    // Inicializar usando Session Manager
-    (async function() {
-        const result = await initWantSession();
-        console.log('📊 Login - Resultado:', result);
+    // Variables globales
+    let usuarioAuthTemp = null;
+    
+    // Mostrar/ocultar loading
+    function mostrarLoading(mostrar) {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            overlay.style.display = mostrar ? 'flex' : 'none';
+        }
+    }
+    
+    function mostrarToast(mensaje, tipo) {
+        const toast = document.createElement('div');
+        toast.textContent = mensaje;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '50px';
+        toast.style.zIndex = '10001';
+        toast.style.fontSize = '0.85rem';
+        toast.style.fontWeight = '500';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // Función para iniciar login con Google
+    async function iniciarLoginGoogle() {
+        mostrarLoading(true);
         
-        // Si ya hay sesión, redirigir a index
-        if (result.success) {
-            window.location.href = 'index.html';
+        try {
+            // Verificar que la función existe
+            if (typeof loginWithGoogle !== 'function') {
+                console.error('❌ loginWithGoogle no está definida');
+                mostrarToast('Error: Función de autenticación no disponible', 'error');
+                mostrarLoading(false);
+                return;
+            }
+            
+            console.log('🔄 Iniciando login con Google...');
+            const result = await loginWithGoogle();
+            console.log('📡 Resultado login:', result);
+            
+            if (result && result.success) {
+                console.log('✅ Redirigiendo a index.html');
+                // La redirección la maneja Supabase
+            } else {
+                mostrarLoading(false);
+                mostrarToast(result?.error || 'Error al iniciar sesión', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error en login:', error);
+            mostrarLoading(false);
+            mostrarToast('Error al conectar con Google', 'error');
+        }
+    }
+    
+    // Función para iniciar registro con Google
+    async function iniciarRegistroGoogle() {
+        mostrarLoading(true);
+        
+        try {
+            if (typeof loginWithGoogle !== 'function') {
+                console.error('❌ loginWithGoogle no está definida');
+                mostrarToast('Error: Función de autenticación no disponible', 'error');
+                mostrarLoading(false);
+                return;
+            }
+            
+            console.log('🔄 Iniciando registro con Google...');
+            const result = await loginWithGoogle();
+            console.log('📡 Resultado registro:', result);
+            
+            if (result && result.success) {
+                console.log('✅ Usuario autenticado, esperando redirección...');
+            } else {
+                mostrarLoading(false);
+                mostrarToast(result?.error || 'Error al registrarse', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error en registro:', error);
+            mostrarLoading(false);
+            mostrarToast('Error al conectar con Google', 'error');
+        }
+    }
+    
+    // Función para registrar usuario después del login
+    async function registrarUsuarioDatos(e) {
+        e.preventDefault();
+        
+        const nombreCompleto = document.getElementById('reg-nombre').value.trim();
+        const provincia = document.getElementById('reg-provincia').value;
+        const ciudad = document.getElementById('reg-ciudad').value;
+        const direccion = document.getElementById('reg-direccion').value.trim();
+        let telefono = document.getElementById('reg-telefono').value.trim();
+        
+        if (!nombreCompleto || !provincia || !ciudad || !direccion || !telefono) {
+            mostrarToast('Completá todos los campos', 'error');
+            return;
+        }
+        
+        telefono = telefono.replace(/\D/g, '');
+        if (!telefono.match(/^\d{10,15}$/)) {
+            mostrarToast('Ingresá un teléfono válido (10-15 dígitos)', 'error');
+            return;
+        }
+        
+        const nombreParts = nombreCompleto.split(' ');
+        const nombre = nombreParts[0];
+        const apellido = nombreParts.slice(1).join(' ');
+        
+        if (!apellido) {
+            mostrarToast('Ingresá nombre y apellido completo (ej: Juan Pérez)', 'error');
+            return;
+        }
+        
+        mostrarLoading(true);
+        
+        try {
+            if (typeof crearOActualizarUsuario === 'function' && usuarioAuthTemp) {
+                const result = await crearOActualizarUsuario({
+                    auth_id: usuarioAuthTemp.id,
+                    email: usuarioAuthTemp.email,
+                    nombre: nombre,
+                    apellido: apellido,
+                    provincia: provincia,
+                    ciudad: ciudad,
+                    direccion: direccion,
+                    telefono: telefono,
+                    foto_perfil: usuarioAuthTemp.user_metadata?.avatar_url || null
+                });
+                
+                if (result && result.success) {
+                    localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                        id: result.usuario.id,
+                        email: result.usuario.email,
+                        nombre: result.usuario.nombre
+                    }));
+                    
+                    mostrarToast('¡Registro completado!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    mostrarToast(result?.error || 'Error al guardar datos', 'error');
+                    mostrarLoading(false);
+                }
+            } else {
+                mostrarToast('Error: No hay sesión activa', 'error');
+                mostrarLoading(false);
+            }
+        } catch (error) {
+            console.error('Error al registrar:', error);
+            mostrarToast('Error al guardar datos', 'error');
+            mostrarLoading(false);
+        }
+    }
+    
+    // Escuchar evento de autenticación
+    if (typeof onAuthStateChange === 'function') {
+        onAuthStateChange((event, session) => {
+            console.log('📢 Auth state change:', event, session?.user?.email);
+            
+            if (event === 'SIGNED_IN' && session?.user) {
+                console.log('✅ Usuario autenticado:', session.user.email);
+                usuarioAuthTemp = session.user;
+                
+                // Verificar si el usuario ya existe en la base de datos
+                (async () => {
+                    mostrarLoading(true);
+                    
+                    try {
+                        if (typeof obtenerUsuarioPorAuthId === 'function') {
+                            const result = await obtenerUsuarioPorAuthId(session.user.id);
+                            
+                            if (result && result.success && result.usuario) {
+                                // Usuario ya existe, redirigir a index
+                                localStorage.setItem('want_usuario_sesion', JSON.stringify({
+                                    id: result.usuario.id,
+                                    email: result.usuario.email,
+                                    nombre: result.usuario.nombre
+                                }));
+                                mostrarToast(`Bienvenido ${result.usuario.nombre}`, 'success');
+                                setTimeout(() => {
+                                    window.location.href = 'index.html';
+                                }, 1000);
+                            } else if (result && result.notFound) {
+                                // Usuario nuevo, mostrar formulario de registro
+                                console.log('📝 Usuario nuevo, mostrando formulario');
+                                document.getElementById('login-screen').style.display = 'none';
+                                document.getElementById('registro-screen').style.display = 'flex';
+                                mostrarLoading(false);
+                            } else {
+                                mostrarLoading(false);
+                                mostrarToast('Error al verificar usuario', 'error');
+                            }
+                        } else {
+                            mostrarLoading(false);
+                        }
+                    } catch (error) {
+                        console.error('Error verificando usuario:', error);
+                        mostrarLoading(false);
+                    }
+                })();
+            }
+        });
+    }
+    
+    // Inicializar eventos cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('📄 Login DOM cargado');
+        
+        const loginBtn = document.getElementById('login-google-btn');
+        const registerBtn = document.getElementById('register-google-btn');
+        const registroForm = document.getElementById('registro-form');
+        
+        if (loginBtn) {
+            loginBtn.addEventListener('click', iniciarLoginGoogle);
+            console.log('✅ Botón login configurado');
+        }
+        
+        if (registerBtn) {
+            registerBtn.addEventListener('click', iniciarRegistroGoogle);
+            console.log('✅ Botón registro configurado');
+        }
+        
+        if (registroForm) {
+            registroForm.addEventListener('submit', registrarUsuarioDatos);
+            console.log('✅ Formulario registro configurado');
+        }
+    });
+    
+    // Inicializar Session Manager
+    (async function() {
+        if (typeof initWantSession === 'function') {
+            const result = await initWantSession();
+            console.log('📊 Login - Resultado:', result);
+            
+            // Si ya hay sesión, redirigir a index
+            if (result && result.success) {
+                window.location.href = 'index.html';
+            }
         }
     })();
 </script>
