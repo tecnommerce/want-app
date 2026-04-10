@@ -148,8 +148,8 @@ function renderizarNegocios(vendedores) {
         const rubros = v.rubros || [];
         const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        // Mostrar más rubros en desktop (4), en móvil (2)
-        const maxRubros = isMobile ? 2 : 4;
+        // Mostrar más rubros en desktop (4), en móvil (3)
+        const maxRubros = isMobile ? 3 : 4;
         const rubrosMostrar = rubros.slice(0, maxRubros);
         const resto = rubros.length - maxRubros;
         
@@ -170,9 +170,14 @@ function renderizarNegocios(vendedores) {
                 </div>
                 <div class="negocio-info">
                     <h3 class="negocio-nombre">${nombreResaltado}</h3>
-                    <div class="negocio-estado">${getEstadoTexto(estadoAbierto)}</div>
-                    ${rubrosHTML ? `<div class="rubros-container">${rubrosHTML}</div>` : ''}
-                    ${!isMobile ? `<p class="negocio-horario"><i class="fas fa-clock"></i> ${escapeHTML(v.horario || 'Horario no especificado')}</p>` : ''}
+                    <div class="negocio-estado-rubros">
+                        <span class="${estadoAbierto ? 'estado-abierto' : 'estado-cerrado'}">
+                            <i class="fas ${estadoAbierto ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${estadoAbierto ? 'Atendiendo' : 'Cerrado'}
+                        </span>
+                        ${rubrosHTML ? `<div class="rubros-container">${rubrosHTML}</div>` : ''}
+                    </div>
+                    ${v.horario ? `<p class="negocio-horario"><i class="fas fa-clock"></i> ${escapeHTML(v.horario)}</p>` : ''}
                 </div>
             </a>
         `;
