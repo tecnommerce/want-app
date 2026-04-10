@@ -148,13 +148,20 @@ function renderizarNegocios(vendedores) {
         const rubros = v.rubros || [];
         const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        // Formatear rubros (todos, no solo 2)
-        const rubrosHTML = formatearRubros(rubros, isMobile);
+        // Mostrar más rubros en desktop
+        const maxRubros = isMobile ? 2 : 4;
+        const rubrosMostrar = rubros.slice(0, maxRubros);
+        const resto = rubros.length - maxRubros;
+        
+        let rubrosHTML = rubrosMostrar.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+        if (resto > 0) {
+            rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
+        }
         
         const nombreResaltado = resaltarCoincidencia(v.nombre || 'Sin nombre', terminoBusquedaActual);
         
         return `
-            <a href="tienda.html?vendedor=${v.id}" class="negocio-card" data-nombre="${escapeHTML(v.nombre || '').toLowerCase()}" data-direccion="${escapeHTML(v.direccion || '').toLowerCase()}">
+            <a href="tienda.html?vendedor=${v.id}" class="negocio-card">
                 <div class="negocio-logo">
                     ${v.logo_url ? 
                         `<img src="${v.logo_url}" alt="${escapeHTML(v.nombre || 'Negocio')}" loading="lazy">` : 
@@ -164,14 +171,13 @@ function renderizarNegocios(vendedores) {
                 <div class="negocio-info">
                     <h3 class="negocio-nombre">${nombreResaltado}</h3>
                     <div class="negocio-estado">${getEstadoTexto(estadoAbierto)}</div>
-                    ${rubrosHTML}
+                    ${rubrosHTML ? `<div class="rubros-container">${rubrosHTML}</div>` : ''}
                     ${!isMobile ? `<p class="negocio-horario"><i class="fas fa-clock"></i> ${escapeHTML(v.horario || 'Horario no especificado')}</p>` : ''}
                 </div>
             </a>
         `;
     }).join('');
     
-    // Event listener para redimensionar
     if (!window.resizedListener) {
         window.addEventListener('resize', () => {
             if (todosLosNegocios.length > 0) {
