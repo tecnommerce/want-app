@@ -16,7 +16,7 @@
     
     <style>
         /* ===================================================
-           ESTILOS DE NOTIFICACIONES (sin afectar diseño existente)
+           ESTILOS DE NOTIFICACIONES
            =================================================== */
         .notificaciones-container {
             position: relative;
@@ -58,12 +58,13 @@
             justify-content: center;
         }
         
+        /* PANEL NOTIFICACIONES ESCRITORIO */
         .notificaciones-panel {
             position: absolute;
             top: 100%;
             right: 0;
             margin-top: 10px;
-            width: 350px;
+            width: 380px;
             max-width: calc(100vw - 40px);
             background: white;
             border-radius: 20px;
@@ -79,13 +80,49 @@
         }
         
         @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* PANEL NOTIFICACIONES MÓVIL */
+        @media (max-width: 768px) {
+            .notificaciones-panel {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 20px 20px 0 0;
+                margin-top: 0;
+                max-height: 80vh;
+                animation: slideUp 0.3s ease;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            
+            @keyframes slideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+            
+            .notificaciones-header {
+                position: sticky;
+                top: 0;
+                background: #FF5A00;
+                z-index: 10;
+            }
+            
+            .btn-cerrar-notif-mobile {
+                display: inline-flex !important;
+                align-items: center;
+                gap: 5px;
+                background: rgba(255,255,255,0.2);
+                border: none;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 30px;
+                font-size: 0.7rem;
+                cursor: pointer;
             }
         }
         
@@ -97,6 +134,10 @@
             background: #FF5A00;
             color: white;
             font-weight: 600;
+        }
+        
+        .btn-cerrar-notif-mobile {
+            display: none;
         }
         
         .btn-limpiar-notif {
@@ -112,6 +153,12 @@
         .notificaciones-lista {
             max-height: 400px;
             overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .notificaciones-lista {
+                max-height: 60vh;
+            }
         }
         
         .notificacion-item {
@@ -214,44 +261,7 @@
         .notificacion-toast.error { background: #ef4444; }
         .notificacion-toast.info { background: #FF5A00; }
         
-        @media (max-width: 768px) {
-            .notificaciones-panel {
-                position: fixed;
-                top: auto;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                max-width: 100%;
-                border-radius: 20px 20px 0 0;
-                margin-top: 0;
-                max-height: 80vh;
-                animation: slideUp 0.3s ease;
-            }
-            
-            @keyframes slideUp {
-                from { transform: translateY(100%); }
-                to { transform: translateY(0); }
-            }
-            
-            .notificaciones-lista {
-                max-height: 60vh;
-            }
-            
-            .btn-notificaciones {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-            }
-            
-            .notificacion-toast {
-                bottom: 80px;
-                font-size: 0.75rem;
-                padding: 10px 16px;
-            }
-        }
-        
-        /* Header actions - mantener orden */
+        /* HEADER ACTIONS */
         .header-actions {
             display: flex;
             align-items: center;
@@ -274,12 +284,74 @@
             cursor: pointer;
         }
         
+        /* HEADER CONTENT - NUEVO ORDEN */
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            order: 1;
+        }
+        
+        .header-actions {
+            order: 2;
+        }
+        
+        .search-container {
+            order: 3;
+            width: 100%;
+            margin-top: 12px;
+            margin-bottom: 0;
+        }
+        
+        /* En escritorio, el buscador vuelve a su posición original */
+        @media (min-width: 769px) {
+            .header-content {
+                flex-wrap: nowrap;
+            }
+            
+            .search-container {
+                order: 2;
+                width: auto;
+                margin-top: 0;
+                flex: 1;
+                margin: 0 20px;
+            }
+            
+            .header-actions {
+                order: 3;
+            }
+        }
+        
         @media (max-width: 768px) {
             .user-avatar-desktop {
                 display: none !important;
             }
             .user-avatar-mobile {
                 display: flex !important;
+            }
+            
+            .btn-notificaciones {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            
+            .notificacion-toast {
+                bottom: 80px;
+                font-size: 0.75rem;
+                padding: 10px 16px;
+            }
+            
+            .search-container {
+                position: sticky;
+                top: 60px;
+                background: white;
+                z-index: 999;
+                padding: 8px 0;
             }
         }
     </style>
@@ -316,9 +388,14 @@
                         <div class="notificaciones-panel" id="notificaciones-panel">
                             <div class="notificaciones-header">
                                 <span>Notificaciones</span>
-                                <button class="btn-limpiar-notif" id="btn-limpiar-notif">
-                                    <i class="fas fa-trash-alt"></i> Limpiar
-                                </button>
+                                <div>
+                                    <button class="btn-cerrar-notif-mobile" id="btn-cerrar-notif-mobile">
+                                        <i class="fas fa-arrow-down"></i> Cerrar
+                                    </button>
+                                    <button class="btn-limpiar-notif" id="btn-limpiar-notif">
+                                        <i class="fas fa-trash-alt"></i> Limpiar
+                                    </button>
+                                </div>
                             </div>
                             <div class="notificaciones-lista" id="notificaciones-lista">
                                 <div class="notificaciones-vacio">
@@ -594,7 +671,35 @@
     window.cerrarModalDetallePedido = function() {
         document.getElementById('modal-detalle-pedido').classList.remove('active');
     };
+    
+    // Función para cerrar panel de notificaciones
+    function cerrarPanelNotificaciones() {
+        const panel = document.getElementById('notificaciones-panel');
+        if (panel) {
+            panel.classList.remove('active');
+            window.notificacionesAbiertas = false;
+        }
+    }
+    
+    // Botón cerrar notificaciones móvil
+    const btnCerrarNotif = document.getElementById('btn-cerrar-notif-mobile');
+    if (btnCerrarNotif) {
+        btnCerrarNotif.addEventListener('click', cerrarPanelNotificaciones);
+    }
+    
+    // Cerrar panel al hacer clic fuera (solo escritorio)
+    document.addEventListener('click', function(e) {
+        const panel = document.getElementById('notificaciones-panel');
+        const btn = document.getElementById('notificaciones-btn');
+        const isMobile = window.innerWidth <= 768;
+        
+        if (panel && panel.classList.contains('active') && !isMobile) {
+            if (!btn?.contains(e.target) && !panel.contains(e.target)) {
+                panel.classList.remove('active');
+                window.notificacionesAbiertas = false;
+            }
+        }
+    });
 </script>
-
 </body>
 </html>
