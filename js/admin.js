@@ -1466,3 +1466,123 @@ window.cerrarModalSeleccionarProducto = cerrarModalSeleccionarProducto;
 window.confirmarAgregarProducto = confirmarAgregarProducto;
 window.cerrarModal = cerrarModal;
 window.cerrarTodosModales = cerrarTodosModales;
+// ===================================================
+// FUNCIONES PARA CERRAR MODALES (TODAS)
+// ===================================================
+
+function cerrarModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function cerrarModalRubros() {
+    const modal = document.getElementById('modal-rubros');
+    if (modal) modal.classList.remove('active');
+    rubrosCallback = null;
+    if (window.modalPerfilAbierto) {
+        const modalPerfil = document.getElementById('modal-perfil');
+        if (modalPerfil) modalPerfil.classList.add('active');
+        window.modalPerfilAbierto = false;
+    }
+}
+
+function cerrarModalPerfil() {
+    const modal = document.getElementById('modal-perfil');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function cerrarModalProducto() {
+    const modal = document.getElementById('modal-producto');
+    if (modal) modal.classList.remove('active');
+    document.getElementById('producto-form').reset();
+    document.getElementById('producto-id').value = '';
+    document.getElementById('producto-imagen-preview').innerHTML = '';
+}
+
+function cerrarModalDelivery() {
+    const modal = document.getElementById('modal-delivery');
+    if (modal) modal.classList.remove('active');
+    document.getElementById('delivery-form').reset();
+    document.getElementById('delivery-id').value = '';
+}
+
+function cerrarModalEditarPedido() {
+    const modal = document.getElementById('modal-editar-pedido');
+    if (modal) modal.classList.remove('active');
+    productosTempEdit = [];
+}
+
+function cerrarModalNuevoPedido() {
+    const modal = document.getElementById('modal-nuevo-pedido');
+    if (modal) modal.classList.remove('active');
+    productosTempNuevo = [];
+}
+
+function cerrarModalSeleccionarProducto() {
+    const modal = document.getElementById('modal-seleccionar-producto');
+    if (modal) modal.classList.remove('active');
+    currentCallback = null;
+}
+
+function cerrarModalTiempo() {
+    const modal = document.getElementById('modal-tiempo-entrega');
+    if (modal) modal.classList.remove('active');
+    pedidoPendienteConfirmar = null;
+    botonPendienteConfirmar = null;
+}
+
+function cerrarModalAsignarDelivery() {
+    const modal = document.getElementById('modal-asignar-delivery');
+    if (modal) modal.classList.remove('active');
+    pedidoParaAsignar = null;
+}
+
+function cerrarModalPedidoCompleto() {
+    const modal = document.getElementById('modal-pedido-completo');
+    if (modal) modal.remove();
+}
+
+function cerrarModalPedidoCompletoMovil() {
+    const modal = document.getElementById('modal-pedido-completo-movil');
+    if (modal) modal.remove();
+}
+
+// ===================================================
+// FUNCIONES PARA GUARDAR/CANCELAR (REEMPLAZAR LAS EXISTENTES)
+// ===================================================
+
+function cancelarEditarPedido() {
+    cerrarModalEditarPedido();
+}
+
+function cancelarNuevoPedido() {
+    cerrarModalNuevoPedido();
+}
+
+function cancelarSeleccionarProducto() {
+    cerrarModalSeleccionarProducto();
+}
+
+// ===================================================
+// EXPONER FUNCIONES GLOBALMENTE
+// ===================================================
+
+window.cerrarModal = cerrarModal;
+window.cerrarModalRubros = cerrarModalRubros;
+window.cerrarModalPerfil = cerrarModalPerfil;
+window.cerrarModalProducto = cerrarModalProducto;
+window.cerrarModalDelivery = cerrarModalDelivery;
+window.cerrarModalEditarPedido = cerrarModalEditarPedido;
+window.cerrarModalNuevoPedido = cerrarModalNuevoPedido;
+window.cerrarModalSeleccionarProducto = cerrarModalSeleccionarProducto;
+window.cerrarModalTiempo = cerrarModalTiempo;
+window.cerrarModalAsignarDelivery = cerrarModalAsignarDelivery;
+window.cerrarModalPedidoCompleto = cerrarModalPedidoCompleto;
+window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
+window.cancelarEditarPedido = cancelarEditarPedido;
+window.cancelarNuevoPedido = cancelarNuevoPedido;
+window.cancelarSeleccionarProducto = cancelarSeleccionarProducto;
