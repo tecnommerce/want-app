@@ -1646,6 +1646,7 @@ async function iniciarPanel(vendedor) {
     inicializarFiltros();
     inicializarMenuAdmin();
     inicializarBuscador();
+    inicializarMenuHamburguesa();
 }
 
 function inicializarTabs() {
@@ -2162,3 +2163,91 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('✅ admin.js cargado completamente');
+
+// ===================================================
+// FUNCIÓN ESPECÍFICA PARA EL MENÚ HAMBURGUESA (MÓVIL)
+// ===================================================
+
+function inicializarMenuHamburguesa() {
+    const toggleBtn = document.getElementById('menu-toggle-admin');
+    const mobileMenu = document.getElementById('mobile-menu-admin');
+    const overlay = document.getElementById('menu-overlay-admin');
+    const closeBtn = document.getElementById('menu-close-admin');
+    
+    // Función para abrir el menú
+    function abrirMenu() {
+        if (mobileMenu) {
+            mobileMenu.style.display = 'flex';
+            mobileMenu.classList.add('active');
+        }
+        if (overlay) {
+            overlay.style.display = 'block';
+            overlay.classList.add('active');
+        }
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Función para cerrar el menú
+    function cerrarMenu() {
+        if (mobileMenu) {
+            mobileMenu.style.display = 'none';
+            mobileMenu.classList.remove('active');
+        }
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
+        document.body.style.overflow = '';
+    }
+    
+    // Evento para el botón hamburguesa
+    if (toggleBtn) {
+        // Remover event listeners anteriores para evitar duplicados
+        const newToggleBtn = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+        
+        newToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🍔 Botón hamburguesa clickeado');
+            abrirMenu();
+        });
+    }
+    
+    // Evento para el botón cerrar
+    if (closeBtn) {
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        
+        newCloseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            cerrarMenu();
+        });
+    }
+    
+    // Evento para el overlay (fondo oscuro)
+    if (overlay) {
+        const newOverlay = overlay.cloneNode(true);
+        overlay.parentNode.replaceChild(newOverlay, overlay);
+        
+        newOverlay.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            cerrarMenu();
+        });
+    }
+    
+    // Cerrar menú con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarMenu();
+        }
+    });
+    
+    console.log('✅ Menú hamburguesa inicializado correctamente');
+}
+
+// Llamar a esta función cuando se inicia el panel
+// Agregar esta línea dentro de la función iniciarPanel(vendedor) al final:
+// inicializarMenuHamburguesa();
