@@ -148,7 +148,7 @@ function renderizarNegocios(vendedores) {
         const rubros = v.rubros || [];
         const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        // Mostrar más rubros en desktop
+        // Mostrar más rubros en desktop (4), en móvil (2)
         const maxRubros = isMobile ? 2 : 4;
         const rubrosMostrar = rubros.slice(0, maxRubros);
         const resto = rubros.length - maxRubros;

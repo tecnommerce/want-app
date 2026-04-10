@@ -124,6 +124,7 @@ body {
     color: #666;
     font-size: 1.1rem;
     transition: color 0.3s;
+    text-decoration: none;
 }
 
 .social-icon:hover {
@@ -216,6 +217,7 @@ body {
     color: #333;
 }
 
+/* MENÚ MÓVIL */
 .mobile-menu {
     position: fixed;
     top: 0;
@@ -327,51 +329,80 @@ body {
     display: block;
 }
 
-.contacto-modal .modal-content {
-    max-width: 450px;
-}
-
-.contacto-info-modal {
-    text-align: center;
-}
-
-.contacto-info-modal p {
-    margin: 15px 0;
-    font-size: 1rem;
-}
-
-.contacto-info-modal i {
-    color: #FF5A00;
-    width: 30px;
-    font-size: 1.2rem;
-}
-
-.contacto-social-modal {
-    display: flex;
+/* MODALES */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 3000;
     justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
+    align-items: center;
 }
 
-.contacto-social-modal .social-icon {
-    width: 45px;
-    height: 45px;
-    background: #f5f5f5;
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
-    color: #666;
-    transition: all 0.3s;
-    text-decoration: none;
+    transition: all 0.2s;
 }
 
-.contacto-social-modal .social-icon:hover {
-    background: #FF5A00;
-    color: white;
+.modal-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
 }
 
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* HERO */
 .hero {
     text-align: center;
     padding: 50px 0 40px;
@@ -391,37 +422,39 @@ body {
     margin: 0 auto;
 }
 
+/* NEGOCIOS SECTION */
 .negocios-section {
     padding: 40px 0 80px;
 }
 
 .negocios-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 .negocio-card {
+    display: flex;
     background: white;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
-    display: block;
+    height: 100%;
 }
 
 .negocio-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
 .negocio-logo {
-    width: 100%;
-    height: 160px;
-    background: #f8f8f8;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -431,16 +464,14 @@ body {
 .negocio-logo img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    background: #f8f8f8;
-    padding: 10px;
+    object-fit: cover;
 }
 
 .negocio-logo .placeholder-logo {
-    font-size: 3rem;
-    font-weight: bold;
+    font-size: 2.5rem;
+    font-weight: 700;
     color: #FF5A00;
-    background: #f8f8f8;
+    background: linear-gradient(135deg, #FFF5EB 0%, #FFE4D6 100%);
     width: 100%;
     height: 100%;
     display: flex;
@@ -449,265 +480,59 @@ body {
 }
 
 .negocio-info {
-    padding: 20px;
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .negocio-nombre {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #1a1a1a;
-}
-
-.negocio-direccion {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.negocio-horario {
-    font-size: 0.8rem;
-    color: #888;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.productos-section {
-    padding: 40px 0 80px;
-}
-
-.productos-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.productos-header h2 {
-    font-size: 1.5rem;
-    color: #333;
-}
-
-.cart-icon {
-    position: relative;
-    background: #f5f5f5;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FF5A00;
-    font-size: 1.2rem;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.cart-icon:hover {
-    background: #FF5A00;
-    color: white;
-}
-
-.cart-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #FF5A00;
-    color: white;
-    font-size: 0.65rem;
-    font-weight: bold;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.productos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 25px;
-    align-items: stretch;
-}
-
-.producto-card {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid #eee;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 380px;
-}
-
-.producto-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.producto-imagen {
-    width: 100%;
-    height: 160px;
-    background: #f8f8f8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.producto-imagen img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #f8f8f8;
-    padding: 15px;
-}
-
-.producto-imagen .placeholder-img {
-    font-size: 2.5rem;
-    color: #ccc;
-    background: #f8f8f8;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.producto-info {
-    padding: 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.producto-nombre {
     font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #1a1a1a;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 40px;
-}
-
-.producto-descripcion {
-    font-size: 0.75rem;
-    color: #888;
-    margin-bottom: 10px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 32px;
-}
-
-.producto-precio {
-    font-size: 1.1rem;
     font-weight: 700;
-    color: #FF5A00;
-    margin-bottom: 12px;
-    margin-top: auto;
+    color: #1a1a1a;
+    margin: 0;
+    line-height: 1.3;
 }
 
-.btn-agregar {
-    width: 100%;
-    background: #f5f5f5;
-    color: #333;
-    border: none;
-    padding: 10px;
+.negocio-estado {
+    margin: 0;
+}
+
+.estado-abierto, .estado-cerrado {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    padding: 3px 10px;
     border-radius: 30px;
     font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 8px;
-}
-
-.btn-agregar:hover {
-    background: #FF5A00;
-    color: white;
 }
 
 .estado-abierto {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
-    transition: all 0.3s ease;
-}
-
-.estado-abierto i {
-    font-size: 0.65rem;
-}
-
-.estado-abierto:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
 .estado-cerrado {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
-    transition: all 0.3s ease;
-}
-
-.estado-cerrado i {
-    font-size: 0.65rem;
-}
-
-.estado-cerrado:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
 
 .rubros-container {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin: 8px 0;
+    margin: 0;
 }
 
 .rubro-tag {
     background: #FFF5EB;
     color: #FF5A00;
-    font-size: 0.65rem;
-    font-weight: 600;
-    padding: 4px 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 3px 10px;
     border-radius: 20px;
-    display: inline-block;
 }
 
 .rubro-tag.rubro-mas {
@@ -715,6 +540,16 @@ body {
     color: #666;
 }
 
+.negocio-horario {
+    font-size: 0.7rem;
+    color: #888;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* BANNERS CARRUSEL */
 .banners-section {
     margin: 20px 0 30px;
     width: 100%;
@@ -827,78 +662,7 @@ body {
     border-radius: 10px;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 3000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 24px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #999;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.modal-close:hover {
-    background: #fee2e2;
-    color: #ef4444;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 15px 20px;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
+/* FORMULARIOS */
 .form-group {
     margin-bottom: 16px;
 }
@@ -973,6 +737,7 @@ body {
     width: 100%;
 }
 
+/* LOADING */
 .loading {
     text-align: center;
     padding: 50px;
@@ -993,6 +758,7 @@ body {
     to { transform: rotate(360deg); }
 }
 
+/* FOOTER */
 .footer {
     background: white;
     border-top: 1px solid #eee;
@@ -1002,1100 +768,7 @@ body {
     font-size: 0.8rem;
 }
 
-.login-screen, .registro-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #FF5A00 0%, #FF7A00 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.login-container, .registro-container {
-    width: 100%;
-    max-width: 450px;
-    padding: 20px;
-}
-
-.login-card, .registro-card {
-    background: white;
-    border-radius: 32px;
-    padding: 40px 30px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.login-header h1 {
-    font-size: 2.5rem;
-    color: #FF5A00;
-    margin-bottom: 10px;
-}
-
-.login-header p {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.login-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.btn-google {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    padding: 14px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 50px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-google:hover {
-    background: #f5f5f5;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.google-icon {
-    width: 20px;
-    height: 20px;
-}
-
-.btn-register {
-    background: #FF5A00;
-    color: white;
-    border: none;
-}
-
-.btn-register:hover {
-    background: #e04e00;
-}
-
-.login-divider {
-    text-align: center;
-    margin: 20px 0;
-    position: relative;
-}
-
-.login-divider::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: #eee;
-}
-
-.login-divider span {
-    background: white;
-    padding: 0 15px;
-    position: relative;
-    color: #999;
-    font-size: 0.8rem;
-}
-
-.login-footer {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 0.7rem;
-    color: #888;
-}
-
-.login-footer a {
-    color: #FF5A00;
-    text-decoration: none;
-}
-
-.info-box {
-    background: #FFF5EB;
-    border-radius: 12px;
-    padding: 12px 15px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.8rem;
-    color: #FF5A00;
-}
-
-.pedidos-screen, .cuenta-screen {
-    padding: 80px 0 40px;
-    min-height: 100vh;
-    background: #f8f9fa;
-}
-
-.pedidos-header, .cuenta-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.btn-back {
-    background: white;
-    border: 1px solid #ddd;
-    padding: 10px 20px;
-    border-radius: 40px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-}
-
-.btn-back:hover {
-    background: #FF5A00;
-    color: white;
-    border-color: #FF5A00;
-}
-
-.total-gastado {
-    background: linear-gradient(135deg, #FF5A00, #FF7A00);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 40px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.total-gastado span {
-    font-size: 0.8rem;
-    opacity: 0.9;
-}
-
-.total-gastado strong {
-    font-size: 1.2rem;
-}
-
-.pedidos-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 10px;
-}
-
-.pedidos-tab {
-    background: none;
-    border: none;
-    padding: 10px 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    color: #64748b;
-    border-radius: 30px;
-    transition: all 0.2s;
-}
-
-.pedidos-tab:hover {
-    color: #FF5A00;
-}
-
-.pedidos-tab.active {
-    background: #FF5A00;
-    color: white;
-}
-
-.pedidos-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.pedido-card {
-    background: white;
-    border-radius: 20px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.pedido-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-
-.pedido-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.pedido-numero {
-    font-weight: 700;
-    color: #FF5A00;
-    font-size: 0.9rem;
-}
-
-.pedido-estado {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-}
-
-.pedido-card-body {
-    margin-bottom: 12px;
-}
-
-.pedido-fecha, .pedido-negocio, .pedido-productos {
-    font-size: 0.8rem;
-    color: #64748b;
-    margin-bottom: 6px;
-}
-
-.pedido-total {
-    font-weight: 700;
-    color: #FF5A00;
-    font-size: 0.9rem;
-    margin-top: 8px;
-}
-
-.pedido-card-footer {
-    text-align: right;
-}
-
-.btn-ver-detalle {
-    background: none;
-    border: none;
-    color: #FF5A00;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: gap 0.2s;
-}
-
-.btn-ver-detalle:hover {
-    gap: 10px;
-}
-
-.cuenta-card {
-    background: white;
-    border-radius: 24px;
-    padding: 30px;
-    max-width: 700px;
-    margin: 0 auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.cuenta-avatar {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.cuenta-avatar img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #FF5A00;
-}
-
-.btn-usar-datos {
-    background: #f0f0f0;
-    border: none;
-    padding: 12px;
-    border-radius: 40px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-    width: 100%;
-    margin-bottom: 16px;
-}
-
-.btn-usar-datos:hover {
-    background: #FF5A00;
-    color: white;
-}
-
-/* ===================================================
-   ESCRITORIO (estándar)
-   =================================================== */
-@media (min-width: 769px) {
-    .negocios-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
-    
-    .productos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    }
-    
-    .mobile-menu,
-    .menu-overlay,
-    .user-avatar-mobile {
-        display: none !important;
-    }
-    
-    .menu-toggle {
-        display: none !important;
-    }
-}
-
-/* ===================================================
-   MÓVIL (vista lista y ajustes específicos)
-   =================================================== */
-@media (max-width: 768px) {
-    .container {
-        padding: 0 16px;
-    }
-    
-    .user-avatar-desktop {
-        display: none !important;
-    }
-    
-    .user-avatar-mobile {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .nav-desktop {
-        display: none !important;
-    }
-    
-    .logo {
-        font-size: 1.4rem;
-    }
-    
-    .search-container {
-        margin: 0 8px;
-    }
-    
-    .search-box {
-        padding: 6px 10px;
-    }
-    
-    .search-box input {
-        font-size: 0.8rem;
-        padding: 6px 8px;
-    }
-    
-    .hero {
-        padding: 35px 0 30px;
-    }
-    
-    .hero h2 {
-        font-size: 1.5rem;
-    }
-    
-    .hero p {
-        font-size: 0.9rem;
-    }
-    
-    .negocios-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .negocio-card {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-    }
-    
-    .negocio-logo {
-        width: 70px;
-        height: 70px;
-        flex-shrink: 0;
-        border-radius: 12px;
-    }
-    
-    .negocio-logo img {
-        padding: 0;
-    }
-    
-    .negocio-info {
-        flex: 1;
-        padding: 0;
-    }
-    
-    .negocio-nombre {
-        font-size: 1rem;
-        margin-bottom: 4px;
-    }
-    
-    .negocio-direccion {
-        font-size: 0.7rem;
-    }
-    
-    .negocio-horario {
-        display: none;
-    }
-    
-    .productos-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .producto-card {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        min-height: auto;
-    }
-    
-    .producto-imagen {
-        width: 70px;
-        height: 70px;
-        flex-shrink: 0;
-        border-radius: 12px;
-    }
-    
-    .producto-imagen img {
-        padding: 0;
-        border-radius: 12px;
-    }
-    
-    .producto-info {
-        flex: 1;
-        padding: 0;
-    }
-    
-    .producto-nombre {
-        font-size: 0.85rem;
-        margin-bottom: 4px;
-        min-height: auto;
-    }
-    
-    .producto-descripcion {
-        font-size: 0.7rem;
-        margin-bottom: 6px;
-        min-height: auto;
-    }
-    
-    .producto-precio {
-        font-size: 0.85rem;
-        margin-bottom: 6px;
-    }
-    
-    .btn-agregar {
-        padding: 5px 12px;
-        font-size: 0.7rem;
-        width: auto;
-    }
-    
-    .banner-carousel {
-        border-radius: 12px;
-    }
-    
-    .carousel-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 0.85rem;
-    }
-    
-    .banner-titulo {
-        font-size: 0.7rem;
-        bottom: 10px;
-        left: 10px;
-        padding: 4px 10px;
-        white-space: normal;
-        max-width: 70%;
-    }
-    
-    .dot {
-        width: 8px;
-        height: 8px;
-    }
-    
-    .dot.active {
-        width: 20px;
-    }
-    
-    /* ===================================================
-       MIS PEDIDOS Y MI CUENTA - SOLO MÓVIL
-       (MEJORAS SOLICITADAS)
-    =================================================== */
-    
-    /* Mis pedidos - total gastado al lado del título */
-    .pedidos-header {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    
-    .pedidos-header h2 {
-        font-size: 1.2rem;
-        margin: 0;
-        order: 2;
-        flex: 1;
-        text-align: center;
-    }
-    
-    .pedidos-header .btn-back {
-        order: 1;
-        margin: 0;
-        padding: 6px 14px;
-        font-size: 0.75rem;
-        border: 1.5px solid #FF5A00;
-        color: #FF5A00;
-        background: white;
-        border-radius: 40px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-    }
-    
-    .pedidos-header .btn-back i {
-        font-size: 0.7rem;
-    }
-    
-    .pedidos-header .btn-back:active {
-        transform: scale(0.96);
-    }
-    
-    .pedidos-header .total-gastado {
-        order: 3;
-        padding: 5px 12px;
-        font-size: 0.7rem;
-        white-space: nowrap;
-        margin: 0;
-        border-radius: 40px;
-    }
-    
-    .pedidos-header .total-gastado span {
-        font-size: 0.65rem;
-    }
-    
-    .pedidos-header .total-gastado strong {
-        font-size: 0.85rem;
-    }
-    
-    /* Mi cuenta - botón volver alineado con la foto de perfil */
-    .cuenta-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        gap: 10px;
-    }
-    
-    .cuenta-header .btn-back {
-        order: 1;
-        margin: 0;
-        padding: 6px 14px;
-        font-size: 0.75rem;
-        border: 1.5px solid #FF5A00;
-        color: #FF5A00;
-        background: white;
-        border-radius: 40px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-        flex-shrink: 0;
-    }
-    
-    .cuenta-header .btn-back:active {
-        transform: scale(0.96);
-    }
-    
-    .cuenta-header h2 {
-        order: 2;
-        font-size: 1.2rem;
-        margin: 0;
-        text-align: center;
-        flex: 1;
-    }
-    
-    /* Avatar más compacto en móvil */
-    .cuenta-avatar {
-        margin-bottom: 20px;
-    }
-    
-    .cuenta-avatar img {
-        width: 70px;
-        height: 70px;
-    }
-    
-    /* Formularios más compactos */
-    .registro-card, .login-card {
-        padding: 25px 20px;
-    }
-    
-    .cuenta-card {
-        padding: 20px 15px;
-    }
-    
-    .form-group {
-        margin-bottom: 12px;
-    }
-    
-    .form-group label {
-        font-size: 0.75rem;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 10px 14px;
-        font-size: 0.85rem;
-    }
-    
-    .btn {
-        padding: 10px 20px;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .negocio-logo {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .producto-imagen {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .carousel-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 0.75rem;
-    }
-    
-    .pedidos-header h2 {
-        font-size: 1rem;
-    }
-    
-    .pedidos-header .total-gastado {
-        padding: 4px 10px;
-        font-size: 0.65rem;
-    }
-    
-    .pedidos-header .total-gastado strong {
-        font-size: 0.75rem;
-    }
-    
-    .cuenta-header h2 {
-        font-size: 1rem;
-    }
-    
-    .cuenta-avatar img {
-        width: 60px;
-        height: 60px;
-    }
-}
-/* Toast responsive */
-.toast-success, .toast-error, .toast-info {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
-    border-radius: 50px;
-    z-index: 9999;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-    .toast-success, .toast-error, .toast-info {
-        padding: 10px 16px;
-        font-size: 0.75rem;
-        white-space: normal;
-        text-align: center;
-        max-width: 90%;
-        width: auto;
-        line-height: 1.4;
-    }
-}
-.user-avatar-desktop {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    padding: 5px 12px;
-    background: #f5f5f5;
-    border-radius: 40px;
-    position: relative;
-}
-
-.user-avatar-mobile {
-    display: none;
-    cursor: pointer;
-}
-
-.avatar-img {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.avatar-name {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #333;
-}
-
-.avatar-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    min-width: 180px;
-    display: none;
-    z-index: 1000;
-}
-
-.avatar-dropdown.active {
-    display: block;
-}
-
-.avatar-dropdown a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 15px;
-    text-decoration: none;
-    color: #333;
-    font-size: 0.85rem;
-}
-
-.avatar-dropdown a:hover {
-    background: #FFF5EB;
-}
-
-@media (max-width: 768px) {
-    .user-avatar-desktop {
-        display: none !important;
-    }
-    .user-avatar-mobile {
-        display: flex !important;
-    }
-}
-
-/* Asegurar que los modales tengan z-index correcto */
-.modal {
-    z-index: 10000;
-}
-
-.modal.active {
-    display: flex !important;
-}
-
-/* El modal de rubros debe estar siempre visible cuando se abre */
-#modal-rubros.active {
-    z-index: 10100 !important;
-}
-
-/* Asegurar que el overlay del menú móvil no interfiera */
-.menu-overlay-admin {
-    z-index: 9999;
-}
-
-.mobile-menu-admin {
-    z-index: 10000;
-}
-/* ===================================================
-   MEJORAS PARA EL HOME - TARJETAS Y BUSCADOR
-   =================================================== */
-
-/* Efecto de gradiente en espacios vacíos de tarjetas */
-.negocio-logo {
-    position: relative;
-    overflow: hidden;
-}
-
-.negocio-logo::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255,90,0,0.05) 0%, rgba(255,122,0,0.1) 100%);
-    pointer-events: none;
-}
-
-.negocio-logo .placeholder-logo {
-    background: linear-gradient(135deg, #FFF5EB 0%, #FFE4D6 100%);
-}
-
-/* Coincidencias de búsqueda resaltadas */
-.coincidencia {
-    background-color: #FFF3CD;
-    color: #FF5A00;
-    font-weight: 600;
-    padding: 0 2px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-/* Botón de sugerencia */
-.btn-sugerencia {
-    background: #f5f5f5;
-    border: 1px solid #e0e0e0;
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-sugerencia:hover {
-    background: #FF5A00;
-    color: white;
-    border-color: #FF5A00;
-    transform: translateY(-2px);
-}
-
-.btn-sugerencia:active {
-    transform: scale(0.96);
-}
-
-/* Sin resultados */
-.sin-negocios {
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 24px;
-    border: 1px solid #eee;
-    margin: 20px 0;
-}
-
-.sin-negocios i {
-    font-size: 3rem;
-    color: #ccc;
-    margin-bottom: 15px;
-}
-
-.sin-negocios .sugerencia {
-    color: #888;
-    font-size: 0.85rem;
-    margin-top: 8px;
-}
-
-.sin-negocios .sugerencias {
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-.sin-negocios .sugerencias p {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 12px;
-}
-
-.sin-negocios .sugerencias-lista {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-/* Error message */
-.error-mensaje {
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 24px;
-    border: 1px solid #fee2e2;
-}
-
-.error-mensaje p {
-    color: #ef4444;
-    margin-bottom: 15px;
-}
-
-/* Mejoras en el buscador */
-.search-box {
-    transition: all 0.3s ease;
-}
-
-.search-box:focus-within {
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(255,90,0,0.15);
-}
-
-.search-box input::placeholder {
-    transition: opacity 0.2s;
-}
-
-.search-box input:focus::placeholder {
-    opacity: 0.5;
-}
-
-/* Efecto de presión en tarjetas móvil */
-@media (max-width: 768px) {
-    .negocio-card:active {
-        transform: scale(0.98);
-        transition: transform 0.05s ease;
-    }
-    
-    .btn-sugerencia {
-        padding: 6px 12px;
-        font-size: 0.7rem;
-    }
-}
-
-/* Animación de carga mejorada */
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
-.loading p {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-/* ===================================================
-   MEJORAS DE DISEÑO - TARJETAS, MIS PEDIDOS, MI CUENTA
-   =================================================== */
-
-/* ===================================================
-   TARJETAS DE VENDEDORES - MEJOR DISTRIBUCIÓN
-   =================================================== */
-.negocio-card {
-    display: flex;
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
-    text-decoration: none;
-    color: inherit;
-    height: 100%;
-}
-
-.negocio-logo {
-    width: 110px;
-    height: 110px;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.negocio-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.negocio-logo .placeholder-logo {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #FF5A00;
-    background: linear-gradient(135deg, #FFF5EB 0%, #FFE4D6 100%);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.negocio-info {
-    flex: 1;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.negocio-nombre {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0;
-    line-height: 1.3;
-}
-
-.negocio-estado {
-    margin: 0;
-}
-
-.estado-abierto, .estado-cerrado {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 30px;
-    font-weight: 600;
-}
-
-.rubros-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 0;
-}
-
-.rubro-tag {
-    background: #FFF5EB;
-    color: #FF5A00;
-    font-size: 0.7rem;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 20px;
-}
-
-.negocio-horario {
-    font-size: 0.7rem;
-    color: #888;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* ===================================================
-   MIS PEDIDOS - OPTIMIZADO
-   =================================================== */
+/* MIS PEDIDOS */
 .pedidos-screen {
     padding: 20px 0 40px;
     min-height: 100vh;
@@ -2221,6 +894,11 @@ body {
     color: #D97706;
 }
 
+.pedido-estado.entregado {
+    background: #D1FAE5;
+    color: #059669;
+}
+
 .pedido-card-body {
     display: flex;
     flex-direction: column;
@@ -2267,9 +945,7 @@ body {
     gap: 10px;
 }
 
-/* ===================================================
-   MI CUENTA - OPTIMIZADO
-   =================================================== */
+/* MI CUENTA */
 .cuenta-screen {
     padding: 20px 0 40px;
     min-height: 100vh;
@@ -2368,7 +1044,58 @@ body {
    RESPONSIVE - MÓVIL
    =================================================== */
 @media (max-width: 768px) {
-    /* Tarjetas de vendedores - mejor distribución */
+    .container {
+        padding: 0 16px;
+    }
+    
+    .logo {
+        font-size: 1.4rem;
+    }
+    
+    .search-container {
+        margin: 0 8px;
+    }
+    
+    .search-box {
+        padding: 6px 10px;
+    }
+    
+    .search-box input {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+    }
+    
+    .user-avatar-desktop {
+        display: none !important;
+    }
+    
+    .user-avatar-mobile {
+        display: flex !important;
+    }
+    
+    .nav-desktop {
+        display: none !important;
+    }
+    
+    .hero {
+        padding: 35px 0 30px;
+    }
+    
+    .hero h2 {
+        font-size: 1.5rem;
+    }
+    
+    .hero p {
+        font-size: 0.9rem;
+    }
+    
+    /* NEGOCIOS MÓVIL */
+    .negocios-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
     .negocio-card {
         padding: 10px;
         align-items: center;
@@ -2404,7 +1131,36 @@ body {
         display: none;
     }
     
-    /* Mis pedidos móvil */
+    /* CARRUSEL MÓVIL */
+    .banner-carousel {
+        border-radius: 12px;
+    }
+    
+    .carousel-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+    
+    .banner-titulo {
+        font-size: 0.7rem;
+        bottom: 10px;
+        left: 10px;
+        padding: 4px 10px;
+        white-space: normal;
+        max-width: 70%;
+    }
+    
+    .dot {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .dot.active {
+        width: 20px;
+    }
+    
+    /* MIS PEDIDOS MÓVIL */
     .pedidos-header {
         flex-wrap: wrap;
     }
@@ -2439,7 +1195,7 @@ body {
         font-size: 0.7rem;
     }
     
-    /* Mi cuenta móvil */
+    /* MI CUENTA MÓVIL */
     .cuenta-header h2 {
         font-size: 1.1rem;
     }
@@ -2462,6 +1218,20 @@ body {
     .cuenta-card .form-group label {
         font-size: 0.75rem;
     }
+    
+    /* MODALES MÓVIL */
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2478,8 +1248,66 @@ body {
         font-size: 0.55rem;
         padding: 2px 6px;
     }
-    
-    .pedido-card-body {
-        gap: 4px;
+}
+
+/* TOASTS */
+.toast-success, .toast-error, .toast-info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 50px;
+    z-index: 9999;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .toast-success, .toast-error, .toast-info {
+        padding: 10px 16px;
+        font-size: 0.75rem;
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+        width: auto;
+        line-height: 1.4;
+        bottom: 80px;
     }
+}
+
+/* EFECTOS ADICIONALES */
+.coincidencia {
+    background-color: #FFF3CD;
+    color: #FF5A00;
+    font-weight: 600;
+    padding: 0 2px;
+    border-radius: 4px;
+}
+
+.sin-negocios {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #eee;
+}
+
+.sin-negocios i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.error-mensaje {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #fee2e2;
+}
+
+.error-mensaje p {
+    color: #ef4444;
+    margin-bottom: 15px;
 }
