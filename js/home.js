@@ -510,30 +510,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     inicializarBuscador();
     inicializarCarruselBotones();
     inicializarNotificaciones();
-    
-    // Botón notificaciones
-    const notifBtn = document.getElementById('notificaciones-btn');
-    if (notifBtn) {
-        notifBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (typeof window.toggleNotificaciones === 'function') {
-                window.toggleNotificaciones();
-            }
-        });
-    }
-    
-    // Cerrar panel al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        const panel = document.getElementById('notificaciones-panel');
-        const btn = document.getElementById('notificaciones-btn');
-        
-        if (panel && panel.classList.contains('active')) {
-            if (!btn?.contains(e.target) && !panel.contains(e.target)) {
-                panel.classList.remove('active');
-                window.notificacionesAbiertas = false;
-            }
-        }
-    });
 });
 
 // Exponer funciones globales

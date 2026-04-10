@@ -87,10 +87,15 @@ function mostrarMisPedidos() {
     const mainContent = document.getElementById('main-content');
     const misPedidosScreen = document.getElementById('mis-pedidos-screen');
     const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
     
     if (mainContent) mainContent.style.display = 'none';
     if (misPedidosScreen) misPedidosScreen.style.display = 'block';
     if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    
+    // Ocultar buscador en Mis Pedidos
+    if (searchContainer) searchContainer.style.display = 'none';
+    
     cargarPedidosUsuario();
 }
 
@@ -98,10 +103,14 @@ function mostrarMiCuenta() {
     const mainContent = document.getElementById('main-content');
     const misPedidosScreen = document.getElementById('mis-pedidos-screen');
     const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
     
     if (mainContent) mainContent.style.display = 'none';
     if (misPedidosScreen) misPedidosScreen.style.display = 'none';
     if (miCuentaScreen) miCuentaScreen.style.display = 'block';
+    
+    // Ocultar buscador en Mi Cuenta
+    if (searchContainer) searchContainer.style.display = 'none';
     
     forzarCargaDatosUsuario().then(() => {
         cargarDatosUsuarioFormulario();
@@ -112,10 +121,15 @@ function volverAlHome() {
     const mainContent = document.getElementById('main-content');
     const misPedidosScreen = document.getElementById('mis-pedidos-screen');
     const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    const searchContainer = document.getElementById('search-container');
     
     if (mainContent) mainContent.style.display = 'block';
     if (misPedidosScreen) misPedidosScreen.style.display = 'none';
     if (miCuentaScreen) miCuentaScreen.style.display = 'none';
+    
+    // Mostrar buscador en el home
+    if (searchContainer) searchContainer.style.display = 'block';
+    
     if (typeof cargarNegocios === 'function') cargarNegocios();
     if (typeof cargarBanners === 'function') cargarBanners();
 }
@@ -566,16 +580,31 @@ function mostrarNotificacionTemporal(mensaje, tipo = 'info') {
 
 function toggleNotificaciones() {
     const panel = document.getElementById('notificaciones-panel');
+    const overlay = document.getElementById('notificaciones-overlay');
+    const isMobile = window.innerWidth <= 768;
+    
     if (!panel) return;
     
     if (notificacionesAbiertas) {
         panel.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
         notificacionesAbiertas = false;
     } else {
         cargarListaNotificaciones();
         panel.classList.add('active');
+        if (isMobile && overlay) overlay.classList.add('active');
         notificacionesAbiertas = true;
     }
+}
+
+function cerrarPanelNotificaciones() {
+    const panel = document.getElementById('notificaciones-panel');
+    const overlay = document.getElementById('notificaciones-overlay');
+    if (panel) {
+        panel.classList.remove('active');
+        notificacionesAbiertas = false;
+    }
+    if (overlay) overlay.classList.remove('active');
 }
 
 function cargarListaNotificaciones() {
@@ -618,7 +647,7 @@ function cargarListaNotificaciones() {
         }
         
         return `
-            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" data-id="${notif.id}">
+            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" data-id="${notif.id}" onclick="window.irAMisPedidosDesdeNotificacion(${notif.id})">
                 <div class="notificacion-icono" style="background: ${color}20; color: ${color};">
                     <i class="fas ${icono}"></i>
                 </div>
@@ -626,13 +655,14 @@ function cargarListaNotificaciones() {
                     <div class="notificacion-mensaje">${escapeHTML(notif.mensaje)}</div>
                     <div class="notificacion-fecha">${fechaStr}</div>
                 </div>
-                <button class="notificacion-eliminar" onclick="event.stopPropagation(); eliminarNotificacionItem(${notif.id})">
+                <button class="notificacion-eliminar" onclick="event.stopPropagation(); window.eliminarNotificacionItem(${notif.id})">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         `;
     }).join('');
     
+    // Marcar como leídas al abrir
     setTimeout(() => {
         notificacionesActuales.forEach(n => {
             if (!n.leida) {
@@ -655,6 +685,22 @@ function limpiarTodasNotificaciones() {
         cargarListaNotificaciones();
         actualizarContadorNotificaciones();
         mostrarNotificacionTemporal('Notificaciones eliminadas', 'info');
+    }
+}
+
+function irAMisPedidosDesdeNotificacion(notificacionId) {
+    // Marcar como leída
+    window.marcarNotificacionLeida(notificacionId);
+    actualizarContadorNotificaciones();
+    
+    // Cerrar panel de notificaciones
+    cerrarPanelNotificaciones();
+    
+    // Ir a Mis pedidos
+    if (typeof mostrarMisPedidos === 'function') {
+        mostrarMisPedidos();
+    } else {
+        window.location.href = 'index.html#mis-pedidos';
     }
 }
 
@@ -804,18 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (historialContainer) historialContainer.style.display = tabId === 'historial' ? 'block' : 'none';
             });
         });
-        
-        // Botón limpiar notificaciones
-        const btnLimpiar = document.getElementById('btn-limpiar-notif');
-        if (btnLimpiar) {
-            btnLimpiar.addEventListener('click', limpiarTodasNotificaciones);
-        }
-        
-        // Botón notificaciones
-        const notifBtn = document.getElementById('notificaciones-btn');
-        if (notifBtn) {
-            notifBtn.addEventListener('click', toggleNotificaciones);
-        }
     }
 });
 
@@ -834,7 +868,9 @@ window.mostrarPantallaPrincipal = mostrarPantallaPrincipal;
 window.cargarDatosUsuarioUI = cargarDatosUsuarioUI;
 window.cargarPedidosUsuario = cargarPedidosUsuario;
 window.toggleNotificaciones = toggleNotificaciones;
+window.cerrarPanelNotificaciones = cerrarPanelNotificaciones;
 window.limpiarTodasNotificaciones = limpiarTodasNotificaciones;
 window.eliminarNotificacionItem = eliminarNotificacionItem;
 window.actualizarContadorNotificaciones = actualizarContadorNotificaciones;
 window.mostrarNotificacionTemporal = mostrarNotificacionTemporal;
+window.irAMisPedidosDesdeNotificacion = irAMisPedidosDesdeNotificacion;
