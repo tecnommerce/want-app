@@ -197,7 +197,18 @@ const SessionManager = {
     
     redirigirInteligente(destino, force = false) {
         const currentPath = window.location.pathname;
-        const currentUrl = window.location.href;
+        
+        // NO redirigir si es admin.html (panel de vendedor)
+        if (currentPath.includes('admin.html')) {
+            console.log('🛠️ En admin.html, omitiendo redirección a', destino);
+            return false;
+        }
+        
+        // NO redirigir si es tienda.html
+        if (currentPath.includes('tienda.html')) {
+            console.log('🏪 En tienda.html, omitiendo redirección a', destino);
+            return false;
+        }
         
         if (currentPath.includes(destino) && !force) {
             console.log('🔄 Ya estamos en', destino, ', no redirijo');
@@ -251,6 +262,20 @@ const SessionManager = {
         
         const isLoginPage = window.location.pathname.includes('login.html');
         const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+        const isAdminPage = window.location.pathname.includes('admin.html');
+        const isTiendaPage = window.location.pathname.includes('tienda.html');
+        
+        // Si es admin.html, NO hacer ninguna redirección automática
+        if (isAdminPage) {
+            console.log('🛠️ Página de administración detectada, omitiendo redirección automática');
+            return { success: false, page: 'admin', isAdminPage: true };
+        }
+        
+        // Si es tienda.html, NO hacer ninguna redirección automática
+        if (isTiendaPage) {
+            console.log('🏪 Página de tienda detectada, omitiendo redirección automática');
+            return { success: false, page: 'tienda', isTiendaPage: true };
+        }
         
         // 1. Verificar sesión en Supabase (más confiable)
         const supabaseUser = await this.verificarSesionSupabase();
@@ -259,8 +284,6 @@ const SessionManager = {
             const usuario = await this.recuperarUsuarioDesdeSupabase(supabaseUser.id);
             if (usuario) {
                 this.guardarSesion(usuario);
-                
-                // SINCRONIZAR USUARIO CON AUTH-USUARIO.JS
                 this.sincronizarUsuario(usuario);
                 
                 if (isLoginPage) {
@@ -284,8 +307,6 @@ const SessionManager = {
             const usuario = await this.recuperarUsuarioDesdeSupabase(localSession.id);
             if (usuario) {
                 this.guardarSesion(usuario);
-                
-                // SINCRONIZAR USUARIO CON AUTH-USUARIO.JS
                 this.sincronizarUsuario(usuario);
                 
                 if (isLoginPage) {
@@ -335,7 +356,10 @@ async function initWantSession() {
     } catch (error) {
         console.error('❌ Error en inicialización:', error);
         
-        if (!window.location.pathname.includes('login.html')) {
+        // Solo redirigir si no es admin.html ni tienda.html
+        if (!window.location.pathname.includes('admin.html') && 
+            !window.location.pathname.includes('tienda.html') &&
+            !window.location.pathname.includes('login.html')) {
             window.location.href = 'login.html';
         }
         return { success: false, error: error.message };
