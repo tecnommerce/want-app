@@ -194,7 +194,8 @@ function agregarAlCarrito(productoId) {
             id: producto.id,
             nombre: producto.nombre,
             precio: parseFloat(producto.precio),
-            cantidad: 1
+            cantidad: 1,
+            imagen_url: producto.imagen_url || null
         });
     }
     
@@ -231,13 +232,11 @@ function cargarCarritoDelVendedor() {
 function actualizarContadorCarrito() {
     const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
     
-    // Contador desktop
     const cartCountElement = document.getElementById('cart-count');
     if (cartCountElement) {
         cartCountElement.textContent = totalItems;
     }
     
-    // Contador flotante móvil
     const cartCountFloating = document.getElementById('cart-count-floating');
     if (cartCountFloating) {
         cartCountFloating.textContent = totalItems;
@@ -287,8 +286,15 @@ function renderizarCarrito() {
         const subtotal = item.precio * item.cantidad;
         total += subtotal;
         
+        const imagenHtml = item.imagen_url ? 
+            `<img src="${item.imagen_url}" alt="${escapeHTML(item.nombre)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'70\' font-size=\'50\' text-anchor=\'middle\' fill=\'%23ccc\'%3E🍕%3C/text%3E%3C/svg%3E'">` :
+            `<div class="placeholder-img">🍕</div>`;
+        
         return `
             <div class="carrito-item">
+                <div class="carrito-item-imagen">
+                    ${imagenHtml}
+                </div>
                 <div class="carrito-item-info">
                     <div class="carrito-item-nombre">${escapeHTML(item.nombre)}</div>
                     <div class="carrito-item-precio">${formatearPrecio(item.precio)} c/u</div>
@@ -339,11 +345,15 @@ function mostrarFormularioCliente() {
         mostrarToast('El carrito está vacío', 'error');
         return;
     }
+    
+    // Cargar automáticamente los datos del usuario si existe
+    cargarDatosUsuarioAuto();
+    
     document.getElementById('cliente-modal').classList.add('active');
 }
 
-function cargarDatosUsuarioEnFormulario() {
-    console.log('📝 Intentando cargar datos del usuario...');
+function cargarDatosUsuarioAuto() {
+    console.log('📝 Cargando datos del usuario automáticamente...');
     
     let usuario = window.usuarioActual;
     
@@ -359,7 +369,7 @@ function cargarDatosUsuarioEnFormulario() {
     }
     
     if (!usuario) {
-        mostrarToast('No hay sesión activa. Inicia sesión para usar tus datos.', 'error');
+        console.log('⚠️ No hay sesión activa');
         return;
     }
     
@@ -367,11 +377,19 @@ function cargarDatosUsuarioEnFormulario() {
     const telefonoInput = document.getElementById('cliente-telefono');
     const direccionInput = document.getElementById('cliente-direccion');
     
-    if (nombreInput) nombreInput.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
-    if (telefonoInput) telefonoInput.value = usuario.telefono || '';
-    if (direccionInput) direccionInput.value = `${usuario.direccion || ''}, ${usuario.ciudad || ''}, ${usuario.provincia || ''}`;
-    
-    mostrarToast('Datos cargados desde tu perfil', 'success');
+    if (nombreInput && usuario.nombre) {
+        nombreInput.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
+    }
+    if (telefonoInput && usuario.telefono) {
+        telefonoInput.value = usuario.telefono;
+    }
+    if (direccionInput && usuario.direccion) {
+        direccionInput.value = `${usuario.direccion || ''}, ${usuario.ciudad || ''}, ${usuario.provincia || ''}`;
+    }
+}
+
+function cargarDatosUsuarioEnFormulario() {
+    cargarDatosUsuarioAuto();
 }
 
 async function confirmarPedido() {
@@ -420,7 +438,8 @@ async function confirmarPedido() {
             id: item.id,
             nombre: item.nombre,
             precio: item.precio,
-            cantidad: item.cantidad
+            cantidad: item.cantidad,
+            imagen_url: item.imagen_url
         })),
         total: total,
         fecha: new Date().toISOString(),
@@ -505,12 +524,23 @@ function mostrarTicketConfirmacion() {
     document.getElementById('confirm-total').textContent = formatearPrecio(total);
     
     const productosContainer = document.getElementById('confirm-productos');
-    productosContainer.innerHTML = carrito.map(item => `
-        <div class="producto-item">
-            <span>${item.cantidad}x ${escapeHTML(item.nombre)}</span>
-            <span>${formatearPrecio(item.precio * item.cantidad)}</span>
-        </div>
-    `).join('');
+    productosContainer.innerHTML = carrito.map(item => {
+        const imagenHtml = item.imagen_url ? 
+            `<img src="${item.imagen_url}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'30\' height=\'30\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'70\' font-size=\'50\' text-anchor=\'middle\' fill=\'%23ccc\'%3E🍕%3C/text%3E%3C/svg%3E'">` :
+            `<div class="placeholder-img" style="font-size: 1rem;">🍕</div>`;
+        
+        return `
+            <div class="producto-item">
+                <div class="producto-item-imagen">
+                    ${imagenHtml}
+                </div>
+                <div class="producto-item-info">
+                    <div class="producto-item-nombre">${item.cantidad}x ${escapeHTML(item.nombre)}</div>
+                </div>
+                <div class="producto-item-precio">${formatearPrecio(item.precio * item.cantidad)}</div>
+            </div>
+        `;
+    }).join('');
     
     const detallesSection = document.getElementById('confirm-detalles-section');
     const detallesSpan = document.getElementById('confirm-detalles');
@@ -557,7 +587,8 @@ async function enviarPedido() {
             id: item.id,
             nombre: item.nombre,
             precio: item.precio,
-            cantidad: item.cantidad
+            cantidad: item.cantidad,
+            imagen_url: item.imagen_url
         })),
         total: total,
         fecha: new Date().toISOString(),
@@ -624,15 +655,15 @@ function mostrarToast(mensaje, tipo = 'info') {
     const toast = document.createElement('div');
     toast.textContent = mensaje;
     toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
+    toast.style.bottom = '80px';
     toast.style.left = '50%';
     toast.style.transform = 'translateX(-50%)';
     toast.style.backgroundColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#FF5A00';
     toast.style.color = 'white';
-    toast.style.padding = '12px 24px';
+    toast.style.padding = '10px 16px';
     toast.style.borderRadius = '50px';
     toast.style.zIndex = '9999';
-    toast.style.fontSize = '0.9rem';
+    toast.style.fontSize = '0.75rem';
     toast.style.fontWeight = '500';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
@@ -642,7 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarTienda();
     cargarCarritoDelVendedor();
     
-    // Carrito desktop
     const cartIconDesktop = document.getElementById('cart-icon-desktop');
     if (cartIconDesktop) {
         cartIconDesktop.addEventListener('click', (e) => {
@@ -652,7 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Botón flotante carrito (móvil)
     const cartFloatingBtn = document.getElementById('cart-floating-btn');
     if (cartFloatingBtn) {
         cartFloatingBtn.addEventListener('click', () => {
@@ -704,11 +733,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             mostrarTicketConfirmacion();
         });
-    }
-    
-    const btnUsarMisDatos = document.getElementById('btn-usar-mis-datos');
-    if (btnUsarMisDatos) {
-        btnUsarMisDatos.addEventListener('click', cargarDatosUsuarioEnFormulario);
     }
     
     const cerrarConfirmacionModal = document.getElementById('cerrar-confirmacion-modal');

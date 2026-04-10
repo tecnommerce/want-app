@@ -552,7 +552,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         
-        /* MODAL CLIENTE - OPTIMIZADO PARA MÓVIL */
+        /* MODAL CLIENTE - OPTIMIZADO MÓVIL */
         .cliente-modal-content {
             max-width: 500px;
             width: 90%;
@@ -639,10 +639,6 @@
             box-shadow: 0 0 0 3px rgba(255,90,0,0.1);
         }
         
-        .input-help {
-            display: none;
-        }
-        
         .required {
             color: #ef4444;
         }
@@ -685,34 +681,7 @@
             width: 100%;
         }
         
-        /* Botón "Usar mis datos" estilo chip */
-        .btn-usar-mis-datos-chip {
-            background: #f0f0f0;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            color: #FF5A00;
-            margin-bottom: 20px;
-            width: auto;
-        }
-        
-        .btn-usar-mis-datos-chip i {
-            font-size: 0.9rem;
-        }
-        
-        .btn-usar-mis-datos-chip:active {
-            background: #FF5A00;
-            color: white;
-        }
-        
-        /* CARRITO MODAL */
+        /* CARRITO MODAL - CON IMÁGENES */
         .carrito-item {
             display: flex;
             justify-content: space-between;
@@ -723,13 +692,38 @@
             gap: 8px;
         }
         
+        .carrito-item-imagen {
+            width: 50px;
+            height: 50px;
+            background: #f8f8f8;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .carrito-item-imagen img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 5px;
+        }
+        
+        .carrito-item-imagen .placeholder-img {
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+        
         .carrito-item-info {
             flex: 1;
+            margin-left: 10px;
         }
         
         .carrito-item-nombre {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .carrito-item-precio {
@@ -762,7 +756,7 @@
             font-weight: 600;
             min-width: 80px;
             text-align: right;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .btn-eliminar {
@@ -781,11 +775,11 @@
             flex: 1;
         }
         
-        /* TICKET CONFIRMACIÓN - OPTIMIZADO MÓVIL */
+        /* TICKET CONFIRMACIÓN - OPTIMIZADO MÓVIL (SIN SCROLL) */
         .ticket-modal-content {
-            max-width: 500px;
+            max-width: 480px;
             width: 95%;
-            max-height: 90vh;
+            max-height: 85vh;
             border-radius: 28px;
             overflow-y: auto;
         }
@@ -793,64 +787,101 @@
         .ticket-info {
             background: #f9f9f9;
             border-radius: 20px;
-            padding: 16px;
+            padding: 12px;
         }
         
         .ticket-section {
             background: white;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 12px;
+            border-radius: 14px;
+            padding: 10px;
+            margin-bottom: 10px;
             border: 1px solid #eee;
         }
         
         .ticket-section p {
-            margin: 6px 0;
-            font-size: 0.85rem;
+            margin: 5px 0;
+            font-size: 0.8rem;
             word-break: break-word;
         }
         
         .productos-lista {
-            margin: 8px 0;
+            margin: 6px 0;
+            max-height: 150px;
+            overflow-y: auto;
         }
         
         .producto-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 6px 0;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
+            gap: 8px;
+        }
+        
+        .producto-item-imagen {
+            width: 35px;
+            height: 35px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .producto-item-imagen img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 3px;
+        }
+        
+        .producto-item-info {
+            flex: 1;
+        }
+        
+        .producto-item-nombre {
+            font-weight: 500;
+        }
+        
+        .producto-item-precio {
+            font-weight: 600;
+            color: #FF5A00;
         }
         
         .ticket-total {
             text-align: right;
-            margin-top: 8px;
-            padding-top: 8px;
+            margin-top: 6px;
+            padding-top: 6px;
             border-top: 1px solid #eee;
+            font-size: 0.85rem;
         }
         
         .ticket-warning {
             background: #FFF3E0;
-            border-radius: 16px;
-            padding: 10px 12px;
-            font-size: 0.7rem;
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-size: 0.65rem;
             color: #FF9800;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .ticket-footer {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
-            padding: 15px;
+            padding: 12px;
         }
         
         .ticket-footer .btn {
             flex: 1;
-            padding: 12px;
-            font-size: 0.9rem;
+            padding: 10px;
+            font-size: 0.85rem;
         }
         
         /* LOADING */
@@ -905,10 +936,10 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 20px;
+            padding: 10px 16px;
             border-radius: 50px;
             z-index: 9999;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             white-space: nowrap;
             font-weight: 500;
         }
@@ -1060,29 +1091,40 @@
                 width: 100%;
             }
             
+            /* CARRITO MÓVIL */
             .carrito-item {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .carrito-item-imagen {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .carrito-item-info {
+                margin-left: 8px;
             }
             
             .carrito-item-cantidad {
                 order: 2;
+                margin-left: auto;
             }
             
             .carrito-item-total {
                 order: 3;
                 text-align: left;
+                width: 100%;
+                margin-left: 55px;
             }
             
             .btn-eliminar {
                 order: 4;
-                align-self: flex-end;
+                align-self: center;
             }
             
             .toast-success, .toast-error, .toast-info {
                 bottom: 90px;
-                padding: 10px 16px;
-                font-size: 0.75rem;
                 white-space: normal;
                 text-align: center;
                 max-width: 90%;
@@ -1090,31 +1132,41 @@
                 line-height: 1.4;
             }
             
-            /* TICKET MÓVIL - SIN SCROLL EXCESIVO */
+            /* TICKET MÓVIL - COMPACTO SIN SCROLL */
             .ticket-modal-content {
-                max-height: 85vh;
+                max-height: 80vh;
             }
             
             .ticket-info {
-                padding: 12px;
+                padding: 10px;
             }
             
             .ticket-section {
-                padding: 10px;
-                margin-bottom: 10px;
+                padding: 8px;
+                margin-bottom: 8px;
             }
             
             .ticket-section p {
-                font-size: 0.8rem;
-            }
-            
-            .producto-item {
                 font-size: 0.75rem;
             }
             
+            .productos-lista {
+                max-height: 120px;
+            }
+            
+            .producto-item {
+                padding: 4px 0;
+                font-size: 0.7rem;
+            }
+            
+            .producto-item-imagen {
+                width: 30px;
+                height: 30px;
+            }
+            
             .ticket-warning {
-                font-size: 0.65rem;
-                padding: 8px 10px;
+                font-size: 0.6rem;
+                padding: 6px 8px;
             }
         }
         
@@ -1158,6 +1210,11 @@
             .btn {
                 padding: 12px 20px;
                 font-size: 0.9rem;
+            }
+            
+            .carrito-item-imagen {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -1290,7 +1347,7 @@
         </div>
     </div>
 
-    <!-- Modal del formulario de cliente (OPTIMIZADO MÓVIL) -->
+    <!-- Modal del formulario de cliente (SIN BOTÓN USAR MIS DATOS) -->
     <div class="modal" id="cliente-modal">
         <div class="modal-content cliente-modal-content">
             <div class="modal-header">
@@ -1298,10 +1355,6 @@
                 <button class="modal-close" id="cerrar-cliente-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <button type="button" class="btn-usar-mis-datos-chip" id="btn-usar-mis-datos">
-                    <i class="fas fa-user-check"></i> Usar mis datos
-                </button>
-                
                 <form id="cliente-form">
                     <div class="form-group">
                         <label>Nombre completo <span class="required">*</span></label>
@@ -1339,7 +1392,7 @@
         </div>
     </div>
 
-    <!-- Modal de confirmación (ticket) - OPTIMIZADO MÓVIL -->
+    <!-- Modal de confirmación (ticket) - OPTIMIZADO -->
     <div class="modal" id="confirmacion-modal">
         <div class="modal-content ticket-modal-content">
             <div class="modal-header">
@@ -1348,7 +1401,7 @@
             </div>
             <div class="modal-body">
                 <div class="ticket-info">
-                    <h4 style="margin-bottom: 12px; text-align: center; font-size: 1rem;">Resumen del pedido</h4>
+                    <h4 style="margin-bottom: 10px; text-align: center; font-size: 0.95rem;">Resumen del pedido</h4>
                     <div class="ticket-section">
                         <p><strong>Nombre:</strong> <span id="confirm-nombre"></span></p>
                         <p><strong>WhatsApp:</strong> <span id="confirm-telefono"></span></p>
@@ -1362,7 +1415,7 @@
                     </div>
                     <div class="ticket-section" id="confirm-detalles-section" style="display: none;">
                         <strong>Detalles:</strong>
-                        <p id="confirm-detalles" style="font-size: 0.8rem;"></p>
+                        <p id="confirm-detalles" style="font-size: 0.75rem;"></p>
                     </div>
                     <div class="ticket-warning">
                         <i class="fas fa-info-circle"></i>
