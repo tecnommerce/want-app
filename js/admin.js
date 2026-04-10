@@ -1421,13 +1421,73 @@ window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
 // ===================================================
 
 async function guardarSoloDescripcion() {
-    const vendedorId = localStorage.getItem('vendedorId');
+    console.log('🖊️ Botón guardar descripción clickeado');
+    
+    // 🔥 OBTENER EL ID DEL VENDEDOR DESDE MÚLTIPLES FUENTES
+    let vendedorId = null;
+    
+    // 1. Intentar desde localStorage con diferentes claves
+    const posiblesClaves = ['vendedorId', 'vendedor_id', 'vendedor-id', 'vendedor', 'id', 'userId', 'user_id'];
+    for (const clave of posiblesClaves) {
+        const valor = localStorage.getItem(clave);
+        if (valor) {
+            console.log(`📌 Encontrado en localStorage['${clave}']:`, valor);
+            if (clave === 'vendedor' || clave === 'usuario') {
+                try {
+                    const obj = JSON.parse(valor);
+                    vendedorId = obj.id || obj.vendedor_id;
+                    if (vendedorId) break;
+                } catch(e) {}
+            } else {
+                vendedorId = valor;
+                break;
+            }
+        }
+    }
+    
+    // 2. Intentar desde sessionStorage
+    if (!vendedorId) {
+        for (const clave of posiblesClaves) {
+            const valor = sessionStorage.getItem(clave);
+            if (valor) {
+                console.log(`📌 Encontrado en sessionStorage['${clave}']:`, valor);
+                if (clave === 'vendedor' || clave === 'usuario') {
+                    try {
+                        const obj = JSON.parse(valor);
+                        vendedorId = obj.id || obj.vendedor_id;
+                        if (vendedorId) break;
+                    } catch(e) {}
+                } else {
+                    vendedorId = valor;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // 3. Intentar desde window (variable global)
+    if (!vendedorId && window.vendedorActual) {
+        vendedorId = window.vendedorActual.id;
+        console.log('📌 Encontrado en window.vendedorActual:', vendedorId);
+    }
+    
+    // 4. Si hay función global que devuelve el vendedor actual
+    if (!vendedorId && typeof window.obtenerVendedorActual === 'function') {
+        const vendedor = await window.obtenerVendedorActual();
+        if (vendedor) vendedorId = vendedor.id;
+        console.log('📌 Encontrado en obtenerVendedorActual():', vendedorId);
+    }
+    
+    console.log('📦 Contenido completo de localStorage:', {...localStorage});
+    console.log('🔑 Vendedor ID final:', vendedorId);
+    
     const descripcion = document.getElementById('perfil-descripcion').value;
     const statusSpan = document.getElementById('descripcion-status');
     
     if (!vendedorId) {
+        console.error('❌ No se encontró ID del vendedor');
         if (statusSpan) {
-            statusSpan.innerHTML = '❌ Error: No hay sesión';
+            statusSpan.innerHTML = '❌ Error: No hay sesión activa. Reingresa al panel.';
             statusSpan.style.color = 'red';
         }
         return;
@@ -1444,9 +1504,11 @@ async function guardarSoloDescripcion() {
             descripcion: descripcion
         });
         
+        console.log('📡 Respuesta de la API:', result);
+        
         if (result.success) {
             if (statusSpan) {
-                statusSpan.innerHTML = '✅ Descripción guardada';
+                statusSpan.innerHTML = '✅ ¡Descripción guardada!';
                 statusSpan.style.color = 'green';
                 setTimeout(() => {
                     if (statusSpan) statusSpan.innerHTML = '';
@@ -1459,7 +1521,7 @@ async function guardarSoloDescripcion() {
             }
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Error guardando descripción:', error);
         if (statusSpan) {
             statusSpan.innerHTML = '❌ Error de conexión';
             statusSpan.style.color = 'red';
@@ -1491,23 +1553,57 @@ function inicializarBotonDescripcion() {
 async function guardarSoloDescripcion() {
     console.log('🖊️ Botón guardar descripción clickeado');
     
-    const vendedorId = localStorage.getItem('vendedorId');
+    // 🔥 OBTENER EL ID DEL VENDEDOR DESDE sessionStorage
+    let vendedorId = null;
+    
+    // Intentar desde sessionStorage (donde está guardado)
+    const vendedorSesion = sessionStorage.getItem('vendedor_sesion');
+    if (vendedorSesion) {
+        try {
+            const vendedor = JSON.parse(vendedorSesion);
+            vendedorId = vendedor.id;
+            console.log('✅ Vendedor ID obtenido de sessionStorage:', vendedorId);
+        } catch(e) {
+            console.error('Error parseando vendedor_sesion:', e);
+        }
+    }
+    
+    // Si no, intentar desde localStorage
+    if (!vendedorId) {
+        const posiblesClaves = ['vendedorId', 'vendedor_id', 'vendedor', 'id'];
+        for (const clave of posiblesClaves) {
+            const valor = localStorage.getItem(clave);
+            if (valor) {
+                if (clave === 'vendedor' || clave === 'vendedor_sesion') {
+                    try {
+                        const obj = JSON.parse(valor);
+                        vendedorId = obj.id;
+                        if (vendedorId) break;
+                    } catch(e) {}
+                } else {
+                    vendedorId = valor;
+                    break;
+                }
+            }
+        }
+    }
+    
+    console.log('🔑 Vendedor ID final:', vendedorId);
+    
     const descripcion = document.getElementById('perfil-descripcion').value;
     const statusSpan = document.getElementById('descripcion-status');
     
-    console.log('Vendedor ID:', vendedorId);
-    console.log('Descripción a guardar:', descripcion);
-    
     if (!vendedorId) {
+        console.error('❌ No se encontró ID del vendedor');
         if (statusSpan) {
-            statusSpan.innerHTML = '❌ Error: No hay sesión';
+            statusSpan.innerHTML = '❌ Error: No hay sesión activa. Reingresa al panel.';
             statusSpan.style.color = 'red';
         }
         return;
     }
     
     if (statusSpan) {
-        statusSpan.innerHTML = '💾 Guardando...';
+        statusSpan.innerHTML = '💾 Guardando descripción...';
         statusSpan.style.color = '#007bff';
     }
     
@@ -1517,29 +1613,30 @@ async function guardarSoloDescripcion() {
             descripcion: descripcion
         });
         
-        console.log('Respuesta de la API:', result);
+        console.log('📡 Respuesta de la API:', result);
         
         if (result.success) {
             if (statusSpan) {
-                statusSpan.innerHTML = '✅ ¡Descripción guardada!';
+                statusSpan.innerHTML = '✅ ¡Descripción guardada correctamente!';
                 statusSpan.style.color = 'green';
                 setTimeout(() => {
                     if (statusSpan) statusSpan.innerHTML = '';
                 }, 3000);
             }
-            // Mostrar notificación flotante
-            mostrarNotificacion('Descripción guardada correctamente', 'success');
+            // Mostrar notificación
+            if (typeof mostrarNotificacion === 'function') {
+                mostrarNotificacion('Descripción guardada', 'success');
+            }
         } else {
             if (statusSpan) {
                 statusSpan.innerHTML = '❌ Error: ' + (result.error || 'No se pudo guardar');
                 statusSpan.style.color = 'red';
             }
-            mostrarNotificacion('Error al guardar descripción', 'error');
         }
     } catch (error) {
-        console.error('Error guardando descripción:', error);
+        console.error('❌ Error guardando descripción:', error);
         if (statusSpan) {
-            statusSpan.innerHTML = '❌ Error de conexión';
+            statusSpan.innerHTML = '❌ Error de conexión: ' + error.message;
             statusSpan.style.color = 'red';
         }
     }
