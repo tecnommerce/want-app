@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>Want | Pedidos simples a tus negocios favoritos</title>
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00' font-family='system-ui, -apple-system, sans-serif'%3EW%3C/text%3E%3C/svg%3E">
@@ -10,6 +13,184 @@
     
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Estilos adicionales para mejoras */
+        .negocio-card {
+            position: relative;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .negocio-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .negocio-logo {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+        }
+        
+        .negocio-logo .placeholder-logo {
+            background: linear-gradient(135deg, #FFF5EB 0%, #FFE4D6 100%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #FF5A00;
+        }
+        
+        .coincidencia {
+            background-color: #FFF3CD;
+            color: #FF5A00;
+            font-weight: 600;
+            padding: 0 2px;
+            border-radius: 4px;
+        }
+        
+        .sin-negocios {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #eee;
+        }
+        
+        .sin-negocios i {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+        
+        .sugerencia {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+        
+        .sugerencias {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .sugerencias p {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        
+        .sugerencias-lista {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn-sugerencia {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-sugerencia:hover {
+            background: #FF5A00;
+            color: white;
+            border-color: #FF5A00;
+        }
+        
+        .error-mensaje {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #fee2e2;
+        }
+        
+        .error-mensaje p {
+            color: #ef4444;
+            margin-bottom: 15px;
+        }
+        
+        /* Efecto difuminado en tarjetas */
+        .negocio-card {
+            backdrop-filter: blur(0px);
+            transition: all 0.3s ease;
+        }
+        
+        .negocio-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Buscador mejorado */
+        .search-box {
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus-within {
+            transform: scale(1.02);
+        }
+        
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .negocio-card {
+                padding: 12px;
+            }
+            
+            .negocio-logo {
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+            }
+            
+            .negocio-info {
+                padding: 0;
+            }
+            
+            .negocio-nombre {
+                font-size: 1rem;
+                margin-bottom: 6px;
+            }
+            
+            .rubros-container {
+                margin: 6px 0;
+                gap: 5px;
+            }
+            
+            .rubro-tag {
+                font-size: 0.6rem;
+                padding: 3px 8px;
+            }
+            
+            .estado-abierto, .estado-cerrado {
+                font-size: 0.6rem;
+                padding: 3px 8px;
+                display: inline-block;
+                margin-bottom: 6px;
+            }
+            
+            .negocio-direccion {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .negocio-logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .negocio-nombre {
+                font-size: 0.9rem;
+            }
+            
+            .rubro-tag {
+                font-size: 0.55rem;
+                padding: 2px 6px;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header" id="main-header">
@@ -20,7 +201,7 @@
                 <div class="search-container" id="search-container">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Buscar negocios..." id="search-input">
+                        <input type="text" placeholder="Buscar negocios, productos, rubros..." id="search-input">
                     </div>
                 </div>
 

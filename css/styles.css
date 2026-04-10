@@ -1837,3 +1837,156 @@ body {
 .mobile-menu-admin {
     z-index: 10000;
 }
+/* ===================================================
+   MEJORAS PARA EL HOME - TARJETAS Y BUSCADOR
+   =================================================== */
+
+/* Efecto de gradiente en espacios vacíos de tarjetas */
+.negocio-logo {
+    position: relative;
+    overflow: hidden;
+}
+
+.negocio-logo::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,90,0,0.05) 0%, rgba(255,122,0,0.1) 100%);
+    pointer-events: none;
+}
+
+.negocio-logo .placeholder-logo {
+    background: linear-gradient(135deg, #FFF5EB 0%, #FFE4D6 100%);
+}
+
+/* Coincidencias de búsqueda resaltadas */
+.coincidencia {
+    background-color: #FFF3CD;
+    color: #FF5A00;
+    font-weight: 600;
+    padding: 0 2px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Botón de sugerencia */
+.btn-sugerencia {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-sugerencia:hover {
+    background: #FF5A00;
+    color: white;
+    border-color: #FF5A00;
+    transform: translateY(-2px);
+}
+
+.btn-sugerencia:active {
+    transform: scale(0.96);
+}
+
+/* Sin resultados */
+.sin-negocios {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #eee;
+    margin: 20px 0;
+}
+
+.sin-negocios i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.sin-negocios .sugerencia {
+    color: #888;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+.sin-negocios .sugerencias {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.sin-negocios .sugerencias p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.sin-negocios .sugerencias-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Error message */
+.error-mensaje {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #fee2e2;
+}
+
+.error-mensaje p {
+    color: #ef4444;
+    margin-bottom: 15px;
+}
+
+/* Mejoras en el buscador */
+.search-box {
+    transition: all 0.3s ease;
+}
+
+.search-box:focus-within {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(255,90,0,0.15);
+}
+
+.search-box input::placeholder {
+    transition: opacity 0.2s;
+}
+
+.search-box input:focus::placeholder {
+    opacity: 0.5;
+}
+
+/* Efecto de presión en tarjetas móvil */
+@media (max-width: 768px) {
+    .negocio-card:active {
+        transform: scale(0.98);
+        transition: transform 0.05s ease;
+    }
+    
+    .btn-sugerencia {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Animación de carga mejorada */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading p {
+    animation: pulse 1.5s ease-in-out infinite;
+}

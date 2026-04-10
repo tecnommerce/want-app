@@ -1,5 +1,5 @@
 // ===================================================
-// HOME - Lógica de la página principal (CON ESTADO)
+// HOME - Lógica de la página principal (CON MEJORAS)
 // ===================================================
 
 let todosLosNegocios = [];
@@ -26,11 +26,14 @@ function escapeHTML(str) {
         .replace(/'/g, '&#39;');
 }
 
-function formatearRubros(rubros) {
+function formatearRubros(rubros, isMobile = false) {
     if (!rubros || rubros.length === 0) return '';
     
-    const rubrosMostrar = rubros.slice(0, 2);
-    const resto = rubros.length - 2;
+    // En móvil mostrar máximo 2 rubros, en desktop mostrar 3
+    const maxRubros = isMobile ? 2 : 3;
+    const rubrosMostrar = rubros.slice(0, maxRubros);
+    const resto = rubros.length - maxRubros;
+    
     let rubrosHTML = rubrosMostrar.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
     if (resto > 0) {
         rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
@@ -43,6 +46,22 @@ function getEstadoTexto(estadoAbierto) {
         return '<span class="estado-abierto"><i class="fas fa-check-circle"></i> Atendiendo</span>';
     }
     return '<span class="estado-cerrado"><i class="fas fa-times-circle"></i> Cerrado</span>';
+}
+
+function resaltarCoincidencia(texto, busqueda) {
+    if (!busqueda || !texto) return escapeHTML(texto);
+    
+    const textoLower = texto.toLowerCase();
+    const busquedaLower = busqueda.toLowerCase();
+    const index = textoLower.indexOf(busquedaLower);
+    
+    if (index === -1) return escapeHTML(texto);
+    
+    const antes = escapeHTML(texto.substring(0, index));
+    const coincidencia = escapeHTML(texto.substring(index, index + busqueda.length));
+    const despues = escapeHTML(texto.substring(index + busqueda.length));
+    
+    return `${antes}<span class="coincidencia">${coincidencia}</span>${despues}`;
 }
 
 // ===================================================
@@ -70,7 +89,7 @@ async function cargarNegocios() {
         todosLosNegocios = (response.vendedores || []).filter(v => v.activo === true);
         
         if (todosLosNegocios.length === 0) {
-            grid.innerHTML = `<div class="sin-negocios"><p>📭 No hay negocios disponibles</p></div>`;
+            grid.innerHTML = `<div class="sin-negocios"><i class="fas fa-store-slash"></i><p>📭 No hay negocios disponibles</p></div>`;
             return;
         }
 
@@ -81,6 +100,7 @@ async function cargarNegocios() {
         console.error('❌ Error:', error);
         grid.innerHTML = `
             <div class="error-mensaje">
+                <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444; margin-bottom: 15px;"></i>
                 <p>⚠️ Error: ${error.message}</p>
                 <button onclick="location.reload()" class="btn btn-outline" style="margin-top: 15px;">Reintentar</button>
             </div>
@@ -111,61 +131,47 @@ function renderizarNegocios(vendedores) {
     if (vendedores.length === 0) {
         grid.innerHTML = `
             <div class="sin-negocios">
-                <p>🔍 No encontramos negocios que coincidan con "${escapeHTML(terminoBusquedaActual)}"</p>
-                <p class="sugerencia">Probá con otras palabras o mirá todos los negocios</p>
-                <button onclick="limpiarBusqueda()" class="btn btn-outline" style="margin-top: 15px;">Ver todos los negocios</button>
+                <i class="fas fa-search"></i>
+                <p>🔍 No encontramos negocios que coincidan con <strong>"${escapeHTML(terminoBusquedaActual)}"</strong></p>
+                <p class="sugerencia">Probá con otras palabras como: pizza, hamburguesa, café, delivery...</p>
+                <button onclick="limpiarBusqueda()" class="btn btn-primary" style="margin-top: 20px;">
+                    <i class="fas fa-store"></i> Ver todos los negocios
+                </button>
             </div>
         `;
         return;
     }
     
-    // Detectar si es móvil
     const isMobile = window.innerWidth <= 768;
     
     grid.innerHTML = vendedores.map(v => {
         const rubros = v.rubros || [];
         const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        // En móvil, mostrar solo 1 rubro para ahorrar espacio
-        const rubrosMostrar = isMobile ? rubros.slice(0, 1) : rubros.slice(0, 2);
-        const resto = rubros.length - rubrosMostrar.length;
-        let rubrosHTML = rubrosMostrar.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
-        if (resto > 0 && !isMobile) {
-            rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
-        } else if (resto > 0 && isMobile) {
-            rubrosHTML += `<span class="rubro-tag rubro-mas">+${resto}</span>`;
-        }
+        // Formatear rubros (todos, no solo 2)
+        const rubrosHTML = formatearRubros(rubros, isMobile);
         
         const nombreResaltado = resaltarCoincidencia(v.nombre || 'Sin nombre', terminoBusquedaActual);
-        const direccionResaltada = resaltarCoincidencia(v.direccion || 'Sin dirección', terminoBusquedaActual);
-        
-        // En móvil, mostrar menos información
-        const mostrarProductosPreview = !isMobile && v.productos && v.productos.length > 0;
-        const productosPreview = mostrarProductosPreview 
-            ? v.productos.slice(0, 2).map(p => p.nombre).join(', ') 
-            : '';
         
         return `
             <a href="tienda.html?vendedor=${v.id}" class="negocio-card" data-nombre="${escapeHTML(v.nombre || '').toLowerCase()}" data-direccion="${escapeHTML(v.direccion || '').toLowerCase()}">
                 <div class="negocio-logo">
                     ${v.logo_url ? 
                         `<img src="${v.logo_url}" alt="${escapeHTML(v.nombre || 'Negocio')}" loading="lazy">` : 
-                        `<div class="placeholder-logo">${(v.nombre || '?').charAt(0)}</div>`
+                        `<div class="placeholder-logo">${(v.nombre || '?').charAt(0).toUpperCase()}</div>`
                     }
                 </div>
                 <div class="negocio-info">
                     <h3 class="negocio-nombre">${nombreResaltado}</h3>
                     <div class="negocio-estado">${getEstadoTexto(estadoAbierto)}</div>
-                    ${rubrosHTML ? `<div class="rubros-container">${rubrosHTML}</div>` : ''}
-                    <p class="negocio-direccion">📍 ${direccionResaltada}</p>
-                    ${!isMobile ? `<p class="negocio-horario">🕐 ${escapeHTML(v.horario || 'Sin horario')}</p>` : ''}
-                    ${productosPreview ? `<p class="negocio-productos">📦 ${escapeHTML(productosPreview)}...</p>` : ''}
+                    ${rubrosHTML}
+                    ${!isMobile ? `<p class="negocio-horario"><i class="fas fa-clock"></i> ${escapeHTML(v.horario || 'Horario no especificado')}</p>` : ''}
                 </div>
             </a>
         `;
     }).join('');
     
-    // Agregar event listener para redimensionar
+    // Event listener para redimensionar
     if (!window.resizedListener) {
         window.addEventListener('resize', () => {
             if (todosLosNegocios.length > 0) {
@@ -176,20 +182,58 @@ function renderizarNegocios(vendedores) {
     }
 }
 
-function resaltarCoincidencia(texto, busqueda) {
-    if (!busqueda || !texto) return escapeHTML(texto);
+function mostrarSinResultados(termino) {
+    const grid = document.getElementById('negocios-grid');
     
-    const textoLower = texto.toLowerCase();
-    const busquedaLower = busqueda.toLowerCase();
-    const index = textoLower.indexOf(busquedaLower);
+    // Buscar sugerencias basadas en palabras clave
+    const terminoPalabras = termino.split(' ');
+    const sugerencias = todosLosNegocios.filter(negocio => {
+        const nombre = negocio.nombre?.toLowerCase() || '';
+        return terminoPalabras.some(palabra => 
+            nombre.includes(palabra) && palabra.length > 2
+        );
+    }).slice(0, 3);
     
-    if (index === -1) return escapeHTML(texto);
-    
-    const antes = escapeHTML(texto.substring(0, index));
-    const coincidencia = escapeHTML(texto.substring(index, index + busqueda.length));
-    const despues = escapeHTML(texto.substring(index + busqueda.length));
-    
-    return `${antes}<span class="coincidencia">${coincidencia}</span>${despues}`;
+    grid.innerHTML = `
+        <div class="sin-negocios">
+            <i class="fas fa-search"></i>
+            <p>🔍 No encontramos negocios que coincidan con <strong>"${escapeHTML(termino)}"</strong></p>
+            <p class="sugerencia">Probá con otras palabras como: pizza, hamburguesa, café, delivery...</p>
+            ${sugerencias.length > 0 ? `
+                <div class="sugerencias">
+                    <p>💡 Quizás te interese:</p>
+                    <div class="sugerencias-lista">
+                        ${sugerencias.map(n => `
+                            <button onclick="buscarSugerencia('${escapeHTML(n.nombre)}')" class="btn-sugerencia">
+                                ${escapeHTML(n.nombre)}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            <button onclick="limpiarBusqueda()" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-store"></i> Ver todos los negocios
+            </button>
+        </div>
+    `;
+}
+
+function buscarSugerencia(texto) {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = texto;
+        terminoBusquedaActual = texto.toLowerCase();
+        realizarBusqueda(texto.toLowerCase());
+    }
+}
+
+function limpiarBusqueda() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+        terminoBusquedaActual = '';
+        renderizarNegocios(todosLosNegocios);
+    }
 }
 
 function inicializarBuscador() {
@@ -226,13 +270,14 @@ function realizarBusqueda(termino) {
     setTimeout(() => {
         const resultados = todosLosNegocios.filter(negocio => {
             const nombreMatch = negocio.nombre?.toLowerCase().includes(termino) || false;
-            const direccionMatch = negocio.direccion?.toLowerCase().includes(termino) || false;
             const horarioMatch = negocio.horario?.toLowerCase().includes(termino) || false;
             
+            // Búsqueda en rubros (todos, no solo primeros)
             const rubrosMatch = (negocio.rubros && negocio.rubros.some(r => 
                 r.toLowerCase().includes(termino)
             )) || false;
             
+            // Búsqueda en productos
             let productosMatch = false;
             if (negocio.productos && negocio.productos.length > 0) {
                 productosMatch = negocio.productos.some(producto => 
@@ -241,7 +286,7 @@ function realizarBusqueda(termino) {
                 );
             }
             
-            return nombreMatch || direccionMatch || horarioMatch || rubrosMatch || productosMatch;
+            return nombreMatch || horarioMatch || rubrosMatch || productosMatch;
         });
         
         console.log(`🔍 Búsqueda "${termino}": ${resultados.length} resultados de ${todosLosNegocios.length}`);
@@ -252,59 +297,6 @@ function realizarBusqueda(termino) {
             renderizarNegocios(resultados);
         }
     }, 100);
-}
-
-function mostrarSinResultados(termino) {
-    const grid = document.getElementById('negocios-grid');
-    
-    const sugerencias = todosLosNegocios.filter(negocio => {
-        const nombre = negocio.nombre?.toLowerCase() || '';
-        const direccion = negocio.direccion?.toLowerCase() || '';
-        const terminoPalabras = termino.split(' ');
-        return terminoPalabras.some(palabra => 
-            nombre.includes(palabra) || direccion.includes(palabra)
-        );
-    }).slice(0, 3);
-    
-    grid.innerHTML = `
-        <div class="sin-negocios">
-            <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
-            <p>🔍 No encontramos negocios que coincidan con <strong>"${escapeHTML(termino)}"</strong></p>
-            <p class="sugerencia">Probá con otras palabras como: pizza, hamburguesa, café, delivery...</p>
-            ${sugerencias.length > 0 ? `
-                <div class="sugerencias">
-                    <p>💡 Quizás te interese:</p>
-                    <div class="sugerencias-lista">
-                        ${sugerencias.map(n => `
-                            <button onclick="buscarSugerencia('${escapeHTML(n.nombre)}')" class="btn-sugerencia">
-                                ${escapeHTML(n.nombre)}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            <button onclick="limpiarBusqueda()" class="btn btn-primary" style="margin-top: 20px;">
-                <i class="fas fa-store"></i> Ver todos los negocios
-            </button>
-        </div>
-    `;
-}
-
-function buscarSugerencia(texto) {
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.value = texto;
-        realizarBusqueda(texto.toLowerCase());
-    }
-}
-
-function limpiarBusqueda() {
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.value = '';
-        terminoBusquedaActual = '';
-        renderizarNegocios(todosLosNegocios);
-    }
 }
 
 function inicializarMenu() {
@@ -475,3 +467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     inicializarBuscador();
     inicializarCarruselBotones();
 });
+
+// Exponer funciones globales
+window.buscarSugerencia = buscarSugerencia;
+window.limpiarBusqueda = limpiarBusqueda;
