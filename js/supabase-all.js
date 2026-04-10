@@ -732,4 +732,136 @@
     window.postAPI = window.callAPI;
     
     console.log('✅ Supabase API con autenticación Google inicializada');
+    // ===================================================
+    // NOTIFICACIONES EN TIEMPO REAL
+    // ===================================================
+    
+    let pedidosSubscription = null;
+    let notificacionesCallbacks = [];
+
+    window.suscribirCambiosPedidos = function(usuarioId, callback) {
+        if (!usuarioId) {
+            console.error('❌ No se puede suscribir: usuarioId requerido');
+            return null;
+        }
+        
+        if (callback && typeof callback === 'function') {
+            notificacionesCallbacks.push(callback);
+        }
+        
+        if (pedidosSubscription) {
+            console.log('✅ Ya hay una suscripción activa a pedidos');
+            return pedidosSubscription;
+        }
+        
+        console.log(`🔔 Suscribiendo a cambios de pedidos para usuario: ${usuarioId}`);
+        
+        pedidosSubscription = supabaseClient
+            .channel('pedidos-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'pedidos',
+                    filter: `usuario_id=eq.${usuarioId}`
+                },
+                (payload) => {
+                    console.log('🔔 Cambio en pedido detectado:', payload);
+                    
+                    const pedido = payload.new || payload.old;
+                    if (!pedido) return;
+                    
+                    notificacionesCallbacks.forEach(cb => {
+                        try {
+                            cb(payload);
+                        } catch(e) {
+                            console.error('Error en callback:', e);
+                        }
+                    });
+                    
+                    if (payload.eventType === 'UPDATE') {
+                        const evento = {
+                            tipo: 'estado',
+                            pedidoId: pedido.id,
+                            numeroOrden: pedido.numero_orden || pedido.id,
+                            estadoAnterior: payload.old?.estado,
+                            estadoNuevo: pedido.estado,
+                            mensaje: `Tu pedido #${pedido.numero_orden || pedido.id} cambió a "${getEstadoPedidoTexto(pedido.estado)}"`
+                        };
+                        
+                        guardarNotificacion(evento);
+                        
+                        if (typeof window.mostrarNotificacionTemporal === 'function') {
+                            window.mostrarNotificacionTemporal(evento.mensaje, 'info');
+                        }
+                    }
+                }
+            )
+            .subscribe((status) => {
+                console.log(`📡 Estado de suscripción: ${status}`);
+            });
+        
+        return pedidosSubscription;
+    };
+
+    function getEstadoPedidoTexto(estado) {
+        const estados = {
+            'preparando': 'Nuevo pedido',
+            'en preparacion': 'En preparación',
+            'en camino': 'En camino',
+            'entregado': 'Entregado'
+        };
+        return estados[estado] || estado;
+    }
+
+    function guardarNotificacion(notificacion) {
+        const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+        notificacion.id = Date.now();
+        notificacion.leida = false;
+        notificacion.fecha = new Date().toISOString();
+        notificaciones.unshift(notificacion);
+        
+        if (notificaciones.length > 50) notificaciones.pop();
+        
+        localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+        window.dispatchEvent(new CustomEvent('nuevaNotificacion', { detail: notificacion }));
+    }
+
+    window.obtenerNotificaciones = function() {
+        return JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    };
+
+    window.marcarNotificacionLeida = function(notificacionId) {
+        const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+        const index = notificaciones.findIndex(n => n.id === notificacionId);
+        if (index !== -1) {
+            notificaciones[index].leida = true;
+            localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+            window.dispatchEvent(new CustomEvent('notificacionLeida'));
+        }
+    };
+
+    window.marcarTodasNotificacionesLeidas = function() {
+        const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+        notificaciones.forEach(n => n.leida = true);
+        localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+        window.dispatchEvent(new CustomEvent('notificacionLeida'));
+    };
+
+    window.eliminarNotificacion = function(notificacionId) {
+        const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+        const nuevas = notificaciones.filter(n => n.id !== notificacionId);
+        localStorage.setItem('want_notificaciones', JSON.stringify(nuevas));
+        window.dispatchEvent(new CustomEvent('notificacionLeida'));
+    };
+
+    window.desuscribirCambiosPedidos = function() {
+        if (pedidosSubscription) {
+            pedidosSubscription.unsubscribe();
+            pedidosSubscription = null;
+            console.log('🔕 Desuscrito de cambios de pedidos');
+        }
+    };
+
 })();

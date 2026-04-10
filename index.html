@@ -13,6 +13,276 @@
     
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===================================================
+           ESTILOS DE NOTIFICACIONES (sin afectar diseño existente)
+           =================================================== */
+        .notificaciones-container {
+            position: relative;
+        }
+        
+        .btn-notificaciones {
+            background: #f5f5f5;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-notificaciones:hover {
+            background: #FF5A00;
+            color: white;
+        }
+        
+        .notificaciones-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notificaciones-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .notificaciones-panel.active {
+            display: block;
+            animation: fadeInDown 0.2s ease;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .notificaciones-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #FF5A00;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-limpiar-notif {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        
+        .notificaciones-lista {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notificacion-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .notificacion-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .notificacion-item.leida {
+            opacity: 0.7;
+        }
+        
+        .notificacion-icono {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .notificacion-contenido {
+            flex: 1;
+        }
+        
+        .notificacion-mensaje {
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .notificacion-fecha {
+            font-size: 0.65rem;
+            color: #999;
+        }
+        
+        .notificacion-eliminar {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notificacion-eliminar:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        
+        .notificaciones-vacio {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+        
+        .notificaciones-vacio i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: #ddd;
+        }
+        
+        .notificacion-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            font-size: 0.85rem;
+            transition: transform 0.3s ease;
+            max-width: 90%;
+        }
+        
+        .notificacion-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .notificacion-toast.success { background: #10b981; }
+        .notificacion-toast.error { background: #ef4444; }
+        .notificacion-toast.info { background: #FF5A00; }
+        
+        @media (max-width: 768px) {
+            .notificaciones-panel {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 20px 20px 0 0;
+                margin-top: 0;
+                max-height: 80vh;
+                animation: slideUp 0.3s ease;
+            }
+            
+            @keyframes slideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+            
+            .notificaciones-lista {
+                max-height: 60vh;
+            }
+            
+            .btn-notificaciones {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            
+            .notificacion-toast {
+                bottom: 80px;
+                font-size: 0.75rem;
+                padding: 10px 16px;
+            }
+        }
+        
+        /* Header actions - mantener orden */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar-desktop {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 5px 12px;
+            background: #f5f5f5;
+            border-radius: 40px;
+            position: relative;
+        }
+        
+        .user-avatar-mobile {
+            display: none;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .user-avatar-desktop {
+                display: none !important;
+            }
+            .user-avatar-mobile {
+                display: flex !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header" id="main-header">
@@ -36,17 +306,43 @@
                     </div>
                 </div>
 
-                <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
-                    <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
-                    <span class="avatar-name" id="avatar-name-desktop"></span>
-                    <div class="avatar-dropdown" id="avatar-dropdown">
-                        <a href="#" id="mi-cuenta-desktop"><i class="fas fa-user-circle"></i> Mi cuenta</a>
-                        <a href="#" id="cerrar-sesion-desktop"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                <div class="header-actions">
+                    <!-- NOTIFICACIONES -->
+                    <div class="notificaciones-container">
+                        <button class="btn-notificaciones" id="notificaciones-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notificaciones-count" id="notificaciones-count">0</span>
+                        </button>
+                        <div class="notificaciones-panel" id="notificaciones-panel">
+                            <div class="notificaciones-header">
+                                <span>Notificaciones</span>
+                                <button class="btn-limpiar-notif" id="btn-limpiar-notif">
+                                    <i class="fas fa-trash-alt"></i> Limpiar
+                                </button>
+                            </div>
+                            <div class="notificaciones-lista" id="notificaciones-lista">
+                                <div class="notificaciones-vacio">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No hay notificaciones</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
-                    <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
+                    <!-- AVATAR ESCRITORIO -->
+                    <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
+                        <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
+                        <span class="avatar-name" id="avatar-name-desktop"></span>
+                        <div class="avatar-dropdown" id="avatar-dropdown">
+                            <a href="#" id="mi-cuenta-desktop"><i class="fas fa-user-circle"></i> Mi cuenta</a>
+                            <a href="#" id="cerrar-sesion-desktop"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                        </div>
+                    </div>
+
+                    <!-- AVATAR MÓVIL -->
+                    <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
+                        <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
+                    </div>
                 </div>
             </div>
         </div>

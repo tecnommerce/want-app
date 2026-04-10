@@ -5,6 +5,8 @@
 let usuarioActual = null;
 let pedidosUsuario = [];
 let authSubscription = null;
+let notificacionesAbiertas = false;
+let notificacionesActuales = [];
 
 // ===================================================
 // UTILIDADES
@@ -101,7 +103,6 @@ function mostrarMiCuenta() {
     if (misPedidosScreen) misPedidosScreen.style.display = 'none';
     if (miCuentaScreen) miCuentaScreen.style.display = 'block';
     
-    // Forzar carga de datos antes de mostrar el formulario
     forzarCargaDatosUsuario().then(() => {
         cargarDatosUsuarioFormulario();
     });
@@ -160,7 +161,7 @@ async function forzarCargaDatosUsuario() {
 }
 
 // ===================================================
-// FUNCIONES DE AUTENTICACIÓN (sin initAuth automático)
+// FUNCIONES DE AUTENTICACIÓN
 // ===================================================
 
 async function handleUserLogin(user) {
@@ -525,7 +526,188 @@ async function registrarNuevoUsuario(e) {
 }
 
 // ===================================================
-// EVENT LISTENERS (sin initAuth automático)
+// NOTIFICACIONES - FUNCIONES
+// ===================================================
+
+function obtenerContadorNotificaciones() {
+    const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    const noLeidas = notificaciones.filter(n => !n.leida).length;
+    return noLeidas;
+}
+
+function actualizarContadorNotificaciones() {
+    const contador = document.getElementById('notificaciones-count');
+    const total = obtenerContadorNotificaciones();
+    
+    if (contador) {
+        if (total > 0) {
+            contador.textContent = total > 99 ? '99+' : total;
+            contador.style.display = 'flex';
+        } else {
+            contador.style.display = 'none';
+        }
+    }
+}
+
+function mostrarNotificacionTemporal(mensaje, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `notificacion-toast ${tipo}`;
+    toast.innerHTML = `
+        <i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-bell'}"></i>
+        <span>${mensaje}</span>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+function toggleNotificaciones() {
+    const panel = document.getElementById('notificaciones-panel');
+    if (!panel) return;
+    
+    if (notificacionesAbiertas) {
+        panel.classList.remove('active');
+        notificacionesAbiertas = false;
+    } else {
+        cargarListaNotificaciones();
+        panel.classList.add('active');
+        notificacionesAbiertas = true;
+    }
+}
+
+function cargarListaNotificaciones() {
+    const container = document.getElementById('notificaciones-lista');
+    if (!container) return;
+    
+    notificacionesActuales = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    
+    if (notificacionesActuales.length === 0) {
+        container.innerHTML = `
+            <div class="notificaciones-vacio">
+                <i class="fas fa-bell-slash"></i>
+                <p>No hay notificaciones</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = notificacionesActuales.map(notif => {
+        const fecha = new Date(notif.fecha);
+        const fechaStr = fecha.toLocaleString('es-AR', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        let icono = 'fa-truck';
+        let color = '#FF5A00';
+        
+        if (notif.estadoNuevo === 'entregado') {
+            icono = 'fa-check-circle';
+            color = '#10b981';
+        } else if (notif.estadoNuevo === 'en camino') {
+            icono = 'fa-truck';
+            color = '#3b82f6';
+        } else if (notif.estadoNuevo === 'en preparacion') {
+            icono = 'fa-utensils';
+            color = '#f59e0b';
+        }
+        
+        return `
+            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" data-id="${notif.id}">
+                <div class="notificacion-icono" style="background: ${color}20; color: ${color};">
+                    <i class="fas ${icono}"></i>
+                </div>
+                <div class="notificacion-contenido">
+                    <div class="notificacion-mensaje">${escapeHTML(notif.mensaje)}</div>
+                    <div class="notificacion-fecha">${fechaStr}</div>
+                </div>
+                <button class="notificacion-eliminar" onclick="event.stopPropagation(); eliminarNotificacionItem(${notif.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    }).join('');
+    
+    setTimeout(() => {
+        notificacionesActuales.forEach(n => {
+            if (!n.leida) {
+                window.marcarNotificacionLeida(n.id);
+            }
+        });
+        actualizarContadorNotificaciones();
+    }, 500);
+}
+
+function eliminarNotificacionItem(notificacionId) {
+    window.eliminarNotificacion(notificacionId);
+    cargarListaNotificaciones();
+    actualizarContadorNotificaciones();
+}
+
+function limpiarTodasNotificaciones() {
+    if (confirm('¿Eliminar todas las notificaciones?')) {
+        localStorage.setItem('want_notificaciones', '[]');
+        cargarListaNotificaciones();
+        actualizarContadorNotificaciones();
+        mostrarNotificacionTemporal('Notificaciones eliminadas', 'info');
+    }
+}
+
+// Escuchar eventos de notificaciones
+window.addEventListener('nuevaNotificacion', () => {
+    actualizarContadorNotificaciones();
+});
+
+window.addEventListener('notificacionLeida', () => {
+    actualizarContadorNotificaciones();
+    if (notificacionesAbiertas) {
+        cargarListaNotificaciones();
+    }
+});
+
+// ===================================================
+// FUNCIÓN PARA RECIBIR USUARIO DESDE SESSION-MANAGER
+// ===================================================
+
+window.setUsuarioActual = function(usuario) {
+    console.log('📝 Recibiendo usuario desde SessionManager:', usuario?.email);
+    if (!usuario) return;
+    
+    usuarioActual = usuario;
+    cargarDatosUsuarioUI();
+    
+    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
+    if (miCuentaScreen && miCuentaScreen.style.display === 'block') {
+        cargarDatosUsuarioFormulario();
+    }
+    
+    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+    if (misPedidosScreen && misPedidosScreen.style.display === 'block') {
+        cargarPedidosUsuario();
+    }
+};
+
+document.addEventListener('usuarioActualizado', (event) => {
+    console.log('📢 Evento usuarioActualizado recibido:', event.detail?.usuario);
+    if (event.detail && event.detail.usuario) {
+        usuarioActual = event.detail.usuario;
+        cargarDatosUsuarioUI();
+    }
+});
+
+window.onSessionClosed = function() {
+    console.log('🔴 Sesión cerrada por SessionManager');
+    usuarioActual = null;
+    window.location.href = 'login.html';
+};
+
+// ===================================================
+// EVENT LISTENERS
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -539,15 +721,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const registerBtn = document.getElementById('register-google-btn');
         const registroForm = document.getElementById('registro-form');
         
-        if (loginBtn) {
-            loginBtn.addEventListener('click', iniciarLoginConGoogle);
-        }
-        if (registerBtn) {
-            registerBtn.addEventListener('click', iniciarRegistroConGoogle);
-        }
-        if (registroForm) {
-            registroForm.addEventListener('submit', registrarNuevoUsuario);
-        }
+        if (loginBtn) loginBtn.addEventListener('click', iniciarLoginConGoogle);
+        if (registerBtn) registerBtn.addEventListener('click', iniciarRegistroConGoogle);
+        if (registroForm) registroForm.addEventListener('submit', registrarNuevoUsuario);
         
         if (window.location.hash === '#registro') {
             document.getElementById('login-screen').style.display = 'none';
@@ -560,27 +736,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (isIndexPage) {
         const logoHome = document.getElementById('logo-home');
-        if (logoHome) {
-            logoHome.addEventListener('click', (e) => {
-                e.preventDefault();
-                volverAlHome();
-            });
-        }
+        if (logoHome) logoHome.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
         
-        document.getElementById('mis-pedidos-desktop')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarMisPedidos();
-        });
-        
-        document.getElementById('mi-cuenta-desktop')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarMiCuenta();
-        });
-        
-        document.getElementById('cerrar-sesion-desktop')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            cerrarSesion();
-        });
+        document.getElementById('mis-pedidos-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
+        document.getElementById('mi-cuenta-desktop')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
+        document.getElementById('cerrar-sesion-desktop')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
         
         const avatarDesktop = document.getElementById('user-avatar-desktop');
         if (avatarDesktop) {
@@ -596,35 +756,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dropdown) dropdown.classList.remove('active');
         });
         
-        document.getElementById('mis-pedidos-mobile')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarMisPedidos();
-        });
-        
-        document.getElementById('mi-cuenta-mobile')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarMiCuenta();
-        });
-        
-        document.getElementById('logout-mobile')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            cerrarSesion();
-        });
-        
-        document.getElementById('contacto-mobile')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarModalContacto();
-        });
-        
-        document.getElementById('back-to-home')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            volverAlHome();
-        });
-        
-        document.getElementById('back-to-home-cuenta')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            volverAlHome();
-        });
+        document.getElementById('mis-pedidos-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMisPedidos(); });
+        document.getElementById('mi-cuenta-mobile')?.addEventListener('click', (e) => { e.preventDefault(); mostrarMiCuenta(); });
+        document.getElementById('logout-mobile')?.addEventListener('click', (e) => { e.preventDefault(); cerrarSesion(); });
+        document.getElementById('back-to-home')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
+        document.getElementById('back-to-home-cuenta')?.addEventListener('click', (e) => { e.preventDefault(); volverAlHome(); });
         
         const avatarMobile = document.getElementById('user-avatar-mobile');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -668,53 +804,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (historialContainer) historialContainer.style.display = tabId === 'historial' ? 'block' : 'none';
             });
         });
-    }
-    
-/// ===================================================
-// FUNCIÓN PARA RECIBIR USUARIO DESDE SESSION-MANAGER
-// ===================================================
-
-window.setUsuarioActual = function(usuario) {
-    console.log('📝 Recibiendo usuario desde SessionManager:', usuario?.email);
-    if (!usuario) return;
-    
-    usuarioActual = usuario;
-    
-    // Actualizar UI si es necesario
-    cargarDatosUsuarioUI();
-    
-    // Si estamos en Mi Cuenta, recargar el formulario
-    const miCuentaScreen = document.getElementById('mi-cuenta-screen');
-    if (miCuentaScreen && miCuentaScreen.style.display === 'block') {
-        cargarDatosUsuarioFormulario();
-    }
-    
-    // Si estamos en Mis Pedidos, recargar pedidos
-    const misPedidosScreen = document.getElementById('mis-pedidos-screen');
-    if (misPedidosScreen && misPedidosScreen.style.display === 'block') {
-        cargarPedidosUsuario();
-    }
-};
-
-// Escuchar evento personalizado de SessionManager
-document.addEventListener('usuarioActualizado', (event) => {
-    console.log('📢 Evento usuarioActualizado recibido:', event.detail?.usuario);
-    if (event.detail && event.detail.usuario) {
-        usuarioActual = event.detail.usuario;
-        cargarDatosUsuarioUI();
+        
+        // Botón limpiar notificaciones
+        const btnLimpiar = document.getElementById('btn-limpiar-notif');
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener('click', limpiarTodasNotificaciones);
+        }
+        
+        // Botón notificaciones
+        const notifBtn = document.getElementById('notificaciones-btn');
+        if (notifBtn) {
+            notifBtn.addEventListener('click', toggleNotificaciones);
+        }
     }
 });
 
-// Función para cuando se cierra la sesión
-window.onSessionClosed = function() {
-    console.log('🔴 Sesión cerrada por SessionManager');
-    usuarioActual = null;
-    window.location.href = 'login.html';
-};
-
-});
-
-// Funciones globales
+// Exponer funciones globales
 window.verDetallePedido = verDetallePedido;
 window.cerrarModalDetallePedido = cerrarModalDetallePedido;
 window.mostrarMisPedidos = mostrarMisPedidos;
@@ -727,3 +832,9 @@ window.forzarCargaDatosUsuario = forzarCargaDatosUsuario;
 window.handleUserLogin = handleUserLogin;
 window.mostrarPantallaPrincipal = mostrarPantallaPrincipal;
 window.cargarDatosUsuarioUI = cargarDatosUsuarioUI;
+window.cargarPedidosUsuario = cargarPedidosUsuario;
+window.toggleNotificaciones = toggleNotificaciones;
+window.limpiarTodasNotificaciones = limpiarTodasNotificaciones;
+window.eliminarNotificacionItem = eliminarNotificacionItem;
+window.actualizarContadorNotificaciones = actualizarContadorNotificaciones;
+window.mostrarNotificacionTemporal = mostrarNotificacionTemporal;

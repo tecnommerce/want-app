@@ -1,5 +1,5 @@
 // ===================================================
-// HOME - Lógica de la página principal (CON MEJORAS)
+// HOME - Lógica de la página principal
 // ===================================================
 
 let todosLosNegocios = [];
@@ -29,7 +29,6 @@ function escapeHTML(str) {
 function formatearRubros(rubros, isMobile = false) {
     if (!rubros || rubros.length === 0) return '';
     
-    // En móvil mostrar máximo 2 rubros, en desktop mostrar 3
     const maxRubros = isMobile ? 2 : 3;
     const rubrosMostrar = rubros.slice(0, maxRubros);
     const resto = rubros.length - maxRubros;
@@ -148,7 +147,6 @@ function renderizarNegocios(vendedores) {
         const rubros = v.rubros || [];
         const estadoAbierto = v.estado_abierto === true || v.estado_abierto === 'true' || v.estado_abierto === 1;
         
-        // Mostrar más rubros en desktop (4), en móvil (3)
         const maxRubros = isMobile ? 3 : 4;
         const rubrosMostrar = rubros.slice(0, maxRubros);
         const resto = rubros.length - maxRubros;
@@ -196,7 +194,6 @@ function renderizarNegocios(vendedores) {
 function mostrarSinResultados(termino) {
     const grid = document.getElementById('negocios-grid');
     
-    // Buscar sugerencias basadas en palabras clave
     const terminoPalabras = termino.split(' ');
     const sugerencias = todosLosNegocios.filter(negocio => {
         const nombre = negocio.nombre?.toLowerCase() || '';
@@ -282,13 +279,10 @@ function realizarBusqueda(termino) {
         const resultados = todosLosNegocios.filter(negocio => {
             const nombreMatch = negocio.nombre?.toLowerCase().includes(termino) || false;
             const horarioMatch = negocio.horario?.toLowerCase().includes(termino) || false;
-            
-            // Búsqueda en rubros (todos, no solo primeros)
             const rubrosMatch = (negocio.rubros && negocio.rubros.some(r => 
                 r.toLowerCase().includes(termino)
             )) || false;
             
-            // Búsqueda en productos
             let productosMatch = false;
             if (negocio.productos && negocio.productos.length > 0) {
                 productosMatch = negocio.productos.some(producto => 
@@ -467,6 +461,44 @@ function inicializarCarruselBotones() {
 }
 
 // ===================================================
+// NOTIFICACIONES EN TIEMPO REAL
+// ===================================================
+
+async function inicializarNotificaciones() {
+    const esperarUsuario = setInterval(async () => {
+        let usuario = window.usuarioActual;
+        
+        if (!usuario) {
+            const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+            if (sessionGuardada) {
+                try {
+                    const userData = JSON.parse(sessionGuardada);
+                    usuario = userData;
+                } catch(e) {}
+            }
+        }
+        
+        if (usuario && usuario.id) {
+            clearInterval(esperarUsuario);
+            console.log('🔔 Inicializando notificaciones para usuario:', usuario.id);
+            
+            if (typeof window.suscribirCambiosPedidos === 'function') {
+                window.suscribirCambiosPedidos(usuario.id, (payload) => {
+                    console.log('📢 Notificación recibida:', payload);
+                    if (typeof cargarPedidosUsuario === 'function') {
+                        cargarPedidosUsuario();
+                    }
+                });
+            }
+            
+            if (typeof window.actualizarContadorNotificaciones === 'function') {
+                window.actualizarContadorNotificaciones();
+            }
+        }
+    }, 500);
+}
+
+// ===================================================
 // INICIALIZACIÓN
 // ===================================================
 
@@ -477,6 +509,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     inicializarMenu();
     inicializarBuscador();
     inicializarCarruselBotones();
+    inicializarNotificaciones();
+    
+    // Botón notificaciones
+    const notifBtn = document.getElementById('notificaciones-btn');
+    if (notifBtn) {
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (typeof window.toggleNotificaciones === 'function') {
+                window.toggleNotificaciones();
+            }
+        });
+    }
+    
+    // Cerrar panel al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        const panel = document.getElementById('notificaciones-panel');
+        const btn = document.getElementById('notificaciones-btn');
+        
+        if (panel && panel.classList.contains('active')) {
+            if (!btn?.contains(e.target) && !panel.contains(e.target)) {
+                panel.classList.remove('active');
+                window.notificacionesAbiertas = false;
+            }
+        }
+    });
 });
 
 // Exponer funciones globales
