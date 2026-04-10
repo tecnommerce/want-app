@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>Want | Tienda</title>
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
@@ -13,6 +16,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -20,6 +24,7 @@
             background-color: #f8f9fa;
             color: #1a1a1a;
             line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
         
         .container {
@@ -159,7 +164,6 @@
             gap: 15px;
         }
         
-        /* Icono carrito desktop (se oculta en móvil) */
         .cart-icon-desktop {
             position: relative;
             background: #f5f5f5;
@@ -384,9 +388,8 @@
             font-size: 1rem;
         }
         
-        .cart-floating-btn:hover {
-            background: #16a34a;
-            transform: translateX(-50%) scale(1.02);
+        .cart-floating-btn:active {
+            transform: translateX(-50%) scale(0.98);
         }
         
         .cart-floating-btn .cart-info {
@@ -444,9 +447,8 @@
             height: 100%;
         }
         
-        .producto-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        .producto-card:active {
+            transform: scale(0.99);
         }
         
         .producto-imagen {
@@ -513,6 +515,10 @@
             transition: all 0.2s;
         }
         
+        .btn-agregar:active {
+            transform: scale(0.98);
+        }
+        
         .btn-agregar:hover {
             background: #FF5A00;
             color: white;
@@ -546,6 +552,14 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         
+        /* MODAL CLIENTE - OPTIMIZADO PARA MÓVIL */
+        .cliente-modal-content {
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            border-radius: 28px;
+        }
+        
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -565,17 +579,16 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: #999;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        .modal-close:hover {
-            background: #fee2e2;
-            color: #ef4444;
+        .modal-close:active {
+            background: #f0f0f0;
         }
         
         .modal-body {
@@ -590,16 +603,16 @@
             justify-content: flex-end;
         }
         
-        /* FORMULARIOS */
+        /* FORMULARIOS MÓVIL OPTIMIZADOS */
         .form-group {
             margin-bottom: 16px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
             color: #333;
         }
         
@@ -607,12 +620,15 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 0.9rem;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            font-size: 1rem;
             transition: all 0.2s;
             font-family: inherit;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
         }
         
         .form-group input:focus,
@@ -620,14 +636,11 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #FF5A00;
-            box-shadow: 0 0 0 2px rgba(255,90,0,0.1);
+            box-shadow: 0 0 0 3px rgba(255,90,0,0.1);
         }
         
         .input-help {
-            display: block;
-            margin-top: 5px;
-            font-size: 0.7rem;
-            color: #888;
+            display: none;
         }
         
         .required {
@@ -639,10 +652,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 12px 24px;
+            padding: 14px 24px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
@@ -653,9 +666,8 @@
             color: white;
         }
         
-        .btn-primary:hover {
-            background: #e04e00;
-            transform: translateY(-2px);
+        .btn-primary:active {
+            transform: scale(0.98);
         }
         
         .btn-outline {
@@ -664,7 +676,7 @@
             color: #FF5A00;
         }
         
-        .btn-outline:hover {
+        .btn-outline:active {
             background: #FF5A00;
             color: white;
         }
@@ -673,24 +685,29 @@
             width: 100%;
         }
         
-        .btn-usar-datos {
+        /* Botón "Usar mis datos" estilo chip */
+        .btn-usar-mis-datos-chip {
             background: #f0f0f0;
             border: none;
-            padding: 12px;
+            padding: 10px 16px;
             border-radius: 40px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            width: 100%;
-            margin-bottom: 16px;
             transition: all 0.2s;
+            color: #FF5A00;
+            margin-bottom: 20px;
+            width: auto;
         }
         
-        .btn-usar-datos:hover {
+        .btn-usar-mis-datos-chip i {
+            font-size: 0.9rem;
+        }
+        
+        .btn-usar-mis-datos-chip:active {
             background: #FF5A00;
             color: white;
         }
@@ -700,7 +717,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #f0f0f0;
             flex-wrap: wrap;
             gap: 8px;
@@ -723,24 +740,29 @@
         .carrito-item-cantidad {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
         
         .carrito-item-cantidad button {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .carrito-item-cantidad button:active {
+            background: #f0f0f0;
         }
         
         .carrito-item-total {
             font-weight: 600;
-            min-width: 70px;
+            min-width: 80px;
             text-align: right;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
         
         .btn-eliminar {
@@ -748,7 +770,8 @@
             border: none;
             color: #ff4444;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            padding: 8px;
         }
         
         .carrito-total {
@@ -758,28 +781,37 @@
             flex: 1;
         }
         
-        /* TICKET */
+        /* TICKET CONFIRMACIÓN - OPTIMIZADO MÓVIL */
+        .ticket-modal-content {
+            max-width: 500px;
+            width: 95%;
+            max-height: 90vh;
+            border-radius: 28px;
+            overflow-y: auto;
+        }
+        
         .ticket-info {
             background: #f9f9f9;
             border-radius: 20px;
-            padding: 20px;
+            padding: 16px;
         }
         
         .ticket-section {
             background: white;
             border-radius: 16px;
-            padding: 12px 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            margin-bottom: 12px;
             border: 1px solid #eee;
         }
         
         .ticket-section p {
-            margin: 8px 0;
-            font-size: 0.9rem;
+            margin: 6px 0;
+            font-size: 0.85rem;
+            word-break: break-word;
         }
         
         .productos-lista {
-            margin: 10px 0;
+            margin: 8px 0;
         }
         
         .producto-item {
@@ -787,35 +819,38 @@
             justify-content: space-between;
             padding: 6px 0;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         
         .ticket-total {
             text-align: right;
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px solid #eee;
         }
         
         .ticket-warning {
             background: #FFF3E0;
             border-radius: 16px;
-            padding: 12px 15px;
-            font-size: 0.8rem;
+            padding: 10px 12px;
+            font-size: 0.7rem;
             color: #FF9800;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .ticket-footer {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: flex-end;
+            padding: 15px;
         }
         
         .ticket-footer .btn {
             flex: 1;
+            padding: 12px;
+            font-size: 0.9rem;
         }
         
         /* LOADING */
@@ -867,18 +902,23 @@
         
         .toast-success, .toast-error, .toast-info {
             position: fixed;
-            bottom: 20px;
+            bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 50px;
             z-index: 9999;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             white-space: nowrap;
+            font-weight: 500;
         }
         
         /* RESPONSIVE MÓVIL */
         @media (max-width: 768px) {
+            body {
+                -webkit-touch-callout: none;
+            }
+            
             .container {
                 padding: 0 16px;
             }
@@ -917,17 +957,14 @@
                 text-align: center;
             }
             
-            /* Ocultar carrito desktop en móvil */
             .cart-icon-desktop {
                 display: none !important;
             }
             
-            /* Ocultar avatar desktop en móvil */
             .user-avatar-desktop {
                 display: none !important;
             }
             
-            /* Mostrar avatar móvil */
             .user-avatar-mobile {
                 display: flex !important;
             }
@@ -956,7 +993,6 @@
                 min-height: auto;
             }
             
-            /* IMÁGENES MÁS GRANDES EN MÓVIL */
             .producto-imagen {
                 width: 120px !important;
                 height: 120px !important;
@@ -990,27 +1026,38 @@
             }
             
             .btn-agregar {
-                padding: 6px 12px;
-                font-size: 0.7rem;
+                padding: 8px 12px;
+                font-size: 0.75rem;
                 width: auto;
             }
             
-            /* MODALES MÓVIL */
+            /* MODALES MÓVIL OPTIMIZADOS */
             .modal-content {
                 width: 95%;
                 max-height: 90vh;
+                border-radius: 24px;
+            }
+            
+            .cliente-modal-content {
+                width: 95%;
             }
             
             .modal-footer {
                 flex-direction: column;
+                padding: 15px;
             }
             
             .modal-footer .btn {
                 width: 100%;
+                padding: 14px;
             }
             
             .ticket-footer {
                 flex-direction: column;
+            }
+            
+            .ticket-footer .btn {
+                width: 100%;
             }
             
             .carrito-item {
@@ -1033,6 +1080,7 @@
             }
             
             .toast-success, .toast-error, .toast-info {
+                bottom: 90px;
                 padding: 10px 16px;
                 font-size: 0.75rem;
                 white-space: normal;
@@ -1040,6 +1088,33 @@
                 max-width: 90%;
                 width: auto;
                 line-height: 1.4;
+            }
+            
+            /* TICKET MÓVIL - SIN SCROLL EXCESIVO */
+            .ticket-modal-content {
+                max-height: 85vh;
+            }
+            
+            .ticket-info {
+                padding: 12px;
+            }
+            
+            .ticket-section {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .ticket-section p {
+                font-size: 0.8rem;
+            }
+            
+            .producto-item {
+                font-size: 0.75rem;
+            }
+            
+            .ticket-warning {
+                font-size: 0.65rem;
+                padding: 8px 10px;
             }
         }
         
@@ -1068,10 +1143,21 @@
                 font-size: 1.2rem;
             }
             
-            /* IMÁGENES AÚN MÁS GRANDES EN PANTALLAS MUY PEQUEÑAS */
             .producto-imagen {
-                width: 110px !important;
-                height: 110px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 12px 14px;
+                font-size: 0.95rem;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -1085,7 +1171,7 @@
                 </a>
                 
                 <div class="header-actions">
-                    <!-- AVATAR ESCRITORIO CON DROPDOWN -->
+                    <!-- AVATAR ESCRITORIO -->
                     <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
                         <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
                         <span class="avatar-name" id="avatar-name-desktop"></span>
@@ -1097,7 +1183,7 @@
                         </div>
                     </div>
                     
-                    <!-- AVATAR MÓVIL (abre menú lateral) -->
+                    <!-- AVATAR MÓVIL -->
                     <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
                         <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
                     </div>
@@ -1204,16 +1290,16 @@
         </div>
     </div>
 
-    <!-- Modal del formulario de cliente -->
+    <!-- Modal del formulario de cliente (OPTIMIZADO MÓVIL) -->
     <div class="modal" id="cliente-modal">
-        <div class="modal-content">
+        <div class="modal-content cliente-modal-content">
             <div class="modal-header">
                 <h3>Completá tus datos</h3>
                 <button class="modal-close" id="cerrar-cliente-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <button type="button" class="btn-usar-datos" id="btn-usar-mis-datos">
-                    <i class="fas fa-user-check"></i> Usar mis datos de envío
+                <button type="button" class="btn-usar-mis-datos-chip" id="btn-usar-mis-datos">
+                    <i class="fas fa-user-check"></i> Usar mis datos
                 </button>
                 
                 <form id="cliente-form">
@@ -1223,9 +1309,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Teléfono <span class="required">*</span></label>
+                        <label>Número de WhatsApp <span class="required">*</span></label>
                         <input type="tel" id="cliente-telefono" placeholder="5491112345678" required>
-                        <small class="input-help">📱 Importante: Número de WhatsApp correcto para recibir la confirmación</small>
                     </div>
                     
                     <div class="form-group">
@@ -1243,9 +1328,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Detalles del pedido</label>
-                        <textarea id="pedido-detalles" rows="3" placeholder="Ej: Sin cebolla, extra salsa, bien cocido, sin TACC, etc."></textarea>
-                        <small class="input-help">📝 Contanos cómo querés tu pedido. Aderezos, salsas, cocción, o cualquier indicación especial.</small>
+                        <label>Detalles del pedido (opcional)</label>
+                        <textarea id="pedido-detalles" rows="2" placeholder="Ej: Sin cebolla, extra salsa, bien cocido"></textarea>
                     </div>
                 </form>
             </div>
@@ -1255,21 +1339,21 @@
         </div>
     </div>
 
-    <!-- Modal de confirmación (ticket) -->
+    <!-- Modal de confirmación (ticket) - OPTIMIZADO MÓVIL -->
     <div class="modal" id="confirmacion-modal">
-        <div class="modal-content ticket-modal">
+        <div class="modal-content ticket-modal-content">
             <div class="modal-header">
                 <h3>Confirmá tu pedido</h3>
                 <button class="modal-close" id="cerrar-confirmacion-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="ticket-info">
-                    <h4 style="margin-bottom: 15px; text-align: center;">Resumen del pedido</h4>
+                    <h4 style="margin-bottom: 12px; text-align: center; font-size: 1rem;">Resumen del pedido</h4>
                     <div class="ticket-section">
                         <p><strong>Nombre:</strong> <span id="confirm-nombre"></span></p>
-                        <p><strong>Teléfono:</strong> <span id="confirm-telefono"></span></p>
+                        <p><strong>WhatsApp:</strong> <span id="confirm-telefono"></span></p>
                         <p><strong>Dirección:</strong> <span id="confirm-direccion"></span></p>
-                        <p><strong>Método de pago:</strong> <span id="confirm-pago"></span></p>
+                        <p><strong>Pago:</strong> <span id="confirm-pago"></span></p>
                     </div>
                     <div class="ticket-section">
                         <strong>Productos:</strong>
@@ -1277,18 +1361,18 @@
                         <p class="ticket-total"><strong>Total:</strong> <span id="confirm-total"></span></p>
                     </div>
                     <div class="ticket-section" id="confirm-detalles-section" style="display: none;">
-                        <strong>Detalles del pedido:</strong>
-                        <p id="confirm-detalles"></p>
+                        <strong>Detalles:</strong>
+                        <p id="confirm-detalles" style="font-size: 0.8rem;"></p>
                     </div>
                     <div class="ticket-warning">
                         <i class="fas fa-info-circle"></i>
-                        Verificá que tu número de WhatsApp sea correcto. El vendedor te confirmará tu pedido por ese medio.
+                        Verificá tu número de WhatsApp. El vendedor te confirmará por ahí.
                     </div>
                 </div>
             </div>
             <div class="modal-footer ticket-footer">
-                <button class="btn btn-outline" id="btn-editar-pedido">Editar pedido</button>
-                <button class="btn btn-primary" id="btn-enviar-pedido">Confirmar y enviar</button>
+                <button class="btn btn-outline" id="btn-editar-pedido">Editar</button>
+                <button class="btn btn-primary" id="btn-enviar-pedido">Confirmar</button>
             </div>
         </div>
     </div>
@@ -1351,7 +1435,7 @@
     
     // Configurar eventos
     document.addEventListener('DOMContentLoaded', function() {
-        // Avatar desktop - toggle dropdown
+        // Avatar desktop
         const avatarDesktop = document.getElementById('user-avatar-desktop');
         const dropdown = document.getElementById('avatar-dropdown');
         
@@ -1366,7 +1450,7 @@
             if (dropdown) dropdown.classList.remove('active');
         });
         
-        // Avatar móvil - abre menú lateral
+        // Avatar móvil
         const avatarMobile = document.getElementById('user-avatar-mobile');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuOverlay = document.getElementById('menu-overlay');
@@ -1396,7 +1480,7 @@
             });
         }
         
-        // Botones del menú móvil
+        // Botones menú móvil
         const miCuentaMobile = document.getElementById('mi-cuenta-mobile-tienda');
         if (miCuentaMobile) {
             miCuentaMobile.addEventListener('click', function(e) {
@@ -1416,7 +1500,7 @@
             });
         }
         
-        // Botones del dropdown desktop
+        // Botones dropdown desktop
         const miCuentaDesktop = document.getElementById('mi-cuenta-desktop-tienda');
         if (miCuentaDesktop) {
             miCuentaDesktop.addEventListener('click', function(e) {
@@ -1438,9 +1522,7 @@
         const cartFloatingBtn = document.getElementById('cart-floating-btn');
         if (cartFloatingBtn) {
             cartFloatingBtn.addEventListener('click', function() {
-                if (typeof renderizarCarrito === 'function') {
-                    renderizarCarrito();
-                }
+                if (typeof renderizarCarrito === 'function') renderizarCarrito();
                 const carritoModal = document.getElementById('carrito-modal');
                 if (carritoModal) carritoModal.classList.add('active');
             });
