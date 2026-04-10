@@ -1450,3 +1450,132 @@ function inicializarBotonDescripcion() {
 
 // Si no encuentras la función, busca donde se carga el perfil y agrega esta línea:
 // inicializarBotonDescripcion();
+
+// ===================================================
+// GUARDAR SOLO LA DESCRIPCIÓN (BOTÓN APARTE)
+// ===================================================
+
+async function guardarSoloDescripcion() {
+    console.log('🖊️ Botón guardar descripción clickeado');
+    
+    const vendedorId = localStorage.getItem('vendedorId');
+    const descripcion = document.getElementById('perfil-descripcion').value;
+    const statusSpan = document.getElementById('descripcion-status');
+    
+    console.log('Vendedor ID:', vendedorId);
+    console.log('Descripción a guardar:', descripcion);
+    
+    if (!vendedorId) {
+        if (statusSpan) {
+            statusSpan.innerHTML = '❌ Error: No hay sesión';
+            statusSpan.style.color = 'red';
+        }
+        return;
+    }
+    
+    if (statusSpan) {
+        statusSpan.innerHTML = '💾 Guardando...';
+        statusSpan.style.color = '#007bff';
+    }
+    
+    try {
+        const result = await window.callAPI('actualizarVendedor', {
+            id: parseInt(vendedorId),
+            descripcion: descripcion
+        });
+        
+        console.log('Respuesta de la API:', result);
+        
+        if (result.success) {
+            if (statusSpan) {
+                statusSpan.innerHTML = '✅ ¡Descripción guardada!';
+                statusSpan.style.color = 'green';
+                setTimeout(() => {
+                    if (statusSpan) statusSpan.innerHTML = '';
+                }, 3000);
+            }
+            // Mostrar notificación flotante
+            mostrarNotificacion('Descripción guardada correctamente', 'success');
+        } else {
+            if (statusSpan) {
+                statusSpan.innerHTML = '❌ Error: ' + (result.error || 'No se pudo guardar');
+                statusSpan.style.color = 'red';
+            }
+            mostrarNotificacion('Error al guardar descripción', 'error');
+        }
+    } catch (error) {
+        console.error('Error guardando descripción:', error);
+        if (statusSpan) {
+            statusSpan.innerHTML = '❌ Error de conexión';
+            statusSpan.style.color = 'red';
+        }
+    }
+}
+
+// Función para inicializar el botón (se llama CADA VEZ que se abre el modal)
+function inicializarBotonDescripcion() {
+    const btn = document.getElementById('btn-guardar-descripcion');
+    if (btn) {
+        // Remover event listeners anteriores para evitar duplicados
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('✅ Botón clickeado - guardando descripción');
+            guardarSoloDescripcion();
+        });
+        console.log('✅ Botón guardar descripción inicializado');
+    } else {
+        console.log('⚠️ Botón btn-guardar-descripcion no encontrado en el DOM');
+    }
+}
+
+// Buscar la función que ABRE el modal de perfil y agregar la inicialización
+// Método 1: Buscar la función original y modificarla
+function patchAbrirModalPerfil() {
+    // Si existe la función original abrirModalPerfil, la envolvemos
+    if (typeof window.abrirModalPerfilOriginal === 'undefined' && typeof abrirModalPerfil !== 'undefined') {
+        window.abrirModalPerfilOriginal = abrirModalPerfil;
+        window.abrirModalPerfil = function() {
+            window.abrirModalPerfilOriginal();
+            setTimeout(inicializarBotonDescripcion, 100);
+        };
+    }
+}
+
+// Método 2: Usar MutationObserver para detectar cuando el modal se abre
+function observarModalPerfil() {
+    const modalPerfil = document.getElementById('modal-perfil');
+    if (modalPerfil) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'style') {
+                    if (modalPerfil.style.display !== 'none' && modalPerfil.style.display !== '') {
+                        console.log('📂 Modal de perfil abierto');
+                        setTimeout(inicializarBotonDescripcion, 200);
+                    }
+                }
+            });
+        });
+        observer.observe(modalPerfil, { attributes: true });
+        console.log('✅ Observer del modal de perfil configurado');
+    } else {
+        console.log('⚠️ Modal perfil no encontrado, reintentando...');
+        setTimeout(observarModalPerfil, 500);
+    }
+}
+
+// Iniciar la observación del modal
+setTimeout(observarModalPerfil, 1000);
+
+// También intentar inicializar cuando se hace clic en el botón "Perfil"
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'btn-open-profile' || e.target.closest('#btn-open-profile')) {
+        console.log('🖱️ Botón Perfil clickeado');
+        setTimeout(inicializarBotonDescripcion, 300);
+    }
+});
+
+console.log('✅ Script de descripción cargado');
