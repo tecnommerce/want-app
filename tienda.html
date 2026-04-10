@@ -195,21 +195,21 @@
             justify-content: center;
         }
         
-        /* AVATAR USUARIO */
+        /* AVATAR USUARIO - ESCRITORIO */
         .user-avatar-desktop {
+            position: relative;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 10px;
-            cursor: pointer;
             padding: 5px 12px;
             background: #f5f5f5;
             border-radius: 40px;
-            position: relative;
+            transition: all 0.2s;
         }
         
-        .user-avatar-mobile {
-            display: none;
-            cursor: pointer;
+        .user-avatar-desktop:hover {
+            background: #e8e8e8;
         }
         
         .avatar-img {
@@ -233,9 +233,10 @@
             background: white;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            min-width: 180px;
+            min-width: 200px;
             display: none;
             z-index: 1000;
+            overflow: hidden;
         }
         
         .avatar-dropdown.active {
@@ -245,15 +246,118 @@
         .avatar-dropdown a {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 15px;
+            gap: 12px;
+            padding: 12px 16px;
             text-decoration: none;
             color: #333;
             font-size: 0.85rem;
+            transition: background 0.2s;
         }
         
         .avatar-dropdown a:hover {
             background: #FFF5EB;
+        }
+        
+        .avatar-dropdown a i {
+            width: 20px;
+            color: #FF5A00;
+        }
+        
+        /* AVATAR USUARIO - MÓVIL */
+        .user-avatar-mobile {
+            display: none;
+            cursor: pointer;
+        }
+        
+        /* MENÚ MÓVIL */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            z-index: 2000;
+            transition: right 0.3s ease;
+            padding: 70px 25px 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-menu.active {
+            right: 0;
+        }
+        
+        .menu-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
+        }
+        
+        .menu-overlay.active {
+            display: block;
+        }
+        
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .mobile-nav-link {
+            font-size: 1rem;
+            color: #333;
+            text-decoration: none;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .mobile-nav-link i {
+            width: 24px;
+            color: #FF5A00;
+        }
+        
+        .mobile-social {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .mobile-social .social-icon {
+            width: 40px;
+            height: 40px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #666;
+            text-decoration: none;
         }
         
         /* PRODUCTOS */
@@ -360,97 +464,6 @@
         .btn-agregar:hover {
             background: #FF5A00;
             color: white;
-        }
-        
-        /* MENÚ MÓVIL */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 280px;
-            height: 100vh;
-            background: white;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
-            z-index: 2000;
-            transition: right 0.3s ease;
-            padding: 70px 25px 30px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .mobile-menu.active {
-            right: 0;
-        }
-        
-        .menu-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-        }
-        
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1500;
-            display: none;
-        }
-        
-        .menu-overlay.active {
-            display: block;
-        }
-        
-        .mobile-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .mobile-nav-link {
-            font-size: 1rem;
-            color: #333;
-            text-decoration: none;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .mobile-nav-link i {
-            width: 24px;
-            color: #FF5A00;
-        }
-        
-        .mobile-social {
-            display: flex;
-            gap: 25px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        
-        .mobile-social .social-icon {
-            width: 40px;
-            height: 40px;
-            background: #f5f5f5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #666;
-            text-decoration: none;
         }
         
         /* MODALES */
@@ -859,10 +872,12 @@
                 font-size: 1rem;
             }
             
+            /* Ocultar avatar desktop en móvil */
             .user-avatar-desktop {
                 display: none !important;
             }
             
+            /* Mostrar avatar móvil */
             .user-avatar-mobile {
                 display: flex !important;
             }
@@ -977,6 +992,15 @@
             }
         }
         
+        @media (min-width: 769px) {
+            .user-avatar-mobile {
+                display: none !important;
+            }
+            .user-avatar-desktop {
+                display: flex !important;
+            }
+        }
+        
         @media (max-width: 480px) {
             .vendedor-logo-grande {
                 width: 70px;
@@ -1003,7 +1027,7 @@
                 </a>
                 
                 <div class="header-actions">
-                    <!-- AVATAR ESCRITORIO -->
+                    <!-- AVATAR ESCRITORIO CON DROPDOWN -->
                     <div class="user-avatar-desktop" id="user-avatar-desktop" style="display: none;">
                         <img src="" alt="Foto perfil" id="avatar-img-desktop" class="avatar-img">
                         <span class="avatar-name" id="avatar-name-desktop"></span>
@@ -1015,7 +1039,7 @@
                         </div>
                     </div>
                     
-                    <!-- AVATAR MÓVIL -->
+                    <!-- AVATAR MÓVIL (abre menú lateral) -->
                     <div class="user-avatar-mobile" id="user-avatar-mobile" style="display: none;">
                         <img src="" alt="Foto perfil" id="avatar-img-mobile" class="avatar-img">
                     </div>
@@ -1224,8 +1248,128 @@
         }
         if (typeof window.usuarioActual !== 'undefined' && window.usuarioActual) {
             console.log('✅ Usuario disponible en tienda:', window.usuarioActual.email);
+            // Actualizar avatar
+            cargarDatosUsuarioUI();
         }
     })();
+    
+    // Función para cargar datos del usuario en el avatar (desde auth-usuario.js)
+    function cargarDatosUsuarioUI() {
+        if (!window.usuarioActual) return;
+        
+        const avatarUrl = window.usuarioActual.foto_perfil || 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(window.usuarioActual.nombre);
+        
+        const avatarImgDesktop = document.getElementById('avatar-img-desktop');
+        const avatarNameDesktop = document.getElementById('avatar-name-desktop');
+        const avatarImgMobile = document.getElementById('avatar-img-mobile');
+        
+        if (avatarImgDesktop) {
+            avatarImgDesktop.src = avatarUrl;
+            avatarImgDesktop.onerror = () => {
+                avatarImgDesktop.src = 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(window.usuarioActual.nombre);
+            };
+        }
+        if (avatarNameDesktop) avatarNameDesktop.textContent = window.usuarioActual.nombre;
+        if (avatarImgMobile) {
+            avatarImgMobile.src = avatarUrl;
+            avatarImgMobile.onerror = () => {
+                avatarImgMobile.src = 'https://ui-avatars.com/api/?background=FF5A00&color=fff&name=' + encodeURIComponent(window.usuarioActual.nombre);
+            };
+        }
+        
+        // Mostrar el avatar en desktop y móvil
+        const avatarDesktop = document.getElementById('user-avatar-desktop');
+        const avatarMobile = document.getElementById('user-avatar-mobile');
+        if (avatarDesktop) avatarDesktop.style.display = 'flex';
+        if (avatarMobile) avatarMobile.style.display = 'flex';
+    }
+    
+    // Configurar eventos del avatar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Avatar desktop - toggle dropdown
+        const avatarDesktop = document.getElementById('user-avatar-desktop');
+        const dropdown = document.getElementById('avatar-dropdown');
+        
+        if (avatarDesktop) {
+            avatarDesktop.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (dropdown) dropdown.classList.toggle('active');
+            });
+        }
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function() {
+            if (dropdown) dropdown.classList.remove('active');
+        });
+        
+        // Avatar móvil - abre menú lateral
+        const avatarMobile = document.getElementById('user-avatar-mobile');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuClose = document.getElementById('menu-close');
+        
+        if (avatarMobile) {
+            avatarMobile.addEventListener('click', function() {
+                if (mobileMenu) mobileMenu.classList.add('active');
+                if (menuOverlay) menuOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        }
+        
+        if (menuClose) {
+            menuClose.addEventListener('click', function() {
+                if (mobileMenu) mobileMenu.classList.remove('active');
+                if (menuOverlay) menuOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', function() {
+                if (mobileMenu) mobileMenu.classList.remove('active');
+                if (menuOverlay) menuOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        // Botones del menú móvil
+        const miCuentaMobile = document.getElementById('mi-cuenta-mobile-tienda');
+        if (miCuentaMobile) {
+            miCuentaMobile.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (typeof mostrarMiCuenta === 'function') mostrarMiCuenta();
+                if (mobileMenu) mobileMenu.classList.remove('active');
+                if (menuOverlay) menuOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        const logoutMobile = document.getElementById('logout-mobile-tienda');
+        if (logoutMobile) {
+            logoutMobile.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (typeof cerrarSesion === 'function') cerrarSesion();
+            });
+        }
+        
+        // Botones del dropdown desktop
+        const miCuentaDesktop = document.getElementById('mi-cuenta-desktop-tienda');
+        if (miCuentaDesktop) {
+            miCuentaDesktop.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (typeof mostrarMiCuenta === 'function') mostrarMiCuenta();
+                if (dropdown) dropdown.classList.remove('active');
+            });
+        }
+        
+        const cerrarSesionDesktop = document.getElementById('cerrar-sesion-desktop-tienda');
+        if (cerrarSesionDesktop) {
+            cerrarSesionDesktop.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (typeof cerrarSesion === 'function') cerrarSesion();
+            });
+        }
+    });
 </script>
 </body>
 </html>
