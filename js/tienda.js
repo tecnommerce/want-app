@@ -52,6 +52,27 @@ async function cargarTienda() {
                     logoHeader.style.display = 'flex';
                 }
                 
+                // Mostrar descripción del negocio
+                const descripcionElement = document.getElementById('negocio-descripcion');
+                if (descripcionElement && vendedorActual.descripcion) {
+                    descripcionElement.textContent = vendedorActual.descripcion;
+                    descripcionElement.style.display = 'block';
+                }
+                
+                // Mostrar rubros del negocio
+                const rubrosContainer = document.getElementById('negocio-rubros');
+                if (rubrosContainer && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
+                    rubrosContainer.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+                    rubrosContainer.style.display = 'flex';
+                }
+                
+                // Mostrar horario
+                const horarioElement = document.getElementById('negocio-horario');
+                if (horarioElement && vendedorActual.horario) {
+                    horarioElement.innerHTML = `<i class="fas fa-clock"></i> ${escapeHTML(vendedorActual.horario)}`;
+                    horarioElement.style.display = 'flex';
+                }
+                
                 console.log('✅ Vendedor cargado:', vendedorActual);
             } else {
                 mostrarToast('Este negocio no está disponible', 'error');
@@ -113,7 +134,6 @@ function renderizarProductos() {
         return;
     }
     
-    // Detectar si es móvil
     const isMobile = window.innerWidth <= 768;
     
     grid.innerHTML = productos.map(producto => {
@@ -290,10 +310,8 @@ function mostrarFormularioCliente() {
 function cargarDatosUsuarioEnFormulario() {
     console.log('📝 Intentando cargar datos del usuario...');
     
-    // Intentar obtener usuario desde window (global)
     let usuario = window.usuarioActual;
     
-    // Si no está, intentar desde localStorage
     if (!usuario) {
         const sessionGuardada = localStorage.getItem('want_usuario_sesion');
         if (sessionGuardada) {
@@ -310,7 +328,6 @@ function cargarDatosUsuarioEnFormulario() {
         return;
     }
     
-    // Cargar datos en el formulario
     const nombreInput = document.getElementById('cliente-nombre');
     const telefonoInput = document.getElementById('cliente-telefono');
     const direccionInput = document.getElementById('cliente-direccion');
@@ -320,26 +337,6 @@ function cargarDatosUsuarioEnFormulario() {
     if (direccionInput) direccionInput.value = `${usuario.direccion || ''}, ${usuario.ciudad || ''}, ${usuario.provincia || ''}`;
     
     mostrarToast('Datos cargados desde tu perfil', 'success');
-}
-
-async function cargarUsuarioDesdeAPI() {
-    try {
-        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
-        if (sessionGuardada) {
-            const userData = JSON.parse(sessionGuardada);
-            const result = await obtenerUsuarioPorAuthId(userData.id);
-            if (result.success && result.usuario) {
-                window.usuarioActual = result.usuario;
-                document.getElementById('cliente-nombre').value = `${result.usuario.nombre} ${result.usuario.apellido}`;
-                document.getElementById('cliente-telefono').value = result.usuario.telefono;
-                document.getElementById('cliente-direccion').value = `${result.usuario.direccion}, ${result.usuario.ciudad}, ${result.usuario.provincia}`;
-                mostrarToast('Datos cargados desde tu perfil', 'success');
-            }
-        }
-    } catch (error) {
-        console.error('Error cargando usuario:', error);
-        mostrarToast('Error al cargar tus datos', 'error');
-    }
 }
 
 async function confirmarPedido() {
@@ -395,13 +392,11 @@ async function confirmarPedido() {
         usuario_id: usuarioId
     };
     
-    // Guardar en localStorage como respaldo
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
     const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    // Guardar en Supabase
     const resultado = await guardarPedidoEnSupabase(pedido);
     
     carrito = [];
@@ -428,7 +423,6 @@ async function confirmarPedido() {
 async function guardarPedidoEnSupabase(pedido) {
     try {
         console.log('📤 Intentando guardar en Supabase...');
-        console.log('📦 Datos del pedido:', pedido);
         
         const response = await postAPI('crearPedido', {
             cliente_nombre: pedido.cliente_nombre,
@@ -443,13 +437,11 @@ async function guardarPedidoEnSupabase(pedido) {
             vendedor_nombre: pedido.vendedor_nombre || null
         });
         
-        console.log('📥 Respuesta de Supabase:', response);
-        
         if (response && response.success) {
             console.log('✅ Pedido guardado en Supabase. ID:', response.pedidoId);
             return { success: true, pedidoId: response.pedidoId };
         } else {
-            console.error('❌ Error al guardar en Supabase:', response?.error || 'Error desconocido');
+            console.error('❌ Error al guardar en Supabase:', response?.error);
             return { success: false, error: response?.error };
         }
     } catch (error) {
@@ -514,7 +506,6 @@ async function enviarPedido() {
         try {
             const userData = JSON.parse(usuarioGuardado);
             usuarioId = userData.id;
-            console.log('📝 Usuario ID para el pedido:', usuarioId);
         } catch (e) {}
     }
     
@@ -537,15 +528,11 @@ async function enviarPedido() {
         usuario_id: usuarioId
     };
     
-    console.log('📦 Pedido a enviar:', pedido);
-    
-    // Guardar en localStorage como respaldo
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
     const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
-    // Guardar en Supabase
     const resultado = await guardarPedidoEnSupabase(pedido);
     
     carrito = [];
@@ -578,7 +565,6 @@ function mostrarMensajeExito(usuarioId) {
     
     setTimeout(() => {
         mensaje.remove();
-        // Redirigir a Mis Pedidos
         window.location.href = 'index.html#mis-pedidos';
     }, 2000);
 }
@@ -710,458 +696,3 @@ window.modificarCantidad = modificarCantidad;
 window.eliminarDelCarrito = eliminarDelCarrito;
 window.confirmarPedido = confirmarPedido;
 window.cargarDatosUsuarioEnFormulario = cargarDatosUsuarioEnFormulario;
-
-// Avatar en tienda.html
-function mostrarAvatarEnTienda() {
-    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
-    if (!sessionGuardada) return;
-    try {
-        const userData = JSON.parse(sessionGuardada);
-        if (userData && userData.id) {
-            const avatarDesktop = document.getElementById('user-avatar-desktop');
-            const avatarMobile = document.getElementById('user-avatar-mobile');
-            if (avatarDesktop) avatarDesktop.style.display = 'flex';
-            if (avatarMobile) avatarMobile.style.display = 'flex';
-            const avatarImgDesktop = document.getElementById('avatar-img-desktop');
-            const avatarImgMobile = document.getElementById('avatar-img-mobile');
-            const avatarName = document.getElementById('avatar-name-desktop');
-            const nombre = userData.nombre || 'Usuario';
-            const avatarUrl = `https://ui-avatars.com/api/?background=FF5A00&color=fff&name=${encodeURIComponent(nombre)}`;
-            if (avatarImgDesktop) avatarImgDesktop.src = avatarUrl;
-            if (avatarImgMobile) avatarImgMobile.src = avatarUrl;
-            if (avatarName) avatarName.textContent = nombre;
-        }
-    } catch (e) {}
-}
-
-function configurarAvatarEventos() {
-    const avatarDesktop = document.getElementById('user-avatar-desktop');
-    const dropdown = document.getElementById('avatar-dropdown');
-    if (avatarDesktop && dropdown) {
-        avatarDesktop.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        });
-        document.addEventListener('click', () => {
-            dropdown.classList.remove('active');
-        });
-    }
-    const cerrarSesionBtn = document.getElementById('cerrar-sesion-desktop');
-    if (cerrarSesionBtn) {
-        cerrarSesionBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (typeof cerrarSesion === 'function') {
-                await cerrarSesion();
-            } else {
-                localStorage.removeItem('want_usuario_sesion');
-                window.location.href = 'login.html';
-            }
-        });
-    }
-    const miCuentaBtn = document.getElementById('mi-cuenta-desktop');
-    if (miCuentaBtn) {
-        miCuentaBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'index.html#mi-cuenta';
-        });
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    mostrarAvatarEnTienda();
-    configurarAvatarEventos();
-});
-
-// ===================================================
-// AVATAR Y FOTO DE PERFIL EN TIENDA.HTML
-// ===================================================
-
-async function cargarAvatarEnTienda() {
-    console.log('🖼️ Cargando avatar en tienda...');
-    
-    // Obtener usuario actual
-    let usuario = window.usuarioActual;
-    
-    if (!usuario) {
-        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
-        if (sessionGuardada) {
-            try {
-                const userData = JSON.parse(sessionGuardada);
-                const result = await obtenerUsuarioPorAuthId(userData.id);
-                if (result.success && result.usuario) {
-                    usuario = result.usuario;
-                    window.usuarioActual = usuario;
-                }
-            } catch (e) {}
-        }
-    }
-    
-    if (!usuario) {
-        console.log('⚠️ No hay usuario logueado');
-        return;
-    }
-    
-    console.log('✅ Usuario encontrado:', usuario.email);
-    
-    // Mostrar contenedores del avatar
-    const avatarDesktop = document.getElementById('user-avatar-desktop');
-    const avatarMobile = document.getElementById('user-avatar-mobile');
-    
-    if (avatarDesktop) avatarDesktop.style.display = 'flex';
-    if (avatarMobile) avatarMobile.style.display = 'flex';
-    
-    // Cargar foto de perfil (desde Google o generada)
-    const avatarImgDesktop = document.getElementById('avatar-img-desktop');
-    const avatarImgMobile = document.getElementById('avatar-img-mobile');
-    const avatarName = document.getElementById('avatar-name-desktop');
-    
-    const nombre = usuario.nombre || 'Usuario';
-    const apellido = usuario.apellido || '';
-    const nombreCompleto = `${nombre} ${apellido}`.trim();
-    
-    // Usar foto de Google si existe, si no, generar avatar
-    let fotoUrl = usuario.foto_perfil;
-    if (!fotoUrl) {
-        fotoUrl = `https://ui-avatars.com/api/?background=FF5A00&color=fff&name=${encodeURIComponent(nombreCompleto)}&length=2&size=36&font-size=18`;
-    }
-    
-    if (avatarImgDesktop) avatarImgDesktop.src = fotoUrl;
-    if (avatarImgMobile) avatarImgMobile.src = fotoUrl;
-    if (avatarName) avatarName.textContent = nombre;
-    
-    console.log('✅ Avatar cargado con foto:', fotoUrl);
-}
-
-function configurarAvatarEventosTienda() {
-    const avatarDesktop = document.getElementById('user-avatar-desktop');
-    const dropdown = document.getElementById('avatar-dropdown');
-    
-    if (avatarDesktop && dropdown) {
-        // Abrir/cerrar dropdown al hacer clic
-        avatarDesktop.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        });
-        
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', () => {
-            dropdown.classList.remove('active');
-        });
-    }
-    
-    // Cerrar sesión
-    const cerrarSesionBtn = document.getElementById('cerrar-sesion-desktop-tienda');
-    if (cerrarSesionBtn) {
-        cerrarSesionBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (typeof cerrarSesion === 'function') {
-                await cerrarSesion();
-            } else {
-                localStorage.removeItem('want_usuario_sesion');
-                window.location.href = 'login.html';
-            }
-        });
-    }
-    
-    // Mi cuenta
-    const miCuentaBtn = document.getElementById('mi-cuenta-desktop-tienda');
-    if (miCuentaBtn) {
-        miCuentaBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'index.html#mi-cuenta';
-        });
-    }
-    
-    // Inicio
-    const inicioBtn = document.querySelector('#avatar-dropdown a[href="index.html"]');
-    if (inicioBtn) {
-        inicioBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'index.html';
-        });
-    }
-    
-    // Mis pedidos
-    const misPedidosBtn = document.querySelector('#avatar-dropdown a[href="index.html#mis-pedidos"]');
-    if (misPedidosBtn) {
-        misPedidosBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'index.html#mis-pedidos';
-        });
-    }
-}
-
-// Inicializar avatar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        cargarAvatarEnTienda();
-        configurarAvatarEventosTienda();
-    }, 500);
-});
-// ===================================================
-// MENÚ MÓVIL EN TIENDA.HTML
-// ===================================================
-
-function configurarMenuMovilTienda() {
-    const avatarMobile = document.getElementById('user-avatar-mobile');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    const menuClose = document.getElementById('menu-close');
-    
-    function openMenu() {
-        if (mobileMenu) mobileMenu.classList.add('active');
-        if (menuOverlay) menuOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function closeMenu() {
-        if (mobileMenu) mobileMenu.classList.remove('active');
-        if (menuOverlay) menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    
-    if (avatarMobile) {
-        avatarMobile.addEventListener('click', openMenu);
-    }
-    
-    if (menuClose) {
-        menuClose.addEventListener('click', closeMenu);
-    }
-    
-    if (menuOverlay) {
-        menuOverlay.addEventListener('click', closeMenu);
-    }
-    
-    // Opciones del menú móvil
-    const miCuentaMobile = document.getElementById('mi-cuenta-mobile-tienda');
-    const logoutMobile = document.getElementById('logout-mobile-tienda');
-    
-    if (miCuentaMobile) {
-        miCuentaMobile.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeMenu();
-            window.location.href = 'index.html#mi-cuenta';
-        });
-    }
-    
-    if (logoutMobile) {
-        logoutMobile.addEventListener('click', async (e) => {
-            e.preventDefault();
-            closeMenu();
-            if (typeof cerrarSesion === 'function') {
-                await cerrarSesion();
-            } else {
-                localStorage.removeItem('want_usuario_sesion');
-                window.location.href = 'login.html';
-            }
-        });
-    }
-}
-
-// Llamar a la función después de cargar el avatar
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        cargarAvatarEnTienda();
-        configurarAvatarEventosTienda();
-        configurarMenuMovilTienda();
-    }, 500);
-});
-
-// ===================================================
-// AVATAR Y MENÚ MÓVIL COMPLETO PARA TIENDA.HTML
-// ===================================================
-
-async function cargarAvatarEnTienda() {
-    console.log('🖼️ Cargando avatar en tienda...');
-    
-    let usuario = window.usuarioActual;
-    
-    if (!usuario) {
-        const sessionGuardada = localStorage.getItem('want_usuario_sesion');
-        if (sessionGuardada) {
-            try {
-                const userData = JSON.parse(sessionGuardada);
-                const result = await obtenerUsuarioPorAuthId(userData.id);
-                if (result.success && result.usuario) {
-                    usuario = result.usuario;
-                    window.usuarioActual = usuario;
-                }
-            } catch (e) {}
-        }
-    }
-    
-    if (!usuario) {
-        console.log('⚠️ No hay usuario logueado');
-        return;
-    }
-    
-    console.log('✅ Usuario encontrado:', usuario.email);
-    
-    // Mostrar contenedores del avatar
-    const avatarDesktop = document.getElementById('user-avatar-desktop');
-    const avatarMobile = document.getElementById('user-avatar-mobile');
-    
-    if (avatarDesktop) avatarDesktop.style.display = 'flex';
-    if (avatarMobile) avatarMobile.style.display = 'flex';
-    
-    // Cargar foto de perfil
-    const avatarImgDesktop = document.getElementById('avatar-img-desktop');
-    const avatarImgMobile = document.getElementById('avatar-img-mobile');
-    const avatarName = document.getElementById('avatar-name-desktop');
-    
-    const nombre = usuario.nombre || 'Usuario';
-    const apellido = usuario.apellido || '';
-    const nombreCompleto = `${nombre} ${apellido}`.trim();
-    
-    let fotoUrl = usuario.foto_perfil;
-    if (!fotoUrl) {
-        fotoUrl = `https://ui-avatars.com/api/?background=FF5A00&color=fff&name=${encodeURIComponent(nombreCompleto)}&length=2&size=36&font-size=18`;
-    }
-    
-    if (avatarImgDesktop) avatarImgDesktop.src = fotoUrl;
-    if (avatarImgMobile) avatarImgMobile.src = fotoUrl;
-    if (avatarName) avatarName.textContent = nombre;
-    
-    console.log('✅ Avatar cargado');
-}
-
-function configurarAvatarEventosTienda() {
-    // ========== ESCRITORIO ==========
-    const avatarDesktop = document.getElementById('user-avatar-desktop');
-    const dropdown = document.getElementById('avatar-dropdown');
-    
-    if (avatarDesktop && dropdown) {
-        avatarDesktop.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        });
-        
-        document.addEventListener('click', () => {
-            dropdown.classList.remove('active');
-        });
-    }
-    
-    // ========== MÓVIL ==========
-    const avatarMobile = document.getElementById('user-avatar-mobile');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    const menuClose = document.getElementById('menu-close');
-    
-    console.log('📱 Configurando menú móvil...');
-    console.log('avatarMobile encontrado:', !!avatarMobile);
-    console.log('mobileMenu encontrado:', !!mobileMenu);
-    
-    function openMobileMenu() {
-        console.log('🔓 Abriendo menú móvil');
-        if (mobileMenu) mobileMenu.classList.add('active');
-        if (menuOverlay) menuOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function closeMobileMenu() {
-        console.log('🔒 Cerrando menú móvil');
-        if (mobileMenu) mobileMenu.classList.remove('active');
-        if (menuOverlay) menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    
-    if (avatarMobile) {
-        // Eliminar event listeners anteriores para evitar duplicados
-        const newAvatarMobile = avatarMobile.cloneNode(true);
-        avatarMobile.parentNode.replaceChild(newAvatarMobile, avatarMobile);
-        
-        newAvatarMobile.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🖱️ Click en avatar móvil');
-            openMobileMenu();
-        });
-        
-        // Actualizar referencia
-        document.getElementById('user-avatar-mobile').src = newAvatarMobile.src;
-    } else {
-        console.log('❌ avatarMobile NO encontrado');
-    }
-    
-    if (menuClose) {
-        menuClose.addEventListener('click', closeMobileMenu);
-    }
-    
-    if (menuOverlay) {
-        menuOverlay.addEventListener('click', closeMobileMenu);
-    }
-    
-    // Opciones del menú móvil
-    const miCuentaMobile = document.getElementById('mi-cuenta-mobile-tienda');
-    const logoutMobile = document.getElementById('logout-mobile-tienda');
-    const misPedidosMobile = document.querySelector('#mobile-menu a[href="index.html#mis-pedidos"]');
-    const inicioMobile = document.querySelector('#mobile-menu a[href="index.html"]');
-    
-    if (miCuentaMobile) {
-        miCuentaMobile.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeMobileMenu();
-            window.location.href = 'index.html#mi-cuenta';
-        });
-    }
-    
-    if (logoutMobile) {
-        logoutMobile.addEventListener('click', async (e) => {
-            e.preventDefault();
-            closeMobileMenu();
-            if (typeof cerrarSesion === 'function') {
-                await cerrarSesion();
-            } else {
-                localStorage.removeItem('want_usuario_sesion');
-                window.location.href = 'login.html';
-            }
-        });
-    }
-    
-    if (misPedidosMobile) {
-        misPedidosMobile.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeMobileMenu();
-            window.location.href = 'index.html#mis-pedidos';
-        });
-    }
-    
-    if (inicioMobile) {
-        inicioMobile.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeMobileMenu();
-            window.location.href = 'index.html';
-        });
-    }
-    
-    // Cerrar sesión escritorio
-    const cerrarSesionBtn = document.getElementById('cerrar-sesion-desktop-tienda');
-    if (cerrarSesionBtn) {
-        cerrarSesionBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (typeof cerrarSesion === 'function') {
-                await cerrarSesion();
-            } else {
-                localStorage.removeItem('want_usuario_sesion');
-                window.location.href = 'login.html';
-            }
-        });
-    }
-    
-    // Mi cuenta escritorio
-    const miCuentaBtn = document.getElementById('mi-cuenta-desktop-tienda');
-    if (miCuentaBtn) {
-        miCuentaBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'index.html#mi-cuenta';
-        });
-    }
-}
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        cargarAvatarEnTienda();
-        configurarAvatarEventosTienda();
-    }, 500);
-});
