@@ -40,19 +40,16 @@ async function cargarTienda() {
             );
             
             if (vendedorActual) {
-                // Mostrar la sección de perfil del vendedor
                 const perfilSection = document.getElementById('vendedor-perfil-section');
                 if (perfilSection) {
                     perfilSection.style.display = 'block';
                 }
                 
-                // Nombre del vendedor
                 const nombreElement = document.getElementById('vendedor-nombre-tienda');
                 if (nombreElement) {
                     nombreElement.textContent = vendedorActual.nombre;
                 }
                 
-                // Logo grande
                 const logoGrande = document.getElementById('vendedor-logo-grande-img');
                 const logoGrandeContainer = document.getElementById('vendedor-logo-grande');
                 if (logoGrande && vendedorActual.logo_url) {
@@ -62,54 +59,19 @@ async function cargarTienda() {
                     logoGrandeContainer.style.display = 'flex';
                 }
                 
-                // Logo pequeño en el header (opcional)
-                const logoHeader = document.getElementById('vendedor-logo-header');
-                const logoImg = document.getElementById('vendedor-logo-img');
-                if (logoHeader && logoImg && vendedorActual.logo_url) {
-                    logoImg.src = vendedorActual.logo_url;
-                    logoHeader.style.display = 'flex';
-                }
-                
-                // Descripción del negocio
                 const descripcionElement = document.getElementById('vendedor-descripcion-tienda');
                 if (descripcionElement && vendedorActual.descripcion) {
                     descripcionElement.textContent = vendedorActual.descripcion;
                 }
                 
-                // Rubros del negocio
                 const rubrosContainer = document.getElementById('vendedor-rubros-tienda');
                 if (rubrosContainer && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
                     rubrosContainer.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
                 }
                 
-                // Horario
                 const horarioElement = document.getElementById('vendedor-horario-tienda');
                 if (horarioElement && vendedorActual.horario) {
                     horarioElement.innerHTML = `<i class="fas fa-clock"></i> <span>${escapeHTML(vendedorActual.horario)}</span>`;
-                }
-                
-                // También actualizar el header (para compatibilidad)
-                const nombreNegocioHeader = document.getElementById('negocio-nombre');
-                if (nombreNegocioHeader) {
-                    nombreNegocioHeader.textContent = vendedorActual.nombre;
-                }
-                
-                const descripcionHeader = document.getElementById('negocio-descripcion');
-                if (descripcionHeader && vendedorActual.descripcion) {
-                    descripcionHeader.textContent = vendedorActual.descripcion;
-                    descripcionHeader.style.display = 'block';
-                }
-                
-                const rubrosHeader = document.getElementById('negocio-rubros');
-                if (rubrosHeader && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
-                    rubrosHeader.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
-                    rubrosHeader.style.display = 'flex';
-                }
-                
-                const horarioHeader = document.getElementById('negocio-horario');
-                if (horarioHeader && vendedorActual.horario) {
-                    horarioHeader.innerHTML = `<i class="fas fa-clock"></i> ${escapeHTML(vendedorActual.horario)}`;
-                    horarioHeader.style.display = 'flex';
                 }
                 
                 console.log('✅ Vendedor cargado:', vendedorActual);
@@ -238,6 +200,7 @@ function agregarAlCarrito(productoId) {
     
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
+    actualizarCarritoUI();
     renderizarCarrito();
     mostrarToast(`${producto.nombre} agregado al carrito`, 'success');
 }
@@ -262,13 +225,43 @@ function cargarCarritoDelVendedor() {
         carrito = [];
     }
     actualizarContadorCarrito();
+    actualizarCarritoUI();
 }
 
 function actualizarContadorCarrito() {
     const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+    
+    // Contador desktop
     const cartCountElement = document.getElementById('cart-count');
     if (cartCountElement) {
         cartCountElement.textContent = totalItems;
+    }
+    
+    // Contador flotante móvil
+    const cartCountFloating = document.getElementById('cart-count-floating');
+    if (cartCountFloating) {
+        cartCountFloating.textContent = totalItems;
+    }
+}
+
+function actualizarCarritoUI() {
+    const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+    const totalPrecio = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    
+    const cartFloatingBtn = document.getElementById('cart-floating-btn');
+    const cartTotalFloating = document.getElementById('cart-total-floating');
+    
+    if (carrito.length > 0) {
+        if (cartFloatingBtn) {
+            cartFloatingBtn.style.display = 'flex';
+        }
+        if (cartTotalFloating) {
+            cartTotalFloating.textContent = formatearPrecio(totalPrecio);
+        }
+    } else {
+        if (cartFloatingBtn) {
+            cartFloatingBtn.style.display = 'none';
+        }
     }
 }
 
@@ -312,6 +305,7 @@ function renderizarCarrito() {
     }).join('');
     
     if (totalSpan) totalSpan.textContent = formatearPrecio(total);
+    actualizarCarritoUI();
 }
 
 function modificarCantidad(productoId, cambio) {
@@ -325,6 +319,7 @@ function modificarCantidad(productoId, cambio) {
         } else {
             guardarCarritoDelVendedor();
             actualizarContadorCarrito();
+            actualizarCarritoUI();
             renderizarCarrito();
         }
     }
@@ -334,6 +329,7 @@ function eliminarDelCarrito(productoId) {
     carrito = carrito.filter(item => item.id !== productoId);
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
+    actualizarCarritoUI();
     renderizarCarrito();
     mostrarToast('Producto eliminado', 'info');
 }
@@ -441,6 +437,7 @@ async function confirmarPedido() {
     carrito = [];
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
+    actualizarCarritoUI();
     document.getElementById('cliente-form').reset();
     document.getElementById('pedido-detalles').value = '';
     
@@ -577,6 +574,7 @@ async function enviarPedido() {
     carrito = [];
     guardarCarritoDelVendedor();
     actualizarContadorCarrito();
+    actualizarCarritoUI();
     datosClienteTemp = null;
     
     document.getElementById('confirmacion-modal').classList.remove('active');
@@ -634,6 +632,8 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.style.padding = '12px 24px';
     toast.style.borderRadius = '50px';
     toast.style.zIndex = '9999';
+    toast.style.fontSize = '0.9rem';
+    toast.style.fontWeight = '500';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
@@ -642,10 +642,20 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarTienda();
     cargarCarritoDelVendedor();
     
-    const cartIcon = document.getElementById('cart-icon');
-    if (cartIcon) {
-        cartIcon.addEventListener('click', (e) => {
+    // Carrito desktop
+    const cartIconDesktop = document.getElementById('cart-icon-desktop');
+    if (cartIconDesktop) {
+        cartIconDesktop.addEventListener('click', (e) => {
             e.preventDefault();
+            renderizarCarrito();
+            document.getElementById('carrito-modal').classList.add('active');
+        });
+    }
+    
+    // Botón flotante carrito (móvil)
+    const cartFloatingBtn = document.getElementById('cart-floating-btn');
+    if (cartFloatingBtn) {
+        cartFloatingBtn.addEventListener('click', () => {
             renderizarCarrito();
             document.getElementById('carrito-modal').classList.add('active');
         });
