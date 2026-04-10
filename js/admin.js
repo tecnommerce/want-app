@@ -52,8 +52,10 @@ function abrirModalConZIndex(modalId) {
         modalesAbiertos.push(modalId);
     }
     
+    // Calcular z-index: base 10000 + (profundidad * 200)
+    // Los modales anidados tendrán z-index más alto
     const zIndexBase = 10000;
-    const nuevoZIndex = zIndexBase + (modalesAbiertos.length * 100);
+    const nuevoZIndex = zIndexBase + (modalesAbiertos.length * 200);
     modal.style.zIndex = nuevoZIndex;
     
     modal.classList.add('active');
@@ -2285,5 +2287,169 @@ function inicializarMenuHamburguesa() {
     
     console.log('✅ Menú hamburguesa inicializado correctamente');
 }
+// ===================================================
+// SOBRESCRIBIR FUNCIONES DE MODALES PARA QUE FUNCIONEN CORRECTAMENTE
+// ===================================================
+
+// Guardar referencia a las funciones originales
+const originalAbrirModalEditarPedido = window.abrirModalEditarPedido;
+const originalVerPedidoCompleto = window.verPedidoCompleto;
+const originalVerPedidoCompletoMovil = window.verPedidoCompletoMovil;
+
+// Nueva función para abrir modal de editar pedido cerrando el anterior
+window.abrirModalEditarPedido = function(pedidoId) {
+    // Primero cerrar el modal de detalle del pedido si está abierto
+    const modalDetalle = document.getElementById('modal-pedido-completo');
+    if (modalDetalle && modalDetalle.style.display === 'flex') {
+        cerrarModalConZIndex('modal-pedido-completo');
+    }
+    
+    const modalDetalleMovil = document.getElementById('modal-pedido-completo-movil');
+    if (modalDetalleMovil && modalDetalleMovil.style.display === 'flex') {
+        modalDetalleMovil.remove();
+    }
+    
+    // Llamar a la función original después de un pequeño retraso
+    setTimeout(() => {
+        if (originalAbrirModalEditarPedido) {
+            originalAbrirModalEditarPedido(pedidoId);
+        } else {
+            // Si no existe la función original, usar la nuestra
+            const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+            if (!pedido) return;
+            
+            productosTempEdit = JSON.parse(JSON.stringify(pedido.productos || []));
+            document.getElementById('edit-pedido-id').value = pedido.id;
+            document.getElementById('edit-pedido-id-display').textContent = pedido.numero_orden || pedido.id;
+            document.getElementById('edit-cliente-nombre').value = pedido.cliente_nombre || '';
+            document.getElementById('edit-cliente-telefono').value = pedido.cliente_telefono || '';
+            document.getElementById('edit-direccion').value = pedido.direccion || '';
+            document.getElementById('edit-detalles').value = pedido.detalles || '';
+            document.getElementById('edit-metodo-pago').value = pedido.metodo_pago || 'efectivo';
+            document.getElementById('edit-estado').value = pedido.estado || 'preparando';
+            
+            renderizarProductosEditar();
+            actualizarTotalEdit();
+            
+            abrirModalConZIndex('modal-editar-pedido');
+        }
+    }, 100);
+};
+
+// Nueva función para ver pedido completo (versión móvil)
+window.verPedidoCompletoMovil = function(pedidoId) {
+    // Cerrar cualquier modal de edición abierto
+    const modalEditar = document.getElementById('modal-editar-pedido');
+    if (modalEditar && modalEditar.classList.contains('active')) {
+        cerrarModalConZIndex('modal-editar-pedido');
+    }
+    
+    if (originalVerPedidoCompletoMovil) {
+        originalVerPedidoCompletoMovil(pedidoId);
+    } else {
+        // Versión simplificada
+        const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+        if (!pedido) return;
+        
+        const fecha = new Date(pedido.fecha);
+        const metodoPago = pedido.metodo_pago === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
+        const numeroMostrar = pedido.numero_orden || pedido.id;
+        
+        let productosHTML = '';
+        if (pedido.productos && Array.isArray(pedido.productos) && pedido.productos.length > 0) {
+            pedido.productos.forEach(pr => {
+                productosHTML += `<div class="producto-detalle"><span>${pr.cantidad}x ${escapeHTML(pr.nombre)}</span><span>${formatearPrecio(pr.precio * pr.cantidad)}</span></div>`;
+            });
+        } else {
+            productosHTML = '<p>No hay productos</p>';
+        }
+        
+        let detallesHTML = '';
+        if (pedido.detalles && pedido.detalles.trim()) {
+            detallesHTML = `<div class="detalle-seccion"><strong><i class="fas fa-pen"></i> Detalles:</strong><p>${escapeHTML(pedido.detalles)}</p></div>`;
+        }
+        
+        const estado = pedido.estado || 'preparando';
+        let botonesAccion = '';
+        
+        if (estado === 'preparando') {
+            botonesAccion = `
+                <button class="btn-tabla btn-whatsapp" onclick="confirmarPedidoWhatsApp(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
+                <button class="btn-tabla btn-preparar" onclick="actualizarEstado(${pedido.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        } else if (estado === 'en preparacion') {
+            botonesAccion = `
+                <button class="btn-tabla btn-pedido-listo" onclick="abrirModalAsignarDelivery(${pedido.id})"><i class="fas fa-check-circle"></i> Listo</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        } else if (estado === 'en camino') {
+            botonesAccion = `
+                <button class="btn-tabla btn-notificar" onclick="notificarEnCamino(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
+                <button class="btn-tabla btn-entregar" onclick="actualizarEstado(${pedido.id}, 'entregado', this)"><i class="fas fa-check-double"></i> Entregar</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        } else if (estado === 'entregado') {
+            botonesAccion = `
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        }
+        
+        const modalContent = `
+            <div class="modal" id="modal-pedido-completo-movil" style="display: flex; z-index: 10100;">
+                <div class="modal-content" style="max-width: 550px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-receipt"></i> Pedido #${numeroMostrar}</h3>
+                        <button class="modal-close" onclick="cerrarModalPedidoCompletoMovil()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="detalle-seccion"><strong><i class="fas fa-calendar"></i> Fecha:</strong><p>${fecha.toLocaleString('es-AR')}</p></div>
+                        <div class="detalle-seccion"><strong><i class="fas fa-user"></i> Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre || 'Sin nombre')}</p></div>
+                        <div class="detalle-seccion"><strong><i class="fas fa-phone"></i> Teléfono:</strong><p>${pedido.cliente_telefono || 'Sin teléfono'}</p></div>
+                        <div class="detalle-seccion"><strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong><p>${escapeHTML(pedido.direccion || 'Sin dirección')}</p></div>
+                        <div class="detalle-seccion"><strong><i class="fas fa-money-bill-wave"></i> Pago:</strong><p>${metodoPago}</p></div>
+                        <div class="detalle-seccion"><strong><i class="fas fa-box"></i> Productos:</strong><div class="productos-detalle">${productosHTML}</div></div>
+                        ${detallesHTML}
+                        <div class="detalle-seccion total"><strong><i class="fas fa-calculator"></i> Total:</strong><p class="total-monto">${formatearPrecio(pedido.total || 0)}</p></div>
+                    </div>
+                    <div class="modal-footer" style="flex-wrap: wrap; gap: 8px;">
+                        ${botonesAccion}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const existingModal = document.getElementById('modal-pedido-completo-movil');
+        if (existingModal) existingModal.remove();
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+        const modal = document.getElementById('modal-pedido-completo-movil');
+        modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModalPedidoCompletoMovil(); });
+    }
+};
+
+// También mejorar la función de cerrar modales para asegurar que se limpia bien
+const originalCerrarModalPedidoCompleto = window.cerrarModalPedidoCompleto;
+window.cerrarModalPedidoCompleto = function() {
+    if (originalCerrarModalPedidoCompleto) {
+        originalCerrarModalPedidoCompleto();
+    }
+    const modal = document.getElementById('modal-pedido-completo');
+    if (modal) modal.remove();
+};
+
+const originalCerrarModalPedidoCompletoMovil = window.cerrarModalPedidoCompletoMovil;
+window.cerrarModalPedidoCompletoMovil = function() {
+    if (originalCerrarModalPedidoCompletoMovil) {
+        originalCerrarModalPedidoCompletoMovil();
+    }
+    const modal = document.getElementById('modal-pedido-completo-movil');
+    if (modal) modal.remove();
+};
+
+console.log('✅ Modales corregidos - los nuevos modales se abren por encima');
 
 console.log('✅ admin.js cargado completamente');
