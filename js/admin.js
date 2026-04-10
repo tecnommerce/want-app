@@ -1381,6 +1381,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backToLogin) backToLogin.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
     const backToLoginRecover = document.getElementById('back-to-login-recover');
     if (backToLoginRecover) backToLoginRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
+
+    // ===================================================
+// FUNCIONES PARA CERRAR MODALES
+// ===================================================
+
+function cerrarModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        // Si es el modal de perfil, también remover el overlay si existe
+        if (modalId === 'modal-perfil') {
+            document.body.style.overflow = '';
+        }
+    }
+}
+
+function cerrarTodosModales() {
+    const modales = document.querySelectorAll('.modal');
+    modales.forEach(modal => {
+        modal.classList.remove('active');
+    });
+    document.body.style.overflow = '';
+}
+
+// También asegurar que el modal de tiempo se cierra correctamente
+function cerrarModalTiempoExterno() {
+    const modal = document.getElementById('modal-tiempo-entrega');
+    if (modal) modal.classList.remove('active');
+    pedidoPendienteConfirmar = null;
+    botonPendienteConfirmar = null;
+}
+
 });
 
 // Exponer funciones globalmente
@@ -1432,3 +1464,5 @@ window.cerrarModalNuevoPedido = cerrarModalNuevoPedido;
 window.abrirModalNuevoPedido = abrirModalNuevoPedido;
 window.cerrarModalSeleccionarProducto = cerrarModalSeleccionarProducto;
 window.confirmarAgregarProducto = confirmarAgregarProducto;
+window.cerrarModal = cerrarModal;
+window.cerrarTodosModales = cerrarTodosModales;
