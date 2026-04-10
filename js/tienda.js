@@ -40,11 +40,29 @@ async function cargarTienda() {
             );
             
             if (vendedorActual) {
-                const nombreNegocio = document.getElementById('negocio-nombre');
-                if (nombreNegocio) {
-                    nombreNegocio.textContent = vendedorActual.nombre;
+                // Mostrar la sección de perfil del vendedor
+                const perfilSection = document.getElementById('vendedor-perfil-section');
+                if (perfilSection) {
+                    perfilSection.style.display = 'block';
                 }
                 
+                // Nombre del vendedor
+                const nombreElement = document.getElementById('vendedor-nombre-tienda');
+                if (nombreElement) {
+                    nombreElement.textContent = vendedorActual.nombre;
+                }
+                
+                // Logo grande
+                const logoGrande = document.getElementById('vendedor-logo-grande-img');
+                const logoGrandeContainer = document.getElementById('vendedor-logo-grande');
+                if (logoGrande && vendedorActual.logo_url) {
+                    logoGrande.src = vendedorActual.logo_url;
+                    if (logoGrandeContainer) logoGrandeContainer.style.display = 'flex';
+                } else if (logoGrandeContainer) {
+                    logoGrandeContainer.style.display = 'flex';
+                }
+                
+                // Logo pequeño en el header (opcional)
                 const logoHeader = document.getElementById('vendedor-logo-header');
                 const logoImg = document.getElementById('vendedor-logo-img');
                 if (logoHeader && logoImg && vendedorActual.logo_url) {
@@ -52,25 +70,46 @@ async function cargarTienda() {
                     logoHeader.style.display = 'flex';
                 }
                 
-                // Mostrar descripción del negocio
-                const descripcionElement = document.getElementById('negocio-descripcion');
+                // Descripción del negocio
+                const descripcionElement = document.getElementById('vendedor-descripcion-tienda');
                 if (descripcionElement && vendedorActual.descripcion) {
                     descripcionElement.textContent = vendedorActual.descripcion;
-                    descripcionElement.style.display = 'block';
                 }
                 
-                // Mostrar rubros del negocio
-                const rubrosContainer = document.getElementById('negocio-rubros');
+                // Rubros del negocio
+                const rubrosContainer = document.getElementById('vendedor-rubros-tienda');
                 if (rubrosContainer && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
                     rubrosContainer.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
-                    rubrosContainer.style.display = 'flex';
                 }
                 
-                // Mostrar horario
-                const horarioElement = document.getElementById('negocio-horario');
+                // Horario
+                const horarioElement = document.getElementById('vendedor-horario-tienda');
                 if (horarioElement && vendedorActual.horario) {
-                    horarioElement.innerHTML = `<i class="fas fa-clock"></i> ${escapeHTML(vendedorActual.horario)}`;
-                    horarioElement.style.display = 'flex';
+                    horarioElement.innerHTML = `<i class="fas fa-clock"></i> <span>${escapeHTML(vendedorActual.horario)}</span>`;
+                }
+                
+                // También actualizar el header (para compatibilidad)
+                const nombreNegocioHeader = document.getElementById('negocio-nombre');
+                if (nombreNegocioHeader) {
+                    nombreNegocioHeader.textContent = vendedorActual.nombre;
+                }
+                
+                const descripcionHeader = document.getElementById('negocio-descripcion');
+                if (descripcionHeader && vendedorActual.descripcion) {
+                    descripcionHeader.textContent = vendedorActual.descripcion;
+                    descripcionHeader.style.display = 'block';
+                }
+                
+                const rubrosHeader = document.getElementById('negocio-rubros');
+                if (rubrosHeader && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
+                    rubrosHeader.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+                    rubrosHeader.style.display = 'flex';
+                }
+                
+                const horarioHeader = document.getElementById('negocio-horario');
+                if (horarioHeader && vendedorActual.horario) {
+                    horarioHeader.innerHTML = `<i class="fas fa-clock"></i> ${escapeHTML(vendedorActual.horario)}`;
+                    horarioHeader.style.display = 'flex';
                 }
                 
                 console.log('✅ Vendedor cargado:', vendedorActual);
