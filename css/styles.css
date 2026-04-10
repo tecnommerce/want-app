@@ -1814,3 +1814,26 @@ body {
         display: flex !important;
     }
 }
+
+/* Asegurar que los modales tengan z-index correcto */
+.modal {
+    z-index: 10000;
+}
+
+.modal.active {
+    display: flex !important;
+}
+
+/* El modal de rubros debe estar siempre visible cuando se abre */
+#modal-rubros.active {
+    z-index: 10100 !important;
+}
+
+/* Asegurar que el overlay del menú móvil no interfiera */
+.menu-overlay-admin {
+    z-index: 9999;
+}
+
+.mobile-menu-admin {
+    z-index: 10000;
+}

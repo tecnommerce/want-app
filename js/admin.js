@@ -22,6 +22,7 @@ let botonPendienteConfirmar = null;
 
 let productosTempEdit = [];
 let productosTempNuevo = [];
+let modalesAbiertos = [];
 
 const RUBROS_DISPONIBLES = [
     'Sandwichería', 'Hamburguesería', 'Pizzería', 'Empanadas', 'Pancheria',
@@ -36,6 +37,62 @@ let rubrosTempPerfil = [];
 let rubrosTempRegistro = [];
 let currentCallback = null;
 let pedidoParaAsignar = null;
+
+// ===================================================
+// FUNCIONES MEJORADAS PARA MANEJO DE MODALES (MÓVIL)
+// ===================================================
+
+function abrirModalConZIndex(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    if (modal.classList.contains('active')) return;
+    
+    if (!modalesAbiertos.includes(modalId)) {
+        modalesAbiertos.push(modalId);
+    }
+    
+    const zIndexBase = 10000;
+    const nuevoZIndex = zIndexBase + (modalesAbiertos.length * 100);
+    modal.style.zIndex = nuevoZIndex;
+    
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    console.log(`📂 Modal abierto: ${modalId} (z-index: ${nuevoZIndex})`);
+}
+
+function cerrarModalConZIndex(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    const index = modalesAbiertos.indexOf(modalId);
+    if (index !== -1) modalesAbiertos.splice(index, 1);
+    
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    modal.style.zIndex = '';
+    
+    if (modalesAbiertos.length === 0) {
+        document.body.style.overflow = '';
+    } else {
+        const modalSuperior = document.getElementById(modalesAbiertos[modalesAbiertos.length - 1]);
+        if (modalSuperior) {
+            const nuevoZIndex = 10000 + (modalesAbiertos.length * 100);
+            modalSuperior.style.zIndex = nuevoZIndex;
+        }
+    }
+    
+    console.log(`📂 Modal cerrado: ${modalId}`);
+}
+
+function cerrarTodosModales() {
+    const modales = [...modalesAbiertos].reverse();
+    modales.forEach(modalId => {
+        cerrarModalConZIndex(modalId);
+    });
+}
 
 // ===================================================
 // FUNCIONES DE UTILIDAD
@@ -624,7 +681,7 @@ async function confirmarPedidoWhatsApp(pedidoId, boton) {
     pedidoPendienteConfirmar = pedido;
     botonPendienteConfirmar = boton;
     document.getElementById('tiempo-entrega-input').value = '';
-    document.getElementById('modal-tiempo-entrega').classList.add('active');
+    abrirModalConZIndex('modal-tiempo-entrega');
 }
 
 async function enviarConfirmacionWhatsApp() {
@@ -643,7 +700,7 @@ async function enviarConfirmacionWhatsApp() {
     mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n*TOTAL:* $${pedido.total.toLocaleString('es-AR')}\n*NUMERO DE ORDEN:* #${pedido.numero_orden || pedido.id}\n━━━━━━━━━━━━━━━━━━━━\n\n*TIEMPO ESTIMADO:* ${tiempoEntrega}\n\n*MÉTODO DE PAGO:* ${metodoPagoTexto === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo'}\n\n*DIRECCIÓN:* ${pedido.direccion}\n\n*Gracias por confiar en nosotros!*`;
     
     window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    cerrarModalTiempo();
+    cerrarModalConZIndex('modal-tiempo-entrega');
     if (botonPendienteConfirmar) {
         botonPendienteConfirmar.disabled = false;
         botonPendienteConfirmar.innerHTML = '<i class="fab fa-whatsapp"></i> Confirmar pedido';
@@ -668,61 +725,9 @@ async function notificarEnCamino(pedidoId, boton) {
     });
 }
 
-function cerrarModalTiempo() {
-    document.getElementById('modal-tiempo-entrega').classList.remove('active');
-    pedidoPendienteConfirmar = null;
-    botonPendienteConfirmar = null;
-}
-
 // ===================================================
 // FUNCIONES DE DELIVERY
 // ===================================================
-
-function abrirModalAsignarDelivery(pedidoId) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    pedidoParaAsignar = pedido;
-    document.getElementById('asignar-pedido-id').textContent = pedido.numero_orden || pedido.id;
-    document.getElementById('asignar-cliente-nombre').textContent = pedido.cliente_nombre;
-    document.getElementById('asignar-total').textContent = formatearPrecio(pedido.total);
-    const select = document.getElementById('select-delivery');
-    if (select) {
-        select.innerHTML = '<option value="">Seleccionar...</option>';
-        deliveries.forEach(d => {
-            select.innerHTML += `<option value="${d.id}" data-telefono="${d.telefono}" data-nombre="${escapeHTML(d.nombre)}">${escapeHTML(d.nombre)} - ${d.telefono}</option>`;
-        });
-    }
-    document.getElementById('modal-asignar-delivery').classList.add('active');
-}
-
-function cerrarModalAsignarDelivery() {
-    document.getElementById('modal-asignar-delivery').classList.remove('active');
-    pedidoParaAsignar = null;
-}
-
-async function enviarPedidoADelivery() {
-    const select = document.getElementById('select-delivery');
-    const selectedOption = select.options[select.selectedIndex];
-    const deliveryTelefono = selectedOption?.getAttribute('data-telefono');
-    const deliveryNombre = selectedOption?.getAttribute('data-nombre');
-    if (!deliveryTelefono || !pedidoParaAsignar) {
-        mostrarToast('Selecciona un delivery', 'error');
-        return;
-    }
-    const pedido = pedidoParaAsignar;
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
-    
-    let mensaje = `*NUEVO PEDIDO PARA ENTREGAR*\n\nHola ${deliveryNombre},\n\nTienes un nuevo pedido:\n\n━━━━━━━━━━━━━━━━━━━━\n*PEDIDO #${pedido.numero_orden || pedido.id}*\n━━━━━━━━━━━━━━━━━━━━\n*Cliente:* ${pedido.cliente_nombre}\n*Teléfono:* ${pedido.cliente_telefono}\n*Dirección:* ${pedido.direccion}\n\n*Productos:*\n`;
-    pedido.productos.forEach(p => { mensaje += `• ${p.cantidad}x ${p.nombre}\n`; });
-    if (pedido.detalles) mensaje += `\n*Indicaciones:* ${pedido.detalles}\n`;
-    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n*Total:* $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += metodoPagoTexto === 'transferencia' ? '*PAGO:* Transferencia bancaria (YA REALIZADA)' : `*PAGO:* Efectivo - *DEBES COBRAR $${pedido.total.toLocaleString('es-AR')}*`;
-    
-    window.open(`https://wa.me/${deliveryTelefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    await actualizarEstado(pedido.id, 'en camino', { disabled: false, innerHTML: '' });
-    mostrarToast(`Pedido #${pedido.numero_orden || pedido.id} asignado`, 'success');
-    cerrarModalAsignarDelivery();
-}
 
 function renderizarDeliveries() {
     const container = document.getElementById('delivery-grid');
@@ -760,11 +765,11 @@ function abrirModalDelivery(deliveryId = null) {
         document.getElementById('delivery-id').value = '';
         document.getElementById('modal-delivery-title').textContent = 'Nuevo delivery';
     }
-    document.getElementById('modal-delivery').classList.add('active');
+    abrirModalConZIndex('modal-delivery');
 }
 
 function cerrarModalDelivery() {
-    document.getElementById('modal-delivery').classList.remove('active');
+    cerrarModalConZIndex('modal-delivery');
 }
 
 async function guardarDelivery() {
@@ -858,11 +863,11 @@ function abrirModalProducto(productoId = null) {
         document.getElementById('producto-disponible').value = 'SI';
         document.getElementById('modal-producto-title').textContent = 'Nuevo producto';
     }
-    document.getElementById('modal-producto').classList.add('active');
+    abrirModalConZIndex('modal-producto');
 }
 
 function cerrarModalProducto() {
-    document.getElementById('modal-producto').classList.remove('active');
+    cerrarModalConZIndex('modal-producto');
 }
 
 async function guardarProducto() {
@@ -934,17 +939,16 @@ async function eliminarProducto(productoId) {
 
 function abrirModalPerfil() {
     cargarPerfil();
-    document.getElementById('modal-perfil').classList.add('active');
+    abrirModalConZIndex('modal-perfil');
 }
 
 function cerrarModalPerfil() {
-    document.getElementById('modal-perfil').classList.remove('active');
+    cerrarModalConZIndex('modal-perfil');
 }
 
 function cargarPerfil() {
     if (!vendedorActual) return;
     
-    // Datos básicos
     document.getElementById('perfil-nombre-display').textContent = vendedorActual.nombre || '';
     document.getElementById('perfil-email-display').textContent = vendedorActual.email || '';
     document.getElementById('perfil-nombre').value = vendedorActual.nombre || '';
@@ -953,7 +957,6 @@ function cargarPerfil() {
     document.getElementById('perfil-horario').value = vendedorActual.horario || '';
     document.getElementById('perfil-descripcion').value = vendedorActual.descripcion || '';
     
-    // Logo/Avatar
     const avatarImg = document.getElementById('perfil-avatar-img');
     if (avatarImg) {
         if (vendedorActual.logo_url) {
@@ -964,7 +967,6 @@ function cargarPerfil() {
         }
     }
     
-    // Botón cambiar logo
     const btnCambiarLogo = document.getElementById('btn-cambiar-logo');
     const logoInput = document.getElementById('perfil-logo-input');
     if (btnCambiarLogo && logoInput) {
@@ -984,7 +986,6 @@ function cargarPerfil() {
         };
     }
     
-    // Rubros
     const rubrosActuales = vendedorActual.rubros || [];
     rubrosTempPerfil = [...rubrosActuales];
     const rubrosContainer = document.getElementById('perfil-rubros-container');
@@ -996,7 +997,6 @@ function cargarPerfil() {
         }
     }
     
-    // Botón editar rubros
     const btnEditarRubros = document.getElementById('btn-editar-rubros');
     if (btnEditarRubros) {
         btnEditarRubros.onclick = () => {
@@ -1013,7 +1013,6 @@ function cargarPerfil() {
         };
     }
     
-    // Inicializar botón de descripción
     setTimeout(inicializarBotonDescripcion, 100);
 }
 
@@ -1083,7 +1082,7 @@ function abrirModalRubros(rubrosActuales, callback) {
     const modalPerfil = document.getElementById('modal-perfil');
     const modalPerfilEstabaAbierto = modalPerfil && modalPerfil.classList.contains('active');
     if (modalPerfilEstabaAbierto) {
-        modalPerfil.classList.remove('active');
+        cerrarModalConZIndex('modal-perfil');
         window.modalPerfilAbierto = true;
     }
     
@@ -1112,7 +1111,7 @@ function abrirModalRubros(rubrosActuales, callback) {
         });
     });
     
-    document.getElementById('modal-rubros').classList.add('active');
+    abrirModalConZIndex('modal-rubros');
 }
 
 function actualizarListaRubrosSeleccionados() {
@@ -1127,10 +1126,10 @@ function actualizarListaRubrosSeleccionados() {
 }
 
 function cerrarModalRubros() {
-    document.getElementById('modal-rubros').classList.remove('active');
+    cerrarModalConZIndex('modal-rubros');
     rubrosCallback = null;
     if (window.modalPerfilAbierto) {
-        document.getElementById('modal-perfil').classList.add('active');
+        abrirModalConZIndex('modal-perfil');
         window.modalPerfilAbierto = false;
     }
 }
@@ -1163,11 +1162,11 @@ function abrirModalEditarPedido(pedidoId) {
     renderizarProductosEditar();
     actualizarTotalEdit();
     
-    document.getElementById('modal-editar-pedido').classList.add('active');
+    abrirModalConZIndex('modal-editar-pedido');
 }
 
 function cerrarModalEditarPedido() {
-    document.getElementById('modal-editar-pedido').classList.remove('active');
+    cerrarModalConZIndex('modal-editar-pedido');
     productosTempEdit = [];
 }
 
@@ -1270,11 +1269,11 @@ function abrirModalNuevoPedido() {
     document.getElementById('nuevo-metodo-pago').value = 'efectivo';
     renderizarProductosNuevo();
     actualizarTotalNuevo();
-    document.getElementById('modal-nuevo-pedido').classList.add('active');
+    abrirModalConZIndex('modal-nuevo-pedido');
 }
 
 function cerrarModalNuevoPedido() {
-    document.getElementById('modal-nuevo-pedido').classList.remove('active');
+    cerrarModalConZIndex('modal-nuevo-pedido');
     productosTempNuevo = [];
 }
 
@@ -1379,11 +1378,11 @@ function abrirModalSeleccionarProducto(productosList, callback) {
         }
     });
     document.getElementById('select-cantidad').value = '1';
-    document.getElementById('modal-seleccionar-producto').classList.add('active');
+    abrirModalConZIndex('modal-seleccionar-producto');
 }
 
 function cerrarModalSeleccionarProducto() {
-    document.getElementById('modal-seleccionar-producto').classList.remove('active');
+    cerrarModalConZIndex('modal-seleccionar-producto');
     currentCallback = null;
 }
 
@@ -1548,7 +1547,6 @@ async function iniciarPanel(vendedor) {
     await cargarDeliveries();
     actualizarReportes();
     
-    // Event Listeners
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
         btnRefresh.addEventListener('click', async () => {
@@ -1602,10 +1600,10 @@ async function iniciarPanel(vendedor) {
     if (btnConfirmarTiempo) btnConfirmarTiempo.addEventListener('click', enviarConfirmacionWhatsApp);
     
     const btnCancelarTiempo = document.getElementById('btn-cancelar-tiempo');
-    if (btnCancelarTiempo) btnCancelarTiempo.addEventListener('click', cerrarModalTiempo);
+    if (btnCancelarTiempo) btnCancelarTiempo.addEventListener('click', () => cerrarModalConZIndex('modal-tiempo-entrega'));
     
     const cerrarModalTiempoBtn = document.getElementById('cerrar-modal-tiempo');
-    if (cerrarModalTiempoBtn) cerrarModalTiempoBtn.addEventListener('click', cerrarModalTiempo);
+    if (cerrarModalTiempoBtn) cerrarModalTiempoBtn.addEventListener('click', () => cerrarModalConZIndex('modal-tiempo-entrega'));
     
     const btnAgregarProductoEditar = document.getElementById('btn-agregar-producto-editar');
     if (btnAgregarProductoEditar) {
@@ -1994,12 +1992,61 @@ function cerrarModalPedidoCompletoMovil() {
 }
 
 // ===================================================
+// FUNCIONES DE ASIGNAR DELIVERY
+// ===================================================
+
+function abrirModalAsignarDelivery(pedidoId) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    pedidoParaAsignar = pedido;
+    document.getElementById('asignar-pedido-id').textContent = pedido.numero_orden || pedido.id;
+    document.getElementById('asignar-cliente-nombre').textContent = pedido.cliente_nombre;
+    document.getElementById('asignar-total').textContent = formatearPrecio(pedido.total);
+    const select = document.getElementById('select-delivery');
+    if (select) {
+        select.innerHTML = '<option value="">Seleccionar...</option>';
+        deliveries.forEach(d => {
+            select.innerHTML += `<option value="${d.id}" data-telefono="${d.telefono}" data-nombre="${escapeHTML(d.nombre)}">${escapeHTML(d.nombre)} - ${d.telefono}</option>`;
+        });
+    }
+    abrirModalConZIndex('modal-asignar-delivery');
+}
+
+function cerrarModalAsignarDelivery() {
+    cerrarModalConZIndex('modal-asignar-delivery');
+    pedidoParaAsignar = null;
+}
+
+async function enviarPedidoADelivery() {
+    const select = document.getElementById('select-delivery');
+    const selectedOption = select.options[select.selectedIndex];
+    const deliveryTelefono = selectedOption?.getAttribute('data-telefono');
+    const deliveryNombre = selectedOption?.getAttribute('data-nombre');
+    if (!deliveryTelefono || !pedidoParaAsignar) {
+        mostrarToast('Selecciona un delivery', 'error');
+        return;
+    }
+    const pedido = pedidoParaAsignar;
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    
+    let mensaje = `*NUEVO PEDIDO PARA ENTREGAR*\n\nHola ${deliveryNombre},\n\nTienes un nuevo pedido:\n\n━━━━━━━━━━━━━━━━━━━━\n*PEDIDO #${pedido.numero_orden || pedido.id}*\n━━━━━━━━━━━━━━━━━━━━\n*Cliente:* ${pedido.cliente_nombre}\n*Teléfono:* ${pedido.cliente_telefono}\n*Dirección:* ${pedido.direccion}\n\n*Productos:*\n`;
+    pedido.productos.forEach(p => { mensaje += `• ${p.cantidad}x ${p.nombre}\n`; });
+    if (pedido.detalles) mensaje += `\n*Indicaciones:* ${pedido.detalles}\n`;
+    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n*Total:* $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += metodoPagoTexto === 'transferencia' ? '*PAGO:* Transferencia bancaria (YA REALIZADA)' : `*PAGO:* Efectivo - *DEBES COBRAR $${pedido.total.toLocaleString('es-AR')}*`;
+    
+    window.open(`https://wa.me/${deliveryTelefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    await actualizarEstado(pedido.id, 'en camino', { disabled: false, innerHTML: '' });
+    mostrarToast(`Pedido #${pedido.numero_orden || pedido.id} asignado`, 'success');
+    cerrarModalAsignarDelivery();
+}
+
+// ===================================================
 // FUNCIONES DE CIERRE DE MODALES (GLOBALES)
 // ===================================================
 
 window.cerrarModal = function(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('active');
+    cerrarModalConZIndex(modalId);
 };
 
 window.cerrarModalRubros = cerrarModalRubros;
@@ -2009,7 +2056,7 @@ window.cerrarModalDelivery = cerrarModalDelivery;
 window.cerrarModalEditarPedido = cerrarModalEditarPedido;
 window.cerrarModalNuevoPedido = cerrarModalNuevoPedido;
 window.cerrarModalSeleccionarProducto = cerrarModalSeleccionarProducto;
-window.cerrarModalTiempo = cerrarModalTiempo;
+window.cerrarModalTiempo = () => cerrarModalConZIndex('modal-tiempo-entrega');
 window.cerrarModalAsignarDelivery = cerrarModalAsignarDelivery;
 window.cerrarModalPedidoCompleto = cerrarModalPedidoCompleto;
 window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
@@ -2162,8 +2209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backToLoginRecover) backToLoginRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
 });
 
-console.log('✅ admin.js cargado completamente');
-
 // ===================================================
 // FUNCIÓN ESPECÍFICA PARA EL MENÚ HAMBURGUESA (MÓVIL)
 // ===================================================
@@ -2174,7 +2219,6 @@ function inicializarMenuHamburguesa() {
     const overlay = document.getElementById('menu-overlay-admin');
     const closeBtn = document.getElementById('menu-close-admin');
     
-    // Función para abrir el menú
     function abrirMenu() {
         if (mobileMenu) {
             mobileMenu.style.display = 'flex';
@@ -2187,7 +2231,6 @@ function inicializarMenuHamburguesa() {
         document.body.style.overflow = 'hidden';
     }
     
-    // Función para cerrar el menú
     function cerrarMenu() {
         if (mobileMenu) {
             mobileMenu.style.display = 'none';
@@ -2200,9 +2243,7 @@ function inicializarMenuHamburguesa() {
         document.body.style.overflow = '';
     }
     
-    // Evento para el botón hamburguesa
     if (toggleBtn) {
-        // Remover event listeners anteriores para evitar duplicados
         const newToggleBtn = toggleBtn.cloneNode(true);
         toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
         
@@ -2214,7 +2255,6 @@ function inicializarMenuHamburguesa() {
         });
     }
     
-    // Evento para el botón cerrar
     if (closeBtn) {
         const newCloseBtn = closeBtn.cloneNode(true);
         closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
@@ -2226,7 +2266,6 @@ function inicializarMenuHamburguesa() {
         });
     }
     
-    // Evento para el overlay (fondo oscuro)
     if (overlay) {
         const newOverlay = overlay.cloneNode(true);
         overlay.parentNode.replaceChild(newOverlay, overlay);
@@ -2238,7 +2277,6 @@ function inicializarMenuHamburguesa() {
         });
     }
     
-    // Cerrar menú con tecla ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             cerrarMenu();
@@ -2248,6 +2286,4 @@ function inicializarMenuHamburguesa() {
     console.log('✅ Menú hamburguesa inicializado correctamente');
 }
 
-// Llamar a esta función cuando se inicia el panel
-// Agregar esta línea dentro de la función iniciarPanel(vendedor) al final:
-// inicializarMenuHamburguesa();
+console.log('✅ admin.js cargado completamente');
