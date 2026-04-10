@@ -893,5 +893,54 @@
         }
     };
 
+    // Inicializar audio después del primer toque del usuario
+let audioInicializado = false;
+
+function inicializarAudioMovil() {
+    if (audioInicializado) return;
+    
+    const audio = document.getElementById('notificacion-sound');
+    if (audio) {
+        // Cargar el audio silenciosamente
+        audio.load();
+        audio.volume = 0.5;
+        audioInicializado = true;
+        console.log('🔊 Audio inicializado para móvil');
+        
+        // Remover event listeners después de inicializar
+        document.removeEventListener('touchstart', inicializarAudioMovil);
+        document.removeEventListener('click', inicializarAudioMovil);
+    }
+}
+
+// Detectar primer toque del usuario en móvil
+if (window.innerWidth <= 768) {
+    document.addEventListener('touchstart', inicializarAudioMovil);
+    document.addEventListener('click', inicializarAudioMovil);
+}
+
+// Modificar la función guardarNotificacion para que reproduzca sonido correctamente
+// (Asegúrate que la función guardarNotificacion tenga esto:)
+function guardarNotificacion(notificacion) {
+    // ... código existente ...
+    
+    // Reproducir sonido (con soporte móvil)
+    try {
+        const audio = document.getElementById('notificacion-sound');
+        if (audio && audioInicializado) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
+        } else if (audio && window.innerWidth <= 768) {
+            // En móvil, esperar a que el usuario interactúe
+            console.log('🔇 Audio no inicializado, esperando interacción');
+        } else if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
+        }
+    } catch(e) {
+        console.log('Error con sonido:', e);
+    }
+}
+
 
 })();

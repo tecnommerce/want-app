@@ -325,6 +325,8 @@ function inicializarMenu() {
     if (menuToggle) menuToggle.addEventListener('click', openMenu);
     if (menuClose) menuClose.addEventListener('click', closeMenu);
     if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+
+    setTimeout(optimizarImagenesMovil, 100);
 }
 
 // ===================================================
@@ -515,3 +517,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Exponer funciones globales
 window.buscarSugerencia = buscarSugerencia;
 window.limpiarBusqueda = limpiarBusqueda;
+
+// Prevenir parpadeo de imágenes en móvil
+function optimizarImagenesMovil() {
+    if (window.innerWidth <= 768) {
+        const imagenes = document.querySelectorAll('.negocio-logo img');
+        imagenes.forEach(img => {
+            img.setAttribute('loading', 'eager');
+            img.style.backfaceVisibility = 'hidden';
+            img.style.webkitBackfaceVisibility = 'hidden';
+        });
+    }
+}
+
+// Llamar después de renderizar negocios
+window.addEventListener('load', optimizarImagenesMovil);
+window.addEventListener('resize', optimizarImagenesMovil);

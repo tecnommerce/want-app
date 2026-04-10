@@ -203,7 +203,6 @@ function agregarAlCarrito(productoId) {
     actualizarContadorCarrito();
     actualizarCarritoUI();
     renderizarCarrito();
-    mostrarToast(`${producto.nombre} agregado al carrito`, 'success');
 }
 
 function guardarCarritoDelVendedor() {
@@ -305,7 +304,9 @@ function renderizarCarrito() {
                     <button onclick="modificarCantidad(${item.id}, 1)">+</button>
                 </div>
                 <div class="carrito-item-total">${formatearPrecio(subtotal)}</div>
-                <button class="btn-eliminar" onclick="eliminarDelCarrito(${item.id})" title="Eliminar">🗑️</button>
+                <button class="btn-eliminar" onclick="eliminarDelCarrito(${item.id})" title="Eliminar">
+    <i class="fas fa-trash-alt"></i>
+</button>
             </div>
         `;
     }).join('');
