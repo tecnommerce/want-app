@@ -25,7 +25,7 @@
     window.supabaseClient = supabaseClient;
     
     // ===================================================
-    // 2. LISTA DE RUBROS DISPONIBLES (con Pancheria)
+    // 2. LISTA DE RUBROS DISPONIBLES
     // ===================================================
     
     window.RUBROS_DISPONIBLES = [
@@ -87,14 +87,13 @@
     };
     
     // ===================================================
-    // 4. FUNCIONES DE USUARIO (CORREGIDAS - SIN ERROR 406)
+    // 4. FUNCIONES DE USUARIO
     // ===================================================
     
     window.obtenerUsuarioPorAuthId = async function(authId) {
         try {
             console.log('🔍 Buscando usuario con auth_id:', authId);
             
-            // Usar .select() sin .single() para evitar error 406
             const { data, error, status } = await supabaseClient
                 .from('usuarios')
                 .select('*')
@@ -107,7 +106,6 @@
                 return { success: false, error: error.message, status: status };
             }
             
-            // Verificar si encontramos datos
             if (data && data.length > 0) {
                 console.log('✅ Usuario encontrado:', data[0]);
                 return { success: true, usuario: data[0] };
@@ -125,7 +123,6 @@
         try {
             console.log('📝 Creando/actualizando usuario:', usuarioData.email);
             
-            // Primero verificar si el usuario ya existe
             const { data: existingUsers, error: findError } = await supabaseClient
                 .from('usuarios')
                 .select('*')
@@ -140,7 +137,6 @@
             
             if (existingUser) {
                 console.log('📝 Usuario existe, actualizando:', existingUser.id);
-                // Actualizar usuario existente
                 const { data, error } = await supabaseClient
                     .from('usuarios')
                     .update({
@@ -165,7 +161,6 @@
                 return { success: true, usuario: data?.[0] || existingUser, isNew: false };
             } else {
                 console.log('📝 Usuario nuevo, creando...');
-                // Crear nuevo usuario
                 const { data, error } = await supabaseClient
                     .from('usuarios')
                     .insert([{
@@ -232,7 +227,6 @@
             
             if (error) throw error;
             
-            // Cargar productos de cada pedido
             for (const pedido of (data || [])) {
                 const { data: prodPedido } = await supabaseClient
                     .from('productos_pedido')
@@ -324,7 +318,6 @@
         try {
             console.log('💰 Actualizando total gastado:', usuarioId, monto);
             
-            // Obtener usuario actual
             const { data: existingUsers, error: findError } = await supabaseClient
                 .from('usuarios')
                 .select('total_gastado')
@@ -351,7 +344,7 @@
     };
     
     // ===================================================
-    // 5. FUNCIONES DE API EXISTENTES (MODIFICADAS)
+    // 5. FUNCIONES DE API
     // ===================================================
     
     window.callAPI = async function(action, data = {}, forceRefresh = false) {
@@ -457,7 +450,6 @@
                             }]);
                     }
                     
-                    // Actualizar total gastado del usuario
                     if (data.usuario_id) {
                         await window.actualizarTotalGastado(data.usuario_id, data.total);
                     }
@@ -594,7 +586,6 @@
                     return { success: true, vendedor: vendedor };
                     
                 case 'registrarVendedor':
-                    // ✅ CORREGIDO: rubrosArray definido ANTES de usarlo
                     let rubrosArrayRegistro = data.rubros;
                     if (typeof rubrosArrayRegistro === 'string') {
                         rubrosArrayRegistro = rubrosArrayRegistro.split(',').map(r => r.trim());
@@ -618,7 +609,7 @@
                             direccion: data.direccion,
                             horario: data.horario,
                             logo_url: data.logo_url,
-                            rubros: rubrosArrayRegistro,  // ✅ Ahora rubrosArrayRegistro está definido
+                            rubros: rubrosArrayRegistro,
                             estado_abierto: true,
                             activo: true
                         }])
@@ -629,14 +620,17 @@
                     return { success: true, vendedor: newVendedor };
                     
                 case 'actualizarVendedor':
-                    // ✅ CORREGIDO: rubrosArray definido ANTES de usarlo
-                    const updateData = {
-                        nombre: data.nombre,
-                        telefono: data.telefono,
-                        direccion: data.direccion,
-                        horario: data.horario,
-                        logo_url: data.logo_url
-                    };
+                    console.log('📝 Actualizando vendedor con datos:', data);
+                    
+                    const updateData = {};
+                    
+                    if (data.nombre !== undefined) updateData.nombre = data.nombre;
+                    if (data.telefono !== undefined) updateData.telefono = data.telefono;
+                    if (data.direccion !== undefined) updateData.direccion = data.direccion;
+                    if (data.horario !== undefined) updateData.horario = data.horario;
+                    if (data.logo_url !== undefined) updateData.logo_url = data.logo_url;
+                    if (data.descripcion !== undefined) updateData.descripcion = data.descripcion;
+                    if (data.estado_abierto !== undefined) updateData.estado_abierto = data.estado_abierto;
                     
                     if (data.rubros !== undefined) {
                         let rubrosArrayUpdate = data.rubros;
@@ -646,22 +640,19 @@
                         updateData.rubros = rubrosArrayUpdate || [];
                     }
                     
-                    if (data.estado_abierto !== undefined) {
-                        updateData.estado_abierto = data.estado_abierto === true || data.estado_abierto === 'true';
-                    }
-                    
-                    if (data.password_hash) {
-                        const { error: passError } = await supabaseClient.auth.updateUser({
-                            password: data.password_hash
-                        });
-                        if (passError) console.warn('Error actualizando contraseña:', passError);
-                    }
+                    console.log('📤 Enviando a Supabase:', updateData);
                     
                     const { error: updateError } = await supabaseClient
                         .from('vendedores')
                         .update(updateData)
                         .eq('id', data.id);
-                    if (updateError) throw updateError;
+                    
+                    if (updateError) {
+                        console.error('❌ Error en actualización:', updateError);
+                        throw updateError;
+                    }
+                    
+                    console.log('✅ Vendedor actualizado correctamente');
                     return { success: true };
                     
                 case 'crearProducto':

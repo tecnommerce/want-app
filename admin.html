@@ -2,295 +2,535 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Want | Panel de Vendedor</title>
-    
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Vendedor - Want</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+        }
+
+        .logo h2 {
+            font-size: 24px;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .btn-cerrar {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-cerrar:hover {
+            background: #c82333;
+        }
+
+        /* Panels */
+        .panel {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        /* Formularios */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Botones */
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #138496;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Rubros */
+        .rubros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .rubro-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rubro-item input {
+            width: auto;
+        }
+
+        /* Tablas */
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .tabla th,
+        .tabla td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tabla th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-preparando { background: #ffc107; color: #333; }
+        .badge-listo { background: #17a2b8; color: white; }
+        .badge-entregado { background: #28a745; color: white; }
+        .badge-cancelado { background: #dc3545; color: white; }
+
+        .estado-abierto {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .estado-cerrado {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid white;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-    <header class="header-admin" id="header-admin" style="display: none;">
-        <div class="container">
-            <div class="header-content">
-                <div class="header-logo-estado">
-                    <div class="header-logo">
-                        <img src="" alt="Logo" id="header-logo-img" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; display: none;">
-                        <span class="logo" id="header-nombre-negocio"></span>
-                    </div>
-                    <div class="estado-toggle-header">
-                        <span class="estado-label" id="estado-abierto-texto">Abierto</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="toggle-estado-switch">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span class="estado-badge-header" id="estado-abierto-badge">
-                            <i class="fas fa-check-circle"></i> Atendiendo
-                        </span>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <button class="header-btn" id="btn-open-profile" title="Mi perfil">
-                        <i class="fas fa-user-circle"></i> Perfil
-                    </button>
-                    <button class="btn-icon" id="btn-refresh" title="Actualizar datos">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button class="btn-icon" id="btn-logout" title="Cerrar sesión">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                    <button class="menu-toggle-admin" id="menu-toggle-admin">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
 
-    <div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
-        <button class="menu-close" id="menu-close-admin">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="mobile-nav-admin">
-            <button class="mobile-tab-btn active" data-tab="pedidos">
-                <i class="fas fa-box"></i> Pedidos
-            </button>
-            <button class="mobile-tab-btn" data-tab="productos">
-                <i class="fas fa-pizza-slice"></i> Productos
-            </button>
-            <button class="mobile-tab-btn" data-tab="delivery">
-                <i class="fas fa-truck"></i> Delivery
-            </button>
-            <button class="mobile-tab-btn" data-tab="reportes">
-                <i class="fas fa-chart-line"></i> Reportes
-            </button>
-            <button class="mobile-logout-btn" id="mobile-logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>🍔 Want</h2>
+                <p>Panel de Vendedor</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-panel="perfil">
+                    📋 Mi Perfil
+                </li>
+                <li class="nav-item" data-panel="productos">
+                    🍕 Productos
+                </li>
+                <li class="nav-item" data-panel="pedidos">
+                    📦 Pedidos
+                </li>
+                <li class="nav-item" data-panel="delivery">
+                    🚚 Delivery
+                </li>
+                <li class="nav-item" data-panel="banners">
+                    🖼️ Banners
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="tituloVendedor">Panel de Vendedor</h1>
+                <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar Sesión</button>
+            </div>
+
+            <!-- Panel Perfil -->
+            <div id="panel-perfil" class="panel active">
+                <h2>Mi Perfil</h2>
+                <form id="perfilForm">
+                    <div class="form-group">
+                        <label>Nombre del negocio</label>
+                        <input type="text" id="nombreVendedor" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="telefonoVendedor">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" id="direccionVendedor">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Horario</label>
+                        <input type="text" id="horarioVendedor" placeholder="Ej: Lunes a Domingo de 20 a 3am">
+                    </div>
+
+                    <div class="form-group">
+                        <label>URL del Logo</label>
+                        <input type="text" id="logoUrlVendedor">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="estadoAbierto">
+                            <option value="true">Abierto</option>
+                            <option value="false">Cerrado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rubros</label>
+                        <div id="rubrosContainer" class="rubros-grid"></div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- SECCIÓN DESCRIPCIÓN - CON BOTÓN APARTE      -->
+                    <!-- ========================================== -->
+                    <div class="form-group">
+                        <label>Descripción del negocio</label>
+                        <textarea id="descripcionVendedor" rows="4" 
+                                  placeholder="Describe tu negocio, horarios especiales, promociones, métodos de pago, etc."></textarea>
+                        <small style="color: #666;">Esta descripción aparecerá en la página principal de tu negocio</small>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" id="btnGuardarDescripcion" class="btn-secondary">
+                            💾 Guardar solo la descripción
+                        </button>
+                        <span id="descripcionStatus" style="margin-left: 15px; font-size: 14px;"></span>
+                    </div>
+
+                    <hr>
+
+                    <button type="submit" class="btn-primary">
+                        Guardar todos los cambios
+                    </button>
+                </form>
+            </div>
+
+            <!-- Panel Productos -->
+            <div id="panel-productos" class="panel">
+                <h2>Mis Productos</h2>
+                <button class="btn-primary" onclick="abrirModalProducto()" style="margin-bottom: 20px;">
+                    + Agregar Producto
+                </button>
+                <div id="productosList"></div>
+            </div>
+
+            <!-- Panel Pedidos -->
+            <div id="panel-pedidos" class="panel">
+                <h2>Pedidos</h2>
+                <div id="pedidosList"></div>
+            </div>
+
+            <!-- Panel Delivery -->
+            <div id="panel-delivery" class="panel">
+                <h2>Repartidores</h2>
+                <button class="btn-primary" onclick="abrirModalDelivery()" style="margin-bottom: 20px;">
+                    + Agregar Repartidor
+                </button>
+                <div id="deliveryList"></div>
+            </div>
+
+            <!-- Panel Banners -->
+            <div id="panel-banners" class="panel">
+                <h2>Banners Promocionales</h2>
+                <button class="btn-primary" onclick="abrirModalBanner()" style="margin-bottom: 20px;">
+                    + Agregar Banner
+                </button>
+                <div id="bannersList"></div>
+            </div>
         </div>
     </div>
-    <div class="menu-overlay-admin" id="menu-overlay-admin" style="display: none;"></div>
 
-    <main>
-        <div class="container">
-            <div class="admin-auth" id="admin-auth">
-                <div class="auth-card">
-                    <div class="auth-logo">
-                        <h1 class="auth-logo-text">Want</h1>
-                        <p class="auth-subtitle">Panel de vendedores</p>
-                    </div>
-                    
-                    <div class="auth-panel active" id="login-panel">
-                        <form id="login-form">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="login-email" placeholder="tu@email.com" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Contraseña</label>
-                                <div class="password-wrapper">
-                                    <input type="password" id="login-password" placeholder="••••••••" required>
-                                    <button type="button" class="toggle-password" data-target="login-password">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="form-group remember-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="remember-me"> Recordarme
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
-                        </form>
-                        <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
-                        <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
-                        <div class="auth-links">
-                            <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
-                        </div>
-                    </div>
-
-                    <div class="auth-panel" id="register-panel">
-                        <button class="back-to-login" id="back-to-login">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </button>
-                        <form id="register-form">
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Nombre del negocio *</label>
-                                    <input type="text" id="reg-nombre" required>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Email *</label>
-                                    <input type="email" id="reg-email" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Teléfono *</label>
-                                    <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Dirección *</label>
-                                    <input type="text" id="reg-direccion" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Rubro(s) del negocio *</label>
-                                <div class="rubros-selector" id="rubros-selector-registro"></div>
-                                <small class="input-help">Puedes seleccionar uno o varios rubros</small>
-                                <div class="rubros-seleccionados-info" style="margin-top: 10px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <strong>Rubros seleccionados:</strong> <span id="rubros-lista-registro">Ninguno</span>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Horario de atención</label>
-                                <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
-                            </div>
-                            <div class="form-group">
-                                <label>Logo del negocio</label>
-                                <input type="file" id="reg-logo" accept="image/*">
-                                <div id="reg-logo-preview" class="image-preview"></div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Contraseña *</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="reg-password" required>
-                                        <button type="button" class="toggle-password" data-target="reg-password">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Confirmar *</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="reg-password2" required>
-                                        <button type="button" class="toggle-password" data-target="reg-password2">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
-                        </form>
-                    </div>
-
-                    <div class="auth-panel" id="recover-panel">
-                        <button class="back-to-login" id="back-to-login-recover">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </button>
-                        <form id="recover-form">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="recover-email" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Enviar código</button>
-                        </form>
-                        <div id="recover-code-section" style="display: none;">
-                            <div class="form-group">
-                                <label>Código de recuperación</label>
-                                <input type="text" id="recover-code" placeholder="Ingresa el código de 6 dígitos">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Nueva contraseña</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="recover-new-password">
-                                        <button type="button" class="toggle-password" data-target="recover-new-password">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Confirmar</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="recover-new-password2">
-                                        <button type="button" class="toggle-password" data-target="recover-new-password2">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary btn-block" id="btn-reset-password">Restablecer contraseña</button>
-                        </div>
-                    </div>
+    <!-- Modal Producto -->
+    <div id="modalProducto" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:white; padding:25px; border-radius:15px; width:90%; max-width:500px;">
+            <h3 id="modalProductoTitulo">Agregar Producto</h3>
+            <form id="productoForm">
+                <input type="hidden" id="productoId">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="prodNombre" required>
                 </div>
-            </div>
-
-            <div class="admin-panel" id="admin-panel" style="display: none;">
-                <div class="metrics-grid">
-                    <div class="metric-card"><div class="metric-icon"><i class="fas fa-calendar-day"></i></div><div class="metric-info"><h3 id="ventas-hoy">$0</h3><p>Ventas hoy</p></div></div>
-                    <div class="metric-card"><div class="metric-icon"><i class="fas fa-calendar-week"></i></div><div class="metric-info"><h3 id="ventas-semana">$0</h3><p>Ventas esta semana</p></div></div>
-                    <div class="metric-card"><div class="metric-icon"><i class="fas fa-calendar-alt"></i></div><div class="metric-info"><h3 id="ventas-mes">$0</h3><p>Ventas este mes</p></div></div>
-                    <div class="metric-card"><div class="metric-icon"><i class="fas fa-check-circle"></i></div><div class="metric-info"><h3 id="pedidos-entregados">0</h3><p>Pedidos entregados</p></div></div>
-                    <div class="metric-card"><div class="metric-icon"><i class="fas fa-truck"></i></div><div class="metric-info"><h3 id="pedidos-pendientes">0</h3><p>Pedidos pendientes</p></div></div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="prodDescripcion" rows="3"></textarea>
                 </div>
-
-                <div class="admin-tabs">
-                    <button class="tab-btn active" data-tab="pedidos"><i class="fas fa-box"></i> Pedidos<span class="tab-badge" id="badge-pedidos">0</span></button>
-                    <button class="tab-btn" data-tab="productos"><i class="fas fa-pizza-slice"></i> Productos<span class="tab-badge" id="badge-productos">0</span></button>
-                    <button class="tab-btn" data-tab="delivery"><i class="fas fa-truck"></i> Delivery<span class="tab-badge" id="badge-delivery">0</span></button>
-                    <button class="tab-btn" data-tab="reportes"><i class="fas fa-chart-line"></i> Reportes</button>
+                <div class="form-group">
+                    <label>Precio</label>
+                    <input type="number" id="prodPrecio" step="0.01" required>
                 </div>
-
-                <div class="tab-content active" id="tab-pedidos">
-                    <div class="filtros-buscador">
-                        <div class="filtros-pedidos">
-                            <button class="filtro-btn active" data-estado="preparando"><i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span></button>
-                            <button class="filtro-btn" data-estado="en preparacion"><i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span></button>
-                            <button class="filtro-btn" data-estado="en camino"><i class="fas fa-truck"></i> En camino <span id="count-camino">0</span></button>
-                            <button class="filtro-btn" data-estado="entregado"><i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span></button>
-                        </div>
-                        <div class="buscador-container">
-                            <div class="buscador-input"><i class="fas fa-search"></i><input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono..."></div>
-                            <div class="buscador-buttons"><button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda"><i class="fas fa-times"></i> Limpiar</button><button class="btn-nuevo-pedido" id="btn-nuevo-pedido"><i class="fas fa-plus-circle"></i> Nuevo pedido</button></div>
-                        </div>
-                    </div>
-                    <div class="pedidos-container" id="pedidos-container"><div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div></div>
+                <div class="form-group">
+                    <label>URL Imagen</label>
+                    <input type="text" id="prodImagen">
                 </div>
-
-                <div class="tab-content" id="tab-productos">
-                    <div class="productos-header-actions"><button class="btn-primary" id="btn-agregar-producto"><i class="fas fa-plus"></i> Agregar producto</button></div>
-                    <div class="productos-admin-grid" id="productos-admin-grid"><div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div></div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="prodDisponible" checked> Disponible
+                    </label>
                 </div>
-
-                <div class="tab-content" id="tab-delivery">
-                    <div class="delivery-header-actions"><button class="btn-primary" id="btn-agregar-delivery"><i class="fas fa-plus"></i> Agregar delivery</button></div>
-                    <div class="delivery-grid" id="delivery-grid"><div class="loading"><div class="spinner"></div><p>Cargando deliveries...</p></div></div>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" class="btn-danger" onclick="cerrarModalProducto()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
                 </div>
-
-                <div class="tab-content" id="tab-reportes">
-                    <div class="reportes-container">
-                        <div class="reportes-section"><h3 class="reportes-titulo"><i class="fas fa-chart-simple"></i> Resumen de ventas</h3><div class="reportes-metrics"><div class="reporte-card"><div class="reporte-icon"><i class="fas fa-calendar-day"></i></div><div class="reporte-info"><h4>Ventas hoy</h4><p id="reporte-ventas-hoy">$0</p></div></div><div class="reporte-card"><div class="reporte-icon"><i class="fas fa-calendar-week"></i></div><div class="reporte-info"><h4>Ventas esta semana</h4><p id="reporte-ventas-semana">$0</p></div></div><div class="reporte-card"><div class="reporte-icon"><i class="fas fa-calendar-alt"></i></div><div class="reporte-info"><h4>Ventas este mes</h4><p id="reporte-ventas-mes">$0</p></div></div><div class="reporte-card"><div class="reporte-icon"><i class="fas fa-check-circle"></i></div><div class="reporte-info"><h4>Pedidos entregados</h4><p id="reporte-pedidos-entregados">0</p></div></div><div class="reporte-card"><div class="reporte-icon"><i class="fas fa-clock"></i></div><div class="reporte-info"><h4>Pedidos pendientes</h4><p id="reporte-pedidos-pendientes">0</p></div></div><div class="reporte-card"><div class="reporte-icon"><i class="fas fa-truck"></i></div><div class="reporte-info"><h4>Total pedidos</h4><p id="reporte-total-pedidos">0</p></div></div></div></div>
-                        <div class="reportes-section"><h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top productos más vendidos</h3><div id="reporte-top-productos" class="reportes-lista"><div class="loading-small">Cargando...</div></div></div>
-                        <div class="reportes-section"><h3 class="reportes-titulo"><i class="fas fa-chart-line"></i> Ventas por día (últimos 7 días)</h3><div id="reporte-ventas-dias" class="reportes-dias"><div class="loading-small">Cargando...</div></div></div>
-                        <div class="reportes-section"><h3 class="reportes-titulo"><i class="fas fa-history"></i> Últimos 10 pedidos</h3><div id="reporte-ultimos-pedidos" class="reportes-pedidos-lista"><div class="loading-small">Cargando...</div></div></div>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
-    </main>
+    </div>
 
-    <div class="modal" id="modal-rubros"><div class="modal-content" style="max-width: 500px;"><div class="modal-header"><h3><i class="fas fa-tags"></i> Seleccionar rubros</h3><button class="modal-close" onclick="cerrarModalRubros()">&times;</button></div><div class="modal-body"><p class="modal-help">Selecciona uno o varios rubros para tu negocio:</p><div class="rubros-grid" id="rubros-grid-modal"></div><div class="rubros-seleccionados-info"><strong>Rubros seleccionados:</strong> <span id="rubros-seleccionados-lista">Ninguno</span></div></div><div class="modal-footer"><button class="btn-outline" onclick="cerrarModalRubros()">Cancelar</button><button class="btn-primary" id="btn-confirmar-rubros">Confirmar selección</button></div></div></div>
+    <!-- Modal Delivery -->
+    <div id="modalDelivery" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:white; padding:25px; border-radius:15px; width:90%; max-width:400px;">
+            <h3 id="modalDeliveryTitulo">Agregar Repartidor</h3>
+            <form id="deliveryForm">
+                <input type="hidden" id="deliveryId">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="deliveryNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="deliveryTelefono" required>
+                </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" class="btn-danger" onclick="cerrarModalDelivery()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <div class="modal" id="modal-perfil"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3><i class="fas fa-user-circle"></i> Mi perfil</h3><button class="modal-close" onclick="cerrarModalPerfil()">&times;</button></div><div class="modal-body"><div class="perfil-header"><div class="perfil-avatar"><i class="fas fa-store"></i></div><div class="perfil-info"><h3 id="perfil-nombre-display"></h3><p id="perfil-email-display"></p></div></div><form id="perfil-form" class="perfil-form"><div class="form-row"><div class="form-group half"><label>Nombre del negocio</label><input type="text" id="perfil-nombre" class="form-control"></div><div class="form-group half"><label>Teléfono (WhatsApp)</label><input type="tel" id="perfil-telefono" class="form-control"></div></div><div class="form-group"><label>Dirección</label><input type="text" id="perfil-direccion" class="form-control"></div><div class="form-group"><label>Horario de atención</label><input type="text" id="perfil-horario" class="form-control"></div><div class="form-group"><label>Descripción del negocio</label><textarea id="perfil-descripcion" rows="3" class="form-control" placeholder="Describe tu negocio, especialidades, horarios, etc."></textarea><small class="input-help">Esta descripción se mostrará en tu tienda para que los clientes te conozcan mejor.</small></div><div class="form-group"><label>Rubro(s) del negocio</label><div id="perfil-rubros-container" class="rubros-tags-container"></div><button type="button" class="btn-outline" id="btn-editar-rubros" style="margin-top: 8px;"><i class="fas fa-edit"></i> Editar rubros</button></div><div class="form-group"><label>Logo del negocio</label><div class="logo-upload-area"><input type="file" id="perfil-logo" accept="image/*" style="display: none;"><button type="button" class="btn-outline" id="btn-upload-logo"><i class="fas fa-cloud-upload-alt"></i> Subir logo</button><div id="logo-preview" class="logo-preview"></div></div></div><div class="form-group"><label>Cambiar contraseña</label><input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar"></div><button type="submit" class="btn-primary btn-save">Guardar cambios</button></form></div></div></div>
+    <!-- Modal Banner -->
+    <div id="modalBanner" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:white; padding:25px; border-radius:15px; width:90%; max-width:500px;">
+            <h3 id="modalBannerTitulo">Agregar Banner</h3>
+            <form id="bannerForm">
+                <input type="hidden" id="bannerId">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="bannerTitulo" required>
+                </div>
+                <div class="form-group">
+                    <label>URL Imagen</label>
+                    <input type="text" id="bannerImagen" required>
+                </div>
+                <div class="form-group">
+                    <label>Link</label>
+                    <input type="text" id="bannerLink">
+                </div>
+                <div class="form-group">
+                    <label>Orden</label>
+                    <input type="number" id="bannerOrden" value="0">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="bannerActivo" checked> Activo
+                    </label>
+                </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" class="btn-danger" onclick="cerrarModalBanner()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <div class="modal" id="modal-producto"><div class="modal-content modal-producto"><div class="modal-header"><h3 id="modal-producto-title">Nuevo producto</h3><button class="modal-close" onclick="cerrarModalProducto()">&times;</button></div><div class="modal-body"><form id="producto-form"><input type="hidden" id="producto-id"><div class="form-group"><label>Nombre del producto *</label><input type="text" id="producto-nombre" required></div><div class="form-group"><label>Descripción</label><textarea id="producto-descripcion" rows="3"></textarea></div><div class="form-group"><label>Precio *</label><input type="number" id="producto-precio" step="100" required></div><div class="form-group"><label>Imagen del producto</label><input type="file" id="producto-imagen" accept="image/*"><div id="producto-imagen-preview" class="image-preview"></div></div><div class="form-group"><label>Disponible</label><select id="producto-disponible"><option value="SI">Sí</option><option value="NO">No</option></select></div></form></div><div class="modal-footer"><button class="btn-primary" id="guardar-producto">Guardar producto</button><button class="btn-outline" onclick="cerrarModalProducto()">Cancelar</button></div></div></div>
-
-    <div class="modal" id="modal-delivery"><div class="modal-content"><div class="modal-header"><h3 id="modal-delivery-title">Nuevo delivery</h3><button class="modal-close" onclick="cerrarModalDelivery()">&times;</button></div><div class="modal-body"><form id="delivery-form"><input type="hidden" id="delivery-id"><div class="form-group"><label>Nombre del delivery *</label><input type="text" id="delivery-nombre" required></div><div class="form-group"><label>WhatsApp *</label><input type="tel" id="delivery-telefono" placeholder="5491112345678" required><small class="input-help">Ejemplo: 5491112345678 (código país + número)</small></div></form></div><div class="modal-footer"><button class="btn-primary" id="guardar-delivery">Guardar delivery</button><button class="btn-outline" onclick="cerrarModalDelivery()">Cancelar</button></div></div></div>
-
-    <div class="modal" id="modal-editar-pedido"><div class="modal-content" style="max-width: 700px;"><div class="modal-header"><h3>Editar pedido #<span id="edit-pedido-id-display"></span></h3><button class="modal-close" onclick="cerrarModalEditarPedido()">&times;</button></div><div class="modal-body"><form id="editar-pedido-form"><input type="hidden" id="edit-pedido-id"><div class="form-row"><div class="form-group half"><label>Nombre del cliente *</label><input type="text" id="edit-cliente-nombre" required></div><div class="form-group half"><label>Teléfono *</label><input type="tel" id="edit-cliente-telefono" required></div></div><div class="form-group"><label>Dirección de entrega *</label><input type="text" id="edit-direccion" required></div><div class="form-group"><label>Detalles del pedido</label><textarea id="edit-detalles" rows="2"></textarea></div><div class="form-group"><label>Método de pago</label><select id="edit-metodo-pago"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia bancaria</option></select></div><div class="form-group"><label>Estado del pedido</label><select id="edit-estado"><option value="preparando">Nuevo</option><option value="en preparacion">En preparación</option><option value="en camino">En camino</option><option value="entregado">Entregado</option></select></div><div class="form-group"><label>Productos</label><div id="productos-editar-container" class="productos-seleccion"></div><button type="button" class="btn-outline" id="btn-agregar-producto-editar" style="width: 100%; margin-top: 10px;"><i class="fas fa-plus"></i> Agregar producto</button></div><div class="form-group"><label>Total</label><input type="text" id="edit-total" readonly style="background: var(--gray-50); font-weight: bold; color: var(--primary);"></div></form></div><div class="modal-footer"><button class="btn-primary" id="guardar-editar-pedido">Guardar cambios</button><button class="btn-outline" onclick="cerrarModalEditarPedido()">Cancelar</button></div></div></div>
-
-    <div class="modal" id="modal-nuevo-pedido"><div class="modal-content" style="max-width: 700px;"><div class="modal-header"><h3>Crear nuevo pedido</h3><button class="modal-close" onclick="cerrarModalNuevoPedido()">&times;</button></div><div class="modal-body"><form id="nuevo-pedido-form"><div class="form-row"><div class="form-group half"><label>Nombre del cliente *</label><input type="text" id="nuevo-cliente-nombre" required></div><div class="form-group half"><label>Teléfono *</label><input type="tel" id="nuevo-cliente-telefono" required></div></div><div class="form-group"><label>Dirección de entrega *</label><input type="text" id="nuevo-direccion" required></div><div class="form-group"><label>Detalles del pedido</label><textarea id="nuevo-detalles" rows="2"></textarea></div><div class="form-group"><label>Método de pago</label><select id="nuevo-metodo-pago"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia bancaria</option></select></div><div class="form-group"><label>Productos</label><div id="productos-nuevo-container" class="productos-seleccion"></div><button type="button" class="btn-outline" id="btn-agregar-producto-nuevo" style="width: 100%; margin-top: 10px;"><i class="fas fa-plus"></i> Agregar producto</button></div><div class="form-group"><label>Total</label><input type="text" id="nuevo-total" readonly style="background: var(--gray-50); font-weight: bold; color: var(--primary);"></div></form></div><div class="modal-footer"><button class="btn-primary" id="guardar-nuevo-pedido">Crear pedido</button><button class="btn-outline" onclick="cerrarModalNuevoPedido()">Cancelar</button></div></div></div>
-
-    <div class="modal" id="modal-seleccionar-producto"><div class="modal-content" style="max-width: 500px;"><div class="modal-header"><h3>Seleccionar producto</h3><button class="modal-close" onclick="cerrarModalSeleccionarProducto()">&times;</button></div><div class="modal-body"><div class="form-group"><label>Producto</label><select id="select-producto" class="form-control"><option value="">Seleccionar...</option></select></div><div class="form-group"><label>Cantidad</label><input type="number" id="select-cantidad" value="1" min="1" class="form-control"></div></div><div class="modal-footer"><button class="btn-primary" id="btn-confirmar-agregar-producto">Agregar</button><button class="btn-outline" onclick="cerrarModalSeleccionarProducto()">Cancelar</button></div></div></div>
-
-    <div class="modal" id="modal-tiempo-entrega"><div class="modal-content small"><div class="modal-header"><h3>Tiempo estimado de entrega</h3><button class="modal-close" id="cerrar-modal-tiempo">&times;</button></div><div class="modal-body"><div class="form-group"><label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label><input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off"></div></div><div class="modal-footer"><button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button><button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y enviar</button></div></div></div>
-
-    <div class="modal" id="modal-asignar-delivery"><div class="modal-content"><div class="modal-header"><h3>Asignar delivery</h3><button class="modal-close" onclick="cerrarModalAsignarDelivery()">&times;</button></div><div class="modal-body"><div class="form-group"><label>Seleccionar delivery</label><select id="select-delivery" class="form-control"><option value="">Seleccionar...</option></select></div><div id="info-pedido-asignar" style="margin-top: 16px; padding: 12px; background: var(--gray-50); border-radius: var(--radius-md);"><p><strong>Pedido #<span id="asignar-pedido-id"></span></strong></p><p>Cliente: <span id="asignar-cliente-nombre"></span></p><p>Total: <span id="asignar-total"></span></p></div></div><div class="modal-footer"><button class="btn-primary" id="btn-enviar-delivery">Enviar al delivery</button><button class="btn-outline" onclick="cerrarModalAsignarDelivery()">Cancelar</button></div></div></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-all.js"></script>
-<script src="js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-all.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>

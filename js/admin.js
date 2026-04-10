@@ -1257,6 +1257,116 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backToLogin) backToLogin.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
     const backToLoginRecover = document.getElementById('back-to-login-recover');
     if (backToLoginRecover) backToLoginRecover.addEventListener('click', (e) => { e.preventDefault(); mostrarPanelLogin(); });
+
+    // Buscar el botón de guardar descripción y asignarle el evento
+const btnGuardarDescripcion = document.getElementById('btnGuardarDescripcion');
+if (btnGuardarDescripcion) {
+    btnGuardarDescripcion.addEventListener('click', guardarSoloDescripcion);
+    console.log('✅ Botón "Guardar solo descripción" configurado');
+} else {
+    console.warn('⚠️ No se encontró el botón btnGuardarDescripcion');
+}
+
+// Cargar la descripción existente al iniciar
+cargarDescripcionExistente();
+
+    // ===================================================
+// FUNCIÓN: GUARDAR SOLO LA DESCRIPCIÓN
+// ===================================================
+async function guardarSoloDescripcion() {
+    console.log('🖊️ Guardando solo la descripción...');
+    
+    // Obtener el ID del vendedor desde localStorage
+    const vendedorId = localStorage.getItem('vendedorId');
+    if (!vendedorId) {
+        console.error('❌ No se encontró ID del vendedor');
+        mostrarMensajeDescripcion('❌ Error: No hay sesión activa', 'red');
+        return;
+    }
+    
+    // Obtener el texto de la descripción
+    const descripcionTextarea = document.getElementById('descripcionVendedor');
+    if (!descripcionTextarea) {
+        console.error('❌ No se encontró el campo descripcionVendedor');
+        mostrarMensajeDescripcion('❌ Error: Campo de descripción no encontrado', 'red');
+        return;
+    }
+    
+    const descripcion = descripcionTextarea.value;
+    
+    // Mostrar mensaje de guardando
+    mostrarMensajeDescripcion('💾 Guardando descripción...', 'blue');
+    
+    try {
+        // Llamar a la API solo con la descripción
+        const result = await window.callAPI('actualizarVendedor', {
+            id: parseInt(vendedorId),
+            descripcion: descripcion
+        });
+        
+        console.log('📡 Respuesta de la API:', result);
+        
+        if (result.success) {
+            mostrarMensajeDescripcion('✅ ¡Descripción guardada correctamente!', 'green');
+            // Limpiar el mensaje después de 3 segundos
+            setTimeout(() => {
+                const statusSpan = document.getElementById('descripcionStatus');
+                if (statusSpan) statusSpan.innerHTML = '';
+            }, 3000);
+        } else {
+            mostrarMensajeDescripcion('❌ Error: ' + (result.error || 'No se pudo guardar'), 'red');
+        }
+    } catch (error) {
+        console.error('❌ Error al guardar descripción:', error);
+        mostrarMensajeDescripcion('❌ Error de conexión: ' + error.message, 'red');
+    }
+}
+
+// ===================================================
+// FUNCIÓN: MOSTRAR MENSAJE DE ESTADO
+// ===================================================
+function mostrarMensajeDescripcion(mensaje, color) {
+    const statusSpan = document.getElementById('descripcionStatus');
+    if (statusSpan) {
+        statusSpan.innerHTML = mensaje;
+        statusSpan.style.color = color;
+        statusSpan.style.fontWeight = 'bold';
+    }
+}
+
+// ===================================================
+// FUNCIÓN: CARGAR DESCRIPCIÓN EXISTENTE
+// ===================================================
+async function cargarDescripcionExistente() {
+    const vendedorId = localStorage.getItem('vendedorId');
+    if (!vendedorId) {
+        console.log('⚠️ No hay vendedor logueado');
+        return;
+    }
+    
+    console.log('📥 Cargando descripción existente para vendedor:', vendedorId);
+    
+    try {
+        // Obtener los datos del vendedor
+        const result = await window.callAPI('getAllVendedores', {});
+        
+        if (result.success && result.vendedores) {
+            const vendedor = result.vendedores.find(v => v.id === parseInt(vendedorId));
+            if (vendedor && vendedor.descripcion) {
+                const descripcionTextarea = document.getElementById('descripcionVendedor');
+                if (descripcionTextarea) {
+                    descripcionTextarea.value = vendedor.descripcion;
+                    console.log('✅ Descripción cargada:', vendedor.descripcion.substring(0, 50) + '...');
+                }
+            } else {
+                console.log('ℹ️ No hay descripción guardada aún');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar descripción:', error);
+    }
+}
+
 });
 
 window.login = login;
@@ -1273,3 +1383,98 @@ window.confirmarRubros = confirmarRubros;
 window.toggleEstadoAbierto = toggleEstadoAbierto;
 window.verPedidoCompletoMovil = verPedidoCompletoMovil;
 window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
+
+// ===================================================
+// FUNCIONES PARA LA DESCRIPCIÓN (BOTÓN APARTE)
+// ===================================================
+
+async function guardarSoloDescripcion() {
+    console.log('🖊️ Guardando solo la descripción...');
+    
+    const vendedorId = localStorage.getItem('vendedorId');
+    if (!vendedorId) {
+        console.error('❌ No se encontró ID del vendedor');
+        mostrarMensajeDescripcion('❌ Error: No hay sesión activa', 'red');
+        return;
+    }
+    
+    const descripcionTextarea = document.getElementById('descripcionVendedor');
+    if (!descripcionTextarea) {
+        console.error('❌ No se encontró el campo descripcionVendedor');
+        mostrarMensajeDescripcion('❌ Error: Campo de descripción no encontrado', 'red');
+        return;
+    }
+    
+    const descripcion = descripcionTextarea.value;
+    
+    mostrarMensajeDescripcion('💾 Guardando descripción...', 'blue');
+    
+    try {
+        const result = await window.callAPI('actualizarVendedor', {
+            id: parseInt(vendedorId),
+            descripcion: descripcion
+        });
+        
+        console.log('📡 Respuesta de la API:', result);
+        
+        if (result.success) {
+            mostrarMensajeDescripcion('✅ ¡Descripción guardada correctamente!', 'green');
+            setTimeout(() => {
+                const statusSpan = document.getElementById('descripcionStatus');
+                if (statusSpan) statusSpan.innerHTML = '';
+            }, 3000);
+        } else {
+            mostrarMensajeDescripcion('❌ Error: ' + (result.error || 'No se pudo guardar'), 'red');
+        }
+    } catch (error) {
+        console.error('❌ Error al guardar descripción:', error);
+        mostrarMensajeDescripcion('❌ Error de conexión: ' + error.message, 'red');
+    }
+}
+
+function mostrarMensajeDescripcion(mensaje, color) {
+    const statusSpan = document.getElementById('descripcionStatus');
+    if (statusSpan) {
+        statusSpan.innerHTML = mensaje;
+        statusSpan.style.color = color;
+        statusSpan.style.fontWeight = 'bold';
+    }
+}
+
+async function cargarDescripcionExistente() {
+    const vendedorId = localStorage.getItem('vendedorId');
+    if (!vendedorId) {
+        console.log('⚠️ No hay vendedor logueado');
+        return;
+    }
+    
+    console.log('📥 Cargando descripción existente...');
+    
+    try {
+        const result = await window.callAPI('getAllVendedores', {});
+        
+        if (result.success && result.vendedores) {
+            const vendedor = result.vendedores.find(v => v.id === parseInt(vendedorId));
+            if (vendedor && vendedor.descripcion) {
+                const descripcionTextarea = document.getElementById('descripcionVendedor');
+                if (descripcionTextarea) {
+                    descripcionTextarea.value = vendedor.descripcion;
+                    console.log('✅ Descripción cargada');
+                }
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar descripción:', error);
+    }
+}
+
+// Agregar event listener cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    const btnGuardarDescripcion = document.getElementById('btnGuardarDescripcion');
+    if (btnGuardarDescripcion) {
+        btnGuardarDescripcion.addEventListener('click', guardarSoloDescripcion);
+        console.log('✅ Botón "Guardar solo descripción" configurado');
+    }
+    
+    cargarDescripcionExistente();
+});
