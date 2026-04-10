@@ -1383,31 +1383,27 @@ window.confirmarRubros = confirmarRubros;
 window.toggleEstadoAbierto = toggleEstadoAbierto;
 window.verPedidoCompletoMovil = verPedidoCompletoMovil;
 window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
-
 // ===================================================
-// FUNCIONES PARA LA DESCRIPCIÓN (BOTÓN APARTE)
+// GUARDAR SOLO LA DESCRIPCIÓN (BOTÓN APARTE)
 // ===================================================
 
 async function guardarSoloDescripcion() {
-    console.log('🖊️ Guardando solo la descripción...');
-    
     const vendedorId = localStorage.getItem('vendedorId');
+    const descripcion = document.getElementById('perfil-descripcion').value;
+    const statusSpan = document.getElementById('descripcion-status');
+    
     if (!vendedorId) {
-        console.error('❌ No se encontró ID del vendedor');
-        mostrarMensajeDescripcion('❌ Error: No hay sesión activa', 'red');
+        if (statusSpan) {
+            statusSpan.innerHTML = '❌ Error: No hay sesión';
+            statusSpan.style.color = 'red';
+        }
         return;
     }
     
-    const descripcionTextarea = document.getElementById('descripcionVendedor');
-    if (!descripcionTextarea) {
-        console.error('❌ No se encontró el campo descripcionVendedor');
-        mostrarMensajeDescripcion('❌ Error: Campo de descripción no encontrado', 'red');
-        return;
+    if (statusSpan) {
+        statusSpan.innerHTML = '💾 Guardando...';
+        statusSpan.style.color = '#007bff';
     }
-    
-    const descripcion = descripcionTextarea.value;
-    
-    mostrarMensajeDescripcion('💾 Guardando descripción...', 'blue');
     
     try {
         const result = await window.callAPI('actualizarVendedor', {
@@ -1415,66 +1411,42 @@ async function guardarSoloDescripcion() {
             descripcion: descripcion
         });
         
-        console.log('📡 Respuesta de la API:', result);
-        
         if (result.success) {
-            mostrarMensajeDescripcion('✅ ¡Descripción guardada correctamente!', 'green');
-            setTimeout(() => {
-                const statusSpan = document.getElementById('descripcionStatus');
-                if (statusSpan) statusSpan.innerHTML = '';
-            }, 3000);
+            if (statusSpan) {
+                statusSpan.innerHTML = '✅ Descripción guardada';
+                statusSpan.style.color = 'green';
+                setTimeout(() => {
+                    if (statusSpan) statusSpan.innerHTML = '';
+                }, 3000);
+            }
         } else {
-            mostrarMensajeDescripcion('❌ Error: ' + (result.error || 'No se pudo guardar'), 'red');
-        }
-    } catch (error) {
-        console.error('❌ Error al guardar descripción:', error);
-        mostrarMensajeDescripcion('❌ Error de conexión: ' + error.message, 'red');
-    }
-}
-
-function mostrarMensajeDescripcion(mensaje, color) {
-    const statusSpan = document.getElementById('descripcionStatus');
-    if (statusSpan) {
-        statusSpan.innerHTML = mensaje;
-        statusSpan.style.color = color;
-        statusSpan.style.fontWeight = 'bold';
-    }
-}
-
-async function cargarDescripcionExistente() {
-    const vendedorId = localStorage.getItem('vendedorId');
-    if (!vendedorId) {
-        console.log('⚠️ No hay vendedor logueado');
-        return;
-    }
-    
-    console.log('📥 Cargando descripción existente...');
-    
-    try {
-        const result = await window.callAPI('getAllVendedores', {});
-        
-        if (result.success && result.vendedores) {
-            const vendedor = result.vendedores.find(v => v.id === parseInt(vendedorId));
-            if (vendedor && vendedor.descripcion) {
-                const descripcionTextarea = document.getElementById('descripcionVendedor');
-                if (descripcionTextarea) {
-                    descripcionTextarea.value = vendedor.descripcion;
-                    console.log('✅ Descripción cargada');
-                }
+            if (statusSpan) {
+                statusSpan.innerHTML = '❌ Error: ' + (result.error || 'No se pudo guardar');
+                statusSpan.style.color = 'red';
             }
         }
     } catch (error) {
-        console.error('❌ Error al cargar descripción:', error);
+        console.error('Error:', error);
+        if (statusSpan) {
+            statusSpan.innerHTML = '❌ Error de conexión';
+            statusSpan.style.color = 'red';
+        }
     }
 }
 
-// Agregar event listener cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    const btnGuardarDescripcion = document.getElementById('btnGuardarDescripcion');
-    if (btnGuardarDescripcion) {
-        btnGuardarDescripcion.addEventListener('click', guardarSoloDescripcion);
-        console.log('✅ Botón "Guardar solo descripción" configurado');
+// Inicializar el botón cuando se abre el modal de perfil
+function inicializarBotonDescripcion() {
+    const btn = document.getElementById('btn-guardar-descripcion');
+    if (btn) {
+        btn.removeEventListener('click', guardarSoloDescripcion);
+        btn.addEventListener('click', guardarSoloDescripcion);
+        console.log('✅ Botón guardar descripción inicializado');
     }
-    
-    cargarDescripcionExistente();
-});
+}
+
+// Llamar a esta función cuando se abre el modal de perfil
+// Busca la función que abre el modal (generalmente se llama abrirModalPerfil o similar)
+// y agrega dentro: inicializarBotonDescripcion();
+
+// Si no encuentras la función, busca donde se carga el perfil y agrega esta línea:
+// inicializarBotonDescripcion();
