@@ -679,15 +679,6 @@ function eliminarNotificacionItem(notificacionId) {
     actualizarContadorNotificaciones();
 }
 
-function limpiarTodasNotificaciones() {
-    if (confirm('¿Eliminar todas las notificaciones?')) {
-        localStorage.setItem('want_notificaciones', '[]');
-        cargarListaNotificaciones();
-        actualizarContadorNotificaciones();
-        mostrarNotificacionTemporal('Notificaciones eliminadas', 'info');
-    }
-}
-
 function irAMisPedidosDesdeNotificacion(notificacionId) {
     // Marcar como leída
     window.marcarNotificacionLeida(notificacionId);
@@ -869,7 +860,6 @@ window.cargarDatosUsuarioUI = cargarDatosUsuarioUI;
 window.cargarPedidosUsuario = cargarPedidosUsuario;
 window.toggleNotificaciones = toggleNotificaciones;
 window.cerrarPanelNotificaciones = cerrarPanelNotificaciones;
-window.limpiarTodasNotificaciones = limpiarTodasNotificaciones;
 window.eliminarNotificacionItem = eliminarNotificacionItem;
 window.actualizarContadorNotificaciones = actualizarContadorNotificaciones;
 window.mostrarNotificacionTemporal = mostrarNotificacionTemporal;

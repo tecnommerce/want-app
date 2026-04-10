@@ -84,7 +84,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* PANEL NOTIFICACIONES MÓVIL - LATERAL (DESDE LA DERECHA) */
+        /* PANEL NOTIFICACIONES MÓVIL - LATERAL */
         @media (max-width: 768px) {
             .notificaciones-panel {
                 position: fixed;
@@ -119,15 +119,6 @@
             
             .btn-cerrar-notif-mobile {
                 display: inline-flex !important;
-                align-items: center;
-                gap: 5px;
-                background: rgba(255,255,255,0.2);
-                border: none;
-                color: white;
-                padding: 6px 12px;
-                border-radius: 30px;
-                font-size: 0.7rem;
-                cursor: pointer;
             }
             
             .notificaciones-lista {
@@ -153,17 +144,35 @@
         }
         
         .btn-cerrar-notif-mobile {
-            display: none;
-        }
-        
-        .btn-limpiar-notif {
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.1rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-cerrar-notif-mobile:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .btn-cerrar-notif-mobile:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 768px) {
+            .btn-cerrar-notif-mobile {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
         }
         
         .notificaciones-lista {
@@ -416,7 +425,6 @@
             outline: none;
         }
         
-        /* ESCRITORIO */
         @media (min-width: 769px) {
             .header-content {
                 flex-wrap: nowrap;
@@ -443,7 +451,6 @@
             }
         }
         
-        /* MÓVIL */
         @media (max-width: 768px) {
             .user-avatar-desktop {
                 display: none !important;
@@ -471,7 +478,6 @@
             }
         }
         
-        /* NAV DESKTOP */
         .nav-desktop {
             display: flex;
             align-items: center;
@@ -497,7 +503,6 @@
             text-decoration: none;
         }
         
-        /* HERO */
         .hero {
             text-align: center;
             padding: 50px 0 40px;
@@ -514,7 +519,6 @@
             color: #666;
         }
         
-        /* NEGOCIOS */
         .negocios-section {
             padding: 40px 0 80px;
         }
@@ -631,7 +635,6 @@
             gap: 4px;
         }
         
-        /* BANNERS */
         .banners-section {
             margin: 20px 0 30px;
         }
@@ -706,7 +709,6 @@
             border-radius: 10px;
         }
         
-        /* LOADING */
         .loading {
             text-align: center;
             padding: 50px;
@@ -736,7 +738,6 @@
             font-size: 0.8rem;
         }
         
-        /* MODALES */
         .modal {
             display: none;
             position: fixed;
@@ -794,7 +795,6 @@
             justify-content: flex-end;
         }
         
-        /* BOTONES */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -822,7 +822,6 @@
             width: 100%;
         }
         
-        /* MIS PEDIDOS */
         .pedidos-screen {
             padding: 20px 0 40px;
             min-height: 100vh;
@@ -954,7 +953,6 @@
             gap: 5px;
         }
         
-        /* MI CUENTA */
         .cuenta-screen {
             padding: 20px 0 40px;
             min-height: 100vh;
@@ -1037,7 +1035,6 @@
             color: #ef4444;
         }
         
-        /* MOBILE MENU */
         .mobile-menu {
             position: fixed;
             top: 0;
@@ -1125,7 +1122,6 @@
             text-decoration: none;
         }
         
-        /* TOAST */
         .toast-success, .toast-error, .toast-info {
             position: fixed;
             bottom: 20px;
@@ -1231,15 +1227,11 @@
                         </button>
                         <div class="notificaciones-panel" id="notificaciones-panel">
                             <div class="notificaciones-header">
+                                <button class="btn-cerrar-notif-mobile" id="btn-cerrar-notif-mobile" onclick="window.cerrarPanelNotificaciones()">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
                                 <span>Notificaciones</span>
-                                <div>
-                                    <button class="btn-cerrar-notif-mobile" id="btn-cerrar-notif-mobile" onclick="window.cerrarPanelNotificaciones()">
-                                        <i class="fas fa-arrow-right"></i> Cerrar
-                                    </button>
-                                    <button class="btn-limpiar-notif" id="btn-limpiar-notif" onclick="window.limpiarTodasNotificaciones()">
-                                        <i class="fas fa-trash-alt"></i> Limpiar
-                                    </button>
-                                </div>
+                                <div style="width: 32px;"></div>
                             </div>
                             <div class="notificaciones-lista" id="notificaciones-lista">
                                 <div class="notificaciones-vacio">
@@ -1270,7 +1262,6 @@
         </div>
     </header>
 
-    <!-- MENÚ MÓVIL -->
     <div class="mobile-menu" id="mobile-menu">
         <button class="menu-close" id="menu-close">
             <i class="fas fa-times"></i>
@@ -1294,7 +1285,6 @@
     </div>
     <div class="menu-overlay" id="menu-overlay"></div>
 
-    <!-- MODAL CONTACTO -->
     <div class="modal contacto-modal" id="contacto-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1315,7 +1305,6 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL (HOME DE VENDEDORES) -->
     <div id="main-content">
         <main>
             <section class="banners-section" id="banners-section" style="display: none;">
@@ -1361,7 +1350,6 @@
         </footer>
     </div>
 
-    <!-- PANTALLA MIS PEDIDOS -->
     <div id="mis-pedidos-screen" class="pedidos-screen" style="display: none;">
         <div class="container">
             <div class="pedidos-header">
@@ -1390,7 +1378,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA MI CUENTA -->
     <div id="mi-cuenta-screen" class="cuenta-screen" style="display: none;">
         <div class="container">
             <div class="cuenta-header">
@@ -1471,7 +1458,6 @@
         </div>
     </div>
 
-    <!-- MODAL DETALLE PEDIDO -->
     <div class="modal" id="modal-detalle-pedido">
         <div class="modal-content">
             <div class="modal-header">
@@ -1485,6 +1471,11 @@
         </div>
     </div>
 
+    <!-- Reproductor de audio para notificaciones -->
+    <audio id="notificacion-sound" preload="auto">
+        <source src="sounds/notification.mp3" type="audio/mpeg">
+    </audio>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-all.js"></script>
 <script src="js/session-manager.js"></script>
@@ -1492,7 +1483,6 @@
 <script src="js/auth-usuario.js"></script>
 
 <script>
-    // Inicializar usando Session Manager
     (async function() {
         const result = await initWantSession();
         console.log('📊 Index - Resultado:', result);
@@ -1502,7 +1492,6 @@
         }
     })();
     
-    // Redirigir a Mis Pedidos si viene con #mis-pedidos
     if (window.location.hash === '#mis-pedidos') {
         setTimeout(() => {
             if (typeof mostrarMisPedidos === 'function') {
@@ -1519,7 +1508,6 @@
         document.getElementById('modal-detalle-pedido').classList.remove('active');
     };
     
-    // Función para cerrar menú móvil
     function closeMobileMenu() {
         const mobileMenu = document.getElementById('mobile-menu');
         const menuOverlay = document.getElementById('menu-overlay');
@@ -1528,7 +1516,6 @@
         document.body.style.overflow = '';
     }
     
-    // Configurar eventos del menú móvil
     document.addEventListener('DOMContentLoaded', function() {
         const mobileMenu = document.getElementById('mobile-menu');
         const menuOverlay = document.getElementById('menu-overlay');

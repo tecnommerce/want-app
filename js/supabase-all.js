@@ -781,13 +781,20 @@
                     });
                     
                     if (payload.eventType === 'UPDATE') {
+                        const estadoNuevo = pedido.estado;
+                        
+                        // Si el pedido cambió a "entregado", eliminar notificaciones de ese pedido
+                        if (estadoNuevo === 'entregado') {
+                            eliminarNotificacionesPorPedido(pedido.id);
+                        }
+                        
                         const evento = {
                             tipo: 'estado',
                             pedidoId: pedido.id,
                             numeroOrden: pedido.numero_orden || pedido.id,
                             estadoAnterior: payload.old?.estado,
-                            estadoNuevo: pedido.estado,
-                            mensaje: `Tu pedido #${pedido.numero_orden || pedido.id} cambió a "${getEstadoPedidoTexto(pedido.estado)}"`
+                            estadoNuevo: estadoNuevo,
+                            mensaje: `Tu pedido #${pedido.numero_orden || pedido.id} cambió a "${getEstadoPedidoTexto(estadoNuevo)}"`
                         };
                         
                         guardarNotificacion(evento);
@@ -815,6 +822,17 @@
         return estados[estado] || estado;
     }
 
+    function eliminarNotificacionesPorPedido(pedidoId) {
+        const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+        const nuevasNotificaciones = notificaciones.filter(n => n.pedidoId !== pedidoId);
+        
+        if (nuevasNotificaciones.length !== notificaciones.length) {
+            localStorage.setItem('want_notificaciones', JSON.stringify(nuevasNotificaciones));
+            window.dispatchEvent(new CustomEvent('notificacionLeida'));
+            console.log(`🗑️ Notificaciones del pedido ${pedidoId} eliminadas (entregado)`);
+        }
+    }
+
     function guardarNotificacion(notificacion) {
         const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
         notificacion.id = Date.now();
@@ -826,6 +844,17 @@
         
         localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
         window.dispatchEvent(new CustomEvent('nuevaNotificacion', { detail: notificacion }));
+        
+        // Reproducir sonido
+        try {
+            const audio = document.getElementById('notificacion-sound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log('Error al reproducir sonido:', e));
+            }
+        } catch(e) {
+            console.log('Error con sonido:', e);
+        }
     }
 
     window.obtenerNotificaciones = function() {
