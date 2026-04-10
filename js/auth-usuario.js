@@ -727,4 +727,3 @@ window.forzarCargaDatosUsuario = forzarCargaDatosUsuario;
 window.handleUserLogin = handleUserLogin;
 window.mostrarPantallaPrincipal = mostrarPantallaPrincipal;
 window.cargarDatosUsuarioUI = cargarDatosUsuarioUI;
-window.cargarPedidosUsuario = cargarPedidosUsuario;
