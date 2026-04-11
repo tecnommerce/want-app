@@ -1,5 +1,5 @@
 // ===================================================
-// BUSCADOR AVANZADO - AUTOCOMPLETADO E HISTORIAL
+// BUSCADOR AVANZADO - MODO PANTALLA COMPLETA
 // ===================================================
 
 const BuscadorAvanzado = {
@@ -7,22 +7,15 @@ const BuscadorAvanzado = {
     config: {
         maxHistorial: 10,
         debounceDelay: 200,
-        minCharsSugerencias: 2
+        minCharsSugerencias: 1
     },
     
     // Estado
     state: {
         historial: [],
-        ultimaBusqueda: '',
-        sugerenciasAbiertas: false,
-        historialAbierto: false
-    },
-    
-    // Elementos DOM
-    elements: {
-        searchInput: null,
-        sugerenciasDropdown: null,
-        historialPanel: null
+        modoBusqueda: false,
+        terminoActual: '',
+        timeoutId: null
     },
     
     // ===================================================
@@ -32,35 +25,60 @@ const BuscadorAvanzado = {
     init: function() {
         console.log('🔍 Inicializando Buscador Avanzado...');
         
-        this.elements.searchInput = document.getElementById('search-input');
-        if (!this.elements.searchInput) {
-            console.error('❌ No se encontró el input de búsqueda');
-            return;
-        }
-        
         this.cargarHistorial();
-        this.crearElementos();
+        this.crearEstructuraHTML();
         this.eventos();
         
         console.log('✅ Buscador Avanzado inicializado');
     },
     
     // ===================================================
-    // CREAR ELEMENTOS DOM
+    // CREAR ESTRUCTURA HTML
     // ===================================================
     
-    crearElementos: function() {
-        // Crear dropdown de sugerencias
-        this.elements.sugerenciasDropdown = document.createElement('div');
-        this.elements.sugerenciasDropdown.className = 'sugerencias-dropdown';
-        this.elements.sugerenciasDropdown.id = 'sugerencias-dropdown';
-        this.elements.searchInput.parentNode.appendChild(this.elements.sugerenciasDropdown);
+    crearEstructuraHTML: function() {
+        // Overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'search-overlay';
+        overlay.id = 'search-overlay';
+        document.body.appendChild(overlay);
         
-        // Crear panel de historial
-        this.elements.historialPanel = document.createElement('div');
-        this.elements.historialPanel.className = 'historial-panel';
-        this.elements.historialPanel.id = 'historial-panel';
-        this.elements.searchInput.parentNode.appendChild(this.elements.historialPanel);
+        // Panel fullscreen
+        const fullscreen = document.createElement('div');
+        fullscreen.className = 'search-fullscreen';
+        fullscreen.id = 'search-fullscreen';
+        fullscreen.innerHTML = `
+            <div class="search-fullscreen-header">
+                <button class="btn-back-search" id="btn-back-search">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="search-fullscreen-input-wrapper">
+                    <input type="text" class="search-fullscreen-input" id="search-fullscreen-input" placeholder="Buscar negocios, productos..." autocomplete="off">
+                    <button class="btn-clear-search" id="btn-clear-search" style="display: none;">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="search-fullscreen-content" id="search-fullscreen-content">
+                <div class="search-loading" style="display: none;">
+                    <div class="spinner-small"></div>
+                    <span>Buscando...</span>
+                </div>
+                <div id="search-results-container"></div>
+            </div>
+        `;
+        document.body.appendChild(fullscreen);
+        
+        this.elements = {
+            overlay: document.getElementById('search-overlay'),
+            fullscreen: document.getElementById('search-fullscreen'),
+            input: document.getElementById('search-fullscreen-input'),
+            content: document.getElementById('search-fullscreen-content'),
+            loading: document.querySelector('.search-loading'),
+            resultsContainer: document.getElementById('search-results-container'),
+            btnBack: document.getElementById('btn-back-search'),
+            btnClear: document.getElementById('btn-clear-search')
+        };
     },
     
     // ===================================================
@@ -72,9 +90,7 @@ const BuscadorAvanzado = {
         if (historialGuardado) {
             try {
                 this.state.historial = JSON.parse(historialGuardado);
-                console.log('📜 Historial cargado:', this.state.historial.length);
             } catch(e) {
-                console.error('Error cargando historial:', e);
                 this.state.historial = [];
             }
         }
@@ -86,22 +102,13 @@ const BuscadorAvanzado = {
     
     agregarAlHistorial: function(termino) {
         if (!termino || termino.trim().length === 0) return;
-        
         termino = termino.trim();
-        
-        // Eliminar si ya existe
         this.state.historial = this.state.historial.filter(h => h !== termino);
-        
-        // Agregar al principio
         this.state.historial.unshift(termino);
-        
-        // Limitar cantidad
         if (this.state.historial.length > this.config.maxHistorial) {
             this.state.historial.pop();
         }
-        
         this.guardarHistorial();
-        this.renderizarHistorial();
     },
     
     eliminarDelHistorial: function(termino) {
@@ -114,48 +121,52 @@ const BuscadorAvanzado = {
         this.state.historial = [];
         this.guardarHistorial();
         this.renderizarHistorial();
-        this.cerrarHistorial();
     },
     
+    // ===================================================
+    // RENDERIZADO
+    // ===================================================
+    
     renderizarHistorial: function() {
-        if (!this.elements.historialPanel) return;
+        if (!this.elements.resultsContainer) return;
         
         if (this.state.historial.length === 0) {
-            this.elements.historialPanel.innerHTML = `
-                <div class="historial-vacio">
-                    <div style="text-align: center; padding: 30px; color: #999;">
-                        <i class="fas fa-history" style="font-size: 1.5rem; margin-bottom: 8px; display: block;"></i>
-                        <span style="font-size: 0.8rem;">No hay búsquedas recientes</span>
-                    </div>
+            this.elements.resultsContainer.innerHTML = `
+                <div class="search-empty">
+                    <i class="fas fa-history"></i>
+                    <p>No hay búsquedas recientes</p>
                 </div>
             `;
             return;
         }
         
-        this.elements.historialPanel.innerHTML = `
-            <div class="historial-header">
-                <span><i class="fas fa-history"></i> Búsquedas recientes</span>
-                <button class="btn-limpiar-historial" id="btn-limpiar-historial">
-                    <i class="fas fa-trash-alt"></i> Limpiar
-                </button>
-            </div>
-            <div class="historial-lista">
-                ${this.state.historial.map(termino => `
-                    <div class="historial-item" data-termino="${escapeHTML(termino)}">
-                        <div class="historial-icono">
-                            <i class="fas fa-clock"></i>
+        this.elements.resultsContainer.innerHTML = `
+            <div class="search-section">
+                <div class="search-section-title">
+                    <i class="fas fa-history"></i>
+                    <span>BÚSQUEDAS RECIENTES</span>
+                    <button class="btn-limpiar-historial" id="btn-limpiar-historial-full" style="margin-left: auto; background: none; border: none; color: #999; font-size: 0.7rem; cursor: pointer;">
+                        <i class="fas fa-trash-alt"></i> Limpiar
+                    </button>
+                </div>
+                <div class="historial-list">
+                    ${this.state.historial.map(termino => `
+                        <div class="historial-item-full" data-termino="${escapeHTML(termino)}">
+                            <div class="icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="text">${escapeHTML(termino)}</div>
+                            <button class="delete" data-termino="${escapeHTML(termino)}">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <div class="historial-texto">${escapeHTML(termino)}</div>
-                        <button class="btn-eliminar-historial" data-termino="${escapeHTML(termino)}">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `).join('')}
+                    `).join('')}
+                </div>
             </div>
         `;
         
-        // Evento para limpiar historial
-        const btnLimpiar = document.getElementById('btn-limpiar-historial');
+        // Evento limpiar historial
+        const btnLimpiar = document.getElementById('btn-limpiar-historial-full');
         if (btnLimpiar) {
             btnLimpiar.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -163,17 +174,17 @@ const BuscadorAvanzado = {
             });
         }
         
-        // Eventos para cada item
-        document.querySelectorAll('.historial-item').forEach(item => {
+        // Eventos items
+        document.querySelectorAll('.historial-item-full').forEach(item => {
             const termino = item.dataset.termino;
             item.addEventListener('click', (e) => {
-                if (!e.target.closest('.btn-eliminar-historial')) {
+                if (!e.target.closest('.delete')) {
                     this.realizarBusqueda(termino);
                 }
             });
         });
         
-        document.querySelectorAll('.btn-eliminar-historial').forEach(btn => {
+        document.querySelectorAll('.historial-item-full .delete').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const termino = btn.dataset.termino;
@@ -182,57 +193,17 @@ const BuscadorAvanzado = {
         });
     },
     
-    // ===================================================
-    // SUGERENCIAS
-    // ===================================================
-    
-    obtenerSugerencias: async function(termino) {
-        if (!termino || termino.length < this.config.minCharsSugerencias) {
-            return { negocios: [], productos: [], rubros: [] };
-        }
-        
-        const terminoLower = termino.toLowerCase();
-        
-        // Buscar en negocios
-        const negocios = (todosLosNegocios || []).filter(n => 
-            n.nombre?.toLowerCase().includes(terminoLower)
-        ).slice(0, 3);
-        
-        // Buscar en productos (a través de los negocios)
-        let productos = [];
-        for (const negocio of (todosLosNegocios || [])) {
-            if (negocio.productos) {
-                const productosEncontrados = negocio.productos.filter(p =>
-                    p.nombre?.toLowerCase().includes(terminoLower)
-                ).map(p => ({
-                    ...p,
-                    negocioNombre: negocio.nombre,
-                    negocioId: negocio.id
-                }));
-                productos.push(...productosEncontrados);
-            }
-        }
-        productos = productos.slice(0, 3);
-        
-        // Buscar en rubros
-        const rubros = (window.RUBROS_DISPONIBLES || []).filter(r =>
-            r.toLowerCase().includes(terminoLower)
-        ).slice(0, 3);
-        
-        return { negocios, productos, rubros };
-    },
-    
     renderizarSugerencias: function(sugerencias, termino) {
-        if (!this.elements.sugerenciasDropdown) return;
+        if (!this.elements.resultsContainer) return;
         
         const { negocios, productos, rubros } = sugerencias;
-        const tieneResultados = negocios.length > 0 || productos.length > 0 || rubros.length > 0;
         
-        if (!tieneResultados) {
-            this.elements.sugerenciasDropdown.innerHTML = `
-                <div class="sugerencias-vacio">
-                    <i class="fas fa-search" style="font-size: 1.2rem; margin-bottom: 8px; display: block;"></i>
-                    <span>No hay sugerencias para "${escapeHTML(termino)}"</span>
+        if (negocios.length === 0 && productos.length === 0 && rubros.length === 0) {
+            this.elements.resultsContainer.innerHTML = `
+                <div class="search-empty">
+                    <i class="fas fa-search"></i>
+                    <p>No encontramos resultados para <strong>"${escapeHTML(termino)}"</strong></p>
+                    <p style="font-size: 0.7rem; margin-top: 8px;">Probá con otras palabras</p>
                 </div>
             `;
             return;
@@ -240,20 +211,22 @@ const BuscadorAvanzado = {
         
         let html = '';
         
-        // Grupos de sugerencias
         if (negocios.length > 0) {
             html += `
-                <div class="sugerencias-grupo">
-                    <div class="sugerencias-grupo-titulo">🏪 NEGOCIOS</div>
-                    <div class="sugerencias-lista">
+                <div class="search-section">
+                    <div class="search-section-title">
+                        <i class="fas fa-store"></i>
+                        <span>NEGOCIOS</span>
+                    </div>
+                    <div class="sugerencias-list">
                         ${negocios.map(n => `
-                            <div class="sugerencia-item" data-tipo="negocio" data-id="${n.id}" data-termino="${escapeHTML(n.nombre)}">
-                                <div class="sugerencia-icono">
+                            <div class="sugerencia-item-full" data-tipo="negocio" data-id="${n.id}" data-termino="${escapeHTML(n.nombre)}">
+                                <div class="icon negocio">
                                     <i class="fas fa-store"></i>
                                 </div>
-                                <div class="sugerencia-contenido">
-                                    <div class="sugerencia-titulo">${this.resaltarTexto(n.nombre, termino)}</div>
-                                    <div class="sugerencia-subtitulo">${escapeHTML(n.rubros?.[0] || 'Negocio')}</div>
+                                <div class="info">
+                                    <div class="titulo">${this.resaltarTexto(n.nombre, termino)}</div>
+                                    <div class="subtitulo">${escapeHTML(n.rubros?.[0] || 'Negocio')}</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -264,17 +237,20 @@ const BuscadorAvanzado = {
         
         if (productos.length > 0) {
             html += `
-                <div class="sugerencias-grupo">
-                    <div class="sugerencias-grupo-titulo">📦 PRODUCTOS</div>
-                    <div class="sugerencias-lista">
+                <div class="search-section">
+                    <div class="search-section-title">
+                        <i class="fas fa-pizza-slice"></i>
+                        <span>PRODUCTOS</span>
+                    </div>
+                    <div class="sugerencias-list">
                         ${productos.map(p => `
-                            <div class="sugerencia-item" data-tipo="producto" data-negocio-id="${p.negocioId}" data-termino="${escapeHTML(p.nombre)}">
-                                <div class="sugerencia-icono">
+                            <div class="sugerencia-item-full" data-tipo="producto" data-negocio-id="${p.negocioId}" data-termino="${escapeHTML(p.nombre)}">
+                                <div class="icon producto">
                                     <i class="fas fa-pizza-slice"></i>
                                 </div>
-                                <div class="sugerencia-contenido">
-                                    <div class="sugerencia-titulo">${this.resaltarTexto(p.nombre, termino)}</div>
-                                    <div class="sugerencia-subtitulo">${escapeHTML(p.negocioNombre)} • ${formatearPrecio(p.precio)}</div>
+                                <div class="info">
+                                    <div class="titulo">${this.resaltarTexto(p.nombre, termino)}</div>
+                                    <div class="subtitulo">${escapeHTML(p.negocioNombre)} • ${formatearPrecio(p.precio)}</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -285,17 +261,20 @@ const BuscadorAvanzado = {
         
         if (rubros.length > 0) {
             html += `
-                <div class="sugerencias-grupo">
-                    <div class="sugerencias-grupo-titulo">🏷️ RUBROS</div>
-                    <div class="sugerencias-lista">
+                <div class="search-section">
+                    <div class="search-section-title">
+                        <i class="fas fa-tag"></i>
+                        <span>RUBROS</span>
+                    </div>
+                    <div class="sugerencias-list">
                         ${rubros.map(r => `
-                            <div class="sugerencia-item" data-tipo="rubro" data-termino="${escapeHTML(r)}">
-                                <div class="sugerencia-icono">
+                            <div class="sugerencia-item-full" data-tipo="rubro" data-termino="${escapeHTML(r)}">
+                                <div class="icon rubro">
                                     <i class="fas fa-tag"></i>
                                 </div>
-                                <div class="sugerencia-contenido">
-                                    <div class="sugerencia-titulo">${this.resaltarTexto(r, termino)}</div>
-                                    <div class="sugerencia-subtitulo">Rubro</div>
+                                <div class="info">
+                                    <div class="titulo">${this.resaltarTexto(r, termino)}</div>
+                                    <div class="subtitulo">Rubro</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -304,32 +283,64 @@ const BuscadorAvanzado = {
             `;
         }
         
-        this.elements.sugerenciasDropdown.innerHTML = html;
+        this.elements.resultsContainer.innerHTML = html;
         
-        // Eventos para las sugerencias
-        document.querySelectorAll('.sugerencia-item').forEach(item => {
+        // Eventos sugerencias
+        document.querySelectorAll('.sugerencia-item-full').forEach(item => {
             item.addEventListener('click', () => {
-                const terminoSugerido = item.dataset.termino;
                 const tipo = item.dataset.tipo;
                 const id = item.dataset.id;
                 const negocioId = item.dataset.negocioId;
+                const termino = item.dataset.termino;
+                
+                this.cerrarModoBusqueda();
                 
                 if (tipo === 'negocio' && id) {
                     window.location.href = `tienda.html?vendedor=${id}`;
                 } else if (tipo === 'producto' && negocioId) {
                     window.location.href = `tienda.html?vendedor=${negocioId}`;
-                } else if (terminoSugerido) {
-                    this.realizarBusqueda(terminoSugerido);
+                } else if (termino) {
+                    this.realizarBusqueda(termino);
                 }
             });
         });
     },
     
-    resaltarTexto: function(texto, busqueda) {
-        if (!texto || !busqueda) return escapeHTML(texto);
+    // ===================================================
+    // OBTENER SUGERENCIAS
+    // ===================================================
+    
+    obtenerSugerencias: async function(termino) {
+        if (!termino || termino.length < this.config.minCharsSugerencias) {
+            return { negocios: [], productos: [], rubros: [] };
+        }
         
-        const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return escapeHTML(texto).replace(regex, '<span class="sugerencia-resaltado">$1</span>');
+        const terminoLower = termino.toLowerCase();
+        
+        const negocios = (window.todosLosNegocios || []).filter(n => 
+            n.nombre?.toLowerCase().includes(terminoLower)
+        ).slice(0, 4);
+        
+        let productos = [];
+        for (const negocio of (window.todosLosNegocios || [])) {
+            if (negocio.productos) {
+                const encontrados = negocio.productos.filter(p =>
+                    p.nombre?.toLowerCase().includes(terminoLower)
+                ).map(p => ({
+                    ...p,
+                    negocioNombre: negocio.nombre,
+                    negocioId: negocio.id
+                }));
+                productos.push(...encontrados);
+            }
+        }
+        productos = productos.slice(0, 4);
+        
+        const rubros = (window.RUBROS_DISPONIBLES || []).filter(r =>
+            r.toLowerCase().includes(terminoLower)
+        ).slice(0, 4);
+        
+        return { negocios, productos, rubros };
     },
     
     // ===================================================
@@ -340,53 +351,95 @@ const BuscadorAvanzado = {
         if (!termino) return;
         
         this.agregarAlHistorial(termino);
-        this.cerrarSugerencias();
-        this.cerrarHistorial();
+        this.cerrarModoBusqueda();
         
-        if (this.elements.searchInput) {
-            this.elements.searchInput.value = termino;
-        }
-        
-        // Disparar búsqueda en home.js
         if (typeof terminoBusquedaActual !== 'undefined') {
             terminoBusquedaActual = termino;
             if (typeof realizarBusqueda === 'function') {
                 realizarBusqueda(termino);
-            } else if (typeof window.realizarBusqueda === 'function') {
-                window.realizarBusqueda(termino);
             }
+        }
+        
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.value = termino;
+    },
+    
+    // ===================================================
+    // MODO BÚSQUEDA
+    // ===================================================
+    
+    abrirModoBusqueda: function() {
+        if (this.state.modoBusqueda) return;
+        
+        this.state.modoBusqueda = true;
+        document.body.classList.add('search-mode');
+        this.elements.overlay.classList.add('active');
+        this.elements.fullscreen.classList.add('active');
+        
+        setTimeout(() => {
+            this.elements.input.focus();
+        }, 100);
+        
+        this.renderizarHistorial();
+    },
+    
+    cerrarModoBusqueda: function() {
+        if (!this.state.modoBusqueda) return;
+        
+        this.state.modoBusqueda = false;
+        this.state.terminoActual = '';
+        document.body.classList.remove('search-mode');
+        this.elements.overlay.classList.remove('active');
+        this.elements.fullscreen.classList.remove('active');
+        this.elements.input.value = '';
+        this.elements.btnClear.style.display = 'none';
+    },
+    
+    // ===================================================
+    // MANEJAR BÚSQUEDA EN TIEMPO REAL
+    // ===================================================
+    
+    handleInput: async function() {
+        const termino = this.elements.input.value;
+        this.state.terminoActual = termino;
+        
+        if (this.state.timeoutId) clearTimeout(this.state.timeoutId);
+        
+        if (termino.length >= this.config.minCharsSugerencias) {
+            this.elements.btnClear.style.display = 'flex';
+            this.elements.resultsContainer.innerHTML = `
+                <div class="search-loading">
+                    <div class="spinner-small"></div>
+                    <span>Buscando...</span>
+                </div>
+            `;
+            
+            this.state.timeoutId = setTimeout(async () => {
+                const sugerencias = await this.obtenerSugerencias(termino);
+                this.renderizarSugerencias(sugerencias, termino);
+            }, this.config.debounceDelay);
+        } else {
+            this.elements.btnClear.style.display = 'none';
+            this.renderizarHistorial();
         }
     },
     
-    // ===================================================
-    // UI - ABRIR/CERRAR
-    // ===================================================
-    
-    abrirHistorial: function() {
-        if (this.state.historialAbierto) return;
-        
+    limpiarInput: function() {
+        this.elements.input.value = '';
+        this.state.terminoActual = '';
+        this.elements.btnClear.style.display = 'none';
         this.renderizarHistorial();
-        this.elements.historialPanel.classList.add('active');
-        this.cerrarSugerencias();
-        this.state.historialAbierto = true;
+        this.elements.input.focus();
     },
     
-    cerrarHistorial: function() {
-        this.elements.historialPanel.classList.remove('active');
-        this.state.historialAbierto = false;
-    },
+    // ===================================================
+    // UTILIDADES
+    // ===================================================
     
-    abrirSugerencias: function() {
-        if (this.state.sugerenciasAbiertas) return;
-        
-        this.elements.sugerenciasDropdown.classList.add('active');
-        this.cerrarHistorial();
-        this.state.sugerenciasAbiertas = true;
-    },
-    
-    cerrarSugerencias: function() {
-        this.elements.sugerenciasDropdown.classList.remove('active');
-        this.state.sugerenciasAbiertas = false;
+    resaltarTexto: function(texto, busqueda) {
+        if (!texto || !busqueda) return escapeHTML(texto);
+        const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return escapeHTML(texto).replace(regex, '<span class="sugerencia-resaltado">$1</span>');
     },
     
     // ===================================================
@@ -394,60 +447,44 @@ const BuscadorAvanzado = {
     // ===================================================
     
     eventos: function() {
-        let timeoutId = null;
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('click', () => this.abrirModoBusqueda());
+        }
         
-        this.elements.searchInput.addEventListener('input', async (e) => {
-            const termino = e.target.value;
-            
-            if (timeoutId) clearTimeout(timeoutId);
-            
-            if (termino.length >= this.config.minCharsSugerencias) {
-                timeoutId = setTimeout(async () => {
-                    this.elements.sugerenciasDropdown.innerHTML = `
-                        <div class="sugerencias-loading">
-                            <div class="spinner-small"></div>
-                            <span>Buscando...</span>
-                        </div>
-                    `;
-                    this.abrirSugerencias();
-                    
-                    const sugerencias = await this.obtenerSugerencias(termino);
-                    this.renderizarSugerencias(sugerencias, termino);
-                }, this.config.debounceDelay);
-            } else {
-                this.cerrarSugerencias();
-            }
-        });
+        if (this.elements.btnBack) {
+            this.elements.btnBack.addEventListener('click', () => this.cerrarModoBusqueda());
+        }
         
-        this.elements.searchInput.addEventListener('focus', () => {
-            if (this.state.historial.length > 0) {
-                this.abrirHistorial();
-            }
-        });
+        if (this.elements.btnClear) {
+            this.elements.btnClear.addEventListener('click', () => this.limpiarInput());
+        }
         
-        this.elements.searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const termino = this.elements.searchInput.value.trim();
-                if (termino) {
-                    this.realizarBusqueda(termino);
-                    this.elements.searchInput.blur();
+        if (this.elements.input) {
+            this.elements.input.addEventListener('input', () => this.handleInput());
+            this.elements.input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const termino = this.elements.input.value.trim();
+                    if (termino) {
+                        this.realizarBusqueda(termino);
+                    }
                 }
-            }
-        });
+            });
+        }
         
-        // Cerrar al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            if (!this.elements.searchInput.contains(e.target) &&
-                !this.elements.sugerenciasDropdown?.contains(e.target) &&
-                !this.elements.historialPanel?.contains(e.target)) {
-                this.cerrarSugerencias();
-                this.cerrarHistorial();
+        if (this.elements.overlay) {
+            this.elements.overlay.addEventListener('click', () => this.cerrarModoBusqueda());
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.state.modoBusqueda) {
+                this.cerrarModoBusqueda();
             }
         });
     }
 };
 
-// Inicializar cuando el DOM esté listo
+// Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         BuscadorAvanzado.init();
