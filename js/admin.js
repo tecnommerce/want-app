@@ -540,22 +540,30 @@ function renderizarPedidosDesktop() {
         let botonesHTML = '';
         
         if (estado === 'preparando') {
+            // Botón "Confirmar y preparar" (abre modal de tiempo)
             botonesHTML = `
-                <button class="btn-tabla btn-whatsapp" onclick="event.stopPropagation(); confirmarPedidoWhatsApp(${p.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
-                <button class="btn-tabla btn-preparar" onclick="event.stopPropagation(); actualizarEstado(${p.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
+                <button class="btn-tabla btn-confirmar-preparar" onclick="event.stopPropagation(); abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
+            `;
+            // Botón "Coordinar transferencia" (solo si método de pago es transferencia)
+            if (p.metodo_pago === 'transferencia') {
+                botonesHTML += `
+                    <button class="btn-tabla btn-coordinar" onclick="event.stopPropagation(); abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-exchange-alt"></i> Coordinar transferencia</button>
+                `;
+            }
+            botonesHTML += `
                 <button class="btn-tabla btn-editar" onclick="event.stopPropagation(); abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="event.stopPropagation(); cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'en preparacion') {
             botonesHTML = `
-                <button class="btn-tabla btn-pedido-listo" onclick="event.stopPropagation(); abrirModalAsignarDelivery(${p.id})"><i class="fas fa-check-circle"></i> Listo</button>
+                <button class="btn-tabla btn-notificar-cliente" onclick="event.stopPropagation(); notificarClienteEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar al cliente</button>
+                <button class="btn-tabla btn-enviar-delivery" onclick="event.stopPropagation(); abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Enviar al delivery</button>
                 <button class="btn-tabla btn-editar" onclick="event.stopPropagation(); abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="event.stopPropagation(); cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'en camino') {
             botonesHTML = `
-                <button class="btn-tabla btn-notificar" onclick="event.stopPropagation(); notificarEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
-                <button class="btn-tabla btn-entregar" onclick="event.stopPropagation(); actualizarEstado(${p.id}, 'entregado', this)"><i class="fas fa-check-double"></i> Entregar</button>
+                <button class="btn-tabla btn-entregar-pedido" onclick="event.stopPropagation(); entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Pedido entregado</button>
                 <button class="btn-tabla btn-editar" onclick="event.stopPropagation(); abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="event.stopPropagation(); cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
@@ -595,6 +603,7 @@ function renderizarPedidosMovil() {
     for (const p of pedidosFiltrados) {
         const estado = p.estado || 'preparando';
         const numeroMostrar = p.numero_orden || p.id;
+        const total = formatearPrecio(p.total || 0);
         
         let productosResumen = '';
         if (p.productos && Array.isArray(p.productos) && p.productos.length > 0) {
@@ -607,9 +616,42 @@ function renderizarPedidosMovil() {
         
         let estadoTexto = '', estadoClase = '';
         if (estado === 'preparando') { estadoTexto = 'NUEVO'; estadoClase = 'estado-preparando'; }
-        else if (estado === 'en preparacion') { estadoTexto = 'EN PREPARACIÓN'; estadoClase = 'estado-en-preparacion'; }
+        else if (estado === 'en preparacion') { estadoTexto = 'PREPARACIÓN'; estadoClase = 'estado-en-preparacion'; }
         else if (estado === 'en camino') { estadoTexto = 'EN CAMINO'; estadoClase = 'estado-en-camino'; }
         else if (estado === 'entregado') { estadoTexto = 'ENTREGADO'; estadoClase = 'estado-entregado'; }
+        
+        let botonesHTML = '';
+        
+        if (estado === 'preparando') {
+            botonesHTML = `
+                <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
+            `;
+            if (p.metodo_pago === 'transferencia') {
+                botonesHTML += `<button class="btn-tabla btn-coordinar" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-exchange-alt"></i> Coordinar</button>`;
+            }
+            botonesHTML += `
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        } else if (estado === 'en preparacion') {
+            botonesHTML = `
+                <button class="btn-tabla btn-notificar-cliente" onclick="notificarClienteEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
+                <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        } else if (estado === 'en camino') {
+            botonesHTML = `
+                <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        } else if (estado === 'entregado') {
+            botonesHTML = `
+                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+            `;
+        }
         
         html += `
             <div class="pedido-card-movil" data-pedido-id="${p.id}">
@@ -620,10 +662,10 @@ function renderizarPedidosMovil() {
                 <div class="pedido-card-body">
                     <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
                     <div class="pedido-resumen-movil">📦 ${escapeHTML(productosResumen)}</div>
-                    <div class="pedido-resumen-movil">💰 ${formatearPrecio(p.total || 0)}</div>
+                    <div class="pedido-resumen-movil">💰 ${total}</div>
                 </div>
-                <div class="pedido-card-footer">
-                    <button class="btn-ver-pedido-movil" onclick="verPedidoCompletoMovil(${p.id})"><i class="fas fa-eye"></i> Ver pedido</button>
+                <div class="pedido-card-footer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                    ${botonesHTML}
                 </div>
             </div>
         `;
