@@ -2537,7 +2537,6 @@ function agregarNotificacionVendedor(mensaje, tipo = 'info') {
     guardarNotificacionesVendedor();
     actualizarContadorNotificacionesVendedor();
     
-    // Reproducir sonido
     try {
         const audio = document.getElementById('notificacion-sound');
         if (audio) {
@@ -2723,7 +2722,6 @@ function abrirModalCoordinarTransferencia(pedidoId) {
     }
     pedidoTransferenciaActual = pedido;
     
-    // SOLO usar cbu-alias (NO mensaje-transferencia)
     const cbuAliasInput = document.getElementById('cbu-alias');
     if (cbuAliasInput) {
         cbuAliasInput.value = '';
@@ -2759,7 +2757,6 @@ function enviarCoordinacionTransferencia() {
     const numeroMostrar = pedido.numero_orden || pedido.id;
     const nombreVendedor = vendedorActual ? vendedorActual.nombre : 'el negocio';
     
-    // Construir el detalle de productos
     let productosDetalle = '';
     if (pedido.productos && pedido.productos.length > 0) {
         pedido.productos.forEach(p => {
@@ -2769,7 +2766,6 @@ function enviarCoordinacionTransferencia() {
         productosDetalle = 'No hay productos registrados\n';
     }
     
-    // Construir el mensaje completo para WhatsApp
     let mensaje = `COORDINACION DE PAGO POR TRANSFERENCIA\n\n`;
     mensaje += `Hola ${pedido.cliente_nombre}, gracias por tu pedido!\n\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -2794,7 +2790,6 @@ function enviarCoordinacionTransferencia() {
     }
     mensaje += `Gracias por confiar en ${nombreVendedor}!`;
     
-    // Abrir WhatsApp
     const whatsappUrl = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
     console.log('Abriendo WhatsApp:', whatsappUrl);
     window.open(whatsappUrl, '_blank');
@@ -2802,40 +2797,41 @@ function enviarCoordinacionTransferencia() {
     cerrarModalCoordinarTransferencia();
     mostrarToast('Mensaje enviado al cliente con los datos de pago', 'success');
     
-    // Limpiar campo
     document.getElementById('cbu-alias').value = '';
     pedidoTransferenciaActual = null;
 }
 
 // ===================================================
-// 3. SOBREESCRIBIR FUNCIONES DE BOTONES EXISTENTES
+// 3. FUNCIONES DE NOTIFICACIÓN AL CLIENTE Y ENTREGA
 // ===================================================
 
-// Modificar la función renderizarPedidosDesktop para incluir nuevos botones
-// Esta función se mantiene igual pero los botones se generan desde el HTML
-// Los botones llaman a las nuevas funciones
+function notificarClienteEnCamino(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    let mensaje = `ACTUALIZACION DE TU PEDIDO\n\nHola ${pedido.cliente_nombre},\n\n*Tu pedido esta en camino!\n\n━━━━━━━━━━━━━━━━━━━━\nDETALLE:\n`;
+    pedido.productos.forEach(p => { mensaje += `${p.cantidad}x ${p.nombre}\n`; });
+    if (pedido.detalles) mensaje += `\nINDICACIONES: ${pedido.detalles}\n`;
+    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\nDIRECCION: ${pedido.direccion}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+    if (metodoPagoTexto === 'transferencia') {
+        mensaje += `PAGO: Transferencia bancaria (YA REALIZADA)`;
+    } else {
+        mensaje += `PAGO: Efectivo - DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY`;
+    }
+    
+    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    mostrarToast(`Notificacion enviada al cliente`, 'success');
+}
+
+function entregarPedido(pedidoId, boton) {
+    actualizarEstado(pedidoId, 'entregado', boton);
+}
 
 // ===================================================
-// 4. INICIALIZAR NOTIFICACIONES AL INICIAR PANEL
+// 4. EVENT LISTENERS
 // ===================================================
 
-// Agregar esta línea dentro de iniciarPanel() al final:
-// inicializarNotificacionesVendedor();
-
-// Exponer funciones globales
-window.toggleNotificacionesVendedor = toggleNotificacionesVendedor;
-window.cerrarPanelNotificacionesVendedor = cerrarPanelNotificacionesVendedor;
-window.marcarNotificacionLeidaVendedor = marcarNotificacionLeidaVendedor;
-window.abrirModalTiempo = abrirModalTiempo;
-window.confirmarTiempoYPreparar = confirmarTiempoYPreparar;
-window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
-window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
-window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
-window.notificarClienteEnCamino = notificarClienteEnCamino;
-window.entregarPedido = entregarPedido;
-window.cerrarModalTiempo = () => cerrarModalConZIndex('modal-tiempo-entrega');
-
-// Agregar event listeners para los nuevos modales
 document.addEventListener('DOMContentLoaded', function() {
     const btnConfirmarTiempo = document.getElementById('btn-confirmar-tiempo');
     if (btnConfirmarTiempo) {
@@ -2856,37 +2852,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnCerrarNotif) {
         btnCerrarNotif.addEventListener('click', cerrarPanelNotificacionesVendedor);
     }
-
-    function notificarClienteEnCamino(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
-    let mensaje = `*ACTUALIZACIÓN DE TU PEDIDO*\n\nHola ${pedido.cliente_nombre},\n\n*¡Tu pedido está en camino!*\n\n━━━━━━━━━━━━━━━━━━━━\n*DETALLE:*\n`;
-    pedido.productos.forEach(p => { mensaje += `• ${p.cantidad}x ${p.nombre}\n`; });
-    if (pedido.detalles) mensaje += `\n*INDICACIONES:* ${pedido.detalles}\n`;
-    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n*DIRECCIÓN:* ${pedido.direccion}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
-    if (metodoPagoTexto === 'transferencia') {
-        mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)`;
-    } else {
-        mensaje += `*PAGO:* Efectivo - *DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY*`;
-    }
-    
-    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    mostrarToast(`Notificación enviada al cliente`, 'success');
-}
-
-function entregarPedido(pedidoId, boton) {
-    actualizarEstado(pedidoId, 'entregado', boton);
-}
-
-
-
 });
 
 // ===================================================
 // FUNCIONES DE CIERRE DE MODALES (GLOBALES)
 // ===================================================
+
 window.cerrarModal = function(modalId) {
     cerrarModalConZIndex(modalId);
 };
@@ -2896,4 +2867,10 @@ window.entregarPedido = entregarPedido;
 window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
 window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
 window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
+window.toggleNotificacionesVendedor = toggleNotificacionesVendedor;
+window.cerrarPanelNotificacionesVendedor = cerrarPanelNotificacionesVendedor;
+window.marcarNotificacionLeidaVendedor = marcarNotificacionLeidaVendedor;
+window.abrirModalTiempo = abrirModalTiempo;
+window.confirmarTiempoYPreparar = confirmarTiempoYPreparar;
+window.cerrarModalTiempo = () => cerrarModalConZIndex('modal-tiempo-entrega');
 
