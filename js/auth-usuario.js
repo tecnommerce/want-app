@@ -697,7 +697,12 @@ function irAMisPedidosDesdeNotificacion(notificacionId) {
 
 // Escuchar eventos de notificaciones
 window.addEventListener('nuevaNotificacion', () => {
+    console.log('🔔 Evento nuevaNotificacion recibido');
     actualizarContadorNotificaciones();
+    // Si el panel está abierto, recargar lista
+    if (notificacionesAbiertas) {
+        cargarListaNotificaciones();
+    }
 });
 
 window.addEventListener('notificacionLeida', () => {

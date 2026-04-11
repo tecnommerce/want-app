@@ -833,29 +833,35 @@
         }
     }
 
-    function guardarNotificacion(notificacion) {
-        const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
-        notificacion.id = Date.now();
-        notificacion.leida = false;
-        notificacion.fecha = new Date().toISOString();
-        notificaciones.unshift(notificacion);
-        
-        if (notificaciones.length > 50) notificaciones.pop();
-        
-        localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
-        window.dispatchEvent(new CustomEvent('nuevaNotificacion', { detail: notificacion }));
-        
-        // Reproducir sonido
-        try {
-            const audio = document.getElementById('notificacion-sound');
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play().catch(e => console.log('Error al reproducir sonido:', e));
-            }
-        } catch(e) {
-            console.log('Error con sonido:', e);
+function guardarNotificacion(notificacion) {
+    console.log('💾 Guardando notificación:', notificacion);
+    
+    const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    notificacion.id = Date.now();
+    notificacion.leida = false;
+    notificacion.fecha = new Date().toISOString();
+    notificaciones.unshift(notificacion);
+    
+    if (notificaciones.length > 50) notificaciones.pop();
+    
+    localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+    
+    // Disparar evento para actualizar UI
+    window.dispatchEvent(new CustomEvent('nuevaNotificacion', { detail: notificacion }));
+    
+    console.log('✅ Notificación guardada. Total:', notificaciones.length);
+    
+    // Reproducir sonido
+    try {
+        const audio = document.getElementById('notificacion-sound');
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
         }
+    } catch(e) {
+        console.log('Error con sonido:', e);
     }
+}
 
     window.obtenerNotificaciones = function() {
         return JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
