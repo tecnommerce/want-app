@@ -2720,6 +2720,12 @@ function abrirModalCoordinarTransferencia(pedidoId) {
     pedidoTransferenciaActual = pedido;
     document.getElementById('mensaje-transferencia').value = '';
     abrirModalConZIndex('modal-coordinar-transferencia');
+        const cbuAliasInput = document.getElementById('cbu-alias');
+    if (cbuAliasInput) {
+        cbuAliasInput.value = '';
+    }
+    
+    abrirModalConZIndex('modal-coordinar-transferencia');
 }
 
 function cerrarModalCoordinarTransferencia() {
@@ -2832,8 +2838,42 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnCerrarNotif) {
         btnCerrarNotif.addEventListener('click', cerrarPanelNotificacionesVendedor);
     }
+
+    function notificarClienteEnCamino(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    let mensaje = `*ACTUALIZACIÓN DE TU PEDIDO*\n\nHola ${pedido.cliente_nombre},\n\n*¡Tu pedido está en camino!*\n\n━━━━━━━━━━━━━━━━━━━━\n*DETALLE:*\n`;
+    pedido.productos.forEach(p => { mensaje += `• ${p.cantidad}x ${p.nombre}\n`; });
+    if (pedido.detalles) mensaje += `\n*INDICACIONES:* ${pedido.detalles}\n`;
+    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n*DIRECCIÓN:* ${pedido.direccion}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+    if (metodoPagoTexto === 'transferencia') {
+        mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)`;
+    } else {
+        mensaje += `*PAGO:* Efectivo - *DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY*`;
+    }
+    
+    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    mostrarToast(`Notificación enviada al cliente`, 'success');
+}
+
+function entregarPedido(pedidoId, boton) {
+    actualizarEstado(pedidoId, 'entregado', boton);
+}
+
 });
 
-// Modificar la función iniciarPanel para incluir notificaciones
-// Busca la función iniciarPanel en tu código y agrega esta línea al final:
-// inicializarNotificacionesVendedor();
+// ===================================================
+// FUNCIONES DE CIERRE DE MODALES (GLOBALES)
+// ===================================================
+window.cerrarModal = function(modalId) {
+    cerrarModalConZIndex(modalId);
+};
+
+window.notificarClienteEnCamino = notificarClienteEnCamino;
+window.entregarPedido = entregarPedido;
+window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
+window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
+window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
+
