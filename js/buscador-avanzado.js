@@ -351,7 +351,21 @@ const BuscadorAvanzado = {
         if (!termino) return;
         
         this.agregarAlHistorial(termino);
+        
+        // Limpiar el buscador principal antes de cerrar
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = termino; // Mostrar lo que buscó
+        }
+        
         this.cerrarModoBusqueda();
+        
+        // Limpiar el buscador después de cerrar (opcional, para que quede vacío la próxima vez)
+        setTimeout(() => {
+            if (searchInput) {
+                searchInput.value = '';
+            }
+        }, 100);
         
         if (typeof terminoBusquedaActual !== 'undefined') {
             terminoBusquedaActual = termino;
@@ -359,9 +373,6 @@ const BuscadorAvanzado = {
                 realizarBusqueda(termino);
             }
         }
-        
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) searchInput.value = termino;
     },
     
     // ===================================================
@@ -376,23 +387,20 @@ const BuscadorAvanzado = {
         this.elements.overlay.classList.add('active');
         this.elements.fullscreen.classList.add('active');
         
+        // Limpiar el input del modo búsqueda al abrir
+        if (this.elements.input) {
+            this.elements.input.value = '';
+            this.elements.btnClear.style.display = 'none';
+        }
+        
+        // Limpiar resultados
+        if (this.elements.resultsContainer) {
+            this.renderizarHistorial();
+        }
+        
         setTimeout(() => {
             this.elements.input.focus();
         }, 100);
-        
-        this.renderizarHistorial();
-    },
-    
-    cerrarModoBusqueda: function() {
-        if (!this.state.modoBusqueda) return;
-        
-        this.state.modoBusqueda = false;
-        this.state.terminoActual = '';
-        document.body.classList.remove('search-mode');
-        this.elements.overlay.classList.remove('active');
-        this.elements.fullscreen.classList.remove('active');
-        this.elements.input.value = '';
-        this.elements.btnClear.style.display = 'none';
     },
     
     // ===================================================
