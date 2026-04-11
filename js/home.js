@@ -6,6 +6,9 @@ let todosLosNegocios = [];
 let timeoutBusqueda = null;
 let terminoBusquedaActual = '';
 
+// Variable global para que el buscador avanzado acceda a los negocios
+window.todosLosNegocios = [];
+
 // Variables para el carrusel de banners
 let banners = [];
 let currentIndex = 0;
@@ -86,6 +89,7 @@ async function cargarNegocios() {
         }
 
         todosLosNegocios = (response.vendedores || []).filter(v => v.activo === true);
+        window.todosLosNegocios = todosLosNegocios;
         
         if (todosLosNegocios.length === 0) {
             grid.innerHTML = `<div class="sin-negocios"><i class="fas fa-store-slash"></i><p>📭 No hay negocios disponibles</p></div>`;
