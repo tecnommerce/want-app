@@ -2772,7 +2772,6 @@ function enviarCoordinacionTransferencia() {
     mensaje += `DETALLE DEL PEDIDO\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
     mensaje += `Pedido #${numeroMostrar}\n`;
-    mensaje += `Fecha: ${fecha.toLocaleString('es-AR')}\n`;
     mensaje += `Metodo de pago: Transferencia bancaria\n\n`;
     mensaje += `PRODUCTOS:\n`;
     mensaje += productosDetalle;
