@@ -732,8 +732,9 @@
     window.postAPI = window.callAPI;
     
     console.log('✅ Supabase API con autenticación Google inicializada');
+    
     // ===================================================
-    // NOTIFICACIONES EN TIEMPO REAL
+    // 7. NOTIFICACIONES EN TIEMPO REAL
     // ===================================================
     
     let pedidosSubscription = null;
@@ -767,7 +768,8 @@
                     filter: `usuario_id=eq.${usuarioId}`
                 },
                 (payload) => {
-                    console.log('🔔 Cambio en pedido detectado:', payload);
+                    console.log('🔔🔔🔔 PAYLOAD RECIBIDO:', payload);
+                    console.log('🔔 EventType:', payload.eventType);
                     
                     const pedido = payload.new || payload.old;
                     if (!pedido) return;
@@ -782,8 +784,8 @@
                     
                     if (payload.eventType === 'UPDATE') {
                         const estadoNuevo = pedido.estado;
+                        console.log('📢 Pedido actualizado a estado:', estadoNuevo);
                         
-                        // Si el pedido cambió a "entregado", eliminar notificaciones de ese pedido
                         if (estadoNuevo === 'entregado') {
                             eliminarNotificacionesPorPedido(pedido.id);
                         }
@@ -797,6 +799,7 @@
                             mensaje: `Tu pedido #${pedido.numero_orden || pedido.id} cambió a "${getEstadoPedidoTexto(estadoNuevo)}"`
                         };
                         
+                        console.log('📢 Llamando a guardarNotificacion');
                         guardarNotificacion(evento);
                         
                         if (typeof window.mostrarNotificacionTemporal === 'function') {
@@ -829,39 +832,77 @@
         if (nuevasNotificaciones.length !== notificaciones.length) {
             localStorage.setItem('want_notificaciones', JSON.stringify(nuevasNotificaciones));
             window.dispatchEvent(new CustomEvent('notificacionLeida'));
-            console.log(`🗑️ Notificaciones del pedido ${pedidoId} eliminadas (entregado)`);
+            console.log(`🗑️ Notificaciones del pedido ${pedidoId} eliminadas`);
         }
     }
 
-function guardarNotificacion(notificacion) {
-    console.log('💾 Guardando notificación:', notificacion);
-    
-    const notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
-    notificacion.id = Date.now();
-    notificacion.leida = false;
-    notificacion.fecha = new Date().toISOString();
-    notificaciones.unshift(notificacion);
-    
-    if (notificaciones.length > 50) notificaciones.pop();
-    
-    localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
-    
-    // Disparar evento para actualizar UI
-    window.dispatchEvent(new CustomEvent('nuevaNotificacion', { detail: notificacion }));
-    
-    console.log('✅ Notificación guardada. Total:', notificaciones.length);
-    
-    // Reproducir sonido
-    try {
+    function guardarNotificacion(notificacion) {
+        console.log('💾💾💾 guardarNotificacion LLAMADA 💾💾💾');
+        console.log('📦 Notificación:', notificacion);
+        
+        let notificaciones = [];
+        const stored = localStorage.getItem('want_notificaciones');
+        
+        if (stored) {
+            try {
+                notificaciones = JSON.parse(stored);
+                console.log('📦 Existentes:', notificaciones.length);
+            } catch(e) {
+                console.error('Error parsing:', e);
+                notificaciones = [];
+            }
+        }
+        
+        notificacion.id = Date.now();
+        notificacion.leida = false;
+        notificacion.fecha = new Date().toISOString();
+        notificaciones.unshift(notificacion);
+        
+        if (notificaciones.length > 50) notificaciones.pop();
+        
+        localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+        console.log('✅ Notificación guardada. Total:', notificaciones.length);
+        
+        window.dispatchEvent(new CustomEvent('nuevaNotificacion', { detail: notificacion }));
+        
+        if (typeof window.actualizarContadorNotificaciones === 'function') {
+            console.log('📢 Llamando a actualizarContadorNotificaciones');
+            window.actualizarContadorNotificaciones();
+        }
+        
+        try {
+            const audio = document.getElementById('notificacion-sound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log('Error sonido:', e));
+                console.log('🔊 Reproduciendo sonido');
+            }
+        } catch(e) {
+            console.log('Error con sonido:', e);
+        }
+    }
+
+    // Inicializar audio para móvil
+    let audioInicializado = false;
+
+    function inicializarAudioMovil() {
+        if (audioInicializado) return;
+        
         const audio = document.getElementById('notificacion-sound');
         if (audio) {
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
+            audio.load();
+            audio.volume = 0.5;
+            audioInicializado = true;
+            console.log('🔊 Audio inicializado para móvil');
+            document.removeEventListener('touchstart', inicializarAudioMovil);
+            document.removeEventListener('click', inicializarAudioMovil);
         }
-    } catch(e) {
-        console.log('Error con sonido:', e);
     }
-}
+
+    if (window.innerWidth <= 768) {
+        document.addEventListener('touchstart', inicializarAudioMovil);
+        document.addEventListener('click', inicializarAudioMovil);
+    }
 
     window.obtenerNotificaciones = function() {
         return JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
@@ -898,55 +939,5 @@ function guardarNotificacion(notificacion) {
             console.log('🔕 Desuscrito de cambios de pedidos');
         }
     };
-
-    // Inicializar audio después del primer toque del usuario
-let audioInicializado = false;
-
-function inicializarAudioMovil() {
-    if (audioInicializado) return;
-    
-    const audio = document.getElementById('notificacion-sound');
-    if (audio) {
-        // Cargar el audio silenciosamente
-        audio.load();
-        audio.volume = 0.5;
-        audioInicializado = true;
-        console.log('🔊 Audio inicializado para móvil');
-        
-        // Remover event listeners después de inicializar
-        document.removeEventListener('touchstart', inicializarAudioMovil);
-        document.removeEventListener('click', inicializarAudioMovil);
-    }
-}
-
-// Detectar primer toque del usuario en móvil
-if (window.innerWidth <= 768) {
-    document.addEventListener('touchstart', inicializarAudioMovil);
-    document.addEventListener('click', inicializarAudioMovil);
-}
-
-// Modificar la función guardarNotificacion para que reproduzca sonido correctamente
-// (Asegúrate que la función guardarNotificacion tenga esto:)
-function guardarNotificacion(notificacion) {
-    // ... código existente ...
-    
-    // Reproducir sonido (con soporte móvil)
-    try {
-        const audio = document.getElementById('notificacion-sound');
-        if (audio && audioInicializado) {
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
-        } else if (audio && window.innerWidth <= 768) {
-            // En móvil, esperar a que el usuario interactúe
-            console.log('🔇 Audio no inicializado, esperando interacción');
-        } else if (audio) {
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
-        }
-    } catch(e) {
-        console.log('Error con sonido:', e);
-    }
-}
-
 
 })();
