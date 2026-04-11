@@ -2730,41 +2730,57 @@ function cerrarModalCoordinarTransferencia() {
 function enviarCoordinacionTransferencia() {
     if (!pedidoTransferenciaActual) return;
     
-    const mensaje = document.getElementById('mensaje-transferencia').value.trim();
-    if (!mensaje) {
-        mostrarToast('Escriba un mensaje para el cliente', 'error');
+    const cbuAlias = document.getElementById('cbu-alias').value.trim();
+    if (!cbuAlias) {
+        mostrarToast('Ingresa tus datos bancarios (CBU o Alias)', 'error');
         return;
     }
     
-    const textoWhatsApp = `*COORDINACIÓN DE PAGO POR TRANSFERENCIA*\n\nHola ${pedidoTransferenciaActual.cliente_nombre},\n\n${mensaje}\n\n*Pedido #${pedidoTransferenciaActual.numero_orden || pedidoTransferenciaActual.id}*\n*Total:* $${pedidoTransferenciaActual.total.toLocaleString('es-AR')}\n\n*Gracias por tu compra!*`;
+    const pedido = pedidoTransferenciaActual;
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    const fecha = new Date(pedido.fecha);
+    const numeroMostrar = pedido.numero_orden || pedido.id;
     
-    window.open(`https://wa.me/${pedidoTransferenciaActual.cliente_telefono}?text=${encodeURIComponent(textoWhatsApp)}`, '_blank');
+    // Construir el detalle de productos
+    let productosDetalle = '';
+    pedido.productos.forEach(p => {
+        productosDetalle += `• ${p.cantidad}x ${p.nombre} - $${(p.precio * p.cantidad).toLocaleString('es-AR')}\n`;
+    });
+    
+    // Construir el mensaje completo para el cliente
+    let mensaje = `*COORDINACIÓN DE PAGO*\n\n`;
+    mensaje += `Hola ${pedido.cliente_nombre}, gracias por tu pedido!\n\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `*DETALLE DEL PEDIDO*\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `*Pedido #${numeroMostrar}*\n`;
+    mensaje += `*Fecha:* ${fecha.toLocaleString('es-AR')}\n`;
+    mensaje += `*Método de pago:* Transferencia bancaria\n\n`;
+    mensaje += `*PRODUCTOS:*\n`;
+    mensaje += productosDetalle;
+    mensaje += `\n*TOTAL:* $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    mensaje += `*DATOS PARA LA TRANSFERENCIA:*\n`;
+    mensaje += `${cbuAlias}\n\n`;
+    mensaje += `*INSTRUCCIONES:*\n`;
+    mensaje += `1. Realiza la transferencia por el monto total de $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `2. Envía el comprobante por este mismo chat\n`;
+    mensaje += `3. Una vez confirmado el pago, enviaremos tu pedido\n\n`;
+    mensaje += `*DIRECCIÓN DE ENTREGA:*\n${pedido.direccion}\n\n`;
+    if (pedido.detalles) {
+        mensaje += `*DETALLES ADICIONALES:*\n${pedido.detalles}\n\n`;
+    }
+    mensaje += `*¡Gracias por confiar en nosotros!* 🍔`;
+    
+    // Abrir WhatsApp con el mensaje
+    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
     
     cerrarModalCoordinarTransferencia();
-    mostrarToast('Mensaje enviado al cliente', 'success');
-}
-
-function notificarClienteEnCamino(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
+    mostrarToast('Mensaje enviado al cliente con los datos de pago', 'success');
     
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
-    let mensaje = `*ACTUALIZACIÓN DE TU PEDIDO*\n\nHola ${pedido.cliente_nombre},\n\n*¡Tu pedido está en camino!*\n\n━━━━━━━━━━━━━━━━━━━━\n*DETALLE:*\n`;
-    pedido.productos.forEach(p => { mensaje += `• ${p.cantidad}x ${p.nombre}\n`; });
-    if (pedido.detalles) mensaje += `\n*INDICACIONES:* ${pedido.detalles}\n`;
-    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n*DIRECCIÓN:* ${pedido.direccion}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
-    if (metodoPagoTexto === 'transferencia') {
-        mensaje += `*PAGO:* Transferencia bancaria (YA REALIZADA)`;
-    } else {
-        mensaje += `*PAGO:* Efectivo - *DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY*`;
-    }
-    
-    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    mostrarToast(`Notificación enviada al cliente`, 'success');
-}
-
-function entregarPedido(pedidoId, boton) {
-    actualizarEstado(pedidoId, 'entregado', boton);
+    // Limpiar el campo
+    document.getElementById('cbu-alias').value = '';
+    pedidoTransferenciaActual = null;
 }
 
 // ===================================================

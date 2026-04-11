@@ -630,29 +630,30 @@
         </div>
     </div>
 
-    <!-- MODAL COORDINAR TRANSFERENCIA (NUEVO) -->
-    <div class="modal" id="modal-coordinar-transferencia">
-        <div class="modal-content small">
-            <div class="modal-header">
-                <h3><i class="fas fa-exchange-alt"></i> Coordinar transferencia</h3>
-                <button class="modal-close" onclick="cerrarModalCoordinarTransferencia()">&times;</button>
+<!-- MODAL COORDINAR TRANSFERENCIA -->
+<div class="modal" id="modal-coordinar-transferencia">
+    <div class="modal-content small">
+        <div class="modal-header">
+            <h3><i class="fas fa-exchange-alt"></i> Coordinar pago por transferencia</h3>
+            <button class="modal-close" onclick="cerrarModalCoordinarTransferencia()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>CBU / Alias / Datos bancarios</label>
+                <textarea id="cbu-alias" rows="3" class="form-control" placeholder="Ej: CBU: 1234567890123456789012&#10;Alias: tu.negocio.alias&#10;Banco: Nación"></textarea>
+                <small class="input-help">El cliente verá estos datos para realizar la transferencia</small>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Mensaje para el cliente</label>
-                    <textarea id="mensaje-transferencia" rows="4" class="form-control" placeholder="Ej: Por favor realizar la transferencia a:\nBanco: ...\nCBU: ...\nAlias: ..."></textarea>
-                </div>
-                <div class="info-box" style="background: #FFF5EB; padding: 12px; border-radius: 12px; margin-top: 12px;">
-                    <i class="fas fa-info-circle"></i>
-                    <span style="font-size: 0.75rem;">El mensaje se enviará por WhatsApp al cliente para coordinar el pago.</span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-outline" onclick="cerrarModalCoordinarTransferencia()">Cancelar</button>
-                <button class="btn-primary" id="btn-enviar-coordinacion">Enviar y coordinar</button>
+            <div class="info-box" style="background: #FFF5EB; padding: 12px; border-radius: 12px; margin-top: 12px;">
+                <i class="fas fa-info-circle"></i>
+                <span style="font-size: 0.75rem;">Al enviar, se le enviará al cliente el detalle completo del pedido junto con tus datos bancarios para que realice la transferencia.</span>
             </div>
         </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="cerrarModalCoordinarTransferencia()">Cancelar</button>
+            <button class="btn-primary" id="btn-enviar-coordinacion">Enviar y coordinar</button>
+        </div>
     </div>
+</div>
 
     <!-- MODALES EXISTENTES (EDITAR PEDIDO, NUEVO PEDIDO, SELECCIONAR PRODUCTO, ASIGNAR DELIVERY) -->
     <!-- MODAL EDITAR PEDIDO -->
