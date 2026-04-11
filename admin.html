@@ -31,11 +31,28 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <!-- CAMPANITA DE NOTIFICACIONES -->
+                    <div class="notificaciones-container">
+                        <button class="btn-notificaciones" id="btn-notificaciones">
+                            <i class="fas fa-bell"></i>
+                            <span class="notificaciones-count" id="notificaciones-count">0</span>
+                        </button>
+                        <div class="notificaciones-panel" id="notificaciones-panel">
+                            <div class="notificaciones-header">
+                                <span>Notificaciones</span>
+                                <button class="btn-cerrar-notif" id="btn-cerrar-notif">&times;</button>
+                            </div>
+                            <div class="notificaciones-lista" id="notificaciones-lista">
+                                <div class="notificaciones-vacio">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No hay notificaciones</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <button class="header-btn" id="btn-open-profile" title="Mi perfil">
                         <i class="fas fa-user-circle"></i> Perfil
-                    </button>
-                    <button class="btn-icon" id="btn-refresh" title="Actualizar datos">
-                        <i class="fas fa-sync-alt"></i>
                     </button>
                     <button class="btn-icon" id="btn-logout" title="Cerrar sesión">
                         <i class="fas fa-sign-out-alt"></i>
@@ -49,29 +66,29 @@
     </header>
 
     <!-- MENÚ MÓVIL -->
-<div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
-    <button class="menu-close" id="menu-close-admin">
-        <i class="fas fa-times"></i>
-    </button>
-    <div class="mobile-nav-admin">
-        <button class="mobile-tab-btn active" data-tab="pedidos">
-            <i class="fas fa-box"></i> Pedidos
+    <div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
+        <button class="menu-close" id="menu-close-admin">
+            <i class="fas fa-times"></i>
         </button>
-        <button class="mobile-tab-btn" data-tab="productos">
-            <i class="fas fa-pizza-slice"></i> Productos
-        </button>
-        <button class="mobile-tab-btn" data-tab="delivery">
-            <i class="fas fa-truck"></i> Delivery
-        </button>
-        <button class="mobile-tab-btn" data-tab="reportes">
-            <i class="fas fa-chart-line"></i> Reportes
-        </button>
-        <button class="mobile-logout-btn" id="mobile-logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-        </button>
+        <div class="mobile-nav-admin">
+            <button class="mobile-tab-btn active" data-tab="pedidos">
+                <i class="fas fa-box"></i> Pedidos
+            </button>
+            <button class="mobile-tab-btn" data-tab="productos">
+                <i class="fas fa-pizza-slice"></i> Productos
+            </button>
+            <button class="mobile-tab-btn" data-tab="delivery">
+                <i class="fas fa-truck"></i> Delivery
+            </button>
+            <button class="mobile-tab-btn" data-tab="reportes">
+                <i class="fas fa-chart-line"></i> Reportes
+            </button>
+            <button class="mobile-logout-btn" id="mobile-logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </button>
+        </div>
     </div>
-</div>
-<div class="menu-overlay-admin" id="menu-overlay-admin" style="display: none;"></div>
+    <div class="menu-overlay-admin" id="menu-overlay-admin" style="display: none;"></div>
 
     <!-- MAIN CONTENT -->
     <main>
@@ -428,10 +445,7 @@
         </div>
     </main>
 
-    <!-- =================================================== -->
-    <!-- MODALES -->
-    <!-- =================================================== -->
-
+    <!-- MODALES EXISTENTES (todos los que ya tenías) -->
     <!-- MODAL RUBROS -->
     <div class="modal" id="modal-rubros">
         <div class="modal-content" style="max-width: 500px;">
@@ -453,7 +467,7 @@
         </div>
     </div>
 
-    <!-- MODAL PERFIL (REDISEÑADO) -->
+    <!-- MODAL PERFIL -->
     <div class="modal" id="modal-perfil">
         <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
@@ -461,7 +475,6 @@
                 <button class="modal-close" onclick="cerrarModalPerfil()">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- HEADER PERFIL CON AVATAR -->
                 <div class="perfil-header">
                     <div class="perfil-avatar" id="perfil-avatar-container">
                         <div id="perfil-avatar-img" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
@@ -477,8 +490,6 @@
                         <p id="perfil-email-display"></p>
                     </div>
                 </div>
-
-                <!-- FORMULARIO PERFIL -->
                 <form id="perfil-form" class="perfil-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -490,7 +501,6 @@
                             <input type="tel" id="perfil-telefono" class="form-control">
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Dirección</label>
@@ -501,7 +511,6 @@
                             <input type="text" id="perfil-horario" class="form-control">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label>Rubro(s) del negocio</label>
                         <div id="perfil-rubros-container" class="rubros-tags-container"></div>
@@ -509,7 +518,6 @@
                             <i class="fas fa-edit"></i> Editar rubros
                         </button>
                     </div>
-
                     <div class="form-group">
                         <label>Descripción del negocio</label>
                         <textarea id="perfil-descripcion" rows="3" class="form-control" placeholder="Describe tu negocio, especialidades, horarios, etc."></textarea>
@@ -521,12 +529,10 @@
                             <span id="descripcion-status" style="margin-left: 10px; font-size: 12px;"></span>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label>Cambiar contraseña</label>
                         <input type="password" id="perfil-new-password" class="form-control" placeholder="Dejar vacío para no cambiar">
                     </div>
-
                     <button type="submit" class="btn-primary btn-save">Guardar todos los cambios</button>
                 </form>
             </div>
@@ -604,6 +610,51 @@
         </div>
     </div>
 
+    <!-- MODAL TIEMPO ENTREGA (NUEVO) -->
+    <div class="modal" id="modal-tiempo-entrega">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Tiempo estimado de entrega</h3>
+                <button class="modal-close" onclick="cerrarModalTiempo()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
+                    <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
+                <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y preparar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL COORDINAR TRANSFERENCIA (NUEVO) -->
+    <div class="modal" id="modal-coordinar-transferencia">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3><i class="fas fa-exchange-alt"></i> Coordinar transferencia</h3>
+                <button class="modal-close" onclick="cerrarModalCoordinarTransferencia()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Mensaje para el cliente</label>
+                    <textarea id="mensaje-transferencia" rows="4" class="form-control" placeholder="Ej: Por favor realizar la transferencia a:\nBanco: ...\nCBU: ...\nAlias: ..."></textarea>
+                </div>
+                <div class="info-box" style="background: #FFF5EB; padding: 12px; border-radius: 12px; margin-top: 12px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span style="font-size: 0.75rem;">El mensaje se enviará por WhatsApp al cliente para coordinar el pago.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="cerrarModalCoordinarTransferencia()">Cancelar</button>
+                <button class="btn-primary" id="btn-enviar-coordinacion">Enviar y coordinar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES EXISTENTES (EDITAR PEDIDO, NUEVO PEDIDO, SELECCIONAR PRODUCTO, ASIGNAR DELIVERY) -->
     <!-- MODAL EDITAR PEDIDO -->
     <div class="modal" id="modal-editar-pedido">
         <div class="modal-content" style="max-width: 700px;">
@@ -744,26 +795,6 @@
             <div class="modal-footer">
                 <button class="btn-primary" id="btn-confirmar-agregar-producto">Agregar</button>
                 <button class="btn-outline" onclick="cerrarModalSeleccionarProducto()">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL TIEMPO ENTREGA -->
-    <div class="modal" id="modal-tiempo-entrega">
-        <div class="modal-content small">
-            <div class="modal-header">
-                <h3>Tiempo estimado de entrega</h3>
-                <button class="modal-close" id="cerrar-modal-tiempo">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
-                    <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
-                <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y enviar</button>
             </div>
         </div>
     </div>
