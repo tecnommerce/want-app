@@ -2715,14 +2715,20 @@ async function actualizarTiempoEstimado(pedidoId, tiempoEstimado) {
 let pedidoTransferenciaActual = null;
 
 function abrirModalCoordinarTransferencia(pedidoId) {
+    console.log('🔧 abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
     const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
+    if (!pedido) {
+        console.error('❌ Pedido no encontrado:', pedidoId);
+        return;
+    }
     pedidoTransferenciaActual = pedido;
-    document.getElementById('mensaje-transferencia').value = '';
-    abrirModalConZIndex('modal-coordinar-transferencia');
-        const cbuAliasInput = document.getElementById('cbu-alias');
+    
+    // SOLO usar cbu-alias (NO mensaje-transferencia)
+    const cbuAliasInput = document.getElementById('cbu-alias');
     if (cbuAliasInput) {
         cbuAliasInput.value = '';
+    } else {
+        console.error('❌ Elemento cbu-alias no encontrado');
     }
     
     abrirModalConZIndex('modal-coordinar-transferencia');
