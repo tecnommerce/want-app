@@ -2740,7 +2740,13 @@ function cerrarModalCoordinarTransferencia() {
 }
 
 function enviarCoordinacionTransferencia() {
-    if (!pedidoTransferenciaActual) return;
+    console.log('Enviando coordinacion de transferencia');
+    
+    if (!pedidoTransferenciaActual) {
+        console.error('No hay pedido seleccionado');
+        mostrarToast('Error: No hay pedido seleccionado', 'error');
+        return;
+    }
     
     const cbuAlias = document.getElementById('cbu-alias').value.trim();
     if (!cbuAlias) {
@@ -2749,48 +2755,54 @@ function enviarCoordinacionTransferencia() {
     }
     
     const pedido = pedidoTransferenciaActual;
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
     const fecha = new Date(pedido.fecha);
     const numeroMostrar = pedido.numero_orden || pedido.id;
+    const nombreVendedor = vendedorActual ? vendedorActual.nombre : 'el negocio';
     
     // Construir el detalle de productos
     let productosDetalle = '';
-    pedido.productos.forEach(p => {
-        productosDetalle += `• ${p.cantidad}x ${p.nombre} - $${(p.precio * p.cantidad).toLocaleString('es-AR')}\n`;
-    });
+    if (pedido.productos && pedido.productos.length > 0) {
+        pedido.productos.forEach(p => {
+            productosDetalle += `${p.cantidad}x ${p.nombre} - $${(p.precio * p.cantidad).toLocaleString('es-AR')}\n`;
+        });
+    } else {
+        productosDetalle = 'No hay productos registrados\n';
+    }
     
-    // Construir el mensaje completo para el cliente
-    let mensaje = `*COORDINACIÓN DE PAGO*\n\n`;
+    // Construir el mensaje completo para WhatsApp
+    let mensaje = `COORDINACION DE PAGO POR TRANSFERENCIA\n\n`;
     mensaje += `Hola ${pedido.cliente_nombre}, gracias por tu pedido!\n\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*DETALLE DEL PEDIDO*\n`;
+    mensaje += `DETALLE DEL PEDIDO\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*Pedido #${numeroMostrar}*\n`;
-    mensaje += `*Fecha:* ${fecha.toLocaleString('es-AR')}\n`;
-    mensaje += `*Método de pago:* Transferencia bancaria\n\n`;
-    mensaje += `*PRODUCTOS:*\n`;
+    mensaje += `Pedido #${numeroMostrar}\n`;
+    mensaje += `Fecha: ${fecha.toLocaleString('es-AR')}\n`;
+    mensaje += `Metodo de pago: Transferencia bancaria\n\n`;
+    mensaje += `PRODUCTOS:\n`;
     mensaje += productosDetalle;
-    mensaje += `\n*TOTAL:* $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `\nTOTAL: $${pedido.total.toLocaleString('es-AR')}\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    mensaje += `*DATOS PARA LA TRANSFERENCIA:*\n`;
+    mensaje += `DATOS PARA LA TRANSFERENCIA:\n`;
     mensaje += `${cbuAlias}\n\n`;
-    mensaje += `*INSTRUCCIONES:*\n`;
+    mensaje += `INSTRUCCIONES:\n`;
     mensaje += `1. Realiza la transferencia por el monto total de $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += `2. Envía el comprobante por este mismo chat\n`;
-    mensaje += `3. Una vez confirmado el pago, enviaremos tu pedido\n\n`;
-    mensaje += `*DIRECCIÓN DE ENTREGA:*\n${pedido.direccion}\n\n`;
+    mensaje += `2. Envia el comprobante por este mismo chat\n`;
+    mensaje += `3. Una vez confirmado el pago, ${nombreVendedor} enviara tu pedido\n\n`;
+    mensaje += `DIRECCION DE ENTREGA:\n${pedido.direccion}\n\n`;
     if (pedido.detalles) {
-        mensaje += `*DETALLES ADICIONALES:*\n${pedido.detalles}\n\n`;
+        mensaje += `DETALLES ADICIONALES:\n${pedido.detalles}\n\n`;
     }
-    mensaje += `*¡Gracias por confiar en nosotros!* 🍔`;
+    mensaje += `Gracias por confiar en ${nombreVendedor}!`;
     
-    // Abrir WhatsApp con el mensaje
-    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    // Abrir WhatsApp
+    const whatsappUrl = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+    console.log('Abriendo WhatsApp:', whatsappUrl);
+    window.open(whatsappUrl, '_blank');
     
     cerrarModalCoordinarTransferencia();
     mostrarToast('Mensaje enviado al cliente con los datos de pago', 'success');
     
-    // Limpiar el campo
+    // Limpiar campo
     document.getElementById('cbu-alias').value = '';
     pedidoTransferenciaActual = null;
 }
@@ -2867,6 +2879,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function entregarPedido(pedidoId, boton) {
     actualizarEstado(pedidoId, 'entregado', boton);
 }
+
+
 
 });
 
