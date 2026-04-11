@@ -18,6 +18,8 @@ const BuscadorAvanzado = {
         timeoutId: null
     },
     
+    elements: {},
+    
     // ===================================================
     // INICIALIZACIÓN
     // ===================================================
@@ -60,10 +62,6 @@ const BuscadorAvanzado = {
                 </div>
             </div>
             <div class="search-fullscreen-content" id="search-fullscreen-content">
-                <div class="search-loading" style="display: none;">
-                    <div class="spinner-small"></div>
-                    <span>Buscando...</span>
-                </div>
                 <div id="search-results-container"></div>
             </div>
         `;
@@ -74,7 +72,6 @@ const BuscadorAvanzado = {
             fullscreen: document.getElementById('search-fullscreen'),
             input: document.getElementById('search-fullscreen-input'),
             content: document.getElementById('search-fullscreen-content'),
-            loading: document.querySelector('.search-loading'),
             resultsContainer: document.getElementById('search-results-container'),
             btnBack: document.getElementById('btn-back-search'),
             btnClear: document.getElementById('btn-clear-search')
@@ -165,7 +162,6 @@ const BuscadorAvanzado = {
             </div>
         `;
         
-        // Evento limpiar historial
         const btnLimpiar = document.getElementById('btn-limpiar-historial-full');
         if (btnLimpiar) {
             btnLimpiar.addEventListener('click', (e) => {
@@ -174,7 +170,6 @@ const BuscadorAvanzado = {
             });
         }
         
-        // Eventos items
         document.querySelectorAll('.historial-item-full').forEach(item => {
             const termino = item.dataset.termino;
             item.addEventListener('click', (e) => {
@@ -285,7 +280,6 @@ const BuscadorAvanzado = {
         
         this.elements.resultsContainer.innerHTML = html;
         
-        // Eventos sugerencias
         document.querySelectorAll('.sugerencia-item-full').forEach(item => {
             item.addEventListener('click', () => {
                 const tipo = item.dataset.tipo;
@@ -352,20 +346,9 @@ const BuscadorAvanzado = {
         
         this.agregarAlHistorial(termino);
         
-        // Limpiar el buscador principal antes de cerrar
         const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.value = termino; // Mostrar lo que buscó
-        }
         
         this.cerrarModoBusqueda();
-        
-        // Limpiar el buscador después de cerrar (opcional, para que quede vacío la próxima vez)
-        setTimeout(() => {
-            if (searchInput) {
-                searchInput.value = '';
-            }
-        }, 100);
         
         if (typeof terminoBusquedaActual !== 'undefined') {
             terminoBusquedaActual = termino;
@@ -373,6 +356,13 @@ const BuscadorAvanzado = {
                 realizarBusqueda(termino);
             }
         }
+        
+        // Limpiar el buscador principal después de la búsqueda
+        setTimeout(() => {
+            if (searchInput) {
+                searchInput.value = '';
+            }
+        }, 100);
     },
     
     // ===================================================
@@ -387,31 +377,71 @@ const BuscadorAvanzado = {
         this.elements.overlay.classList.add('active');
         this.elements.fullscreen.classList.add('active');
         
-        // Limpiar el input del modo búsqueda al abrir
         if (this.elements.input) {
             this.elements.input.value = '';
             this.elements.btnClear.style.display = 'none';
         }
         
-        // Limpiar resultados
-        if (this.elements.resultsContainer) {
-            this.renderizarHistorial();
-        }
+        this.renderizarHistorial();
         
         setTimeout(() => {
-            this.elements.input.focus();
+            if (this.elements.input) {
+                this.elements.input.focus();
+            }
         }, 100);
     },
     
-    // ===================================================
-    // MANEJAR BÚSQUEDA EN TIEMPO REAL
-    // ===================================================
+    cerrarModoBusqueda: function() {
+        if (!this.state.modoBusqueda) return;
+        
+        this.state.modoBusqueda = false;
+        this.state.terminoActual = '';
+        
+        if (this.state.timeoutId) {
+            clearTimeout(this.state.timeoutId);
+        }
+        
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        if (this.elements.input) {
+            this.elements.input.value = '';
+            this.elements.btnClear.style.display = 'none';
+        }
+        
+        if (this.elements.resultsContainer) {
+            this.elements.resultsContainer.innerHTML = '';
+        }
+        
+        document.body.classList.remove('search-mode');
+        
+        if (this.elements.overlay) {
+            this.elements.overlay.classList.remove('active');
+        }
+        
+        if (this.elements.fullscreen) {
+            this.elements.fullscreen.classList.remove('active');
+        }
+    },
+    
+    limpiarInput: function() {
+        if (this.elements.input) {
+            this.elements.input.value = '';
+            this.elements.btnClear.style.display = 'none';
+            this.renderizarHistorial();
+            this.elements.input.focus();
+        }
+    },
     
     handleInput: async function() {
         const termino = this.elements.input.value;
         this.state.terminoActual = termino;
         
-        if (this.state.timeoutId) clearTimeout(this.state.timeoutId);
+        if (this.state.timeoutId) {
+            clearTimeout(this.state.timeoutId);
+        }
         
         if (termino.length >= this.config.minCharsSugerencias) {
             this.elements.btnClear.style.display = 'flex';
@@ -432,14 +462,6 @@ const BuscadorAvanzado = {
         }
     },
     
-    limpiarInput: function() {
-        this.elements.input.value = '';
-        this.state.terminoActual = '';
-        this.elements.btnClear.style.display = 'none';
-        this.renderizarHistorial();
-        this.elements.input.focus();
-    },
-    
     // ===================================================
     // UTILIDADES
     // ===================================================
@@ -458,6 +480,7 @@ const BuscadorAvanzado = {
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
             searchInput.addEventListener('click', () => this.abrirModoBusqueda());
+            searchInput.addEventListener('focus', () => this.abrirModoBusqueda());
         }
         
         if (this.elements.btnBack) {

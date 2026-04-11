@@ -80,7 +80,7 @@
 
 .search-fullscreen-input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 12px 40px 12px 16px;
     border: 1px solid #e0e0e0;
     border-radius: 30px;
     font-size: 1rem;
@@ -148,7 +148,7 @@
 .historial-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 }
 
 .historial-item-full {
@@ -303,7 +303,11 @@ body.search-mode .footer {
     pointer-events: none;
 }
 
-/* Responsive */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive - Escritorio */
 @media (min-width: 769px) {
     .search-fullscreen {
         max-width: 600px;
@@ -316,8 +320,4 @@ body.search-mode .footer {
     .search-fullscreen.active {
         transform: translateX(-50%) translateY(0);
     }
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
 }
