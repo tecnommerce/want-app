@@ -12,6 +12,19 @@ let notificacionesActuales = [];
 // UTILIDADES
 // ===================================================
 
+function formatearFechaArgentina(fechaISO) {
+    if (!fechaISO) return 'N/A';
+    const fecha = new Date(fechaISO);
+    return fecha.toLocaleString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
+}
+
 function mostrarToast(mensaje, tipo = 'info') {
     const toast = document.createElement('div');
     toast.textContent = mensaje;
@@ -37,7 +50,16 @@ function formatearPrecio(precio) {
 function formatearFecha(fechaISO) {
     if (!fechaISO) return 'N/A';
     const fecha = new Date(fechaISO);
-    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    // Forzar zona horaria Argentina (UTC-3)
+    return fecha.toLocaleString('es-AR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
 }
 
 function getEstadoPedidoTexto(estado) {
@@ -356,7 +378,7 @@ function renderizarListaPedidos(pedidos, containerId) {
     container.innerHTML = pedidos.map(pedido => {
         const estadoTexto = getEstadoPedidoTexto(pedido.estado);
         const estadoColor = getEstadoColor(pedido.estado);
-        const fecha = formatearFecha(pedido.fecha);
+        const fecha = formatearFechaArgentina(pedido.fecha);
         
         let productosResumen = '';
         if (pedido.productos && pedido.productos.length > 0) {

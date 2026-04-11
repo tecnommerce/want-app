@@ -2601,7 +2601,7 @@ function renderizarNotificacionesVendedor() {
     
     container.innerHTML = notificacionesVendedor.map(notif => {
         const fecha = new Date(notif.fecha);
-        const fechaStr = fecha.toLocaleString('es-AR', {
+        const fechaStr = fecha.toLocaleString('es-AR', { 
             day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
