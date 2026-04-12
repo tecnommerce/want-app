@@ -1797,6 +1797,17 @@ async function iniciarPanel(vendedor) {
     actualizarReportes();
     iniciarRealtimeVendedor();
     inicializarNotificacionesVendedor();
+
+    // Conectar botón campana
+const btnCampana = document.getElementById('btn-notificaciones');
+if (btnCampana) {
+    btnCampana.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🔔 Campana clickeada');
+        toggleNotificacionesVendedor();
+    };
+}
     
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
