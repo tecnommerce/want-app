@@ -39,6 +39,74 @@ let currentCallback = null;
 let pedidoParaAsignar = null;
 
 // ===================================================
+// TIEMPO REAL PARA VENDEDOR
+// ===================================================
+
+let realtimeChannelVendedor = null;
+let realtimeActiveVendedor = false;
+
+function iniciarRealtimeVendedor() {
+    if (realtimeActiveVendedor || !vendedorActual) return;
+    realtimeActiveVendedor = true;
+    
+    console.log('🔄 Iniciando tiempo real para vendedor:', vendedorActual.id);
+    
+    realtimeChannelVendedor = supabaseClient
+        .channel('vendedor-pedidos-' + vendedorActual.id)
+        .on('postgres_changes', 
+            { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'pedidos', 
+                filter: `vendedor_id=eq.${vendedorActual.id}` 
+            },
+            (payload) => {
+                console.log('📢 NUEVO PEDIDO EN TIEMPO REAL:', payload.new);
+                const nuevoPedido = payload.new;
+                
+                // Agregar notificación
+                agregarNotificacionVendedor(
+                    `📦 Nuevo pedido #${nuevoPedido.numero_orden || nuevoPedido.id} de ${nuevoPedido.cliente_nombre}`, 
+                    'pedido'
+                );
+                
+                // Recargar pedidos
+                cargarPedidos(true);
+                
+                // Reproducir sonido
+                const audio = document.getElementById('notificacion-sound');
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log('Error sonido:', e));
+                }
+            }
+        )
+        .on('postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'pedidos',
+                filter: `vendedor_id=eq.${vendedorActual.id}`
+            },
+            (payload) => {
+                console.log('📢 Pedido actualizado en tiempo real:', payload.new);
+                cargarPedidos(true);
+                calcularMetricas();
+                actualizarReportes();
+            }
+        )
+        .subscribe();
+}
+
+function detenerRealtimeVendedor() {
+    if (realtimeChannelVendedor) {
+        supabaseClient.removeChannel(realtimeChannelVendedor);
+        realtimeChannelVendedor = null;
+    }
+    realtimeActiveVendedor = false;
+}
+
+// ===================================================
 // FUNCIONES MEJORADAS PARA MANEJO DE MODALES (MÓVIL)
 // ===================================================
 
@@ -193,6 +261,8 @@ function cerrarSesion() {
     localStorage.removeItem('want_sesion');
     sessionStorage.removeItem('vendedor_sesion');
     location.reload();
+
+    detenerRealtimeVendedor();
 }
 
 function cargarSesionGuardada() {
@@ -1590,6 +1660,7 @@ async function iniciarPanel(vendedor) {
     await cargarProductos();
     await cargarDeliveries();
     actualizarReportes();
+    iniciarRealtimeVendedor();
     
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
@@ -2659,12 +2730,6 @@ function escucharNuevosPedidos() {
             }
         }
     }, 30000);
-}
-
-function inicializarNotificacionesVendedor() {
-    obtenerNotificacionesVendedor();
-    actualizarContadorNotificacionesVendedor();
-    escucharNuevosPedidos();
 }
 
 // ===================================================
