@@ -831,18 +831,6 @@
     <script src="js/supabase-all.js"></script>
     <script src="js/admin.js"></script>
 
-    <!-- VERIFICACIÓN DE SESIÓN DE VENDEDOR -->
-    <script>
-        (function() {
-            if (window.location.pathname.includes('admin.html')) {
-                const vendedorSesion = sessionStorage.getItem('vendedor_sesion');
-                if (!vendedorSesion) {
-                    window.location.href = 'login.html';
-                }
-            }
-        })();
-    </script>
-
     <!-- Reproductor de audio para notificaciones -->
     <audio id="notificacion-sound" preload="auto">
         <source src="sounds/notification.mp3" type="audio/mpeg">
