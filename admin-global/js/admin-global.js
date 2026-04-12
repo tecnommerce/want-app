@@ -62,6 +62,95 @@ const RUBROS_DISPONIBLES = [
 ];
 
 // ===================================================
+// SUSCRIPCIONES EN TIEMPO REAL
+// ===================================================
+
+let realtimeSubscriptions = [];
+
+function iniciarRealtime() {
+    console.log('🔄 Iniciando suscripciones en tiempo real...');
+    
+    // Suscripción a cambios en vendedores
+    const vendedoresChannel = supabaseClient
+        .channel('vendedores-realtime')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'vendedores' },
+            (payload) => {
+                console.log('📢 Cambio en vendedores:', payload.eventType);
+                cargarTodosLosDatos();
+            }
+        )
+        .subscribe();
+    
+    // Suscripción a cambios en pedidos
+    const pedidosChannel = supabaseClient
+        .channel('pedidos-realtime')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'pedidos' },
+            (payload) => {
+                console.log('📢 Cambio en pedidos:', payload.eventType);
+                cargarTodosLosDatos();
+            }
+        )
+        .subscribe();
+    
+    // Suscripción a cambios en productos
+    const productosChannel = supabaseClient
+        .channel('productos-realtime')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'productos' },
+            (payload) => {
+                console.log('📢 Cambio en productos:', payload.eventType);
+                cargarTodosLosDatos();
+            }
+        )
+        .subscribe();
+    
+    // Suscripción a cambios en usuarios
+    const usuariosChannel = supabaseClient
+        .channel('usuarios-realtime')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'usuarios' },
+            (payload) => {
+                console.log('📢 Cambio en usuarios:', payload.eventType);
+                cargarUsuarios();
+                actualizarDashboard();
+            }
+        )
+        .subscribe();
+    
+    // Suscripción a cambios en banners
+    const bannersChannel = supabaseClient
+        .channel('banners-realtime')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'banners' },
+            (payload) => {
+                console.log('📢 Cambio en banners:', payload.eventType);
+                if (document.getElementById('section-web').style.display !== 'none') {
+                    cargarBanners();
+                }
+            }
+        )
+        .subscribe();
+    
+    realtimeSubscriptions = [
+        vendedoresChannel, 
+        pedidosChannel, 
+        productosChannel, 
+        usuariosChannel,
+        bannersChannel
+    ];
+}
+
+function detenerRealtime() {
+    console.log('🔕 Deteniendo suscripciones en tiempo real...');
+    realtimeSubscriptions.forEach(channel => {
+        supabaseClient.removeChannel(channel);
+    });
+    realtimeSubscriptions = [];
+}
+
+// ===================================================
 // UTILITARIAS
 // ===================================================
 
@@ -1408,12 +1497,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     await cargarTodosLosDatos();
+    iniciarRealtime();
     
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => cambiarSeccion(item.getAttribute('data-section')));
     });
     
-    document.getElementById('btn-refresh-data')?.addEventListener('click', actualizarDatosManual);
+   
     document.getElementById('filtro-vendedor')?.addEventListener('change', () => renderizarPedidos());
     document.getElementById('filtro-estado')?.addEventListener('change', () => renderizarPedidos());
     document.getElementById('filtro-fecha')?.addEventListener('change', () => renderizarPedidos());
