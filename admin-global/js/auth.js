@@ -4,7 +4,7 @@
 
 const ADMIN_CONFIG = {
     email: 'admin@want.com',
-    password_hash: '8f5c5a4f7d3b9e2a1c6d8e0f3b5a7c9d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0a2b'
+    password_hash: 'be4cd6e887c1c43c02c2e924780ba286dc2a8d6f017d7ceab40ac7f5213c09fb'
 };
 
 // Rate limiting: máximo 5 intentos en 15 minutos
