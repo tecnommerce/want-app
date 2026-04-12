@@ -79,6 +79,13 @@ async function withLoading(button, callback) {
     }
 }
 
+function cerrarModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
 // ===================================================
 // FUNCIONES DE USUARIOS
 // ===================================================
@@ -110,7 +117,6 @@ function renderizarUsuarios() {
         return;
     }
     
-    // Calcular pedidos por usuario
     const pedidosPorUsuario = {};
     allPedidos.forEach(p => {
         if (p.usuario_id) {
@@ -134,7 +140,7 @@ function renderizarUsuarios() {
                 <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
                 <a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp" style="background: #25D366; color: white; padding: 6px 10px; border-radius: 40px; display: inline-block; text-decoration: none; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-              </td>
+               </td>
         </tr>
     `).join('');
 }
@@ -211,14 +217,14 @@ async function suspenderUsuario(usuarioId, activo) {
     
     const result = await window.suspenderUsuario(usuarioId, activo);
     if (result.success) {
-        // AGREGAR LOG
-        await window.guardarLogAuditoria(
-            activo ? 'usuario_habilitado' : 'usuario_suspendido',
-            'usuario',
-            usuarioId,
-            { estado_nuevo: activo }
-        );
-        
+        if (typeof window.guardarLogAuditoria === 'function') {
+            await window.guardarLogAuditoria(
+                activo ? 'usuario_habilitado' : 'usuario_suspendido',
+                'usuario',
+                usuarioId,
+                { estado_nuevo: activo }
+            );
+        }
         mostrarToast(`Usuario ${activo ? 'habilitado' : 'suspendido'}`, 'success');
         await cargarUsuarios();
     } else {
@@ -239,33 +245,39 @@ async function eliminarUsuario(usuarioId) {
     }
 }
 
-async function exportarUsuarios() {
-    const btn = document.getElementById('export-usuarios');
-    await withLoading(btn, async () => {
-        const pedidosPorUsuario = {};
-        allPedidos.forEach(p => {
-            if (p.usuario_id) {
-                if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
-                pedidosPorUsuario[p.usuario_id]++;
-            }
-        });
-        
-        const data = allUsuarios.map(u => ({
-            ID: u.id,
-            Nombre: u.nombre,
-            Apellido: u.apellido,
-            Email: u.email,
-            Telefono: u.telefono,
-            Provincia: u.provincia,
-            Ciudad: u.ciudad,
-            Direccion: u.direccion,
-            Total_Gastado: u.total_gastado || 0,
-            Pedidos: pedidosPorUsuario[u.id] || 0,
-            Estado: u.activo === true ? 'Activo' : 'Suspendido',
-            Registrado: u.created_at
-        }));
-        downloadCSV(data, 'usuarios_want.csv');
-    });
+// ===================================================
+// FUNCIÓN CONFIRMAR ELIMINAR USUARIO (FALTANTE)
+// ===================================================
+
+async function confirmarEliminarUsuario() {
+    if (!window.usuarioAEliminar) return;
+    
+    const btn = document.getElementById('confirmar-eliminar-usuario');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+    }
+    
+    try {
+        const result = await window.eliminarUsuario(window.usuarioAEliminar);
+        if (result.success) {
+            mostrarToast('Usuario eliminado', 'success');
+            cerrarModal('modal-confirmar-usuario');
+            await cargarUsuarios();
+            await actualizarDashboard();
+        } else {
+            mostrarToast(result.error || 'Error al eliminar', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al eliminar usuario', 'error');
+    }
+    
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = 'Eliminar';
+    }
+    window.usuarioAEliminar = null;
 }
 
 // ===================================================
@@ -581,7 +593,7 @@ function renderizarVendedores() {
                 <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
                 <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-              </td>
+               </td>
           </tr>
     `).join('');
 }
@@ -669,6 +681,14 @@ async function toggleVendedorStatus(id, button) {
         });
         
         if (res && res.success) {
+            if (typeof window.guardarLogAuditoria === 'function') {
+                await window.guardarLogAuditoria(
+                    nuevoEstado ? 'vendedor_habilitado' : 'vendedor_suspendido',
+                    'vendedor',
+                    id,
+                    { estado_nuevo: nuevoEstado }
+                );
+            }
             mostrarToast(`Vendedor ${nuevoEstado ? 'habilitado' : 'suspendido'}`, 'success');
             await actualizarDatosManual();
         } else {
@@ -699,14 +719,14 @@ async function confirmarEliminarVendedor() {
         try {
             const res = await callAPI('eliminarVendedor', { vendedorId: window.vendedorAEliminar });
             if (res && res.success) {
-                // AGREGAR LOG
-                await window.guardarLogAuditoria(
-                    'vendedor_eliminado',
-                    'vendedor',
-                    window.vendedorAEliminar,
-                    {}
-                );
-                
+                if (typeof window.guardarLogAuditoria === 'function') {
+                    await window.guardarLogAuditoria(
+                        'vendedor_eliminado',
+                        'vendedor',
+                        window.vendedorAEliminar,
+                        {}
+                    );
+                }
                 mostrarToast('Vendedor eliminado', 'success');
                 cerrarModal('modal-confirmar-vendedor');
                 await actualizarDatosManual();
@@ -887,7 +907,7 @@ async function confirmarEliminarPedido() {
 
 async function cargarBanners() {
     const tbody = document.getElementById('banners-tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Cargando banners...</td></tr>';
     
     try {
         const response = await callAPI('getAllBanners');
@@ -907,7 +927,7 @@ function renderizarBanners() {
     if (!tbody) return;
     
     if (banners.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay banners registrados</td>';
+        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay banners registrados</td></tr>';
         return;
     }
     
@@ -1146,181 +1166,7 @@ function downloadCSV(data, filename) {
     mostrarToast('Exportado correctamente', 'success');
 }
 
-function cerrarModal(modalId) {
-    document.getElementById(modalId)?.classList.remove('active');
-}
-
-function cambiarSeccion(seccionId) {
-    document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
-    document.getElementById(`section-${seccionId}`).style.display = 'block';
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-section') === seccionId) item.classList.add('active');
-    });
-    
-    if (seccionId === 'web') {
-        cargarBanners();
-        if (allVendedores.length === 0) cargarTodosLosDatos();
-    }
-    if (seccionId === 'usuarios') {
-        cargarUsuarios();
-    }
-    if (seccionId === 'configuracion') {
-    cargarLogs();
-    }
-}
-
 // ===================================================
-// INICIALIZACIÓN
-// ===================================================
-
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Panel Administrativo Global iniciado');
-    
-    if (typeof supabaseClient === 'undefined') {
-        console.error('❌ supabaseClient no está definido');
-        return;
-    }
-    
-    await cargarTodosLosDatos();
-    
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => cambiarSeccion(item.getAttribute('data-section')));
-    });
-    
-    document.getElementById('btn-refresh-data')?.addEventListener('click', actualizarDatosManual);
-    document.getElementById('filtro-vendedor')?.addEventListener('change', () => renderizarPedidos());
-    document.getElementById('filtro-estado')?.addEventListener('change', () => renderizarPedidos());
-    document.getElementById('filtro-fecha')?.addEventListener('change', () => renderizarPedidos());
-    document.getElementById('filtro-vendedor-prod')?.addEventListener('change', () => renderizarProductos());
-    document.getElementById('search-producto')?.addEventListener('input', () => renderizarProductos());
-    
-    document.getElementById('btn-agregar-banner')?.addEventListener('click', () => abrirModalBanner());
-    document.getElementById('guardar-banner')?.addEventListener('click', guardarBanner);
-    
-    document.querySelectorAll('.submenu-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const sub = btn.getAttribute('data-sub');
-            document.querySelectorAll('.submenu-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.web-subcontent').forEach(c => c.classList.remove('active'));
-            document.getElementById(`sub-${sub}`).classList.add('active');
-            if (sub === 'banners') cargarBanners();
-        });
-    });
-    
-    // Botón refrescar logs
-const btnRefreshLogs = document.getElementById('btn-refresh-logs');
-if (btnRefreshLogs) {
-    btnRefreshLogs.addEventListener('click', () => cargarLogs());
-}
-
-// Botón exportar logs
-const btnExportLogs = document.getElementById('btn-export-logs');
-if (btnExportLogs) {
-    btnExportLogs.addEventListener('click', () => exportarLogs());
-}
-
-    // Buscador de vendedores
-    document.getElementById('search-vendedor')?.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
-        const tbody = document.getElementById('vendedores-tbody');
-        if (!tbody) return;
-        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="11" class="loading-text">No hay vendedores</td>'; return; }
-        const stats = {};
-        allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
-        tbody.innerHTML = filtered.map(v => `
-            <tr>
-                <td>${v.id}</td>
-                <td><strong>${escapeHTML(v.nombre)}</strong></td>
-                <td>${escapeHTML(v.email || '-')}</td>
-                <td>${v.telefono || '-'}</td>
-                <td>${escapeHTML(v.direccion || '-')}</td>
-                <td>${formatearRubrosParaLista(v.rubros)}</td>
-                <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
-                <td><span class="status-badge ${v.estado_abierto === true ? 'status-abierto' : 'status-cerrado'}">${v.estado_abierto === true ? 'Atendiendo' : 'Cerrado'}</span></td>
-                <td>${stats[v.id]?.pedidos || 0}</td>
-                <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
-                <td>
-                    <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
-                    <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
-                  </td>
-              </tr>
-        `).join('');
-    });
-    
-    // Buscador de usuarios
-    document.getElementById('search-usuario')?.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const pedidosPorUsuario = {};
-        allPedidos.forEach(p => {
-            if (p.usuario_id) {
-                if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
-                pedidosPorUsuario[p.usuario_id]++;
-            }
-        });
-        
-        const filtered = allUsuarios.filter(u => 
-            u.nombre?.toLowerCase().includes(term) || 
-            u.apellido?.toLowerCase().includes(term) || 
-            u.email?.toLowerCase().includes(term)
-        );
-        const tbody = document.getElementById('usuarios-tbody');
-        if (!tbody) return;
-        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay usuarios</td>'; return; }
-        tbody.innerHTML = filtered.map(u => `
-            <tr>
-                <td>${u.id.substring(0, 8)}...</td>
-                <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
-                <td>${escapeHTML(u.email)}</td>
-                <td><a href="https://wa.me/${u.telefono}" target="_blank" style="color: #25D366;">${u.telefono}</a></td>
-                <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
-                <td>${formatearPrecio(u.total_gastado || 0)}</td>
-                <td>${pedidosPorUsuario[u.id] || 0}</td>
-                <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
-                <td>
-                    <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
-                    <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
-                    <a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp" style="background: #25D366; color: white; padding: 6px 10px; border-radius: 40px; display: inline-block; text-decoration: none; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                  </td>
-              </tr>
-        `).join('');
-    });
-    
-    document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
-    document.getElementById('export-usuarios')?.addEventListener('click', exportarUsuarios);
-    document.getElementById('export-pedidos')?.addEventListener('click', exportarPedidos);
-    document.getElementById('export-productos')?.addEventListener('click', exportarProductos);
-    
-    document.getElementById('guardar-editar-vendedor')?.addEventListener('click', guardarEditarVendedor);
-    document.getElementById('guardar-editar-usuario')?.addEventListener('click', guardarEditarUsuario);
-    document.getElementById('guardar-editar-producto')?.addEventListener('click', guardarEditarProducto);
-    document.getElementById('guardar-editar-pedido')?.addEventListener('click', guardarEditarPedido);
-    document.getElementById('confirmar-eliminar-vendedor')?.addEventListener('click', confirmarEliminarVendedor);
-    document.getElementById('confirmar-eliminar-usuario')?.addEventListener('click', confirmarEliminarUsuario);
-    document.getElementById('confirmar-eliminar-producto')?.addEventListener('click', confirmarEliminarProducto);
-    document.getElementById('confirmar-eliminar-pedido')?.addEventListener('click', confirmarEliminarPedido);
-    
-    document.querySelectorAll('.modal-close, .btn-secondary').forEach(btn => {
-        btn.addEventListener('click', () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')));
-    });
-    
-    document.getElementById('btn-logout')?.addEventListener('click', () => {
-        sessionStorage.removeItem('admin_session');
-        window.location.href = 'login.html';
-    });
-    
-    const menuToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
-        document.addEventListener('click', (e) => { if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('active'); });
-    }
-
-    // ===================================================
 // FUNCIONES PARA LOGS DE AUDITORÍA
 // ===================================================
 
@@ -1356,7 +1202,6 @@ async function cargarLogs() {
                 }
             }
             
-            // Icono según acción
             let icono = '';
             if (log.accion.includes('eliminado')) icono = '🗑️';
             else if (log.accion.includes('suspendido') || log.accion.includes('habilitado')) icono = '⚠️';
@@ -1414,23 +1259,171 @@ async function exportarLogs() {
     }
 }
 
-function downloadCSV(data, filename) {
-    if (!data || !data.length) return;
-    const headers = Object.keys(data[0]);
-    const rows = data.map(obj => headers.map(h => {
-        let val = obj[h] || '';
-        if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
-            val = `"${val.replace(/"/g, '""')}"`;
-        }
-        return val;
-    }).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
+function cambiarSeccion(seccionId) {
+    document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+    document.getElementById(`section-${seccionId}`).style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-section') === seccionId) item.classList.add('active');
+    });
+    
+    if (seccionId === 'web') {
+        cargarBanners();
+        if (allVendedores.length === 0) cargarTodosLosDatos();
+    }
+    if (seccionId === 'usuarios') {
+        cargarUsuarios();
+    }
+    if (seccionId === 'configuracion') {
+        cargarLogs();
+    }
 }
 
+// ===================================================
+// INICIALIZACIÓN
+// ===================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Panel Administrativo Global iniciado');
+    
+    if (typeof supabaseClient === 'undefined') {
+        console.error('❌ supabaseClient no está definido');
+        return;
+    }
+    
+    await cargarTodosLosDatos();
+    
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => cambiarSeccion(item.getAttribute('data-section')));
+    });
+    
+    document.getElementById('btn-refresh-data')?.addEventListener('click', actualizarDatosManual);
+    document.getElementById('filtro-vendedor')?.addEventListener('change', () => renderizarPedidos());
+    document.getElementById('filtro-estado')?.addEventListener('change', () => renderizarPedidos());
+    document.getElementById('filtro-fecha')?.addEventListener('change', () => renderizarPedidos());
+    document.getElementById('filtro-vendedor-prod')?.addEventListener('change', () => renderizarProductos());
+    document.getElementById('search-producto')?.addEventListener('input', () => renderizarProductos());
+    
+    document.getElementById('btn-agregar-banner')?.addEventListener('click', () => abrirModalBanner());
+    document.getElementById('guardar-banner')?.addEventListener('click', guardarBanner);
+    
+    document.querySelectorAll('.submenu-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sub = btn.getAttribute('data-sub');
+            document.querySelectorAll('.submenu-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.web-subcontent').forEach(c => c.classList.remove('active'));
+            document.getElementById(`sub-${sub}`).classList.add('active');
+            if (sub === 'banners') cargarBanners();
+        });
+    });
+    
+    const btnRefreshLogs = document.getElementById('btn-refresh-logs');
+    if (btnRefreshLogs) {
+        btnRefreshLogs.addEventListener('click', () => cargarLogs());
+    }
+    
+    const btnExportLogs = document.getElementById('btn-export-logs');
+    if (btnExportLogs) {
+        btnExportLogs.addEventListener('click', () => exportarLogs());
+    }
+    
+    // Buscador de vendedores
+    document.getElementById('search-vendedor')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allVendedores.filter(v => v.nombre?.toLowerCase().includes(term) || v.email?.toLowerCase().includes(term));
+        const tbody = document.getElementById('vendedores-tbody');
+        if (!tbody) return;
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="11" class="loading-text">No hay vendedores</td></tr>'; return; }
+        const stats = {};
+        allPedidos.forEach(p => { const id = p.vendedor_id; if (!stats[id]) stats[id] = { pedidos: 0, ingresos: 0 }; stats[id].pedidos++; stats[id].ingresos += parseFloat(p.total) || 0; });
+        tbody.innerHTML = filtered.map(v => `
+            <tr>
+                <td>${v.id}</td>
+                <td><strong>${escapeHTML(v.nombre)}</strong></td>
+                <td>${escapeHTML(v.email || '-')}</td>
+                <td>${v.telefono || '-'}</td>
+                <td>${escapeHTML(v.direccion || '-')}</td>
+                <td>${formatearRubrosParaLista(v.rubros)}</td>
+                <td><span class="status-badge ${v.activo === true ? 'status-activo' : 'status-inactivo'}">${v.activo === true ? 'Activo' : 'Inactivo'}</span></td>
+                <td><span class="status-badge ${v.estado_abierto === true ? 'status-abierto' : 'status-cerrado'}">${v.estado_abierto === true ? 'Atendiendo' : 'Cerrado'}</span></td>
+                <td>${stats[v.id]?.pedidos || 0}</td>
+                <td>${formatearPrecio(stats[v.id]?.ingresos || 0)}</td>
+                <td>
+                    <button class="btn-edit" onclick="editarVendedor(${v.id})"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn-toggle-status" onclick="toggleVendedorStatus(${v.id}, this)"><i class="fas fa-${v.activo === true ? 'ban' : 'check-circle'}"></i> ${v.activo === true ? 'Suspender' : 'Habilitar'}</button>
+                    <button class="btn-delete" onclick="eliminarVendedor(${v.id}, this)"><i class="fas fa-trash"></i> Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    });
+    
+    // Buscador de usuarios
+    document.getElementById('search-usuario')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const pedidosPorUsuario = {};
+        allPedidos.forEach(p => {
+            if (p.usuario_id) {
+                if (!pedidosPorUsuario[p.usuario_id]) pedidosPorUsuario[p.usuario_id] = 0;
+                pedidosPorUsuario[p.usuario_id]++;
+            }
+        });
+        
+        const filtered = allUsuarios.filter(u => 
+            u.nombre?.toLowerCase().includes(term) || 
+            u.apellido?.toLowerCase().includes(term) || 
+            u.email?.toLowerCase().includes(term)
+        );
+        const tbody = document.getElementById('usuarios-tbody');
+        if (!tbody) return;
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9" class="loading-text">No hay usuarios</td></tr>'; return; }
+        tbody.innerHTML = filtered.map(u => `
+            <tr>
+                <td>${u.id.substring(0, 8)}...</td>
+                <td><strong>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido)}</strong></td>
+                <td>${escapeHTML(u.email)}</td>
+                <td><a href="https://wa.me/${u.telefono}" target="_blank" style="color: #25D366;">${u.telefono}</a></td>
+                <td>${escapeHTML(u.direccion)}, ${escapeHTML(u.ciudad)}, ${escapeHTML(u.provincia)}</td>
+                <td>${formatearPrecio(u.total_gastado || 0)}</td>
+                <td>${pedidosPorUsuario[u.id] || 0}</td>
+                <td><span class="status-badge ${u.activo === true ? 'status-activo' : 'status-inactivo'}">${u.activo === true ? 'Activo' : 'Suspendido'}</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editarUsuario('${u.id}')"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn-toggle-status" onclick="suspenderUsuario('${u.id}', ${!u.activo})"><i class="fas fa-${u.activo === true ? 'ban' : 'check-circle'}"></i> ${u.activo === true ? 'Suspender' : 'Habilitar'}</button>
+                    <button class="btn-delete" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash"></i> Eliminar</button>
+                    <a href="https://wa.me/${u.telefono}" target="_blank" class="btn-whatsapp" style="background: #25D366; color: white; padding: 6px 10px; border-radius: 40px; display: inline-block; text-decoration: none; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                </td>
+            </tr>
+        `).join('');
+    });
+    
+    document.getElementById('export-vendedores')?.addEventListener('click', exportarVendedores);
+    document.getElementById('export-usuarios')?.addEventListener('click', exportarUsuarios);
+    document.getElementById('export-pedidos')?.addEventListener('click', exportarPedidos);
+    document.getElementById('export-productos')?.addEventListener('click', exportarProductos);
+    
+    document.getElementById('guardar-editar-vendedor')?.addEventListener('click', guardarEditarVendedor);
+    document.getElementById('guardar-editar-usuario')?.addEventListener('click', guardarEditarUsuario);
+    document.getElementById('guardar-editar-producto')?.addEventListener('click', guardarEditarProducto);
+    document.getElementById('guardar-editar-pedido')?.addEventListener('click', guardarEditarPedido);
+    document.getElementById('confirmar-eliminar-vendedor')?.addEventListener('click', confirmarEliminarVendedor);
+    document.getElementById('confirmar-eliminar-usuario')?.addEventListener('click', confirmarEliminarUsuario);
+    document.getElementById('confirmar-eliminar-producto')?.addEventListener('click', confirmarEliminarProducto);
+    document.getElementById('confirmar-eliminar-pedido')?.addEventListener('click', confirmarEliminarPedido);
+    
+    document.querySelectorAll('.modal-close, .btn-secondary').forEach(btn => {
+        btn.addEventListener('click', () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')));
+    });
+    
+    document.getElementById('btn-logout')?.addEventListener('click', () => {
+        sessionStorage.removeItem('admin_session');
+        window.location.href = 'login.html';
+    });
+    
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+        document.addEventListener('click', (e) => { if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('active'); });
+    }
 });
