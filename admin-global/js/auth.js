@@ -1,10 +1,8 @@
 // ===================================================
-// ADMIN GLOBAL - Autenticación con Supabase
+// ADMIN GLOBAL - Autenticación con Supabase Auth
+// SOLO emails @want.com pueden iniciar sesión
 // ===================================================
 
-const ADMIN_EMAIL = 'admin@want.com';
-
-// Rate limiting: máximo 5 intentos en 15 minutos
 const RATE_LIMIT = {
     maxAttempts: 5,
     windowMinutes: 15
@@ -73,32 +71,53 @@ function checkSession() {
 }
 
 async function login(email, password) {
+    // Verificar rate limiting
     if (isRateLimited()) {
         const remainingMinutes = getRemainingTimeMinutes();
         throw new Error(`Demasiados intentos. Esperá ${remainingMinutes} minutos.`);
     }
     
     try {
-        // Autenticar con Supabase
+        // REGLA PRINCIPAL: Solo emails @want.com pueden intentar login
+        if (!email.endsWith('@want.com')) {
+            registerFailedAttempt();
+            throw new Error('Acceso denegado. Solo emails @want.com pueden acceder al panel de administración.');
+        }
+        
+        // Intentar autenticar con Supabase
         const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
         });
         
-        if (error) throw error;
-        
-        if (data.user && data.user.email === ADMIN_EMAIL) {
-            sessionStorage.setItem('admin_session', 'true');
-            sessionStorage.setItem('admin_supabase_session', JSON.stringify(data.session));
-            resetAttempts();
-            return true;
-        } else {
-            throw new Error('No tienes permisos de administrador');
+        if (error) {
+            registerFailedAttempt();
+            const remainingAttempts = RATE_LIMIT.maxAttempts - getAttempts().count;
+            throw new Error(`${error.message}. Intentos restantes: ${remainingAttempts}`);
         }
+        
+        if (!data.user) {
+            registerFailedAttempt();
+            throw new Error('Error de autenticación');
+        }
+        
+        // Verificar nuevamente que el email sea @want.com (por seguridad)
+        if (!data.user.email.endsWith('@want.com')) {
+            await supabaseClient.auth.signOut();
+            registerFailedAttempt();
+            throw new Error('Acceso denegado. Solo usuarios @want.com pueden acceder.');
+        }
+        
+        // Login exitoso
+        sessionStorage.setItem('admin_session', 'true');
+        sessionStorage.setItem('admin_email', data.user.email);
+        sessionStorage.setItem('admin_user_id', data.user.id);
+        sessionStorage.setItem('admin_supabase_session', JSON.stringify(data.session));
+        resetAttempts();
+        return true;
+        
     } catch (error) {
-        registerFailedAttempt();
-        const remainingAttempts = RATE_LIMIT.maxAttempts - getAttempts().count;
-        throw new Error(`${error.message}. Intentos restantes: ${remainingAttempts}`);
+        throw error;
     }
 }
 
@@ -107,8 +126,30 @@ async function logout() {
         await supabaseClient.auth.signOut();
     } catch(e) {}
     sessionStorage.removeItem('admin_session');
+    sessionStorage.removeItem('admin_email');
+    sessionStorage.removeItem('admin_user_id');
     sessionStorage.removeItem('admin_supabase_session');
     window.location.href = 'login.html';
+}
+
+async function restoreSupabaseSession() {
+    const savedSession = sessionStorage.getItem('admin_supabase_session');
+    if (savedSession) {
+        try {
+            const session = JSON.parse(savedSession);
+            await supabaseClient.auth.setSession(session);
+            console.log('✅ Sesión de Supabase restaurada');
+        } catch(e) {
+            console.error('Error restaurando sesión:', e);
+        }
+    }
+}
+
+function getAdminInfo() {
+    return {
+        email: sessionStorage.getItem('admin_email'),
+        userId: sessionStorage.getItem('admin_user_id')
+    };
 }
 
 function initPasswordToggle() {
@@ -140,7 +181,7 @@ function showError(message) {
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
     setTimeout(() => {
-        errorDiv.style.display = 'none';
+        if (errorDiv) errorDiv.style.display = 'none';
     }, 5000);
 }
 
@@ -178,20 +219,6 @@ function initLogin() {
     }
 }
 
-// Restaurar sesión de Supabase si existe
-async function restoreSupabaseSession() {
-    const savedSession = sessionStorage.getItem('admin_supabase_session');
-    if (savedSession) {
-        try {
-            const session = JSON.parse(savedSession);
-            await supabaseClient.auth.setSession(session);
-            console.log('✅ Sesión de Supabase restaurada');
-        } catch(e) {
-            console.error('Error restaurando sesión:', e);
-        }
-    }
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
     initPasswordToggle();
     await restoreSupabaseSession();
@@ -211,3 +238,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
+
+window.getAdminInfo = getAdminInfo;
+window.adminLogout = logout;
