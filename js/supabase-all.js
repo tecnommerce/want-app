@@ -44,7 +44,7 @@
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/index.html'
+                    redirectTo: 'https://wantapp.online/index.html'
                 }
             });
             if (error) throw error;
