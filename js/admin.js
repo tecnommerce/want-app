@@ -1808,6 +1808,16 @@ if (btnCampana) {
         toggleNotificacionesVendedor();
     };
 }
+// Conectar botón cerrar notificaciones
+const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
+if (btnCerrarNotif) {
+    btnCerrarNotif.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('❌ Cerrar notificaciones clickeado');
+        cerrarPanelNotificacionesVendedor();
+    };
+}
     
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
