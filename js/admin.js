@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (COMPLETO Y CORREGIDO)
+// ADMIN - Panel de vendedor (VERSIÓN CORREGIDA CON REALTIME)
 // ===================================================
 
 console.log('🚀 admin.js cargado correctamente');
@@ -39,6 +39,149 @@ let currentCallback = null;
 let pedidoParaAsignar = null;
 
 // ===================================================
+// NOTIFICACIONES PARA VENDEDOR (MOVIDAS AL PRINCIPIO)
+// ===================================================
+
+let notificacionesVendedor = [];
+let notificacionesPanelAbierto = false;
+
+function obtenerNotificacionesVendedor() {
+    const saved = localStorage.getItem('want_notificaciones_vendedor');
+    if (saved) {
+        try {
+            notificacionesVendedor = JSON.parse(saved);
+        } catch(e) {
+            notificacionesVendedor = [];
+        }
+    }
+    return notificacionesVendedor;
+}
+
+function guardarNotificacionesVendedor() {
+    localStorage.setItem('want_notificaciones_vendedor', JSON.stringify(notificacionesVendedor));
+}
+
+function agregarNotificacionVendedor(mensaje, tipo = 'info') {
+    const notificacion = {
+        id: Date.now(),
+        mensaje: mensaje,
+        tipo: tipo,
+        leida: false,
+        fecha: new Date().toISOString()
+    };
+    notificacionesVendedor.unshift(notificacion);
+    if (notificacionesVendedor.length > 50) notificacionesVendedor.pop();
+    guardarNotificacionesVendedor();
+    actualizarContadorNotificacionesVendedor();
+    
+    try {
+        const audio = document.getElementById('notificacion-sound');
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
+        }
+    } catch(e) {}
+    
+    mostrarToast(mensaje, 'info');
+}
+
+function actualizarContadorNotificacionesVendedor() {
+    const noLeidas = notificacionesVendedor.filter(n => !n.leida).length;
+    const contador = document.getElementById('notificaciones-count');
+    if (contador) {
+        if (noLeidas > 0) {
+            contador.textContent = noLeidas > 99 ? '99+' : noLeidas;
+            contador.style.display = 'flex';
+        } else {
+            contador.style.display = 'none';
+        }
+    }
+}
+
+function toggleNotificacionesVendedor() {
+    const panel = document.getElementById('notificaciones-panel');
+    if (!panel) return;
+    
+    if (notificacionesPanelAbierto) {
+        panel.classList.remove('active');
+        notificacionesPanelAbierto = false;
+    } else {
+        renderizarNotificacionesVendedor();
+        panel.classList.add('active');
+        notificacionesPanelAbierto = true;
+    }
+}
+
+function cerrarPanelNotificacionesVendedor() {
+    const panel = document.getElementById('notificaciones-panel');
+    if (panel) {
+        panel.classList.remove('active');
+        notificacionesPanelAbierto = false;
+    }
+}
+
+function renderizarNotificacionesVendedor() {
+    const container = document.getElementById('notificaciones-lista');
+    if (!container) return;
+    
+    obtenerNotificacionesVendedor();
+    
+    if (notificacionesVendedor.length === 0) {
+        container.innerHTML = `
+            <div class="notificaciones-vacio">
+                <i class="fas fa-bell-slash"></i>
+                <p>No hay notificaciones</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = notificacionesVendedor.map(notif => {
+        const fecha = new Date(notif.fecha);
+        const fechaStr = fecha.toLocaleString('es-AR', { 
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        let icono = 'fa-bell';
+        if (notif.tipo === 'pedido') icono = 'fa-box';
+        else if (notif.tipo === 'success') icono = 'fa-check-circle';
+        else if (notif.tipo === 'error') icono = 'fa-exclamation-circle';
+        
+        return `
+            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" onclick="marcarNotificacionLeidaVendedor(${notif.id})">
+                <div class="notificacion-icono">
+                    <i class="fas ${icono}"></i>
+                </div>
+                <div class="notificacion-contenido">
+                    <div class="notificacion-mensaje">${escapeHTML(notif.mensaje)}</div>
+                    <div class="notificacion-fecha">${fechaStr}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    actualizarContadorNotificacionesVendedor();
+}
+
+function marcarNotificacionLeidaVendedor(notificacionId) {
+    const notif = notificacionesVendedor.find(n => n.id === notificacionId);
+    if (notif) {
+        notif.leida = true;
+        guardarNotificacionesVendedor();
+        renderizarNotificacionesVendedor();
+        actualizarContadorNotificacionesVendedor();
+    }
+}
+
+function inicializarNotificacionesVendedor() {
+    obtenerNotificacionesVendedor();
+    actualizarContadorNotificacionesVendedor();
+}
+
+// ===================================================
 // TIEMPO REAL PARA VENDEDOR
 // ===================================================
 
@@ -64,16 +207,13 @@ function iniciarRealtimeVendedor() {
                 console.log('📢 NUEVO PEDIDO EN TIEMPO REAL:', payload.new);
                 const nuevoPedido = payload.new;
                 
-                // Agregar notificación
                 agregarNotificacionVendedor(
                     `📦 Nuevo pedido #${nuevoPedido.numero_orden || nuevoPedido.id} de ${nuevoPedido.cliente_nombre}`, 
                     'pedido'
                 );
                 
-                // Recargar pedidos
                 cargarPedidos(true);
                 
-                // Reproducir sonido
                 const audio = document.getElementById('notificacion-sound');
                 if (audio) {
                     audio.currentTime = 0;
@@ -120,8 +260,6 @@ function abrirModalConZIndex(modalId) {
         modalesAbiertos.push(modalId);
     }
     
-    // Calcular z-index: base 10000 + (profundidad * 200)
-    // Los modales anidados tendrán z-index más alto
     const zIndexBase = 10000;
     const nuevoZIndex = zIndexBase + (modalesAbiertos.length * 200);
     modal.style.zIndex = nuevoZIndex;
@@ -260,9 +398,8 @@ function guardarSesion(vendedor) {
 function cerrarSesion() {
     localStorage.removeItem('want_sesion');
     sessionStorage.removeItem('vendedor_sesion');
-    location.reload();
-
     detenerRealtimeVendedor();
+    location.reload();
 }
 
 function cargarSesionGuardada() {
@@ -553,7 +690,7 @@ function actualizarReportes() {
 }
 
 // ===================================================
-// RENDERIZADO DE PEDIDOS (CORREGIDO - SIN ONCLICK EN FILA)
+// RENDERIZADO DE PEDIDOS
 // ===================================================
 
 function filtrarPedidos() {
@@ -610,11 +747,9 @@ function renderizarPedidosDesktop() {
         let botonesHTML = '';
         
         if (estado === 'preparando') {
-            // Botón "Confirmar y preparar" (abre modal de tiempo)
             botonesHTML = `
                 <button class="btn-tabla btn-confirmar-preparar" onclick="event.stopPropagation(); abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
             `;
-            // Botón "Coordinar transferencia" (solo si método de pago es transferencia)
             if (p.metodo_pago === 'transferencia') {
                 botonesHTML += `
                     <button class="btn-tabla btn-coordinar" onclick="event.stopPropagation(); abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-exchange-alt"></i> Coordinar transferencia</button>
@@ -1048,7 +1183,7 @@ async function eliminarProducto(productoId) {
 }
 
 // ===================================================
-// FUNCIONES DE PERFIL (CORREGIDAS - CON AVATAR)
+// FUNCIONES DE PERFIL
 // ===================================================
 
 function abrirModalPerfil() {
@@ -1761,7 +1896,6 @@ async function iniciarPanel(vendedor) {
     inicializarMenuAdmin();
     inicializarBuscador();
     inicializarMenuHamburguesa();
-    
 }
 
 function inicializarTabs() {
@@ -2402,18 +2536,16 @@ function inicializarMenuHamburguesa() {
     
     console.log('✅ Menú hamburguesa inicializado correctamente');
 }
+
 // ===================================================
-// SOBRESCRIBIR FUNCIONES DE MODALES PARA QUE FUNCIONEN CORRECTAMENTE
+// SOBRESCRIBIR FUNCIONES DE MODALES
 // ===================================================
 
-// Guardar referencia a las funciones originales
 const originalAbrirModalEditarPedido = window.abrirModalEditarPedido;
 const originalVerPedidoCompleto = window.verPedidoCompleto;
 const originalVerPedidoCompletoMovil = window.verPedidoCompletoMovil;
 
-// Nueva función para abrir modal de editar pedido cerrando el anterior
 window.abrirModalEditarPedido = function(pedidoId) {
-    // Primero cerrar el modal de detalle del pedido si está abierto
     const modalDetalle = document.getElementById('modal-pedido-completo');
     if (modalDetalle && modalDetalle.style.display === 'flex') {
         cerrarModalConZIndex('modal-pedido-completo');
@@ -2424,12 +2556,10 @@ window.abrirModalEditarPedido = function(pedidoId) {
         modalDetalleMovil.remove();
     }
     
-    // Llamar a la función original después de un pequeño retraso
     setTimeout(() => {
         if (originalAbrirModalEditarPedido) {
             originalAbrirModalEditarPedido(pedidoId);
         } else {
-            // Si no existe la función original, usar la nuestra
             const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
             if (!pedido) return;
             
@@ -2451,9 +2581,7 @@ window.abrirModalEditarPedido = function(pedidoId) {
     }, 100);
 };
 
-// Nueva función para ver pedido completo (versión móvil)
 window.verPedidoCompletoMovil = function(pedidoId) {
-    // Cerrar cualquier modal de edición abierto
     const modalEditar = document.getElementById('modal-editar-pedido');
     if (modalEditar && modalEditar.classList.contains('active')) {
         cerrarModalConZIndex('modal-editar-pedido');
@@ -2462,7 +2590,6 @@ window.verPedidoCompletoMovil = function(pedidoId) {
     if (originalVerPedidoCompletoMovil) {
         originalVerPedidoCompletoMovil(pedidoId);
     } else {
-        // Versión simplificada
         const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
         if (!pedido) return;
         
@@ -2546,7 +2673,6 @@ window.verPedidoCompletoMovil = function(pedidoId) {
     }
 };
 
-// También mejorar la función de cerrar modales para asegurar que se limpia bien
 const originalCerrarModalPedidoCompleto = window.cerrarModalPedidoCompleto;
 window.cerrarModalPedidoCompleto = function() {
     if (originalCerrarModalPedidoCompleto) {
@@ -2565,377 +2691,4 @@ window.cerrarModalPedidoCompletoMovil = function() {
     if (modal) modal.remove();
 };
 
-console.log('✅ Modales corregidos - los nuevos modales se abren por encima');
-
 console.log('✅ admin.js cargado completamente');
-
-// ===================================================
-// NOTIFICACIONES Y NUEVAS FUNCIONALIDADES
-// ===================================================
-
-// ===================================================
-// 1. NOTIFICACIONES PARA VENDEDOR
-// ===================================================
-
-let notificacionesVendedor = [];
-let notificacionesPanelAbierto = false;
-
-function obtenerNotificacionesVendedor() {
-    const saved = localStorage.getItem('want_notificaciones_vendedor');
-    if (saved) {
-        try {
-            notificacionesVendedor = JSON.parse(saved);
-        } catch(e) {
-            notificacionesVendedor = [];
-        }
-    }
-    return notificacionesVendedor;
-}
-
-function guardarNotificacionesVendedor() {
-    localStorage.setItem('want_notificaciones_vendedor', JSON.stringify(notificacionesVendedor));
-}
-
-function agregarNotificacionVendedor(mensaje, tipo = 'info') {
-    const notificacion = {
-        id: Date.now(),
-        mensaje: mensaje,
-        tipo: tipo,
-        leida: false,
-        fecha: new Date().toISOString()
-    };
-    notificacionesVendedor.unshift(notificacion);
-    if (notificacionesVendedor.length > 50) notificacionesVendedor.pop();
-    guardarNotificacionesVendedor();
-    actualizarContadorNotificacionesVendedor();
-    
-    try {
-        const audio = document.getElementById('notificacion-sound');
-        if (audio) {
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log('Error al reproducir sonido:', e));
-        }
-    } catch(e) {}
-    
-    mostrarToast(mensaje, 'info');
-}
-
-function actualizarContadorNotificacionesVendedor() {
-    const noLeidas = notificacionesVendedor.filter(n => !n.leida).length;
-    const contador = document.getElementById('notificaciones-count');
-    if (contador) {
-        if (noLeidas > 0) {
-            contador.textContent = noLeidas > 99 ? '99+' : noLeidas;
-            contador.style.display = 'flex';
-        } else {
-            contador.style.display = 'none';
-        }
-    }
-}
-
-function toggleNotificacionesVendedor() {
-    const panel = document.getElementById('notificaciones-panel');
-    if (!panel) return;
-    
-    if (notificacionesPanelAbierto) {
-        panel.classList.remove('active');
-        notificacionesPanelAbierto = false;
-    } else {
-        renderizarNotificacionesVendedor();
-        panel.classList.add('active');
-        notificacionesPanelAbierto = true;
-    }
-}
-
-function cerrarPanelNotificacionesVendedor() {
-    const panel = document.getElementById('notificaciones-panel');
-    if (panel) {
-        panel.classList.remove('active');
-        notificacionesPanelAbierto = false;
-    }
-}
-
-function renderizarNotificacionesVendedor() {
-    const container = document.getElementById('notificaciones-lista');
-    if (!container) return;
-    
-    obtenerNotificacionesVendedor();
-    
-    if (notificacionesVendedor.length === 0) {
-        container.innerHTML = `
-            <div class="notificaciones-vacio">
-                <i class="fas fa-bell-slash"></i>
-                <p>No hay notificaciones</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = notificacionesVendedor.map(notif => {
-        const fecha = new Date(notif.fecha);
-        const fechaStr = fecha.toLocaleString('es-AR', { 
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        let icono = 'fa-bell';
-        if (notif.tipo === 'pedido') icono = 'fa-box';
-        else if (notif.tipo === 'success') icono = 'fa-check-circle';
-        else if (notif.tipo === 'error') icono = 'fa-exclamation-circle';
-        
-        return `
-            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" onclick="marcarNotificacionLeidaVendedor(${notif.id})">
-                <div class="notificacion-icono">
-                    <i class="fas ${icono}"></i>
-                </div>
-                <div class="notificacion-contenido">
-                    <div class="notificacion-mensaje">${escapeHTML(notif.mensaje)}</div>
-                    <div class="notificacion-fecha">${fechaStr}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    actualizarContadorNotificacionesVendedor();
-}
-
-function marcarNotificacionLeidaVendedor(notificacionId) {
-    const notif = notificacionesVendedor.find(n => n.id === notificacionId);
-    if (notif) {
-        notif.leida = true;
-        guardarNotificacionesVendedor();
-        renderizarNotificacionesVendedor();
-        actualizarContadorNotificacionesVendedor();
-    }
-}
-
-function escucharNuevosPedidos() {
-    if (!vendedorActual) return;
-    
-    setInterval(async () => {
-        const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, true);
-        if (response.success && response.pedidos) {
-            const nuevosPedidos = response.pedidos.filter(p => 
-                p.estado === 'preparando' && 
-                !pedidos.find(existing => existing.id === p.id)
-            );
-            
-            nuevosPedidos.forEach(pedido => {
-                agregarNotificacionVendedor(`📦 Nuevo pedido #${pedido.numero_orden || pedido.id} de ${pedido.cliente_nombre}`, 'pedido');
-            });
-            
-            if (nuevosPedidos.length > 0) {
-                await cargarPedidos(true);
-            }
-        }
-    }, 30000);
-}
-
-// ===================================================
-// 2. NUEVAS FUNCIONES DE BOTONES
-// ===================================================
-
-let pedidoPendienteTiempo = null;
-let botonPendienteTiempo = null;
-
-function abrirModalTiempo(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    pedidoPendienteTiempo = pedido;
-    botonPendienteTiempo = boton;
-    document.getElementById('tiempo-entrega-input').value = '';
-    abrirModalConZIndex('modal-tiempo-entrega');
-}
-
-function confirmarTiempoYPreparar() {
-    const tiempoEntrega = document.getElementById('tiempo-entrega-input')?.value.trim();
-    if (!tiempoEntrega) {
-        mostrarToast('Ingrese un tiempo estimado de entrega', 'error');
-        return;
-    }
-    if (!pedidoPendienteTiempo) return;
-    
-    actualizarTiempoEstimado(pedidoPendienteTiempo.id, tiempoEntrega);
-    actualizarEstado(pedidoPendienteTiempo.id, 'en preparacion', botonPendienteTiempo);
-    
-    cerrarModalConZIndex('modal-tiempo-entrega');
-    pedidoPendienteTiempo = null;
-    botonPendienteTiempo = null;
-}
-
-async function actualizarTiempoEstimado(pedidoId, tiempoEstimado) {
-    try {
-        const { error } = await supabaseClient
-            .from('pedidos')
-            .update({ tiempo_estimado: tiempoEstimado })
-            .eq('id', pedidoId);
-        if (error) console.error('Error actualizando tiempo estimado:', error);
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-let pedidoTransferenciaActual = null;
-
-function abrirModalCoordinarTransferencia(pedidoId) {
-    console.log('🔧 abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) {
-        console.error('❌ Pedido no encontrado:', pedidoId);
-        return;
-    }
-    pedidoTransferenciaActual = pedido;
-    
-    const cbuAliasInput = document.getElementById('cbu-alias');
-    if (cbuAliasInput) {
-        cbuAliasInput.value = '';
-    } else {
-        console.error('❌ Elemento cbu-alias no encontrado');
-    }
-    
-    abrirModalConZIndex('modal-coordinar-transferencia');
-}
-
-function cerrarModalCoordinarTransferencia() {
-    cerrarModalConZIndex('modal-coordinar-transferencia');
-    pedidoTransferenciaActual = null;
-}
-
-function enviarCoordinacionTransferencia() {
-    console.log('Enviando coordinacion de transferencia');
-    
-    if (!pedidoTransferenciaActual) {
-        console.error('No hay pedido seleccionado');
-        mostrarToast('Error: No hay pedido seleccionado', 'error');
-        return;
-    }
-    
-    const cbuAlias = document.getElementById('cbu-alias').value.trim();
-    if (!cbuAlias) {
-        mostrarToast('Ingresa tus datos bancarios (CBU o Alias)', 'error');
-        return;
-    }
-    
-    const pedido = pedidoTransferenciaActual;
-    const fecha = new Date(pedido.fecha);
-    const numeroMostrar = pedido.numero_orden || pedido.id;
-    const nombreVendedor = vendedorActual ? vendedorActual.nombre : 'el negocio';
-    
-    let productosDetalle = '';
-    if (pedido.productos && pedido.productos.length > 0) {
-        pedido.productos.forEach(p => {
-            productosDetalle += `${p.cantidad}x ${p.nombre} - $${(p.precio * p.cantidad).toLocaleString('es-AR')}\n`;
-        });
-    } else {
-        productosDetalle = 'No hay productos registrados\n';
-    }
-    
-    let mensaje = `COORDINACION DE PAGO POR TRANSFERENCIA\n\n`;
-    mensaje += `Hola ${pedido.cliente_nombre}, gracias por tu pedido!\n\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `DETALLE DEL PEDIDO\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `Pedido #${numeroMostrar}\n`;
-    mensaje += `Metodo de pago: Transferencia bancaria\n\n`;
-    mensaje += `PRODUCTOS:\n`;
-    mensaje += productosDetalle;
-    mensaje += `\nTOTAL: $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    mensaje += `DATOS PARA LA TRANSFERENCIA:\n`;
-    mensaje += `${cbuAlias}\n\n`;
-    mensaje += `INSTRUCCIONES:\n`;
-    mensaje += `1. Realiza la transferencia por el monto total de $${pedido.total.toLocaleString('es-AR')}\n`;
-    mensaje += `2. Envia el comprobante por este mismo chat\n`;
-    mensaje += `3. Una vez confirmado el pago, ${nombreVendedor} enviara tu pedido\n\n`;
-    mensaje += `DIRECCION DE ENTREGA:\n${pedido.direccion}\n\n`;
-    if (pedido.detalles) {
-        mensaje += `DETALLES ADICIONALES:\n${pedido.detalles}\n\n`;
-    }
-    mensaje += `Gracias por confiar en ${nombreVendedor}!`;
-    
-    const whatsappUrl = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
-    console.log('Abriendo WhatsApp:', whatsappUrl);
-    window.open(whatsappUrl, '_blank');
-    
-    cerrarModalCoordinarTransferencia();
-    mostrarToast('Mensaje enviado al cliente con los datos de pago', 'success');
-    
-    document.getElementById('cbu-alias').value = '';
-    pedidoTransferenciaActual = null;
-}
-
-// ===================================================
-// 3. FUNCIONES DE NOTIFICACIÓN AL CLIENTE Y ENTREGA
-// ===================================================
-
-function notificarClienteEnCamino(pedidoId, boton) {
-    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-    if (!pedido) return;
-    
-    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
-    let mensaje = `ACTUALIZACION DE TU PEDIDO\n\nHola ${pedido.cliente_nombre},\n\n*Tu pedido esta en camino!\n\n━━━━━━━━━━━━━━━━━━━━\nDETALLE:\n`;
-    pedido.productos.forEach(p => { mensaje += `${p.cantidad}x ${p.nombre}\n`; });
-    if (pedido.detalles) mensaje += `\nINDICACIONES: ${pedido.detalles}\n`;
-    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\nDIRECCION: ${pedido.direccion}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
-    if (metodoPagoTexto === 'transferencia') {
-        mensaje += `PAGO: Transferencia bancaria (YA REALIZADA)`;
-    } else {
-        mensaje += `PAGO: Efectivo - DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY`;
-    }
-    
-    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    mostrarToast(`Notificacion enviada al cliente`, 'success');
-}
-
-function entregarPedido(pedidoId, boton) {
-    actualizarEstado(pedidoId, 'entregado', boton);
-}
-
-// ===================================================
-// 4. EVENT LISTENERS
-// ===================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    const btnConfirmarTiempo = document.getElementById('btn-confirmar-tiempo');
-    if (btnConfirmarTiempo) {
-        btnConfirmarTiempo.addEventListener('click', confirmarTiempoYPreparar);
-    }
-    
-    const btnEnviarCoordinacion = document.getElementById('btn-enviar-coordinacion');
-    if (btnEnviarCoordinacion) {
-        btnEnviarCoordinacion.addEventListener('click', enviarCoordinacionTransferencia);
-    }
-    
-    const btnNotificaciones = document.getElementById('btn-notificaciones');
-    if (btnNotificaciones) {
-        btnNotificaciones.addEventListener('click', toggleNotificacionesVendedor);
-    }
-    
-    const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
-    if (btnCerrarNotif) {
-        btnCerrarNotif.addEventListener('click', cerrarPanelNotificacionesVendedor);
-    }
-});
-
-// ===================================================
-// FUNCIONES DE CIERRE DE MODALES (GLOBALES)
-// ===================================================
-
-window.cerrarModal = function(modalId) {
-    cerrarModalConZIndex(modalId);
-};
-
-window.notificarClienteEnCamino = notificarClienteEnCamino;
-window.entregarPedido = entregarPedido;
-window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
-window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
-window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
-window.toggleNotificacionesVendedor = toggleNotificacionesVendedor;
-window.cerrarPanelNotificacionesVendedor = cerrarPanelNotificacionesVendedor;
-window.marcarNotificacionLeidaVendedor = marcarNotificacionLeidaVendedor;
-window.abrirModalTiempo = abrirModalTiempo;
-window.confirmarTiempoYPreparar = confirmarTiempoYPreparar;
-window.cerrarModalTiempo = () => cerrarModalConZIndex('modal-tiempo-entrega');
-
