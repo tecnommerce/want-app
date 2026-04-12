@@ -15,6 +15,15 @@ let currentIndex = 0;
 let autoPlayInterval = null;
 const AUTO_PLAY_DELAY = 5000;
 
+// Función para crear slug desde nombre
+function crearSlug(nombre) {
+    return nombre
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
 // ===================================================
 // FUNCIONES UTILITARIAS
 // ===================================================
@@ -162,8 +171,11 @@ function renderizarNegocios(vendedores) {
         
         const nombreResaltado = resaltarCoincidencia(v.nombre || 'Sin nombre', terminoBusquedaActual);
         
+        // Crear slug para URL amigable
+        const slug = crearSlug(v.nombre);
+        
         return `
-            <a href="tienda.html?vendedor=${v.id}" class="negocio-card">
+            <a href="/${slug}" class="negocio-card">
                 <div class="negocio-logo">
                     ${v.logo_url ? 
                         `<img src="${v.logo_url}" alt="${escapeHTML(v.nombre || 'Negocio')}" loading="lazy">` : 

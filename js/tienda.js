@@ -2,6 +2,46 @@
 // TIENDA - Lógica de catálogo y carrito (CON ESTADO Y USUARIO)
 // ===================================================
 
+// ===================================================
+// FUNCIONES PARA URL AMIGABLES
+// ===================================================
+
+// Función para crear slug desde nombre
+function crearSlug(nombre) {
+    return nombre
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+// Función para obtener el identificador del negocio desde la URL
+function obtenerIdentificadorNegocio() {
+    // Método 1: Leer de la ruta limpia (ej: /pancheria-gourmet)
+    let path = window.location.pathname;
+    let slug = path.substring(1);
+    
+    // Si el slug no es vacío y no es una página especial
+    if (slug && !slug.includes('.html') && slug !== '' && slug !== 'index') {
+        return { tipo: 'slug', valor: slug };
+    }
+    
+    // Método 2: Leer de query string (ej: ?negocio=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const negocioQuery = urlParams.get('negocio');
+    if (negocioQuery) {
+        return { tipo: 'slug', valor: negocioQuery };
+    }
+    
+    // Método 3: Fallback para compatibilidad (ej: ?vendedor=1)
+    const vendedorId = urlParams.get('vendedor');
+    if (vendedorId) {
+        return { tipo: 'id', valor: vendedorId };
+    }
+    
+    return null;
+}
+
 let vendedorActual = null;
 let productos = [];
 let carrito = [];
@@ -12,9 +52,9 @@ function obtenerVendedorId() {
 }
 
 async function cargarTienda() {
-    const vendedorId = obtenerVendedorId();
+    const identificador = obtenerIdentificadorNegocio();
     
-    if (!vendedorId) {
+    if (!identificador) {
         mostrarToast('No se especificó un negocio', 'error');
         setTimeout(() => {
             window.location.href = 'index.html';
@@ -33,58 +73,93 @@ async function cargarTienda() {
             `;
         }
         
-        const vendedoresRes = await callAPI('getVendedores');
-        if (vendedoresRes.success) {
-            vendedorActual = vendedoresRes.vendedores.find(v => 
-                v.id.toString() === vendedorId && v.activo === true
-            );
-            
-            if (vendedorActual) {
-                const perfilSection = document.getElementById('vendedor-perfil-section');
-                if (perfilSection) {
-                    perfilSection.style.display = 'block';
+        let vendedorId = null;
+        let vendedorEncontrado = null;
+        
+        // Si tenemos slug, buscar el vendedor por slug
+        if (identificador.tipo === 'slug') {
+            const vendedoresRes = await callAPI('getAllVendedores');
+            if (vendedoresRes.success) {
+                vendedorEncontrado = vendedoresRes.vendedores.find(v => 
+                    crearSlug(v.nombre) === identificador.valor
+                );
+                if (vendedorEncontrado) {
+                    vendedorId = vendedorEncontrado.id;
+                    vendedorActual = vendedorEncontrado;
+                } else {
+                    mostrarToast('Negocio no encontrado', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                    return;
                 }
-                
-                const nombreElement = document.getElementById('vendedor-nombre-tienda');
-                if (nombreElement) {
-                    nombreElement.textContent = vendedorActual.nombre;
+            }
+        } else if (identificador.tipo === 'id') {
+            vendedorId = identificador.valor;
+            // Cargar el vendedor por ID
+            const vendedoresRes = await callAPI('getAllVendedores');
+            if (vendedoresRes.success) {
+                vendedorEncontrado = vendedoresRes.vendedores.find(v => 
+                    v.id.toString() === vendedorId.toString()
+                );
+                if (vendedorEncontrado) {
+                    vendedorActual = vendedorEncontrado;
                 }
-                
-                const logoGrande = document.getElementById('vendedor-logo-grande-img');
-                const logoGrandeContainer = document.getElementById('vendedor-logo-grande');
-                if (logoGrande && vendedorActual.logo_url) {
-                    logoGrande.src = vendedorActual.logo_url;
-                    if (logoGrandeContainer) logoGrandeContainer.style.display = 'flex';
-                } else if (logoGrandeContainer) {
-                    logoGrandeContainer.style.display = 'flex';
-                }
-                
-                const descripcionElement = document.getElementById('vendedor-descripcion-tienda');
-                if (descripcionElement && vendedorActual.descripcion) {
-                    descripcionElement.textContent = vendedorActual.descripcion;
-                }
-                
-                const rubrosContainer = document.getElementById('vendedor-rubros-tienda');
-                if (rubrosContainer && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
-                    rubrosContainer.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
-                }
-                
-                const horarioElement = document.getElementById('vendedor-horario-tienda');
-                if (horarioElement && vendedorActual.horario) {
-                    horarioElement.innerHTML = `<i class="fas fa-clock"></i> <span>${escapeHTML(vendedorActual.horario)}</span>`;
-                }
-                
-                console.log('✅ Vendedor cargado:', vendedorActual);
-            } else {
-                mostrarToast('Este negocio no está disponible', 'error');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-                return;
             }
         }
         
-        const response = await callAPI('getProductos', { vendedorId: vendedorId });
+        if (!vendedorActual) {
+            mostrarToast('Este negocio no está disponible', 'error');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+            return;
+        }
+        
+        // Redirigir a URL limpia si es necesario
+        const slugActual = window.location.pathname.substring(1);
+        const slugCorrecto = crearSlug(vendedorActual.nombre);
+        
+        if (slugCorrecto && slugActual !== slugCorrecto && !window.location.search.includes('vendedor=')) {
+            const nuevaUrl = `${window.location.origin}/${slugCorrecto}`;
+            window.history.replaceState({}, '', nuevaUrl);
+        }
+        
+        // Mostrar información del vendedor en la página
+        const perfilSection = document.getElementById('vendedor-perfil-section');
+        if (perfilSection) {
+            perfilSection.style.display = 'block';
+        }
+        
+        const nombreElement = document.getElementById('vendedor-nombre-tienda');
+        if (nombreElement) {
+            nombreElement.textContent = vendedorActual.nombre;
+        }
+        
+        const logoGrande = document.getElementById('vendedor-logo-grande-img');
+        const logoGrandeContainer = document.getElementById('vendedor-logo-grande');
+        if (logoGrande && vendedorActual.logo_url) {
+            logoGrande.src = vendedorActual.logo_url;
+            if (logoGrandeContainer) logoGrandeContainer.style.display = 'flex';
+        }
+        
+        const descripcionElement = document.getElementById('vendedor-descripcion-tienda');
+        if (descripcionElement && vendedorActual.descripcion) {
+            descripcionElement.textContent = vendedorActual.descripcion;
+        }
+        
+        const rubrosContainer = document.getElementById('vendedor-rubros-tienda');
+        if (rubrosContainer && vendedorActual.rubros && vendedorActual.rubros.length > 0) {
+            rubrosContainer.innerHTML = vendedorActual.rubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+        }
+        
+        const horarioElement = document.getElementById('vendedor-horario-tienda');
+        if (horarioElement && vendedorActual.horario) {
+            horarioElement.innerHTML = `<i class="fas fa-clock"></i> <span>${escapeHTML(vendedorActual.horario)}</span>`;
+        }
+        
+        // Cargar productos
+        const response = await callAPI('getProductos', { vendedorId: vendedorActual.id });
         
         if (response.error) {
             throw new Error(response.error);
