@@ -34,6 +34,9 @@
                 <button class="nav-item" data-section="web">
                     <i class="fas fa-globe"></i> Web
                 </button>
+                <button class="nav-item" data-section="auditoria">
+                    <i class="fas fa-history"></i> Auditoría
+                </button>
                 <button class="nav-item" data-section="configuracion">
                     <i class="fas fa-cog"></i> Configuración
                 </button>
@@ -154,13 +157,13 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="vendedores-tbody"><td><td colspan="11" class="loading-text">Cargando vendedores...</td></tr></tbody>
+                            <tbody id="vendedores-tbody"><tr><td colspan="11" class="loading-text">Cargando vendedores...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Sección Usuarios (NUEVA) -->
+            <!-- Sección Usuarios -->
             <div class="section-content" id="section-usuarios" style="display: none;">
                 <div class="page-content">
                     <div class="page-header">
@@ -279,12 +282,69 @@
                 </div>
             </div>
 
+            <!-- Sección Auditoría (NUEVA) -->
+            <div class="section-content" id="section-auditoria" style="display: none;">
+                <div class="page-content">
+                    <div class="page-header">
+                        <h2><i class="fas fa-history"></i> Auditoría</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="search-log" placeholder="Buscar por usuario, acción...">
+                            </div>
+                            <button class="btn-refresh" id="btn-refresh-logs">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                            <button class="btn-export" id="btn-export-logs">
+                                <i class="fas fa-file-excel"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="filtros" style="margin-bottom: 20px;">
+                        <select id="filtro-log-tipo">
+                            <option value="">Todos los tipos</option>
+                            <option value="usuario_suspendido">Usuario suspendido</option>
+                            <option value="usuario_habilitado">Usuario habilitado</option>
+                            <option value="vendedor_eliminado">Vendedor eliminado</option>
+                            <option value="login_admin">Login admin</option>
+                        </select>
+                        <input type="date" id="filtro-log-fecha" placeholder="Fecha">
+                    </div>
+                    
+                    <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+                        <table class="data-table" id="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Acción</th>
+                                    <th>Entidad</th>
+                                    <th>Detalles</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-tbody">
+                                <tr><td colspan="7" class="loading-text">Cargando logs...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+                        <button class="btn-outline" id="btn-logs-prev" disabled>Anterior</button>
+                        <span id="logs-page-info">Página 1</span>
+                        <button class="btn-outline" id="btn-logs-next">Siguiente</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Sección Configuración -->
             <div class="section-content" id="section-configuracion" style="display: none;">
                 <div class="page-content">
                     <div class="config-section">
                         <div class="config-card">
-                            <h3>Credenciales de Administrador</h3>
+                            <h3><i class="fas fa-lock"></i> Credenciales de Administrador</h3>
                             <form id="config-admin-form">
                                 <div class="form-group"><label>Email</label><input type="email" id="config-email" placeholder="admin@want.com"></div>
                                 <div class="form-group"><label>Nueva contraseña</label><div class="password-wrapper"><input type="password" id="config-password" placeholder="Dejar vacío para no cambiar"><button type="button" class="toggle-password" data-target="config-password"><i class="fas fa-eye"></i></button></div></div>

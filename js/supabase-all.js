@@ -1025,4 +1025,75 @@ case 'crearPedidoVendedor':
         }
     };
 
+    // ===================================================
+// 8. LOGS DE AUDITORÍA
+// ===================================================
+
+window.guardarLogAuditoria = async function(accion, entidad, entidadId, detalles = {}) {
+    try {
+        // Obtener usuario actual
+        let usuarioEmail = 'desconocido';
+        let usuarioTipo = 'desconocido';
+        
+        // Verificar si es admin global (sesión de admin)
+        const adminSession = sessionStorage.getItem('admin_session');
+        if (adminSession === 'true') {
+            usuarioEmail = 'admin@want.com';
+            usuarioTipo = 'admin_global';
+        }
+        
+        // Verificar si es vendedor
+        const vendedorSession = sessionStorage.getItem('vendedor_sesion');
+        if (vendedorSession && !usuarioEmail) {
+            try {
+                const vendedor = JSON.parse(vendedorSession);
+                usuarioEmail = vendedor.email || 'vendedor_' + vendedor.id;
+                usuarioTipo = 'vendedor';
+            } catch(e) {}
+        }
+        
+        // Verificar si es cliente
+        const clienteSession = localStorage.getItem('want_usuario_sesion');
+        if (clienteSession && !usuarioEmail) {
+            try {
+                const cliente = JSON.parse(clienteSession);
+                usuarioEmail = cliente.email || 'cliente_' + cliente.id;
+                usuarioTipo = 'cliente';
+            } catch(e) {}
+        }
+        
+        // Obtener IP (solo si está disponible)
+        let ipAddress = null;
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ipAddress = ipData.ip;
+        } catch(e) {
+            console.log('No se pudo obtener IP');
+        }
+        
+        const logData = {
+            accion: accion,
+            entidad: entidad,
+            entidad_id: entidadId ? String(entidadId) : null,
+            usuario_email: usuarioEmail,
+            usuario_tipo: usuarioTipo,
+            detalles: detalles,
+            ip_address: ipAddress
+        };
+        
+        const { error } = await supabaseClient
+            .from('logs_auditoria')
+            .insert([logData]);
+        
+        if (error) {
+            console.error('Error guardando log:', error);
+        } else {
+            console.log('✅ Log guardado:', accion, entidad);
+        }
+    } catch (error) {
+        console.error('Error en guardarLogAuditoria:', error);
+    }
+};
+
 })();

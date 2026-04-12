@@ -211,6 +211,14 @@ async function suspenderUsuario(usuarioId, activo) {
     
     const result = await window.suspenderUsuario(usuarioId, activo);
     if (result.success) {
+        // AGREGAR LOG
+        await window.guardarLogAuditoria(
+            activo ? 'usuario_habilitado' : 'usuario_suspendido',
+            'usuario',
+            usuarioId,
+            { estado_nuevo: activo }
+        );
+        
         mostrarToast(`Usuario ${activo ? 'habilitado' : 'suspendido'}`, 'success');
         await cargarUsuarios();
     } else {
@@ -690,13 +698,22 @@ async function confirmarEliminarVendedor() {
     await withLoading(btn, async () => {
         try {
             const res = await callAPI('eliminarVendedor', { vendedorId: window.vendedorAEliminar });
-            if (res && res.success) { 
-                mostrarToast('Vendedor eliminado', 'success'); 
-                cerrarModal('modal-confirmar-vendedor'); 
-                await actualizarDatosManual(); 
+            if (res && res.success) {
+                // AGREGAR LOG
+                await window.guardarLogAuditoria(
+                    'vendedor_eliminado',
+                    'vendedor',
+                    window.vendedorAEliminar,
+                    {}
+                );
+                
+                mostrarToast('Vendedor eliminado', 'success');
+                cerrarModal('modal-confirmar-vendedor');
+                await actualizarDatosManual();
             }
-            else { mostrarToast(res?.error || 'Error al eliminar', 'error'); }
-        } catch (error) { mostrarToast('Error al eliminar', 'error'); }
+        } catch (error) {
+            mostrarToast('Error al eliminar', 'error');
+        }
         window.vendedorAEliminar = null;
     });
 }
@@ -1148,6 +1165,9 @@ function cambiarSeccion(seccionId) {
     if (seccionId === 'usuarios') {
         cargarUsuarios();
     }
+    if (seccionId === 'configuracion') {
+    cargarLogs();
+    }
 }
 
 // ===================================================
@@ -1189,6 +1209,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
     
+    // Botón refrescar logs
+const btnRefreshLogs = document.getElementById('btn-refresh-logs');
+if (btnRefreshLogs) {
+    btnRefreshLogs.addEventListener('click', () => cargarLogs());
+}
+
+// Botón exportar logs
+const btnExportLogs = document.getElementById('btn-export-logs');
+if (btnExportLogs) {
+    btnExportLogs.addEventListener('click', () => exportarLogs());
+}
+
     // Buscador de vendedores
     document.getElementById('search-vendedor')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
@@ -1287,4 +1319,118 @@ document.addEventListener('DOMContentLoaded', async () => {
         menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
         document.addEventListener('click', (e) => { if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('active'); });
     }
+
+    // ===================================================
+// FUNCIONES PARA LOGS DE AUDITORÍA
+// ===================================================
+
+async function cargarLogs() {
+    const tbody = document.getElementById('logs-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="5" class="loading-text">Cargando logs...</td></tr>';
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('logs_auditoria')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(200);
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="loading-text">No hay logs registrados</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = data.map(log => {
+            let detallesTexto = '-';
+            if (log.detalles) {
+                try {
+                    const detalles = typeof log.detalles === 'string' ? JSON.parse(log.detalles) : log.detalles;
+                    detallesTexto = Object.entries(detalles).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    if (detallesTexto.length > 100) detallesTexto = detallesTexto.substring(0, 100) + '...';
+                } catch(e) {
+                    detallesTexto = String(log.detalles).substring(0, 100);
+                }
+            }
+            
+            // Icono según acción
+            let icono = '';
+            if (log.accion.includes('eliminado')) icono = '🗑️';
+            else if (log.accion.includes('suspendido') || log.accion.includes('habilitado')) icono = '⚠️';
+            else if (log.accion.includes('login')) icono = '🔐';
+            else icono = '📝';
+            
+            return `
+                <tr>
+                    <td style="white-space: nowrap;">${new Date(log.created_at).toLocaleString('es-AR')}</td>
+                    <td><strong>${escapeHTML(log.usuario_email)}</strong><br><small style="color:#888">${log.usuario_tipo}</small></td>
+                    <td>${icono} ${escapeHTML(log.accion)}</td>
+                    <td>${escapeHTML(log.entidad)} ${log.entidad_id ? `#${log.entidad_id}` : ''}</td>
+                    <td><small>${escapeHTML(detallesTexto)}</small></td>
+                </tr>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error('Error cargando logs:', error);
+        tbody.innerHTML = `<tr><td colspan="5" class="loading-text">Error: ${error.message}</td></tr>`;
+    }
+}
+
+async function exportarLogs() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('logs_auditoria')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            mostrarToast('No hay logs para exportar', 'error');
+            return;
+        }
+        
+        const exportData = data.map(log => ({
+            Fecha: new Date(log.created_at).toLocaleString('es-AR'),
+            Usuario: log.usuario_email,
+            Tipo: log.usuario_tipo,
+            Accion: log.accion,
+            Entidad: log.entidad,
+            EntidadID: log.entidad_id,
+            Detalles: log.detalles ? JSON.stringify(log.detalles) : '',
+            IP: log.ip_address || ''
+        }));
+        
+        downloadCSV(exportData, 'logs_auditoria_want.csv');
+        mostrarToast('Logs exportados', 'success');
+        
+    } catch (error) {
+        console.error('Error exportando logs:', error);
+        mostrarToast('Error al exportar', 'error');
+    }
+}
+
+function downloadCSV(data, filename) {
+    if (!data || !data.length) return;
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => {
+        let val = obj[h] || '';
+        if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+            val = `"${val.replace(/"/g, '""')}"`;
+        }
+        return val;
+    }).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
 });
