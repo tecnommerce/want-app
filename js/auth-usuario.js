@@ -213,7 +213,15 @@ async function handleUserLogin(user) {
                 email: usuarioActual.email,
                 nombre: usuarioActual.nombre
             }));
-            window.location.href = 'index.html';
+            
+            // Redirigir según si hay URL guardada
+            const redirectUrl = sessionStorage.getItem('redirect_after_login');
+            if (redirectUrl) {
+                sessionStorage.removeItem('redirect_after_login');
+                window.location.href = redirectUrl;
+            } else {
+                window.location.href = 'index.html';
+            }
         } else {
             window.usuarioAuth = user;
             window.location.href = 'login.html#registro';

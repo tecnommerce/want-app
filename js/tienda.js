@@ -52,6 +52,32 @@ function obtenerVendedorId() {
 }
 
 async function cargarTienda() {
+        // 🔒 VERIFICAR QUE EL USUARIO ESTÁ LOGUEADO
+    let usuarioLogueado = null;
+    
+    // Verificar en sessionStorage (usuario de Google)
+    const sessionGuardada = localStorage.getItem('want_usuario_sesion');
+    if (sessionGuardada) {
+        try {
+            usuarioLogueado = JSON.parse(sessionGuardada);
+        } catch(e) {}
+    }
+    
+    // Verificar en window.usuarioActual (global)
+    if (!usuarioLogueado && window.usuarioActual) {
+        usuarioLogueado = window.usuarioActual;
+    }
+    
+    // Si no hay usuario logueado, redirigir al login
+    if (!usuarioLogueado) {
+        // Guardar la URL actual para redirigir después del login
+        sessionStorage.setItem('redirect_after_login', window.location.pathname);
+        mostrarToast('Debes iniciar sesión para ver los productos', 'error');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
     const identificador = obtenerIdentificadorNegocio();
     
     if (!identificador) {
