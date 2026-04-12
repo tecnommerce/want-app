@@ -54,6 +54,17 @@
         </div>
     </div>
 
+    <!-- =================================================== -->
+    <!-- SCRIPTS EN EL ORDEN CORRECTO -->
+    <!-- =================================================== -->
+    
+    <!-- 1. Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 2. Tu configuración de Supabase (crea window.supabaseClient) -->
+    <script src="../js/supabase-all.js"></script>
+    
+    <!-- 3. Autenticación (usa window.supabaseClient) -->
     <script src="js/auth.js"></script>
 </body>
 </html>
