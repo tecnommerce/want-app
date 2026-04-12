@@ -7,6 +7,127 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/admin-global.css">
+    <style>
+        /* Estilos adicionales para mejorar la tabla de usuarios */
+        .usuarios-tabla .acciones-botones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .usuarios-tabla .btn-edit,
+        .usuarios-tabla .btn-toggle-status,
+        .usuarios-tabla .btn-delete,
+        .usuarios-tabla .btn-whatsapp {
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        
+        /* Sistema de notificaciones - una sola a la vez */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            pointer-events: none;
+        }
+        
+        .toast-notification {
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: toastIn 0.3s ease;
+            pointer-events: auto;
+        }
+        
+        .toast-notification.success { background: #10b981; }
+        .toast-notification.error { background: #ef4444; }
+        .toast-notification.info { background: #FF5A00; }
+        
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Top 10 vendedores */
+        .top-vendedores-lista {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .top-vendedor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .top-vendedor-nombre {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .top-vendedor-posicion {
+            width: 28px;
+            height: 28px;
+            background: #FF5A00;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .top-vendedor-posicion.top-1 { background: #FFD700; color: #333; }
+        .top-vendedor-posicion.top-2 { background: #C0C0C0; color: #333; }
+        .top-vendedor-posicion.top-3 { background: #CD7F32; color: #333; }
+        
+        .top-vendedor-info {
+            flex: 1;
+        }
+        
+        .top-vendedor-info strong {
+            font-size: 0.9rem;
+        }
+        
+        .top-vendedor-info small {
+            font-size: 0.7rem;
+            color: #888;
+            display: block;
+        }
+        
+        .top-vendedor-ingresos {
+            font-weight: bold;
+            color: #FF5A00;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            .usuarios-tabla .acciones-botones {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .usuarios-tabla .btn-edit,
+            .usuarios-tabla .btn-toggle-status,
+            .usuarios-tabla .btn-delete,
+            .usuarios-tabla .btn-whatsapp {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="admin-wrapper">
@@ -62,7 +183,7 @@
                 </button>
             </header>
 
-            <!-- Sección Dashboard -->
+            <!-- Sección Dashboard (sin Últimos pedidos) -->
             <div class="section-content" id="section-dashboard">
                 <div class="page-content">
                     <div class="stats-grid">
@@ -105,26 +226,22 @@
 
                     <div class="lists-row">
                         <div class="list-card">
-                            <h3>Top 5 Vendedores</h3>
-                            <div id="top-vendedores-list" class="top-list"></div>
+                            <h3>🏆 Top 10 Vendedores</h3>
+                            <div id="top-vendedores-list" class="top-vendedores-lista">
+                                <div class="loading-text">Cargando...</div>
+                            </div>
                         </div>
                         <div class="list-card">
-                            <h3>Top 5 Productos más vendidos</h3>
-                            <div id="top-productos-list" class="top-list"></div>
+                            <h3>🔥 Top 5 Productos más vendidos</h3>
+                            <div id="top-productos-list" class="top-list">
+                                <div class="loading-text">Cargando...</div>
+                            </div>
                         </div>
                         <div class="list-card">
-                            <h3>Top 5 Usuarios (más gastado)</h3>
-                            <div id="top-usuarios-list" class="top-list"></div>
-                        </div>
-                    </div>
-
-                    <div class="recent-orders">
-                        <h3>Últimos pedidos</h3>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead><tr><th>ID</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
-                                <tbody id="recent-orders-tbody"><tr><td colspan="6" class="loading-text">Cargando...</td></tr></tbody>
-                            </table>
+                            <h3>💰 Top 5 Usuarios (más gastado)</h3>
+                            <div id="top-usuarios-list" class="top-list">
+                                <div class="loading-text">Cargando...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -163,7 +280,7 @@
                 </div>
             </div>
 
-            <!-- Sección Usuarios -->
+            <!-- Sección Usuarios (con botones mejorados) -->
             <div class="section-content" id="section-usuarios" style="display: none;">
                 <div class="page-content">
                     <div class="page-header">
@@ -174,7 +291,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="data-table">
+                        <table class="data-table usuarios-tabla">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -282,7 +399,7 @@
                 </div>
             </div>
 
-            <!-- Sección Auditoría (NUEVA) -->
+            <!-- Sección Auditoría -->
             <div class="section-content" id="section-auditoria" style="display: none;">
                 <div class="page-content">
                     <div class="page-header">
@@ -330,12 +447,6 @@
                             </tbody>
                         </table>
                     </div>
-                    
-                    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-                        <button class="btn-outline" id="btn-logs-prev" disabled>Anterior</button>
-                        <span id="logs-page-info">Página 1</span>
-                        <button class="btn-outline" id="btn-logs-next">Siguiente</button>
-                    </div>
                 </div>
             </div>
 
@@ -358,7 +469,7 @@
         </main>
     </div>
 
-    <!-- MODALES -->
+    <!-- MODALES (igual que antes) -->
     <div class="modal" id="modal-editar-vendedor">
         <div class="modal-content">
             <div class="modal-header">
@@ -439,10 +550,12 @@
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/supabase-all.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/admin-global.js"></script>
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-all.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin-global.js"></script>
 
 </body>
 </html>

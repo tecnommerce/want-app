@@ -3,6 +3,47 @@
 // ===================================================
 
 // ===================================================
+// SISTEMA DE NOTIFICACIONES - UNA SOLA A LA VEZ
+// ===================================================
+
+let toastActivo = false;
+let toastPendiente = null;
+
+function mostrarToastUnico(mensaje, tipo = 'info') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+    
+    // Si hay un toast activo, guardar el nuevo para después
+    if (toastActivo) {
+        toastPendiente = { mensaje, tipo };
+        return;
+    }
+    
+    toastActivo = true;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${tipo}`;
+    toast.textContent = mensaje;
+    
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+        toastActivo = false;
+        
+        // Mostrar el siguiente toast pendiente
+        if (toastPendiente) {
+            mostrarToastUnico(toastPendiente.mensaje, toastPendiente.tipo);
+            toastPendiente = null;
+        }
+    }, 3000);
+}
+
+// Reemplazar la función mostrarToast original
+window.mostrarToastOriginal = window.mostrarToast;
+window.mostrarToast = mostrarToastUnico;
+
+// ===================================================
 // VARIABLES GLOBALES
 // ===================================================
 
@@ -537,6 +578,7 @@ async function actualizarDatosManual() {
 // ===================================================
 
 function actualizarDashboard() {
+    // Estadísticas básicas
     document.getElementById('total-vendedores').textContent = allVendedores.length;
     document.getElementById('total-usuarios').textContent = allUsuarios.length;
     document.getElementById('total-pedidos').textContent = allPedidos.length;
@@ -544,27 +586,101 @@ function actualizarDashboard() {
     const ingresos = allPedidos.reduce((sum, p) => sum + (parseFloat(p.total) || 0), 0);
     document.getElementById('total-ingresos').textContent = formatearPrecio(ingresos);
     
+    // TOP 10 VENDEDORES (por ingresos)
     const ventasPorVendedor = {};
-    allPedidos.forEach(p => { const nombre = p.vendedor_nombre || 'Desconocido'; ventasPorVendedor[nombre] = (ventasPorVendedor[nombre] || 0) + (parseFloat(p.total) || 0); });
-    const topVendedores = Object.entries(ventasPorVendedor).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    document.getElementById('top-vendedores-list').innerHTML = topVendedores.map(([nombre, total]) => `<div class="top-item"><span>${escapeHTML(nombre)}</span><span>${formatearPrecio(total)}</span></div>`).join('') || '<p class="loading-text">No hay datos</p>';
+    allPedidos.forEach(p => {
+        const nombre = p.vendedor_nombre || 'Desconocido';
+        const id = p.vendedor_id;
+        if (!ventasPorVendedor[id]) {
+            ventasPorVendedor[id] = { nombre: nombre, ingresos: 0, pedidos: 0 };
+        }
+        ventasPorVendedor[id].ingresos += parseFloat(p.total) || 0;
+        ventasPorVendedor[id].pedidos++;
+    });
     
+    const topVendedores = Object.entries(ventasPorVendedor)
+        .map(([id, data]) => ({ id, ...data }))
+        .sort((a, b) => b.ingresos - a.ingresos)
+        .slice(0, 10);
+    
+    const topVendedoresContainer = document.getElementById('top-vendedores-list');
+    if (topVendedoresContainer) {
+        if (topVendedores.length === 0) {
+            topVendedoresContainer.innerHTML = '<div class="loading-text">No hay datos de ventas</div>';
+        } else {
+            topVendedoresContainer.innerHTML = topVendedores.map((v, index) => {
+                let posClass = '';
+                if (index === 0) posClass = 'top-1';
+                else if (index === 1) posClass = 'top-2';
+                else if (index === 2) posClass = 'top-3';
+                
+                return `
+                    <div class="top-vendedor-item">
+                        <div class="top-vendedor-nombre">
+                            <div class="top-vendedor-posicion ${posClass}">${index + 1}</div>
+                            <div class="top-vendedor-info">
+                                <strong>${escapeHTML(v.nombre)}</strong>
+                                <small>${v.pedidos} pedidos</small>
+                            </div>
+                        </div>
+                        <div class="top-vendedor-ingresos">${formatearPrecio(v.ingresos)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    
+    // TOP 5 PRODUCTOS
     const ventasPorProducto = {};
-    allPedidos.forEach(p => { if (p.productos) p.productos.forEach(prod => ventasPorProducto[prod.nombre] = (ventasPorProducto[prod.nombre] || 0) + prod.cantidad); });
-    const topProductos = Object.entries(ventasPorProducto).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    document.getElementById('top-productos-list').innerHTML = topProductos.map(([nombre, cantidad]) => `<div class="top-item"><span>${escapeHTML(nombre)}</span><span>${cantidad} unidades</span></div>`).join('') || '<p class="loading-text">No hay datos</p>';
+    allPedidos.forEach(p => {
+        if (p.productos) {
+            p.productos.forEach(prod => {
+                const nombre = prod.nombre;
+                if (!ventasPorProducto[nombre]) {
+                    ventasPorProducto[nombre] = { cantidad: 0, ingresos: 0 };
+                }
+                ventasPorProducto[nombre].cantidad += prod.cantidad;
+                ventasPorProducto[nombre].ingresos += (prod.precio * prod.cantidad);
+            });
+        }
+    });
+    const topProductos = Object.entries(ventasPorProducto)
+        .map(([nombre, data]) => ({ nombre, ...data }))
+        .sort((a, b) => b.cantidad - a.cantidad)
+        .slice(0, 5);
     
-    const recentOrders = allPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
-    document.getElementById('recent-orders-tbody').innerHTML = recentOrders.map(p => `
-        <tr>
-            <td>#${p.id}</td>
-            <td>${escapeHTML(p.cliente_nombre || 'N/A')}</td>
-            <td>${escapeHTML(p.vendedor_nombre || 'N/A')}</td>
-            <td>${formatearPrecio(p.total)}</td>
-            <td><span class="status-badge status-${p.estado || 'preparando'}">${getEstadoTexto(p.estado)}</span></td>
-            <td>${formatearFecha(p.fecha)}</td>
-        </tr>
-    `).join('') || '<tr><td colspan="6" class="loading-text">No hay pedidos</td>';
+    const topProductosContainer = document.getElementById('top-productos-list');
+    if (topProductosContainer) {
+        if (topProductos.length === 0) {
+            topProductosContainer.innerHTML = '<div class="loading-text">No hay datos</div>';
+        } else {
+            topProductosContainer.innerHTML = topProductos.map(p => `
+                <div class="top-item">
+                    <span>${escapeHTML(p.nombre)}</span>
+                    <span>${p.cantidad} unidades (${formatearPrecio(p.ingresos)})</span>
+                </div>
+            `).join('');
+        }
+    }
+    
+    // TOP 5 USUARIOS
+    const topUsuarios = [...allUsuarios]
+        .sort((a, b) => (b.total_gastado || 0) - (a.total_gastado || 0))
+        .slice(0, 5);
+    
+    const topUsuariosContainer = document.getElementById('top-usuarios-list');
+    if (topUsuariosContainer) {
+        if (topUsuarios.length === 0) {
+            topUsuariosContainer.innerHTML = '<div class="loading-text">No hay datos</div>';
+        } else {
+            topUsuariosContainer.innerHTML = topUsuarios.map(u => `
+                <div class="top-item">
+                    <span>${escapeHTML(u.nombre)} ${escapeHTML(u.apellido || '')}</span>
+                    <span>${formatearPrecio(u.total_gastado || 0)}</span>
+                </div>
+            `).join('');
+        }
+    }
 }
 
 // ===================================================
