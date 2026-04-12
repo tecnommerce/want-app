@@ -245,8 +245,6 @@ async function subirImagenACloudinary(file) {
     }
 }
 
-inicializarNotificacionesVendedor();
-
 // ===================================================
 // FUNCIONES DE SESIÓN
 // ===================================================
@@ -1663,6 +1661,7 @@ async function iniciarPanel(vendedor) {
     await cargarDeliveries();
     actualizarReportes();
     iniciarRealtimeVendedor();
+    inicializarNotificacionesVendedor();
     
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
