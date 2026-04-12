@@ -1,11 +1,8 @@
 // ===================================================
-// ADMIN GLOBAL - Autenticación con Rate Limiting
+// ADMIN GLOBAL - Autenticación con Supabase
 // ===================================================
 
-const ADMIN_CONFIG = {
-    email: 'admin@want.com',
-    password_hash: 'be4cd6e887c1c43c02c2e924780ba286dc2a8d6f017d7ceab40ac7f5213c09fb'
-};
+const ADMIN_EMAIL = 'admin@want.com';
 
 // Rate limiting: máximo 5 intentos en 15 minutos
 const RATE_LIMIT = {
@@ -14,15 +11,12 @@ const RATE_LIMIT = {
 };
 
 function getRateLimitKey() {
-    // Usar IP + fecha para limitar por día/hora
-    // Por ahora usamos localStorage con timestamp
     return 'admin_login_attempts';
 }
 
 function getAttempts() {
     const stored = localStorage.getItem(getRateLimitKey());
     if (!stored) return { count: 0, firstAttempt: Date.now() };
-    
     try {
         return JSON.parse(stored);
     } catch(e) {
@@ -39,13 +33,10 @@ function isRateLimited() {
     const windowMs = RATE_LIMIT.windowMinutes * 60 * 1000;
     const timeSinceFirst = Date.now() - attempts.firstAttempt;
     
-    // Si pasó la ventana de tiempo, resetear
     if (timeSinceFirst > windowMs) {
         saveAttempts({ count: 0, firstAttempt: Date.now() });
         return false;
     }
-    
-    // Verificar si excedió el máximo
     return attempts.count >= RATE_LIMIT.maxAttempts;
 }
 
@@ -54,13 +45,10 @@ function registerFailedAttempt() {
     const windowMs = RATE_LIMIT.windowMinutes * 60 * 1000;
     const timeSinceFirst = Date.now() - attempts.firstAttempt;
     
-    // Si pasó la ventana, resetear
     if (timeSinceFirst > windowMs) {
         saveAttempts({ count: 1, firstAttempt: Date.now() });
         return;
     }
-    
-    // Incrementar contador
     saveAttempts({
         count: attempts.count + 1,
         firstAttempt: attempts.firstAttempt
@@ -76,17 +64,8 @@ function getRemainingTimeMinutes() {
     const windowMs = RATE_LIMIT.windowMinutes * 60 * 1000;
     const timeSinceFirst = Date.now() - attempts.firstAttempt;
     const remainingMs = windowMs - timeSinceFirst;
-    
     if (remainingMs <= 0) return 0;
     return Math.ceil(remainingMs / 60000);
-}
-
-async function hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function checkSession() {
@@ -94,28 +73,41 @@ function checkSession() {
 }
 
 async function login(email, password) {
-    // Verificar rate limiting
     if (isRateLimited()) {
         const remainingMinutes = getRemainingTimeMinutes();
-        throw new Error(`Demasiados intentos. Esperá ${remainingMinutes} minutos antes de volver a intentar.`);
+        throw new Error(`Demasiados intentos. Esperá ${remainingMinutes} minutos.`);
     }
     
-    const passwordHash = await hashPassword(password);
-    
-    if (email === ADMIN_CONFIG.email && passwordHash === ADMIN_CONFIG.password_hash) {
-        sessionStorage.setItem('admin_session', 'true');
-        resetAttempts(); // Resetear intentos en login exitoso
-        return true;
+    try {
+        // Autenticar con Supabase
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (error) throw error;
+        
+        if (data.user && data.user.email === ADMIN_EMAIL) {
+            sessionStorage.setItem('admin_session', 'true');
+            sessionStorage.setItem('admin_supabase_session', JSON.stringify(data.session));
+            resetAttempts();
+            return true;
+        } else {
+            throw new Error('No tienes permisos de administrador');
+        }
+    } catch (error) {
+        registerFailedAttempt();
+        const remainingAttempts = RATE_LIMIT.maxAttempts - getAttempts().count;
+        throw new Error(`${error.message}. Intentos restantes: ${remainingAttempts}`);
     }
-    
-    // Registrar intento fallido
-    registerFailedAttempt();
-    const remainingAttempts = RATE_LIMIT.maxAttempts - getAttempts().count;
-    throw new Error(`Email o contraseña incorrectos. Te quedan ${remainingAttempts} intentos.`);
 }
 
-function logout() {
+async function logout() {
+    try {
+        await supabaseClient.auth.signOut();
+    } catch(e) {}
     sessionStorage.removeItem('admin_session');
+    sessionStorage.removeItem('admin_supabase_session');
     window.location.href = 'login.html';
 }
 
@@ -135,20 +127,11 @@ function initPasswordToggle() {
 }
 
 function showError(message) {
-    // Crear elemento de error si no existe
-    let errorDiv = document.getElementById('login-error');
+    let errorDiv = document.getElementById('error-message');
     if (!errorDiv) {
         errorDiv = document.createElement('div');
-        errorDiv.id = 'login-error';
-        errorDiv.style.cssText = `
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            font-size: 0.85rem;
-            text-align: center;
-        `;
+        errorDiv.id = 'error-message';
+        errorDiv.className = 'error-message';
         const loginForm = document.getElementById('login-form');
         if (loginForm) {
             loginForm.insertBefore(errorDiv, loginForm.firstChild);
@@ -156,10 +139,8 @@ function showError(message) {
     }
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
-    
-    // Ocultar después de 5 segundos
     setTimeout(() => {
-        if (errorDiv) errorDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
     }, 5000);
 }
 
@@ -169,15 +150,13 @@ function initLogin() {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Limpiar error anterior
-            const errorDiv = document.getElementById('login-error');
+            const errorDiv = document.getElementById('error-message');
             if (errorDiv) errorDiv.style.display = 'none';
             
             const email = document.getElementById('admin-email').value.trim();
             const password = document.getElementById('admin-password').value;
             const loginBtn = document.getElementById('login-btn');
             
-            // Deshabilitar botón durante la verificación
             if (loginBtn) {
                 loginBtn.disabled = true;
                 loginBtn.textContent = 'Verificando...';
@@ -199,8 +178,23 @@ function initLogin() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Restaurar sesión de Supabase si existe
+async function restoreSupabaseSession() {
+    const savedSession = sessionStorage.getItem('admin_supabase_session');
+    if (savedSession) {
+        try {
+            const session = JSON.parse(savedSession);
+            await supabaseClient.auth.setSession(session);
+            console.log('✅ Sesión de Supabase restaurada');
+        } catch(e) {
+            console.error('Error restaurando sesión:', e);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     initPasswordToggle();
+    await restoreSupabaseSession();
     
     const path = window.location.pathname;
     const isLoginPage = path.includes('login.html') || path === '/admin-global/' || path.endsWith('/');
