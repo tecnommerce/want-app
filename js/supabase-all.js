@@ -702,6 +702,91 @@
                         await eliminarImagenCloudinary(productoAEliminar.imagen_url);
                     }
                     return { success: true };
+                    // ===================================================
+// NUEVAS FUNCIONES PARA ADMIN (ACTUALIZAR PEDIDO COMPLETO Y CREAR PEDIDO VENDEDOR)
+// ===================================================
+
+case 'actualizarPedidoCompleto':
+    // 1. Actualizar los datos del pedido
+    const { error: updatePedidoError } = await supabaseClient
+        .from('pedidos')
+        .update({
+            cliente_nombre: data.cliente_nombre,
+            cliente_telefono: data.cliente_telefono,
+            direccion: data.direccion,
+            metodo_pago: data.metodo_pago,
+            detalles: data.detalles || '',
+            estado: data.estado,
+            total: data.total
+        })
+        .eq('id', data.id);
+    if (updatePedidoError) throw updatePedidoError;
+    
+    // 2. Eliminar los productos antiguos del pedido
+    const { error: deleteOldError } = await supabaseClient
+        .from('productos_pedido')
+        .delete()
+        .eq('pedido_id', data.id);
+    if (deleteOldError) throw deleteOldError;
+    
+    // 3. Insertar los nuevos productos
+    for (const producto of data.productos) {
+        const { error: insertError } = await supabaseClient
+            .from('productos_pedido')
+            .insert([{
+                pedido_id: data.id,
+                producto_id: producto.id,
+                cantidad: producto.cantidad,
+                precio_unitario: producto.precio
+            }]);
+        if (insertError) throw insertError;
+    }
+    
+    return { success: true };
+
+case 'crearPedidoVendedor':
+    // Obtener el último número de orden para este vendedor
+    const { data: ultimoOrdenData } = await supabaseClient
+        .from('pedidos')
+        .select('numero_orden')
+        .eq('vendedor_id', data.vendedor_id)
+        .order('numero_orden', { ascending: false })
+        .limit(1);
+    const nuevoNumeroOrden = (ultimoOrdenData && ultimoOrdenData[0]?.numero_orden || 0) + 1;
+    
+    // Crear el pedido
+    const { data: nuevoPedido, error: createError } = await supabaseClient
+        .from('pedidos')
+        .insert([{
+            vendedor_id: data.vendedor_id,
+            cliente_nombre: data.cliente_nombre,
+            cliente_telefono: data.cliente_telefono,
+            direccion: data.direccion,
+            metodo_pago: data.metodo_pago,
+            detalles: data.detalles || '',
+            total: data.total,
+            estado: 'preparando',
+            numero_orden: nuevoNumeroOrden,
+            usuario_id: data.usuario_id || null
+        }])
+        .select()
+        .single();
+    if (createError) throw createError;
+    
+    // Insertar los productos del pedido
+    for (const producto of data.productos) {
+        const { error: insertError } = await supabaseClient
+            .from('productos_pedido')
+            .insert([{
+                pedido_id: nuevoPedido.id,
+                producto_id: producto.id,
+                cantidad: producto.cantidad,
+                precio_unitario: producto.precio
+            }]);
+        if (insertError) throw insertError;
+    }
+    
+    return { success: true, pedidoId: nuevoPedido.id, numeroOrden: nuevoNumeroOrden };
                     
                 default:
                     console.warn(`⚠️ Acción no implementada: ${action}`);

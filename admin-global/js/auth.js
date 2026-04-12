@@ -4,7 +4,7 @@
 
 const ADMIN_CONFIG = {
     email: 'admin@want.com',
-    password_hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'
+    password_hash: '8f5c5a4f7d3b9e2a1c6d8e0f3b5a7c9d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0a2b'
 };
 
 async function hashPassword(password) {
