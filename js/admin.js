@@ -245,6 +245,8 @@ async function subirImagenACloudinary(file) {
     }
 }
 
+inicializarNotificacionesVendedor();
+
 // ===================================================
 // FUNCIONES DE SESIÓN
 // ===================================================
@@ -1760,7 +1762,7 @@ async function iniciarPanel(vendedor) {
     inicializarMenuAdmin();
     inicializarBuscador();
     inicializarMenuHamburguesa();
-    inicializarNotificacionesVendedor();
+    
 }
 
 function inicializarTabs() {
