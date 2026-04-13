@@ -2375,7 +2375,6 @@ window.guardarNuevoPedido = guardarNuevoPedido;
 window.abrirModalNuevoPedido = abrirModalNuevoPedido;
 window.confirmarAgregarProducto = confirmarAgregarProducto;
 window.guardarSoloDescripcion = guardarSoloDescripcion;
-window.abrirModalTiempo = abrirModalTiempo;
 window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
 window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
 window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
