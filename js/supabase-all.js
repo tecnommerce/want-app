@@ -360,7 +360,7 @@
     };
     
     // ===================================================
-    // 5. FUNCIONES DE API (CORREGIDO - decide qué cliente usar)
+    // 5. FUNCIONES DE API (CORREGIDO)
     // ===================================================
     
     window.callAPI = async function(action, data = {}, forceRefresh = false) {
@@ -368,17 +368,22 @@
         
         // Determinar qué cliente de Supabase usar según la acción
         let client = supabaseClient;
+        
+        // Acciones que REQUIEREN el cliente de VENDEDOR (autenticado con email/contraseña)
         const accionesVendedor = [
-            'getPedidos', 'getProductos', 'getDeliveries', 
             'actualizarVendedor', 'crearProducto', 'actualizarProducto', 
             'eliminarProducto', 'crearPedidoVendedor', 'actualizarPedidoCompleto',
-            'loginVendedor', 'registrarVendedor'
+            'loginVendedor', 'registrarVendedor', 'getDeliveries'
         ];
         
+        // Acciones de LECTURA que deben usar el cliente normal (requiere autenticación de usuario)
+        // Nota: Como quieres que SOLO usuarios registrados vean contenido, todas las lecturas
+        // deben pasar por supabaseClient (que requiere auth)
         if (accionesVendedor.includes(action)) {
             client = supabaseVendedorClient;
             console.log('📌 Usando cliente de VENDEDOR para:', action);
         } else {
+            client = supabaseClient;
             console.log('📌 Usando cliente de CLIENTE para:', action);
         }
         
