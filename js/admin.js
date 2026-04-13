@@ -727,7 +727,7 @@ function renderizarPedidosDesktop() {
         container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
-    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th><tr></thead><tbody>`;
+    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody>`;
     for (const p of pedidosFiltrados) {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago === 'transferencia' ? 'Transferencia' : 'Efectivo';
@@ -792,7 +792,7 @@ function renderizarPedidosDesktop() {
             <td class="col-acciones">${botonesHTML}</td>
         </tr>`;
     }
-    html += `</tbody></tr>`;
+    html += `</tbody></table>`;
     container.innerHTML = html;
 }
 
@@ -1396,7 +1396,6 @@ function abrirModalRubros(rubrosActuales, callback) {
         });
     });
     
-    // Conectar botón confirmar rubros
     const btnConfirmar = document.getElementById('btn-confirmar-rubros');
     if (btnConfirmar) {
         const newBtn = btnConfirmar.cloneNode(true);
@@ -1842,7 +1841,6 @@ async function iniciarPanel(vendedor) {
     iniciarRealtimeVendedor();
     inicializarNotificacionesVendedor();
 
-    // Conectar botón campana
     const btnCampana = document.getElementById('btn-notificaciones');
     if (btnCampana) {
         btnCampana.onclick = function(e) {
@@ -1852,7 +1850,7 @@ async function iniciarPanel(vendedor) {
             toggleNotificacionesVendedor();
         };
     }
-    // Conectar botón cerrar notificaciones
+    
     const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
     if (btnCerrarNotif) {
         btnCerrarNotif.onclick = function(e) {
@@ -1863,7 +1861,6 @@ async function iniciarPanel(vendedor) {
         };
     }
     
-    // Formulario de perfil - IMPORTANTE
     const perfilForm = document.getElementById('perfil-form');
     if (perfilForm) {
         perfilForm.addEventListener('submit', actualizarPerfil);
@@ -2509,7 +2506,6 @@ window.guardarEditarPedido = guardarEditarPedido;
 window.guardarNuevoPedido = guardarNuevoPedido;
 window.abrirModalNuevoPedido = abrirModalNuevoPedido;
 window.confirmarAgregarProducto = confirmarAgregarProducto;
-window.guardarSoloDescripcion = guardarSoloDescripcion;
 window.notificarClienteEnCamino = notificarClienteEnCamino;
 window.entregarPedido = entregarPedido;
 window.abrirModalTiempo = abrirModalTiempo;
