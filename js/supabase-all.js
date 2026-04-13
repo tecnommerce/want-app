@@ -360,16 +360,32 @@
     };
     
     // ===================================================
-    // 5. FUNCIONES DE API
+    // 5. FUNCIONES DE API (CORREGIDO - decide qué cliente usar)
     // ===================================================
     
     window.callAPI = async function(action, data = {}, forceRefresh = false) {
         console.log(`🔄 Llamando a Supabase: ${action}`, data);
         
+        // Determinar qué cliente de Supabase usar según la acción
+        let client = supabaseClient;
+        const accionesVendedor = [
+            'getPedidos', 'getProductos', 'getDeliveries', 
+            'actualizarVendedor', 'crearProducto', 'actualizarProducto', 
+            'eliminarProducto', 'crearPedidoVendedor', 'actualizarPedidoCompleto',
+            'loginVendedor', 'registrarVendedor'
+        ];
+        
+        if (accionesVendedor.includes(action)) {
+            client = supabaseVendedorClient;
+            console.log('📌 Usando cliente de VENDEDOR para:', action);
+        } else {
+            console.log('📌 Usando cliente de CLIENTE para:', action);
+        }
+        
         try {
             switch(action) {
                 case 'getVendedores':
-                    const { data: vendedores, error: vError } = await supabaseClient
+                    const { data: vendedores, error: vError } = await client
                         .from('vendedores')
                         .select('*')
                         .eq('activo', true)
@@ -378,7 +394,7 @@
                     return { success: true, vendedores: vendedores };
                     
                 case 'getAllVendedores':
-                    const { data: allVendedores, error: allVError } = await supabaseClient
+                    const { data: allVendedores, error: allVError } = await client
                         .from('vendedores')
                         .select('*')
                         .order('nombre');
@@ -386,16 +402,16 @@
                     return { success: true, vendedores: allVendedores };
                     
                 case 'getProductos':
-                    let query = supabaseClient.from('productos').select('*');
+                    let productosQuery = client.from('productos').select('*');
                     if (data.vendedorId) {
-                        query = query.eq('vendedor_id', data.vendedorId);
+                        productosQuery = productosQuery.eq('vendedor_id', data.vendedorId);
                     }
-                    const { data: productos, error: pError } = await query.order('nombre');
+                    const { data: productos, error: pError } = await productosQuery.order('nombre');
                     if (pError) throw pError;
                     return { success: true, productos: productos };
                     
                 case 'getPedidos':
-                    let pedidosQuery = supabaseClient.from('pedidos').select('*');
+                    let pedidosQuery = client.from('pedidos').select('*');
                     if (data.vendedorId) {
                         pedidosQuery = pedidosQuery.eq('vendedor_id', data.vendedorId);
                     }
@@ -406,7 +422,7 @@
                     if (pedError) throw pedError;
                     
                     for (const pedido of (pedidos || [])) {
-                        const { data: prodPedido } = await supabaseClient
+                        const { data: prodPedido } = await client
                             .from('productos_pedido')
                             .select(`
                                 cantidad,
@@ -429,7 +445,7 @@
                     return { success: true, pedidos: pedidos || [] };
                     
                 case 'crearPedido':
-                    const { data: ultimoPedido } = await supabaseClient
+                    const { data: ultimoPedido } = await client
                         .from('pedidos')
                         .select('numero_orden')
                         .eq('vendedor_id', data.vendedor_id)
@@ -437,7 +453,7 @@
                         .limit(1);
                     const numeroOrden = (ultimoPedido && ultimoPedido[0]?.numero_orden || 0) + 1;
                     
-                    const { data: pedidoNuevo, error: pedCreateError } = await supabaseClient
+                    const { data: pedidoNuevo, error: pedCreateError } = await client
                         .from('pedidos')
                         .insert([{
                             vendedor_id: data.vendedor_id,
@@ -456,7 +472,7 @@
                     if (pedCreateError) throw pedCreateError;
                     
                     for (const producto of data.productos) {
-                        await supabaseClient
+                        await client
                             .from('productos_pedido')
                             .insert([{
                                 pedido_id: pedidoNuevo.id,
@@ -473,7 +489,7 @@
                     return { success: true, pedidoId: pedidoNuevo.id, numeroOrden: numeroOrden };
                     
                 case 'actualizarEstado':
-                    const { error: estadoError } = await supabaseClient
+                    const { error: estadoError } = await client
                         .from('pedidos')
                         .update({ estado: data.estado })
                         .eq('id', data.pedidoId);
@@ -481,7 +497,7 @@
                     return { success: true };
                     
                 case 'cancelarPedido':
-                    const { error: cancelError } = await supabaseClient
+                    const { error: cancelError } = await client
                         .from('pedidos')
                         .delete()
                         .eq('id', data.pedidoId);
@@ -489,7 +505,7 @@
                     return { success: true };
                     
                 case 'getDeliveries':
-                    const { data: deliveries, error: delError } = await supabaseClient
+                    const { data: deliveries, error: delError } = await client
                         .from('delivery')
                         .select('*')
                         .eq('vendedor_id', data.vendedorId)
@@ -498,7 +514,7 @@
                     return { success: true, deliveries: deliveries };
                     
                 case 'crearDelivery':
-                    const { data: newDelivery, error: delCreateError } = await supabaseClient
+                    const { data: newDelivery, error: delCreateError } = await client
                         .from('delivery')
                         .insert([{
                             vendedor_id: data.vendedor_id,
@@ -511,7 +527,7 @@
                     return { success: true, deliveryId: newDelivery.id };
                     
                 case 'actualizarDelivery':
-                    const { error: delUpdateError } = await supabaseClient
+                    const { error: delUpdateError } = await client
                         .from('delivery')
                         .update({
                             nombre: data.nombre,
@@ -522,7 +538,7 @@
                     return { success: true };
                     
                 case 'eliminarDelivery':
-                    const { error: delDeleteError } = await supabaseClient
+                    const { error: delDeleteError } = await client
                         .from('delivery')
                         .update({ activo: false })
                         .eq('id', data.deliveryId);
@@ -530,7 +546,7 @@
                     return { success: true };
                     
                 case 'getBanners':
-                    let bannersQuery = supabaseClient.from('banners').select('*').eq('activo', true).order('orden');
+                    let bannersQuery = client.from('banners').select('*').eq('activo', true).order('orden');
                     if (data.vendedorId) {
                         bannersQuery = bannersQuery.eq('vendedor_id', data.vendedorId);
                     }
@@ -539,7 +555,7 @@
                     return { success: true, banners: banners };
                     
                 case 'getAllBanners':
-                    const { data: allBanners, error: allBanError } = await supabaseClient
+                    const { data: allBanners, error: allBanError } = await client
                         .from('banners')
                         .select('*')
                         .order('orden');
@@ -547,7 +563,7 @@
                     return { success: true, banners: allBanners };
                     
                 case 'crearBanner':
-                    const { data: newBanner, error: banCreateError } = await supabaseClient
+                    const { data: newBanner, error: banCreateError } = await client
                         .from('banners')
                         .insert([{
                             titulo: data.titulo,
@@ -563,7 +579,7 @@
                     return { success: true, bannerId: newBanner.id };
                     
                 case 'actualizarBanner':
-                    const { error: banUpdateError } = await supabaseClient
+                    const { error: banUpdateError } = await client
                         .from('banners')
                         .update({
                             titulo: data.titulo,
@@ -578,7 +594,7 @@
                     return { success: true };
                     
                 case 'eliminarBanner':
-                    const { error: banDeleteError } = await supabaseClient
+                    const { error: banDeleteError } = await client
                         .from('banners')
                         .delete()
                         .eq('id', data.bannerId);
@@ -586,13 +602,13 @@
                     return { success: true };
                     
                 case 'loginVendedor':
-                    const { data: authData, error: authError } = await supabaseVendedorClient.auth.signInWithPassword({
+                    const { data: authData, error: authError } = await client.auth.signInWithPassword({
                         email: data.email,
                         password: data.password
                     });
                     if (authError) throw new Error(authError.message);
                     
-                    const { data: vendedor, error: vendError } = await supabaseVendedorClient
+                    const { data: vendedor, error: vendError } = await client
                         .from('vendedores')
                         .select('*')
                         .eq('email', data.email)
@@ -610,13 +626,13 @@
                         rubrosArrayRegistro = [];
                     }
                     
-                    const { data: authReg, error: authRegError } = await supabaseVendedorClient.auth.signUp({
+                    const { data: authReg, error: authRegError } = await client.auth.signUp({
                         email: data.email,
                         password: data.password
                     });
                     if (authRegError) throw authRegError;
                     
-                    const { data: newVendedor, error: vendRegError } = await supabaseVendedorClient
+                    const { data: newVendedor, error: vendRegError } = await client
                         .from('vendedores')
                         .insert([{
                             nombre: data.nombre,
@@ -658,7 +674,7 @@
                     
                     console.log('📤 Enviando a Supabase:', updateData);
                     
-                    const { error: updateError } = await supabaseVendedorClient
+                    const { error: updateError } = await client
                         .from('vendedores')
                         .update(updateData)
                         .eq('id', data.id);
@@ -672,7 +688,7 @@
                     return { success: true };
                     
                 case 'crearProducto':
-                    const { data: newProducto, error: prodCreateError } = await supabaseVendedorClient
+                    const { data: newProducto, error: prodCreateError } = await client
                         .from('productos')
                         .insert([{
                             vendedor_id: data.vendedor_id,
@@ -688,7 +704,7 @@
                     return { success: true, productoId: newProducto.id };
                     
                 case 'actualizarProducto':
-                    const { error: prodUpdateError } = await supabaseVendedorClient
+                    const { error: prodUpdateError } = await client
                         .from('productos')
                         .update({
                             nombre: data.nombre,
@@ -702,13 +718,13 @@
                     return { success: true };
                     
                 case 'eliminarProducto':
-                    const { data: productoAEliminar } = await supabaseVendedorClient
+                    const { data: productoAEliminar } = await client
                         .from('productos')
                         .select('imagen_url')
                         .eq('id', data.productoId)
                         .single();
                     
-                    const { error: prodDeleteError } = await supabaseVendedorClient
+                    const { error: prodDeleteError } = await client
                         .from('productos')
                         .delete()
                         .eq('id', data.productoId);
@@ -718,6 +734,82 @@
                         await eliminarImagenCloudinary(productoAEliminar.imagen_url);
                     }
                     return { success: true };
+                    
+                case 'actualizarPedidoCompleto':
+                    const { error: updatePedidoError } = await client
+                        .from('pedidos')
+                        .update({
+                            cliente_nombre: data.cliente_nombre,
+                            cliente_telefono: data.cliente_telefono,
+                            direccion: data.direccion,
+                            metodo_pago: data.metodo_pago,
+                            detalles: data.detalles || '',
+                            estado: data.estado,
+                            total: data.total
+                        })
+                        .eq('id', data.id);
+                    if (updatePedidoError) throw updatePedidoError;
+                    
+                    const { error: deleteOldError } = await client
+                        .from('productos_pedido')
+                        .delete()
+                        .eq('pedido_id', data.id);
+                    if (deleteOldError) throw deleteOldError;
+                    
+                    for (const producto of data.productos) {
+                        const { error: insertError } = await client
+                            .from('productos_pedido')
+                            .insert([{
+                                pedido_id: data.id,
+                                producto_id: producto.id,
+                                cantidad: producto.cantidad,
+                                precio_unitario: producto.precio
+                            }]);
+                        if (insertError) throw insertError;
+                    }
+                    
+                    return { success: true };
+                    
+                case 'crearPedidoVendedor':
+                    const { data: ultimoOrdenData } = await client
+                        .from('pedidos')
+                        .select('numero_orden')
+                        .eq('vendedor_id', data.vendedor_id)
+                        .order('numero_orden', { ascending: false })
+                        .limit(1);
+                    const nuevoNumeroOrden = (ultimoOrdenData && ultimoOrdenData[0]?.numero_orden || 0) + 1;
+                    
+                    const { data: nuevoPedido, error: createError } = await client
+                        .from('pedidos')
+                        .insert([{
+                            vendedor_id: data.vendedor_id,
+                            cliente_nombre: data.cliente_nombre,
+                            cliente_telefono: data.cliente_telefono,
+                            direccion: data.direccion,
+                            metodo_pago: data.metodo_pago,
+                            detalles: data.detalles || '',
+                            total: data.total,
+                            estado: 'preparando',
+                            numero_orden: nuevoNumeroOrden,
+                            usuario_id: data.usuario_id || null
+                        }])
+                        .select()
+                        .single();
+                    if (createError) throw createError;
+                    
+                    for (const producto of data.productos) {
+                        const { error: insertError } = await client
+                            .from('productos_pedido')
+                            .insert([{
+                                pedido_id: nuevoPedido.id,
+                                producto_id: producto.id,
+                                cantidad: producto.cantidad,
+                                precio_unitario: producto.precio
+                            }]);
+                        if (insertError) throw insertError;
+                    }
+                    
+                    return { success: true, pedidoId: nuevoPedido.id, numeroOrden: nuevoNumeroOrden };
                     
                 default:
                     console.warn(`⚠️ Acción no implementada: ${action}`);
