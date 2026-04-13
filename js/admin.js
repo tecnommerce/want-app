@@ -39,7 +39,7 @@ let currentCallback = null;
 let pedidoParaAsignar = null;
 
 // ===================================================
-// NOTIFICACIONES PARA VENDEDOR (MOVIDAS AL PRINCIPIO)
+// NOTIFICACIONES PARA VENDEDOR
 // ===================================================
 
 let notificacionesVendedor = [];
@@ -792,7 +792,7 @@ function renderizarPedidosDesktop() {
             <td class="col-acciones">${botonesHTML}</td>
         </tr>`;
     }
-    html += `</tbody></table>`;
+    html += `</tbody></tr>`;
     container.innerHTML = html;
 }
 
@@ -1799,25 +1799,25 @@ async function iniciarPanel(vendedor) {
     inicializarNotificacionesVendedor();
 
     // Conectar botón campana
-const btnCampana = document.getElementById('btn-notificaciones');
-if (btnCampana) {
-    btnCampana.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('🔔 Campana clickeada');
-        toggleNotificacionesVendedor();
-    };
-}
-// Conectar botón cerrar notificaciones
-const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
-if (btnCerrarNotif) {
-    btnCerrarNotif.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('❌ Cerrar notificaciones clickeado');
-        cerrarPanelNotificacionesVendedor();
-    };
-}
+    const btnCampana = document.getElementById('btn-notificaciones');
+    if (btnCampana) {
+        btnCampana.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔔 Campana clickeada');
+            toggleNotificacionesVendedor();
+        };
+    }
+    // Conectar botón cerrar notificaciones
+    const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
+    if (btnCerrarNotif) {
+        btnCerrarNotif.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('❌ Cerrar notificaciones clickeado');
+            cerrarPanelNotificacionesVendedor();
+        };
+    }
     
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
@@ -2334,6 +2334,193 @@ window.cerrarModalPedidoCompleto = cerrarModalPedidoCompleto;
 window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
 
 // ===================================================
+// NUEVAS FUNCIONES DE BOTONES (DEFINIDAS ANTES DE EXPORTAR)
+// ===================================================
+
+function abrirModalTiempo(pedidoId, boton) {
+    console.log('🔧 abrirModalTiempo llamada para pedido:', pedidoId);
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) {
+        console.error('❌ Pedido no encontrado:', pedidoId);
+        return;
+    }
+    pedidoPendienteTiempo = pedido;
+    botonPendienteTiempo = boton;
+    document.getElementById('tiempo-entrega-input').value = '';
+    abrirModalConZIndex('modal-tiempo-entrega');
+}
+
+function confirmarTiempoYPreparar() {
+    const tiempoEntrega = document.getElementById('tiempo-entrega-input')?.value.trim();
+    if (!tiempoEntrega) {
+        mostrarToast('Ingrese un tiempo estimado de entrega', 'error');
+        return;
+    }
+    if (!pedidoPendienteTiempo) return;
+    
+    actualizarTiempoEstimado(pedidoPendienteTiempo.id, tiempoEntrega);
+    actualizarEstado(pedidoPendienteTiempo.id, 'en preparacion', botonPendienteTiempo);
+    
+    cerrarModalConZIndex('modal-tiempo-entrega');
+    pedidoPendienteTiempo = null;
+    botonPendienteTiempo = null;
+}
+
+async function actualizarTiempoEstimado(pedidoId, tiempoEstimado) {
+    try {
+        const { error } = await supabaseClient
+            .from('pedidos')
+            .update({ tiempo_estimado: tiempoEstimado })
+            .eq('id', pedidoId);
+        if (error) console.error('Error actualizando tiempo estimado:', error);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+let pedidoTransferenciaActual = null;
+
+function abrirModalCoordinarTransferencia(pedidoId) {
+    console.log('🔧 abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) {
+        console.error('❌ Pedido no encontrado:', pedidoId);
+        return;
+    }
+    pedidoTransferenciaActual = pedido;
+    
+    const cbuAliasInput = document.getElementById('cbu-alias');
+    if (cbuAliasInput) {
+        cbuAliasInput.value = '';
+    } else {
+        console.error('❌ Elemento cbu-alias no encontrado');
+    }
+    
+    abrirModalConZIndex('modal-coordinar-transferencia');
+}
+
+function cerrarModalCoordinarTransferencia() {
+    cerrarModalConZIndex('modal-coordinar-transferencia');
+    pedidoTransferenciaActual = null;
+}
+
+function enviarCoordinacionTransferencia() {
+    console.log('Enviando coordinacion de transferencia');
+    
+    if (!pedidoTransferenciaActual) {
+        console.error('No hay pedido seleccionado');
+        mostrarToast('Error: No hay pedido seleccionado', 'error');
+        return;
+    }
+    
+    const cbuAlias = document.getElementById('cbu-alias').value.trim();
+    if (!cbuAlias) {
+        mostrarToast('Ingresa tus datos bancarios (CBU o Alias)', 'error');
+        return;
+    }
+    
+    const pedido = pedidoTransferenciaActual;
+    const fecha = new Date(pedido.fecha);
+    const numeroMostrar = pedido.numero_orden || pedido.id;
+    const nombreVendedor = vendedorActual ? vendedorActual.nombre : 'el negocio';
+    
+    let productosDetalle = '';
+    if (pedido.productos && pedido.productos.length > 0) {
+        pedido.productos.forEach(p => {
+            productosDetalle += `${p.cantidad}x ${p.nombre} - $${(p.precio * p.cantidad).toLocaleString('es-AR')}\n`;
+        });
+    } else {
+        productosDetalle = 'No hay productos registrados\n';
+    }
+    
+    let mensaje = `COORDINACION DE PAGO POR TRANSFERENCIA\n\n`;
+    mensaje += `Hola ${pedido.cliente_nombre}, gracias por tu pedido!\n\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `DETALLE DEL PEDIDO\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `Pedido #${numeroMostrar}\n`;
+    mensaje += `Metodo de pago: Transferencia bancaria\n\n`;
+    mensaje += `PRODUCTOS:\n`;
+    mensaje += productosDetalle;
+    mensaje += `\nTOTAL: $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    mensaje += `DATOS PARA LA TRANSFERENCIA:\n`;
+    mensaje += `${cbuAlias}\n\n`;
+    mensaje += `INSTRUCCIONES:\n`;
+    mensaje += `1. Realiza la transferencia por el monto total de $${pedido.total.toLocaleString('es-AR')}\n`;
+    mensaje += `2. Envia el comprobante por este mismo chat\n`;
+    mensaje += `3. Una vez confirmado el pago, ${nombreVendedor} enviara tu pedido\n\n`;
+    mensaje += `DIRECCION DE ENTREGA:\n${pedido.direccion}\n\n`;
+    if (pedido.detalles) {
+        mensaje += `DETALLES ADICIONALES:\n${pedido.detalles}\n\n`;
+    }
+    mensaje += `Gracias por confiar en ${nombreVendedor}!`;
+    
+    const whatsappUrl = `https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`;
+    console.log('Abriendo WhatsApp:', whatsappUrl);
+    window.open(whatsappUrl, '_blank');
+    
+    cerrarModalCoordinarTransferencia();
+    mostrarToast('Mensaje enviado al cliente con los datos de pago', 'success');
+    
+    document.getElementById('cbu-alias').value = '';
+    pedidoTransferenciaActual = null;
+}
+
+// ===================================================
+// NOTIFICACIÓN AL CLIENTE Y ENTREGA
+// ===================================================
+
+function notificarClienteEnCamino(pedidoId, boton) {
+    const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+    if (!pedido) return;
+    
+    const metodoPagoTexto = pedido.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo';
+    let mensaje = `ACTUALIZACION DE TU PEDIDO\n\nHola ${pedido.cliente_nombre},\n\n*Tu pedido esta en camino!\n\n━━━━━━━━━━━━━━━━━━━━\nDETALLE:\n`;
+    pedido.productos.forEach(p => { mensaje += `${p.cantidad}x ${p.nombre}\n`; });
+    if (pedido.detalles) mensaje += `\nINDICACIONES: ${pedido.detalles}\n`;
+    mensaje += `\n━━━━━━━━━━━━━━━━━━━━\nDIRECCION: ${pedido.direccion}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+    if (metodoPagoTexto === 'transferencia') {
+        mensaje += `PAGO: Transferencia bancaria (YA REALIZADA)`;
+    } else {
+        mensaje += `PAGO: Efectivo - DEBES PAGAR $${pedido.total.toLocaleString('es-AR')} AL DELIVERY`;
+    }
+    
+    window.open(`https://wa.me/${pedido.cliente_telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    mostrarToast(`Notificacion enviada al cliente`, 'success');
+}
+
+function entregarPedido(pedidoId, boton) {
+    actualizarEstado(pedidoId, 'entregado', boton);
+}
+
+// ===================================================
+// EVENT LISTENERS
+// ===================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const btnConfirmarTiempo = document.getElementById('btn-confirmar-tiempo');
+    if (btnConfirmarTiempo) {
+        btnConfirmarTiempo.addEventListener('click', confirmarTiempoYPreparar);
+    }
+    
+    const btnEnviarCoordinacion = document.getElementById('btn-enviar-coordinacion');
+    if (btnEnviarCoordinacion) {
+        btnEnviarCoordinacion.addEventListener('click', enviarCoordinacionTransferencia);
+    }
+    
+    const btnNotificaciones = document.getElementById('btn-notificaciones');
+    if (btnNotificaciones) {
+        btnNotificaciones.addEventListener('click', toggleNotificacionesVendedor);
+    }
+    
+    const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
+    if (btnCerrarNotif) {
+        btnCerrarNotif.addEventListener('click', cerrarPanelNotificacionesVendedor);
+    }
+});
+
+// ===================================================
 // EXPOSICIÓN DE FUNCIONES GLOBALES
 // ===================================================
 
@@ -2375,10 +2562,13 @@ window.guardarNuevoPedido = guardarNuevoPedido;
 window.abrirModalNuevoPedido = abrirModalNuevoPedido;
 window.confirmarAgregarProducto = confirmarAgregarProducto;
 window.guardarSoloDescripcion = guardarSoloDescripcion;
+window.notificarClienteEnCamino = notificarClienteEnCamino;
+window.entregarPedido = entregarPedido;
+window.abrirModalTiempo = abrirModalTiempo;
+window.confirmarTiempoYPreparar = confirmarTiempoYPreparar;
 window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
 window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
 window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
-window.confirmarTiempoYPreparar = confirmarTiempoYPreparar;
 
 // ===================================================
 // DOM CONTENT LOADED
@@ -2561,159 +2751,5 @@ function inicializarMenuHamburguesa() {
     
     console.log('✅ Menú hamburguesa inicializado correctamente');
 }
-
-// ===================================================
-// SOBRESCRIBIR FUNCIONES DE MODALES
-// ===================================================
-
-const originalAbrirModalEditarPedido = window.abrirModalEditarPedido;
-const originalVerPedidoCompleto = window.verPedidoCompleto;
-const originalVerPedidoCompletoMovil = window.verPedidoCompletoMovil;
-
-window.abrirModalEditarPedido = function(pedidoId) {
-    const modalDetalle = document.getElementById('modal-pedido-completo');
-    if (modalDetalle && modalDetalle.style.display === 'flex') {
-        cerrarModalConZIndex('modal-pedido-completo');
-    }
-    
-    const modalDetalleMovil = document.getElementById('modal-pedido-completo-movil');
-    if (modalDetalleMovil && modalDetalleMovil.style.display === 'flex') {
-        modalDetalleMovil.remove();
-    }
-    
-    setTimeout(() => {
-        if (originalAbrirModalEditarPedido) {
-            originalAbrirModalEditarPedido(pedidoId);
-        } else {
-            const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-            if (!pedido) return;
-            
-            productosTempEdit = JSON.parse(JSON.stringify(pedido.productos || []));
-            document.getElementById('edit-pedido-id').value = pedido.id;
-            document.getElementById('edit-pedido-id-display').textContent = pedido.numero_orden || pedido.id;
-            document.getElementById('edit-cliente-nombre').value = pedido.cliente_nombre || '';
-            document.getElementById('edit-cliente-telefono').value = pedido.cliente_telefono || '';
-            document.getElementById('edit-direccion').value = pedido.direccion || '';
-            document.getElementById('edit-detalles').value = pedido.detalles || '';
-            document.getElementById('edit-metodo-pago').value = pedido.metodo_pago || 'efectivo';
-            document.getElementById('edit-estado').value = pedido.estado || 'preparando';
-            
-            renderizarProductosEditar();
-            actualizarTotalEdit();
-            
-            abrirModalConZIndex('modal-editar-pedido');
-        }
-    }, 100);
-};
-
-window.verPedidoCompletoMovil = function(pedidoId) {
-    const modalEditar = document.getElementById('modal-editar-pedido');
-    if (modalEditar && modalEditar.classList.contains('active')) {
-        cerrarModalConZIndex('modal-editar-pedido');
-    }
-    
-    if (originalVerPedidoCompletoMovil) {
-        originalVerPedidoCompletoMovil(pedidoId);
-    } else {
-        const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
-        if (!pedido) return;
-        
-        const fecha = new Date(pedido.fecha);
-        const metodoPago = pedido.metodo_pago === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
-        const numeroMostrar = pedido.numero_orden || pedido.id;
-        
-        let productosHTML = '';
-        if (pedido.productos && Array.isArray(pedido.productos) && pedido.productos.length > 0) {
-            pedido.productos.forEach(pr => {
-                productosHTML += `<div class="producto-detalle"><span>${pr.cantidad}x ${escapeHTML(pr.nombre)}</span><span>${formatearPrecio(pr.precio * pr.cantidad)}</span></div>`;
-            });
-        } else {
-            productosHTML = '<p>No hay productos</p>';
-        }
-        
-        let detallesHTML = '';
-        if (pedido.detalles && pedido.detalles.trim()) {
-            detallesHTML = `<div class="detalle-seccion"><strong><i class="fas fa-pen"></i> Detalles:</strong><p>${escapeHTML(pedido.detalles)}</p></div>`;
-        }
-        
-        const estado = pedido.estado || 'preparando';
-        let botonesAccion = '';
-        
-        if (estado === 'preparando') {
-            botonesAccion = `
-                <button class="btn-tabla btn-whatsapp" onclick="confirmarPedidoWhatsApp(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
-                <button class="btn-tabla btn-preparar" onclick="actualizarEstado(${pedido.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-            `;
-        } else if (estado === 'en preparacion') {
-            botonesAccion = `
-                <button class="btn-tabla btn-pedido-listo" onclick="abrirModalAsignarDelivery(${pedido.id})"><i class="fas fa-check-circle"></i> Listo</button>
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-            `;
-        } else if (estado === 'en camino') {
-            botonesAccion = `
-                <button class="btn-tabla btn-notificar" onclick="notificarEnCamino(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
-                <button class="btn-tabla btn-entregar" onclick="actualizarEstado(${pedido.id}, 'entregado', this)"><i class="fas fa-check-double"></i> Entregar</button>
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-            `;
-        } else if (estado === 'entregado') {
-            botonesAccion = `
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
-            `;
-        }
-        
-        const modalContent = `
-            <div class="modal" id="modal-pedido-completo-movil" style="display: flex; z-index: 10100;">
-                <div class="modal-content" style="max-width: 550px;">
-                    <div class="modal-header">
-                        <h3><i class="fas fa-receipt"></i> Pedido #${numeroMostrar}</h3>
-                        <button class="modal-close" onclick="cerrarModalPedidoCompletoMovil()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="detalle-seccion"><strong><i class="fas fa-calendar"></i> Fecha:</strong><p>${fecha.toLocaleString('es-AR')}</p></div>
-                        <div class="detalle-seccion"><strong><i class="fas fa-user"></i> Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre || 'Sin nombre')}</p></div>
-                        <div class="detalle-seccion"><strong><i class="fas fa-phone"></i> Teléfono:</strong><p>${pedido.cliente_telefono || 'Sin teléfono'}</p></div>
-                        <div class="detalle-seccion"><strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong><p>${escapeHTML(pedido.direccion || 'Sin dirección')}</p></div>
-                        <div class="detalle-seccion"><strong><i class="fas fa-money-bill-wave"></i> Pago:</strong><p>${metodoPago}</p></div>
-                        <div class="detalle-seccion"><strong><i class="fas fa-box"></i> Productos:</strong><div class="productos-detalle">${productosHTML}</div></div>
-                        ${detallesHTML}
-                        <div class="detalle-seccion total"><strong><i class="fas fa-calculator"></i> Total:</strong><p class="total-monto">${formatearPrecio(pedido.total || 0)}</p></div>
-                    </div>
-                    <div class="modal-footer" style="flex-wrap: wrap; gap: 8px;">
-                        ${botonesAccion}
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const existingModal = document.getElementById('modal-pedido-completo-movil');
-        if (existingModal) existingModal.remove();
-        document.body.insertAdjacentHTML('beforeend', modalContent);
-        const modal = document.getElementById('modal-pedido-completo-movil');
-        modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModalPedidoCompletoMovil(); });
-    }
-};
-
-const originalCerrarModalPedidoCompleto = window.cerrarModalPedidoCompleto;
-window.cerrarModalPedidoCompleto = function() {
-    if (originalCerrarModalPedidoCompleto) {
-        originalCerrarModalPedidoCompleto();
-    }
-    const modal = document.getElementById('modal-pedido-completo');
-    if (modal) modal.remove();
-};
-
-const originalCerrarModalPedidoCompletoMovil = window.cerrarModalPedidoCompletoMovil;
-window.cerrarModalPedidoCompletoMovil = function() {
-    if (originalCerrarModalPedidoCompletoMovil) {
-        originalCerrarModalPedidoCompletoMovil();
-    }
-    const modal = document.getElementById('modal-pedido-completo-movil');
-    if (modal) modal.remove();
-};
 
 console.log('✅ admin.js cargado completamente');
