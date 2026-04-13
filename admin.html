@@ -31,7 +31,6 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <!-- CAMPANITA DE NOTIFICACIONES -->
                     <div class="notificaciones-container">
                         <button class="btn-notificaciones" id="btn-notificaciones">
                             <i class="fas fa-bell"></i>
@@ -243,7 +242,6 @@
 
             <!-- PANEL ADMIN (después de login) -->
             <div class="admin-panel" id="admin-panel" style="display: none;">
-                <!-- MÉTRICAS -->
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
@@ -282,7 +280,6 @@
                     </div>
                 </div>
 
-                <!-- TABS -->
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="pedidos">
                         <i class="fas fa-box"></i> Pedidos
@@ -445,7 +442,7 @@
         </div>
     </main>
 
-    <!-- MODALES EXISTENTES (todos los que ya tenías) -->
+    <!-- MODALES -->
     <!-- MODAL RUBROS -->
     <div class="modal" id="modal-rubros">
         <div class="modal-content" style="max-width: 500px;">
@@ -467,7 +464,7 @@
         </div>
     </div>
 
-    <!-- MODAL PERFIL -->
+    <!-- MODAL PERFIL (CORREGIDO - SIN BOTÓN GUARDAR SOLO DESCRIPCIÓN) -->
     <div class="modal" id="modal-perfil">
         <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
@@ -522,12 +519,6 @@
                         <label>Descripción del negocio</label>
                         <textarea id="perfil-descripcion" rows="3" class="form-control" placeholder="Describe tu negocio, especialidades, horarios, etc."></textarea>
                         <small class="input-help">Esta descripción se mostrará en tu tienda para que los clientes te conozcan mejor.</small>
-                        <div style="margin-top: 8px;">
-                            <button type="button" id="btn-guardar-descripcion" class="btn-outline" style="font-size: 12px; padding: 6px 12px;">
-                                <i class="fas fa-save"></i> Guardar solo descripción
-                            </button>
-                            <span id="descripcion-status" style="margin-left: 10px; font-size: 12px;"></span>
-                        </div>
                     </div>
                     <div class="form-group">
                         <label>Cambiar contraseña</label>
@@ -610,77 +601,51 @@
         </div>
     </div>
 
-<!-- MODAL TIEMPO ENTREGA -->
-<div class="modal" id="modal-tiempo-entrega">
-    <div class="modal-content small">
-        <div class="modal-header">
-            <h3>Tiempo estimado de entrega</h3>
-            <button class="modal-close" onclick="cerrarModalTiempo()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
-                <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off">
+    <!-- MODAL TIEMPO ENTREGA -->
+    <div class="modal" id="modal-tiempo-entrega">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Tiempo estimado de entrega</h3>
+                <button class="modal-close" onclick="cerrarModalTiempo()">&times;</button>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
-            <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y preparar</button>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
+                    <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btn-cancelar-tiempo">Cancelar</button>
+                <button class="btn-primary" id="btn-confirmar-tiempo">Confirmar y preparar</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL COORDINAR TRANSFERENCIA -->
-<div class="modal" id="modal-coordinar-transferencia">
-    <div class="modal-content small">
-        <div class="modal-header">
-            <h3><i class="fas fa-exchange-alt"></i> Coordinar pago por transferencia</h3>
-            <button class="modal-close" onclick="cerrarModalCoordinarTransferencia()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>CBU / Alias / Datos bancarios</label>
-                <textarea id="cbu-alias" rows="3" class="form-control" placeholder="Ej: CBU: 1234567890123456789012&#10;Alias: tu.negocio.alias&#10;Banco: Nación"></textarea>
-                <small class="input-help">El cliente verá estos datos para realizar la transferencia</small>
+    <!-- MODAL COORDINAR TRANSFERENCIA (SOLO UNO) -->
+    <div class="modal" id="modal-coordinar-transferencia">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3><i class="fas fa-exchange-alt"></i> Coordinar pago por transferencia</h3>
+                <button class="modal-close" onclick="cerrarModalCoordinarTransferencia()">&times;</button>
             </div>
-            <div class="info-box" style="background: #FFF5EB; padding: 12px; border-radius: 12px; margin-top: 12px;">
-                <i class="fas fa-info-circle"></i>
-                <span style="font-size: 0.75rem;">Al enviar, se le enviará al cliente el detalle completo del pedido junto con tus datos bancarios para que realice la transferencia.</span>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>CBU / Alias / Datos bancarios</label>
+                    <textarea id="cbu-alias" rows="3" class="form-control" placeholder="Ej: CBU: 1234567890123456789012&#10;Alias: tu.negocio.alias&#10;Banco: Nación"></textarea>
+                    <small class="input-help">El cliente verá estos datos para realizar la transferencia</small>
+                </div>
+                <div class="info-box" style="background: #FFF5EB; padding: 12px; border-radius: 12px; margin-top: 12px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span style="font-size: 0.75rem;">Al enviar, se le enviará al cliente el detalle completo del pedido junto con tus datos bancarios para que realice la transferencia.</span>
+                </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-outline" onclick="cerrarModalCoordinarTransferencia()">Cancelar</button>
-            <button class="btn-primary" id="btn-enviar-coordinacion">Enviar y coordinar</button>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="cerrarModalCoordinarTransferencia()">Cancelar</button>
+                <button class="btn-primary" id="btn-enviar-coordinacion">Enviar y coordinar</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL COORDINAR TRANSFERENCIA -->
-<div class="modal" id="modal-coordinar-transferencia">
-    <div class="modal-content small">
-        <div class="modal-header">
-            <h3><i class="fas fa-exchange-alt"></i> Coordinar pago por transferencia</h3>
-            <button class="modal-close" onclick="cerrarModalCoordinarTransferencia()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>CBU / Alias / Datos bancarios</label>
-                <textarea id="cbu-alias" rows="3" class="form-control" placeholder="Ej: CBU: 1234567890123456789012&#10;Alias: tu.negocio.alias&#10;Banco: Nación"></textarea>
-                <small class="input-help">El cliente verá estos datos para realizar la transferencia</small>
-            </div>
-            <div class="info-box" style="background: #FFF5EB; padding: 12px; border-radius: 12px; margin-top: 12px;">
-                <i class="fas fa-info-circle"></i>
-                <span style="font-size: 0.75rem;">Al enviar, se le enviará al cliente el detalle completo del pedido junto con tus datos bancarios para que realice la transferencia.</span>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-outline" onclick="cerrarModalCoordinarTransferencia()">Cancelar</button>
-            <button class="btn-primary" id="btn-enviar-coordinacion">Enviar y coordinar</button>
-        </div>
-    </div>
-</div>
-
-    <!-- MODALES EXISTENTES (EDITAR PEDIDO, NUEVO PEDIDO, SELECCIONAR PRODUCTO, ASIGNAR DELIVERY) -->
     <!-- MODAL EDITAR PEDIDO -->
     <div class="modal" id="modal-editar-pedido">
         <div class="modal-content" style="max-width: 700px;">
@@ -860,40 +825,39 @@
     <audio id="notificacion-sound" preload="auto">
         <source src="sounds/notification.mp3" type="audio/mpeg">
     </audio>
-<script>
-    // Forzar que las funciones globales estén disponibles
-    setTimeout(function() {
-        if (typeof abrirModalTiempo === 'undefined') {
-            console.log('⚠️ abrirModalTiempo no definida, definiendo...');
-            window.abrirModalTiempo = function(pedidoId, boton) {
-                console.log('abrirModalTiempo llamada para pedido:', pedidoId);
-                const modal = document.getElementById('modal-tiempo-entrega');
-                if (modal) {
-                    modal.style.display = 'flex';
-                    modal.classList.add('active');
-                    window.pedidoTiempoActual = pedidoId;
-                    window.botonTiempoActual = boton;
-                } else {
-                    alert('Error: Modal no encontrado');
-                }
-            };
-        }
-        if (typeof abrirModalCoordinarTransferencia === 'undefined') {
-            console.log('⚠️ abrirModalCoordinarTransferencia no definida, definiendo...');
-            window.abrirModalCoordinarTransferencia = function(pedidoId) {
-                console.log('abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
-                const modal = document.getElementById('modal-coordinar-transferencia');
-                if (modal) {
-                    modal.style.display = 'flex';
-                    modal.classList.add('active');
-                    window.pedidoTransferenciaActual = pedidoId;
-                } else {
-                    alert('Error: Modal no encontrado');
-                }
-            };
-        }
-    }, 100);
-</script>
 
+    <script>
+        setTimeout(function() {
+            if (typeof abrirModalTiempo === 'undefined') {
+                console.log('⚠️ abrirModalTiempo no definida, definiendo...');
+                window.abrirModalTiempo = function(pedidoId, boton) {
+                    console.log('abrirModalTiempo llamada para pedido:', pedidoId);
+                    const modal = document.getElementById('modal-tiempo-entrega');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        modal.classList.add('active');
+                        window.pedidoTiempoActual = pedidoId;
+                        window.botonTiempoActual = boton;
+                    } else {
+                        alert('Error: Modal no encontrado');
+                    }
+                };
+            }
+            if (typeof abrirModalCoordinarTransferencia === 'undefined') {
+                console.log('⚠️ abrirModalCoordinarTransferencia no definida, definiendo...');
+                window.abrirModalCoordinarTransferencia = function(pedidoId) {
+                    console.log('abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
+                    const modal = document.getElementById('modal-coordinar-transferencia');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        modal.classList.add('active');
+                        window.pedidoTransferenciaActual = pedidoId;
+                    } else {
+                        alert('Error: Modal no encontrado');
+                    }
+                };
+            }
+        }, 100);
+    </script>
 </body>
 </html>

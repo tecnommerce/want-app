@@ -727,7 +727,7 @@ function renderizarPedidosDesktop() {
         container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
-    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody>`;
+    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th><tr></thead><tbody>`;
     for (const p of pedidosFiltrados) {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago === 'transferencia' ? 'Transferencia' : 'Efectivo';
@@ -1183,7 +1183,7 @@ async function eliminarProducto(productoId) {
 }
 
 // ===================================================
-// FUNCIONES DE PERFIL
+// FUNCIONES DE PERFIL (CORREGIDAS)
 // ===================================================
 
 function abrirModalPerfil() {
@@ -1261,62 +1261,98 @@ function cargarPerfil() {
             });
         };
     }
-    
-    setTimeout(inicializarBotonDescripcion, 100);
 }
 
-async function actualizarPerfil() {
-    const nombre = document.getElementById('perfil-nombre')?.value.trim() || '';
-    const telefono = document.getElementById('perfil-telefono')?.value.trim() || '';
-    const direccion = document.getElementById('perfil-direccion')?.value.trim() || '';
-    const horario = document.getElementById('perfil-horario')?.value.trim() || '';
-    const descripcion = document.getElementById('perfil-descripcion')?.value.trim() || '';
-    const newPassword = document.getElementById('perfil-new-password')?.value || '';
-    const logoFile = window.logoPendiente;
-    const rubrosSeleccionados = rubrosTempPerfil;
+async function actualizarPerfil(e) {
+    if (e) e.preventDefault();
     
-    let logoUrl = vendedorActual.logo_url;
-    if (logoFile) {
-        mostrarToast('Subiendo logo...', 'info');
-        logoUrl = await subirImagenACloudinary(logoFile);
-        if (!logoUrl) {
-            mostrarToast('Error al subir logo', 'error');
-            return;
-        }
-        window.logoPendiente = null;
-    }
-    
-    const updateData = {
-        id: vendedorActual.id,
-        nombre,
-        telefono,
-        direccion,
-        horario,
-        logo_url: logoUrl,
-        rubros: rubrosSeleccionados,
-        descripcion: descripcion
-    };
-    
-    if (newPassword) {
-        if (newPassword.length < 6) {
-            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
-            return;
-        }
-        updateData.password_hash = newPassword;
+    const btn = document.querySelector('#perfil-form button[type="submit"]');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
     }
     
     try {
+        const nombre = document.getElementById('perfil-nombre')?.value.trim() || '';
+        const telefono = document.getElementById('perfil-telefono')?.value.trim() || '';
+        const direccion = document.getElementById('perfil-direccion')?.value.trim() || '';
+        const horario = document.getElementById('perfil-horario')?.value.trim() || '';
+        const descripcion = document.getElementById('perfil-descripcion')?.value.trim() || '';
+        const newPassword = document.getElementById('perfil-new-password')?.value || '';
+        const logoFile = window.logoPendiente;
+        const rubrosSeleccionados = rubrosTempPerfil;
+        
+        let logoUrl = vendedorActual.logo_url;
+        if (logoFile) {
+            mostrarToast('Subiendo logo...', 'info');
+            logoUrl = await subirImagenACloudinary(logoFile);
+            if (!logoUrl) {
+                mostrarToast('Error al subir logo', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Guardar todos los cambios';
+                }
+                return;
+            }
+            window.logoPendiente = null;
+        }
+        
+        const updateData = {
+            id: vendedorActual.id,
+            nombre: nombre,
+            telefono: telefono,
+            direccion: direccion,
+            horario: horario,
+            logo_url: logoUrl,
+            rubros: rubrosSeleccionados,
+            descripcion: descripcion
+        };
+        
+        if (newPassword) {
+            if (newPassword.length < 6) {
+                mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Guardar todos los cambios';
+                }
+                return;
+            }
+            updateData.password_hash = newPassword;
+        }
+        
         const response = await postAPI('actualizarVendedor', updateData);
+        
         if (response && response.success) {
-            mostrarToast('Perfil actualizado', 'success');
-            vendedorActual = { ...vendedorActual, nombre, telefono, direccion, horario, logo_url: logoUrl, rubros: rubrosSeleccionados, descripcion: descripcion };
+            mostrarToast('Perfil actualizado correctamente', 'success');
+            
+            vendedorActual = { ...vendedorActual, ...updateData };
+            
+            document.getElementById('perfil-nombre-display').textContent = nombre;
+            document.getElementById('perfil-email-display').textContent = vendedorActual.email;
+            
+            const headerNombreNegocio = document.getElementById('header-nombre-negocio');
+            if (headerNombreNegocio) headerNombreNegocio.textContent = nombre;
+            
+            const headerLogoImg = document.getElementById('header-logo-img');
+            if (headerLogoImg && logoUrl) {
+                headerLogoImg.src = logoUrl;
+                headerLogoImg.style.display = 'block';
+            }
+            
             document.getElementById('perfil-new-password').value = '';
+            await cargarProductos(true);
             cerrarModalPerfil();
         } else {
-            throw new Error(response?.error || 'Error');
+            throw new Error(response?.error || 'Error al actualizar');
         }
     } catch (error) {
-        mostrarToast('Error al actualizar perfil', 'error');
+        console.error('❌ Error actualizando perfil:', error);
+        mostrarToast(error.message || 'Error al actualizar perfil', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Guardar todos los cambios';
+        }
     }
 }
 
@@ -1359,6 +1395,14 @@ function abrirModalRubros(rubrosActuales, callback) {
             actualizarListaRubrosSeleccionados();
         });
     });
+    
+    // Conectar botón confirmar rubros
+    const btnConfirmar = document.getElementById('btn-confirmar-rubros');
+    if (btnConfirmar) {
+        const newBtn = btnConfirmar.cloneNode(true);
+        btnConfirmar.parentNode.replaceChild(newBtn, btnConfirmar);
+        newBtn.onclick = confirmarRubros;
+    }
     
     abrirModalConZIndex('modal-rubros');
 }
@@ -1819,6 +1863,12 @@ async function iniciarPanel(vendedor) {
         };
     }
     
+    // Formulario de perfil - IMPORTANTE
+    const perfilForm = document.getElementById('perfil-form');
+    if (perfilForm) {
+        perfilForm.addEventListener('submit', actualizarPerfil);
+    }
+    
     const btnRefresh = document.getElementById('btn-refresh');
     if (btnRefresh) {
         btnRefresh.addEventListener('click', async () => {
@@ -2011,108 +2061,6 @@ function inicializarBuscador() {
         });
     }
 }
-
-// ===================================================
-// FUNCIONES DE DESCRIPCIÓN (BOTÓN APARTE)
-// ===================================================
-
-async function guardarSoloDescripcion() {
-    console.log('🖊️ Guardando solo descripción...');
-    
-    let vendedorId = null;
-    const vendedorSesion = sessionStorage.getItem('vendedor_sesion');
-    if (vendedorSesion) {
-        try {
-            const vendedor = JSON.parse(vendedorSesion);
-            vendedorId = vendedor.id;
-        } catch(e) {}
-    }
-    
-    if (!vendedorId && vendedorActual) {
-        vendedorId = vendedorActual.id;
-    }
-    
-    if (!vendedorId) {
-        mostrarToast('Error: No hay sesión activa', 'error');
-        return;
-    }
-    
-    const descripcion = document.getElementById('perfil-descripcion').value;
-    const statusSpan = document.getElementById('descripcion-status');
-    
-    if (statusSpan) {
-        statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        statusSpan.style.color = '#007bff';
-    }
-    
-    try {
-        const result = await window.callAPI('actualizarVendedor', {
-            id: parseInt(vendedorId),
-            descripcion: descripcion
-        });
-        
-        if (result.success) {
-            if (statusSpan) {
-                statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> ¡Descripción guardada!';
-                statusSpan.style.color = 'green';
-                setTimeout(() => statusSpan.innerHTML = '', 3000);
-            }
-            mostrarToast('Descripción guardada correctamente', 'success');
-            if (vendedorActual) vendedorActual.descripcion = descripcion;
-        } else {
-            if (statusSpan) {
-                statusSpan.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error: ' + (result.error || 'No se pudo guardar');
-                statusSpan.style.color = 'red';
-            }
-            mostrarToast('Error al guardar descripción', 'error');
-        }
-    } catch (error) {
-        console.error('❌ Error guardando descripción:', error);
-        if (statusSpan) {
-            statusSpan.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error de conexión';
-            statusSpan.style.color = 'red';
-        }
-    }
-}
-
-function inicializarBotonDescripcion() {
-    const btn = document.getElementById('btn-guardar-descripcion');
-    if (btn) {
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            guardarSoloDescripcion();
-        });
-    }
-}
-
-function observarModalPerfil() {
-    const modalPerfil = document.getElementById('modal-perfil');
-    if (modalPerfil) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.attributeName === 'class') {
-                    if (modalPerfil.classList.contains('active')) {
-                        setTimeout(inicializarBotonDescripcion, 200);
-                    }
-                }
-            });
-        });
-        observer.observe(modalPerfil, { attributes: true });
-    } else {
-        setTimeout(observarModalPerfil, 500);
-    }
-}
-
-setTimeout(observarModalPerfil, 1000);
-
-document.addEventListener('click', function(e) {
-    if (e.target.id === 'btn-open-profile' || e.target.closest('#btn-open-profile')) {
-        setTimeout(inicializarBotonDescripcion, 300);
-    }
-});
 
 // ===================================================
 // FUNCIONES DE VER PEDIDO COMPLETO
@@ -2334,7 +2282,7 @@ window.cerrarModalPedidoCompleto = cerrarModalPedidoCompleto;
 window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
 
 // ===================================================
-// NUEVAS FUNCIONES DE BOTONES (DEFINIDAS ANTES DE EXPORTAR)
+// NUEVAS FUNCIONES DE BOTONES
 // ===================================================
 
 function abrirModalTiempo(pedidoId, boton) {
