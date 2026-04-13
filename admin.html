@@ -860,6 +860,40 @@
     <audio id="notificacion-sound" preload="auto">
         <source src="sounds/notification.mp3" type="audio/mpeg">
     </audio>
+<script>
+    // Forzar que las funciones globales estén disponibles
+    setTimeout(function() {
+        if (typeof abrirModalTiempo === 'undefined') {
+            console.log('⚠️ abrirModalTiempo no definida, definiendo...');
+            window.abrirModalTiempo = function(pedidoId, boton) {
+                console.log('abrirModalTiempo llamada para pedido:', pedidoId);
+                const modal = document.getElementById('modal-tiempo-entrega');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    modal.classList.add('active');
+                    window.pedidoTiempoActual = pedidoId;
+                    window.botonTiempoActual = boton;
+                } else {
+                    alert('Error: Modal no encontrado');
+                }
+            };
+        }
+        if (typeof abrirModalCoordinarTransferencia === 'undefined') {
+            console.log('⚠️ abrirModalCoordinarTransferencia no definida, definiendo...');
+            window.abrirModalCoordinarTransferencia = function(pedidoId) {
+                console.log('abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
+                const modal = document.getElementById('modal-coordinar-transferencia');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    modal.classList.add('active');
+                    window.pedidoTransferenciaActual = pedidoId;
+                } else {
+                    alert('Error: Modal no encontrado');
+                }
+            };
+        }
+    }, 100);
+</script>
 
 </body>
 </html>
