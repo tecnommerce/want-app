@@ -38,9 +38,6 @@ let rubrosTempRegistro = [];
 let currentCallback = null;
 let pedidoParaAsignar = null;
 
-// Usar el cliente específico para vendedores (no redeclarar)
-var supabase = window.supabaseVendedorClient || window.supabaseClient;
-
 // ===================================================
 // NOTIFICACIONES PARA VENDEDOR
 // ===================================================
@@ -197,7 +194,7 @@ function iniciarRealtimeVendedor() {
     
     console.log('🔄 Iniciando tiempo real para vendedor:', vendedorActual.id);
     
-    realtimeChannelVendedor = supabase
+    realtimeChannelVendedor = window.supabaseClient
         .channel('vendedor-pedidos-' + vendedorActual.id)
         .on('postgres_changes', 
             { 
@@ -243,7 +240,7 @@ function iniciarRealtimeVendedor() {
 
 function detenerRealtimeVendedor() {
     if (realtimeChannelVendedor) {
-        supabase.removeChannel(realtimeChannelVendedor);
+        window.supabaseClient.removeChannel(realtimeChannelVendedor);
         realtimeChannelVendedor = null;
     }
     realtimeActiveVendedor = false;
@@ -2316,7 +2313,7 @@ function confirmarTiempoYPreparar() {
 
 async function actualizarTiempoEstimado(pedidoId, tiempoEstimado) {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('pedidos')
             .update({ tiempo_estimado: tiempoEstimado })
             .eq('id', pedidoId);
