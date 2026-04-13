@@ -38,8 +38,8 @@ let rubrosTempRegistro = [];
 let currentCallback = null;
 let pedidoParaAsignar = null;
 
-// Obtener el cliente específico para vendedores
-const supabase = window.supabaseVendedorClient || window.supabaseClient;
+// Usar el cliente específico para vendedores (no redeclarar)
+var supabase = window.supabaseVendedorClient || window.supabaseClient;
 
 // ===================================================
 // NOTIFICACIONES PARA VENDEDOR
