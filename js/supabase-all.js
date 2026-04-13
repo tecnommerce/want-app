@@ -13,7 +13,7 @@
     const CLOUDINARY_CLOUD_NAME = 'dlsmvyz8r';
     const CLOUDINARY_UPLOAD_PRESET = 'want_productos';
     
-    // Cliente Supabase con headers correctos
+    // Cliente para CLIENTES (usa localStorage)
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         global: {
             headers: {
@@ -23,6 +23,22 @@
         }
     });
     window.supabaseClient = supabaseClient;
+    
+    // Cliente para VENDEDORES (usa sessionStorage - se limpia al cerrar la pestaña)
+    const supabaseVendedorClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        },
+        auth: {
+            storage: window.sessionStorage,
+            autoRefreshToken: true,
+            persistSession: true
+        }
+    });
+    window.supabaseVendedorClient = supabaseVendedorClient;
     
     // ===================================================
     // 2. LISTA DE RUBROS DISPONIBLES
@@ -570,13 +586,13 @@
                     return { success: true };
                     
                 case 'loginVendedor':
-                    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                    const { data: authData, error: authError } = await supabaseVendedorClient.auth.signInWithPassword({
                         email: data.email,
                         password: data.password
                     });
                     if (authError) throw new Error(authError.message);
                     
-                    const { data: vendedor, error: vendError } = await supabaseClient
+                    const { data: vendedor, error: vendError } = await supabaseVendedorClient
                         .from('vendedores')
                         .select('*')
                         .eq('email', data.email)
@@ -594,13 +610,13 @@
                         rubrosArrayRegistro = [];
                     }
                     
-                    const { data: authReg, error: authRegError } = await supabaseClient.auth.signUp({
+                    const { data: authReg, error: authRegError } = await supabaseVendedorClient.auth.signUp({
                         email: data.email,
                         password: data.password
                     });
                     if (authRegError) throw authRegError;
                     
-                    const { data: newVendedor, error: vendRegError } = await supabaseClient
+                    const { data: newVendedor, error: vendRegError } = await supabaseVendedorClient
                         .from('vendedores')
                         .insert([{
                             nombre: data.nombre,
@@ -642,7 +658,7 @@
                     
                     console.log('📤 Enviando a Supabase:', updateData);
                     
-                    const { error: updateError } = await supabaseClient
+                    const { error: updateError } = await supabaseVendedorClient
                         .from('vendedores')
                         .update(updateData)
                         .eq('id', data.id);
@@ -656,7 +672,7 @@
                     return { success: true };
                     
                 case 'crearProducto':
-                    const { data: newProducto, error: prodCreateError } = await supabaseClient
+                    const { data: newProducto, error: prodCreateError } = await supabaseVendedorClient
                         .from('productos')
                         .insert([{
                             vendedor_id: data.vendedor_id,
@@ -672,7 +688,7 @@
                     return { success: true, productoId: newProducto.id };
                     
                 case 'actualizarProducto':
-                    const { error: prodUpdateError } = await supabaseClient
+                    const { error: prodUpdateError } = await supabaseVendedorClient
                         .from('productos')
                         .update({
                             nombre: data.nombre,
@@ -686,13 +702,13 @@
                     return { success: true };
                     
                 case 'eliminarProducto':
-                    const { data: productoAEliminar } = await supabaseClient
+                    const { data: productoAEliminar } = await supabaseVendedorClient
                         .from('productos')
                         .select('imagen_url')
                         .eq('id', data.productoId)
                         .single();
                     
-                    const { error: prodDeleteError } = await supabaseClient
+                    const { error: prodDeleteError } = await supabaseVendedorClient
                         .from('productos')
                         .delete()
                         .eq('id', data.productoId);
@@ -702,91 +718,6 @@
                         await eliminarImagenCloudinary(productoAEliminar.imagen_url);
                     }
                     return { success: true };
-                    // ===================================================
-// NUEVAS FUNCIONES PARA ADMIN (ACTUALIZAR PEDIDO COMPLETO Y CREAR PEDIDO VENDEDOR)
-// ===================================================
-
-case 'actualizarPedidoCompleto':
-    // 1. Actualizar los datos del pedido
-    const { error: updatePedidoError } = await supabaseClient
-        .from('pedidos')
-        .update({
-            cliente_nombre: data.cliente_nombre,
-            cliente_telefono: data.cliente_telefono,
-            direccion: data.direccion,
-            metodo_pago: data.metodo_pago,
-            detalles: data.detalles || '',
-            estado: data.estado,
-            total: data.total
-        })
-        .eq('id', data.id);
-    if (updatePedidoError) throw updatePedidoError;
-    
-    // 2. Eliminar los productos antiguos del pedido
-    const { error: deleteOldError } = await supabaseClient
-        .from('productos_pedido')
-        .delete()
-        .eq('pedido_id', data.id);
-    if (deleteOldError) throw deleteOldError;
-    
-    // 3. Insertar los nuevos productos
-    for (const producto of data.productos) {
-        const { error: insertError } = await supabaseClient
-            .from('productos_pedido')
-            .insert([{
-                pedido_id: data.id,
-                producto_id: producto.id,
-                cantidad: producto.cantidad,
-                precio_unitario: producto.precio
-            }]);
-        if (insertError) throw insertError;
-    }
-    
-    return { success: true };
-
-case 'crearPedidoVendedor':
-    // Obtener el último número de orden para este vendedor
-    const { data: ultimoOrdenData } = await supabaseClient
-        .from('pedidos')
-        .select('numero_orden')
-        .eq('vendedor_id', data.vendedor_id)
-        .order('numero_orden', { ascending: false })
-        .limit(1);
-    const nuevoNumeroOrden = (ultimoOrdenData && ultimoOrdenData[0]?.numero_orden || 0) + 1;
-    
-    // Crear el pedido
-    const { data: nuevoPedido, error: createError } = await supabaseClient
-        .from('pedidos')
-        .insert([{
-            vendedor_id: data.vendedor_id,
-            cliente_nombre: data.cliente_nombre,
-            cliente_telefono: data.cliente_telefono,
-            direccion: data.direccion,
-            metodo_pago: data.metodo_pago,
-            detalles: data.detalles || '',
-            total: data.total,
-            estado: 'preparando',
-            numero_orden: nuevoNumeroOrden,
-            usuario_id: data.usuario_id || null
-        }])
-        .select()
-        .single();
-    if (createError) throw createError;
-    
-    // Insertar los productos del pedido
-    for (const producto of data.productos) {
-        const { error: insertError } = await supabaseClient
-            .from('productos_pedido')
-            .insert([{
-                pedido_id: nuevoPedido.id,
-                producto_id: producto.id,
-                cantidad: producto.cantidad,
-                precio_unitario: producto.precio
-            }]);
-        if (insertError) throw insertError;
-    }
-    
-    return { success: true, pedidoId: nuevoPedido.id, numeroOrden: nuevoNumeroOrden };
                     
                 default:
                     console.warn(`⚠️ Acción no implementada: ${action}`);
@@ -967,7 +898,6 @@ case 'crearPedidoVendedor':
         }
     }
 
-    // Inicializar audio para móvil
     let audioInicializado = false;
 
     function inicializarAudioMovil() {
@@ -1024,76 +954,5 @@ case 'crearPedidoVendedor':
             console.log('🔕 Desuscrito de cambios de pedidos');
         }
     };
-
-    // ===================================================
-// 8. LOGS DE AUDITORÍA
-// ===================================================
-
-window.guardarLogAuditoria = async function(accion, entidad, entidadId, detalles = {}) {
-    try {
-        // Obtener usuario actual
-        let usuarioEmail = 'desconocido';
-        let usuarioTipo = 'desconocido';
-        
-        // Verificar si es admin global (sesión de admin)
-        const adminSession = sessionStorage.getItem('admin_session');
-        if (adminSession === 'true') {
-            usuarioEmail = 'admin@want.com';
-            usuarioTipo = 'admin_global';
-        }
-        
-        // Verificar si es vendedor
-        const vendedorSession = sessionStorage.getItem('vendedor_sesion');
-        if (vendedorSession && !usuarioEmail) {
-            try {
-                const vendedor = JSON.parse(vendedorSession);
-                usuarioEmail = vendedor.email || 'vendedor_' + vendedor.id;
-                usuarioTipo = 'vendedor';
-            } catch(e) {}
-        }
-        
-        // Verificar si es cliente
-        const clienteSession = localStorage.getItem('want_usuario_sesion');
-        if (clienteSession && !usuarioEmail) {
-            try {
-                const cliente = JSON.parse(clienteSession);
-                usuarioEmail = cliente.email || 'cliente_' + cliente.id;
-                usuarioTipo = 'cliente';
-            } catch(e) {}
-        }
-        
-        // Obtener IP (solo si está disponible)
-        let ipAddress = null;
-        try {
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            ipAddress = ipData.ip;
-        } catch(e) {
-            console.log('No se pudo obtener IP');
-        }
-        
-        const logData = {
-            accion: accion,
-            entidad: entidad,
-            entidad_id: entidadId ? String(entidadId) : null,
-            usuario_email: usuarioEmail,
-            usuario_tipo: usuarioTipo,
-            detalles: detalles,
-            ip_address: ipAddress
-        };
-        
-        const { error } = await supabaseClient
-            .from('logs_auditoria')
-            .insert([logData]);
-        
-        if (error) {
-            console.error('Error guardando log:', error);
-        } else {
-            console.log('✅ Log guardado:', accion, entidad);
-        }
-    } catch (error) {
-        console.error('Error en guardarLogAuditoria:', error);
-    }
-};
 
 })();

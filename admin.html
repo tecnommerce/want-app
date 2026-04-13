@@ -819,6 +819,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-all.js"></script>
+    
+    <!-- Limpiar sesión de cliente antes de cargar panel vendedor -->
+    <script>
+        (async function() {
+            if (typeof supabaseVendedorClient !== 'undefined') {
+                const { data } = await supabaseVendedorClient.auth.getSession();
+                if (data.session) {
+                    console.log('🔄 Cerrando sesión previa de vendedor:', data.session.user.email);
+                    await supabaseVendedorClient.auth.signOut();
+                }
+            }
+        })();
+    </script>
+    
     <script src="js/admin.js"></script>
 
     <!-- Reproductor de audio para notificaciones -->
@@ -826,6 +840,7 @@
         <source src="sounds/notification.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- Fallback para funciones de modales (por si acaso) -->
     <script>
         setTimeout(function() {
             if (typeof abrirModalTiempo === 'undefined') {
