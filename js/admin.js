@@ -1,5 +1,5 @@
 // ===================================================
-// ADMIN - Panel de vendedor (VERSIÓN CORREGIDA CON REALTIME)
+// ADMIN - Panel de vendedor (VERSIÓN CORREGIDA)
 // ===================================================
 
 console.log('🚀 admin.js cargado correctamente');
@@ -194,7 +194,7 @@ function iniciarRealtimeVendedor() {
     
     console.log('🔄 Iniciando tiempo real para vendedor:', vendedorActual.id);
     
-    realtimeChannelVendedor = window.supabaseClient
+    realtimeChannelVendedor = window.supabaseVendedorClient
         .channel('vendedor-pedidos-' + vendedorActual.id)
         .on('postgres_changes', 
             { 
@@ -240,7 +240,7 @@ function iniciarRealtimeVendedor() {
 
 function detenerRealtimeVendedor() {
     if (realtimeChannelVendedor) {
-        window.supabaseClient.removeChannel(realtimeChannelVendedor);
+        window.supabaseVendedorClient.removeChannel(realtimeChannelVendedor);
         realtimeChannelVendedor = null;
     }
     realtimeActiveVendedor = false;
@@ -428,7 +428,7 @@ function cargarSesionGuardada() {
 
 async function cargarVendedorPorId(vendedorId) {
     try {
-        const response = await callAPI('getVendedores', {}, true);
+        const response = await callAPIVendedor('getVendedores', {}, true);
         if (response.success) {
             const vendedor = response.vendedores.find(v => v.id.toString() === vendedorId.toString());
             if (vendedor && vendedor.activo === true) {
@@ -453,7 +453,7 @@ async function toggleEstadoAbierto() {
     const btnToggle = document.getElementById('toggle-estado-switch');
     await withLoading(btnToggle, async () => {
         try {
-            const response = await postAPI('actualizarVendedor', { id: vendedorActual.id, estado_abierto: nuevoEstado });
+            const response = await postAPIVendedor('actualizarVendedor', { id: vendedorActual.id, estado_abierto: nuevoEstado });
             if (response && response.success) {
                 vendedorActual.estado_abierto = nuevoEstado;
                 actualizarUIEstadoAbierto();
@@ -492,7 +492,7 @@ async function cargarPedidos(forceRefresh = false) {
     const container = document.getElementById('pedidos-container');
     if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando pedidos...</p></div>`;
     try {
-        const response = await callAPI('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
+        const response = await callAPIVendedor('getPedidos', { vendedorId: vendedorActual.id }, forceRefresh);
         if (response.error) throw new Error(response.error);
         pedidos = (response.pedidos || []).map(p => ({ ...p, estado: normalizarEstado(p.estado) }));
         actualizarContadoresPedidos();
@@ -510,7 +510,7 @@ async function cargarProductos(forceRefresh = false) {
     const container = document.getElementById('productos-admin-grid');
     if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>`;
     try {
-        const response = await callAPI('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
+        const response = await callAPIVendedor('getProductos', { vendedorId: vendedorActual.id }, forceRefresh);
         if (response.error) throw new Error(response.error);
         productos = (response.productos || []).filter(p => p.vendedor_id?.toString() === vendedorActual.id.toString());
         renderizarProductosAdmin();
@@ -526,7 +526,7 @@ async function cargarDeliveries(forceRefresh = false) {
     const container = document.getElementById('delivery-grid');
     if (container) container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando deliveries...</p></div>`;
     try {
-        const response = await callAPI('getDeliveries', { vendedorId: vendedorActual.id }, forceRefresh);
+        const response = await callAPIVendedor('getDeliveries', { vendedorId: vendedorActual.id }, forceRefresh);
         if (response.error) throw new Error(response.error);
         deliveries = response.deliveries || [];
         renderizarDeliveries();
@@ -727,7 +727,7 @@ function renderizarPedidosDesktop() {
         container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
-    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody>`;
+    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th></td></thead><tbody>`;
     for (const p of pedidosFiltrados) {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago === 'transferencia' ? 'Transferencia' : 'Efectivo';
@@ -887,7 +887,7 @@ async function actualizarEstado(pedidoId, nuevoEstado, boton) {
     if (!boton) return;
     await withLoading(boton, async () => {
         try {
-            const response = await postAPI('actualizarEstado', { pedidoId, estado: nuevoEstado });
+            const response = await postAPIVendedor('actualizarEstado', { pedidoId, estado: nuevoEstado });
             if (response && response.success) {
                 mostrarToast(`Pedido actualizado a ${getEstadoTexto(nuevoEstado)}`, 'success');
                 const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
@@ -908,7 +908,7 @@ async function cancelarPedido(pedidoId, boton) {
     if (!confirm('¿Cancelar este pedido? Se eliminará permanentemente.')) return;
     await withLoading(boton, async () => {
         try {
-            const response = await postAPI('cancelarPedido', { pedidoId });
+            const response = await postAPIVendedor('cancelarPedido', { pedidoId });
             if (response && response.success) {
                 mostrarToast(`Pedido cancelado`, 'success');
                 pedidos = pedidos.filter(p => p.id.toString() !== pedidoId.toString());
@@ -1033,7 +1033,7 @@ async function guardarDelivery() {
     if (id) data.id = parseInt(id);
     const action = id ? 'actualizarDelivery' : 'crearDelivery';
     try {
-        const response = await postAPI(action, data);
+        const response = await postAPIVendedor(action, data);
         if (response && response.success) {
             mostrarToast(id ? 'Delivery actualizado' : 'Delivery creado', 'success');
             cerrarModalDelivery();
@@ -1049,7 +1049,7 @@ async function guardarDelivery() {
 async function eliminarDelivery(deliveryId) {
     if (!confirm('¿Eliminar este delivery?')) return;
     try {
-        const response = await postAPI('eliminarDelivery', { deliveryId });
+        const response = await postAPIVendedor('eliminarDelivery', { deliveryId });
         if (response.success) {
             mostrarToast('Delivery eliminado', 'success');
             await cargarDeliveries(true);
@@ -1154,7 +1154,7 @@ async function guardarProducto() {
     
     const action = id ? 'actualizarProducto' : 'crearProducto';
     try {
-        const response = await postAPI(action, data);
+        const response = await postAPIVendedor(action, data);
         if (response && response.success) {
             mostrarToast(id ? 'Producto actualizado' : 'Producto creado', 'success');
             cerrarModalProducto();
@@ -1172,7 +1172,7 @@ async function eliminarProducto(productoId) {
     if (!producto) return;
     if (!confirm(`¿Eliminar "${producto.nombre}"?`)) return;
     try {
-        const response = await postAPI('eliminarProducto', { productoId });
+        const response = await postAPIVendedor('eliminarProducto', { productoId });
         if (response.success) {
             mostrarToast('Producto eliminado', 'success');
             await cargarProductos(true);
@@ -1320,7 +1320,7 @@ async function actualizarPerfil(e) {
             updateData.password_hash = newPassword;
         }
         
-        const response = await postAPI('actualizarVendedor', updateData);
+        const response = await postAPIVendedor('actualizarVendedor', updateData);
         
         if (response && response.success) {
             mostrarToast('Perfil actualizado correctamente', 'success');
@@ -1535,7 +1535,7 @@ async function guardarEditarPedido() {
     };
     
     try {
-        const response = await postAPI('actualizarPedidoCompleto', data);
+        const response = await postAPIVendedor('actualizarPedidoCompleto', data);
         if (response && response.success) {
             mostrarToast('Pedido actualizado', 'success');
             cerrarModalEditarPedido();
@@ -1643,7 +1643,7 @@ async function guardarNuevoPedido() {
     };
     
     try {
-        const response = await postAPI('crearPedidoVendedor', data);
+        const response = await postAPIVendedor('crearPedidoVendedor', data);
         if (response && response.success) {
             mostrarToast('Pedido creado', 'success');
             cerrarModalNuevoPedido();
@@ -1761,7 +1761,7 @@ async function login() {
     }
     try {
         mostrarToast('Validando credenciales...', 'info');
-        const response = await callAPI('loginVendedor', { email, password }, true);
+        const response = await callAPIVendedor('loginVendedor', { email, password }, true);
         if (response.success && response.vendedor) {
             vendedorActual = response.vendedor;
             const rememberMe = document.getElementById('remember-me')?.checked || false;
@@ -1794,7 +1794,7 @@ async function registrarVendedorConLogo(nombre, email, telefono, direccion, hora
             return false;
         }
     }
-    const response = await postAPI('registrarVendedor', {
+    const response = await postAPIVendedor('registrarVendedor', {
         nombre,
         email,
         telefono,
@@ -2313,7 +2313,7 @@ function confirmarTiempoYPreparar() {
 
 async function actualizarTiempoEstimado(pedidoId, tiempoEstimado) {
     try {
-        const { error } = await window.supabaseClient
+        const { error } = await window.supabaseVendedorClient
             .from('pedidos')
             .update({ tiempo_estimado: tiempoEstimado })
             .eq('id', pedidoId);
