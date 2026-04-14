@@ -727,7 +727,8 @@ function renderizarPedidosDesktop() {
         container.innerHTML = `<div class="sin-pedidos"><p>No hay pedidos en esta categoría</p></div>`;
         return;
     }
-    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th></td></thead><tbody>`;
+    let html = `<table class="pedidos-tabla"><thead><tr><th class="col-id">ID</th><th class="col-fecha">Fecha</th><th class="col-cliente">Cliente</th><th class="col-telefono">Teléfono</th><th class="col-direccion">Dirección</th><th class="col-pago">Pago</th><th class="col-productos">Productos</th><th class="col-total">Total</th><th class="col-estado">Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody>`;
+    
     for (const p of pedidosFiltrados) {
         const fecha = new Date(p.fecha);
         const metodoPago = p.metodo_pago === 'transferencia' ? 'Transferencia' : 'Efectivo';
@@ -746,6 +747,7 @@ function renderizarPedidosDesktop() {
         const total = formatearPrecio(p.total || 0);
         let botonesHTML = '';
         
+        // ✅ CAMBIOS AQUÍ - NUEVA LÓGICA DE BOTONES
         if (estado === 'preparando') {
             botonesHTML = `
                 <button class="btn-tabla btn-confirmar-preparar" onclick="event.stopPropagation(); abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
@@ -760,14 +762,16 @@ function renderizarPedidosDesktop() {
                 <button class="btn-tabla btn-cancelar-tabla" onclick="event.stopPropagation(); cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'en preparacion') {
+            // ✅ CAMBIADO: Solo botón "Pedido listo" (verde) + Editar + Cancelar
             botonesHTML = `
-                <button class="btn-tabla btn-notificar-cliente" onclick="event.stopPropagation(); notificarClienteEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar al cliente</button>
-                <button class="btn-tabla btn-enviar-delivery" onclick="event.stopPropagation(); abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Enviar al delivery</button>
+                <button class="btn-tabla btn-pedido-listo" onclick="event.stopPropagation(); pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Pedido listo</button>
                 <button class="btn-tabla btn-editar" onclick="event.stopPropagation(); abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="event.stopPropagation(); cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
             `;
         } else if (estado === 'en camino') {
+            // ✅ CAMBIADO: "Enviar al delivery" + "Pedido entregado" + Editar + Cancelar
             botonesHTML = `
+                <button class="btn-tabla btn-enviar-delivery" onclick="event.stopPropagation(); abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Enviar al delivery</button>
                 <button class="btn-tabla btn-entregar-pedido" onclick="event.stopPropagation(); entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Pedido entregado</button>
                 <button class="btn-tabla btn-editar" onclick="event.stopPropagation(); abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="event.stopPropagation(); cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i></button>
@@ -827,6 +831,7 @@ function renderizarPedidosMovil() {
         
         let botonesHTML = '';
         
+        // ✅ CAMBIOS AQUÍ - NUEVA LÓGICA DE BOTONES PARA MÓVIL
         if (estado === 'preparando') {
             botonesHTML = `
                 <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
@@ -839,14 +844,16 @@ function renderizarPedidosMovil() {
                 <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
             `;
         } else if (estado === 'en preparacion') {
+            // ✅ CAMBIADO: Solo botón "Pedido listo" + Editar + Cancelar
             botonesHTML = `
-                <button class="btn-tabla btn-notificar-cliente" onclick="notificarClienteEnCamino(${p.id}, this)"><i class="fab fa-whatsapp"></i> Notificar</button>
-                <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
+                <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Pedido listo</button>
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
             `;
         } else if (estado === 'en camino') {
+            // ✅ CAMBIADO: "Enviar al delivery" + "Pedido entregado" + Editar + Cancelar
             botonesHTML = `
+                <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Enviar al delivery</button>
                 <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
@@ -2258,6 +2265,33 @@ async function enviarPedidoADelivery() {
     cerrarModalAsignarDelivery();
 }
 
+// ✅ NUEVA FUNCIÓN: Cambiar pedido de "en preparacion" a "en camino"
+async function pedidoListoParaEnCamino(pedidoId, boton) {
+    if (!boton) return;
+    await withLoading(boton, async () => {
+        try {
+            const response = await postAPIVendedor('actualizarEstado', { 
+                pedidoId: pedidoId, 
+                estado: 'en camino' 
+            });
+            if (response && response.success) {
+                mostrarToast('Pedido listo - En camino', 'success');
+                const pedido = pedidos.find(p => p.id.toString() === pedidoId.toString());
+                if (pedido) pedido.estado = 'en camino';
+                actualizarContadoresPedidos();
+                calcularMetricas();
+                renderizarPedidos();
+                actualizarReportes();
+            } else {
+                throw new Error(response?.error || 'Error');
+            }
+        } catch (error) {
+            mostrarToast('Error al actualizar', 'error');
+            throw error;
+        }
+    });
+}
+
 // ===================================================
 // FUNCIONES DE CIERRE DE MODALES (GLOBALES)
 // ===================================================
@@ -2277,6 +2311,7 @@ window.cerrarModalTiempo = () => cerrarModalConZIndex('modal-tiempo-entrega');
 window.cerrarModalAsignarDelivery = cerrarModalAsignarDelivery;
 window.cerrarModalPedidoCompleto = cerrarModalPedidoCompleto;
 window.cerrarModalPedidoCompletoMovil = cerrarModalPedidoCompletoMovil;
+window.pedidoListoParaEnCamino = pedidoListoParaEnCamino;
 
 // ===================================================
 // NUEVAS FUNCIONES DE BOTONES
