@@ -2715,3 +2715,55 @@ body {
 #modal-perfil {
     z-index: 3000;
 }
+/* ===================================================
+   OCULTAR SIDEBAR Y TOP BAR EN PANTALLA DE LOGIN
+   =================================================== */
+
+/* Cuando el panel de login está visible, ocultar sidebar y top bar */
+.admin-auth.active ~ .sidebar,
+.admin-auth.active ~ .top-bar,
+.admin-auth.active ~ .bottom-nav,
+#admin-auth.active ~ .sidebar,
+#admin-auth.active ~ .top-bar,
+#admin-auth.active ~ .bottom-nav {
+    display: none !important;
+}
+
+/* Asegurar que el login ocupe toda la pantalla */
+.admin-auth {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: white;
+    z-index: 10000;
+    margin: 0;
+    padding: 0;
+}
+
+/* Cuando el panel admin está visible, mostrar todo normal */
+.admin-panel {
+    display: block;
+}
+
+/* Ocultar elementos del panel cuando se muestra login */
+body:has(#admin-auth[style*="display: flex"]) .sidebar,
+body:has(#admin-auth[style*="display: flex"]) .top-bar,
+body:has(#admin-auth[style*="display: flex"]) .bottom-nav,
+body:has(#admin-auth[style*="display: block"]) .sidebar,
+body:has(#admin-auth[style*="display: block"]) .top-bar,
+body:has(#admin-auth[style*="display: block"]) .bottom-nav {
+    display: none !important;
+}
+
+body:has(#admin-auth[style*="display: flex"]) .main-content,
+body:has(#admin-auth[style*="display: block"]) .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+}
+
+body:has(#admin-auth[style*="display: flex"]) .page-container,
+body:has(#admin-auth[style*="display: block"]) .page-container {
+    padding: 0 !important;
+}
