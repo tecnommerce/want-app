@@ -51,12 +51,10 @@
                         <p class="vendedor-email" id="vendedor-email-sidebar"></p>
                     </div>
                 </div>
-                <!-- Botón Perfil en sidebar -->
                 <button class="sidebar-perfil-btn" id="sidebar-perfil-btn">
                     <i class="fas fa-user-circle"></i>
                     <span>Mi perfil</span>
                 </button>
-                <!-- Botón Cerrar sesión en sidebar -->
                 <button class="sidebar-logout" id="sidebar-logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Cerrar sesión</span>
@@ -105,15 +103,9 @@
                         </div>
                     </div>
                     
-                    <!-- Botón Perfil en top bar (móvil/escritorio) -->
                     <button class="btn-perfil-top" id="btn-open-profile">
                         <i class="fas fa-user-circle"></i>
                         <span>Perfil</span>
-                    </button>
-                    
-                    <!-- Botón Cerrar sesión en top bar (visible en móvil cuando no hay sidebar) -->
-                    <button class="btn-icon logout-top-btn" id="btn-logout" title="Cerrar sesión" style="display: none;">
-                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </header>
@@ -309,7 +301,7 @@
                         </div>
                     </div>
 
-                    <!-- Tabs - Solo visible en escritorio -->
+                    <!-- Tabs - Solo visible en escritorio (se oculta con CSS en móvil) -->
                     <div class="admin-tabs">
                         <button class="tab-btn active" data-tab="pedidos">
                             <i class="fas fa-box"></i> Pedidos
@@ -328,7 +320,9 @@
                         </button>
                     </div>
 
+                    <!-- ============================================ -->
                     <!-- TAB PEDIDOS -->
+                    <!-- ============================================ -->
                     <div class="tab-content active" id="tab-pedidos">
                         <div class="filtros-buscador">
                             <div class="filtros-pedidos">
@@ -368,7 +362,9 @@
                         </div>
                     </div>
 
+                    <!-- ============================================ -->
                     <!-- TAB PRODUCTOS -->
+                    <!-- ============================================ -->
                     <div class="tab-content" id="tab-productos">
                         <div class="productos-header-actions">
                             <button class="btn-primary" id="btn-agregar-producto">
@@ -383,7 +379,9 @@
                         </div>
                     </div>
 
+                    <!-- ============================================ -->
                     <!-- TAB DELIVERY -->
+                    <!-- ============================================ -->
                     <div class="tab-content" id="tab-delivery">
                         <div class="delivery-header-actions">
                             <button class="btn-primary" id="btn-agregar-delivery">
@@ -398,7 +396,9 @@
                         </div>
                     </div>
 
+                    <!-- ============================================ -->
                     <!-- TAB REPORTES -->
+                    <!-- ============================================ -->
                     <div class="tab-content" id="tab-reportes">
                         <div class="reportes-container">
                             <div class="reportes-section">
@@ -540,7 +540,7 @@
         </button>
     </nav>
 
-    <!-- MODALES (MANTENIDOS IGUAL) -->
+    <!-- MODALES (MANTENIDOS IGUAL QUE EL ORIGINAL) -->
     <!-- MODAL RUBROS -->
     <div class="modal" id="modal-rubros">
         <div class="modal-content" style="max-width: 500px;">
@@ -917,6 +917,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-vendedor.js"></script>
+    <script src="js/admin.js"></script>
     
     <!-- Limpiar sesión de cliente antes de cargar panel vendedor -->
     <script>
@@ -930,108 +931,135 @@
             }
         })();
     </script>
-    
-    <script src="js/admin.js"></script>
 
     <!-- Script para conectar los nuevos botones con las funciones existentes -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Función para cambiar de pestaña (usa la función existente del admin.js)
+            function cambiarTabPersonalizado(tabId) {
+                // Actualizar título
+                const titulos = {
+                    'pedidos': 'Pedidos',
+                    'productos': 'Productos',
+                    'delivery': 'Delivery',
+                    'reportes': 'Reportes'
+                };
+                document.getElementById('top-bar-titulo').textContent = titulos[tabId] || 'Pedidos';
+                
+                // Ocultar todos los contenidos
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                document.getElementById('tab-' + tabId)?.classList.add('active');
+                
+                // Actualizar tabs de escritorio
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.tab === tabId) btn.classList.add('active');
+                });
+                
+                // Actualizar sidebar
+                document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.tab === tabId) btn.classList.add('active');
+                });
+                
+                // Actualizar bottom nav
+                document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.tab === tabId) btn.classList.add('active');
+                });
+                
+                // Actualizar menú móvil
+                document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.tab === tabId) btn.classList.add('active');
+                });
+            }
+            
+            // Conectar navegación de sidebar
+            document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    if (tab) cambiarTabPersonalizado(tab);
+                });
+            });
+            
+            // Conectar navegación de bottom nav
+            document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    if (tab) cambiarTabPersonalizado(tab);
+                });
+            });
+            
+            // Conectar navegación móvil
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    if (tab) {
+                        cambiarTabPersonalizado(tab);
+                        document.getElementById('mobile-menu-admin')?.classList.remove('active');
+                        document.getElementById('menu-overlay-admin')?.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Conectar tabs de escritorio
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    if (tab) cambiarTabPersonalizado(tab);
+                });
+            });
+            
             // Conectar botones de perfil
             const btnOpenProfile = document.getElementById('btn-open-profile');
             const sidebarPerfilBtn = document.getElementById('sidebar-perfil-btn');
             const mobilePerfilBtn = document.getElementById('mobile-perfil-btn');
             
-            if (btnOpenProfile) {
-                btnOpenProfile.addEventListener('click', function() {
-                    if (typeof abrirModalPerfil === 'function') {
-                        abrirModalPerfil();
-                    }
-                });
+            function abrirPerfil() {
+                if (typeof abrirModalPerfil === 'function') {
+                    abrirModalPerfil();
+                } else {
+                    console.log('abrirModalPerfil no está definida aún');
+                }
             }
             
+            if (btnOpenProfile) btnOpenProfile.addEventListener('click', abrirPerfil);
             if (sidebarPerfilBtn) {
                 sidebarPerfilBtn.addEventListener('click', function() {
-                    if (typeof abrirModalPerfil === 'function') {
-                        abrirModalPerfil();
-                    }
-                    // Cerrar menú móvil si está abierto
+                    abrirPerfil();
                     document.getElementById('mobile-menu-admin')?.classList.remove('active');
                     document.getElementById('menu-overlay-admin')?.classList.remove('active');
                 });
             }
-            
             if (mobilePerfilBtn) {
                 mobilePerfilBtn.addEventListener('click', function() {
-                    if (typeof abrirModalPerfil === 'function') {
-                        abrirModalPerfil();
-                    }
-                    // Cerrar menú móvil
+                    abrirPerfil();
                     document.getElementById('mobile-menu-admin')?.classList.remove('active');
                     document.getElementById('menu-overlay-admin')?.classList.remove('active');
                 });
             }
             
             // Conectar botones de cerrar sesión
-            const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
-            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-            const topLogoutBtn = document.getElementById('btn-logout');
-            
-            function handleLogout() {
+            function hacerLogout() {
                 if (typeof logout === 'function') {
                     logout();
+                } else {
+                    console.log('logout no está definida aún');
                 }
             }
             
-            if (sidebarLogoutBtn) {
-                sidebarLogoutBtn.addEventListener('click', handleLogout);
-            }
+            const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
             
+            if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', hacerLogout);
             if (mobileLogoutBtn) {
                 mobileLogoutBtn.addEventListener('click', function() {
-                    handleLogout();
+                    hacerLogout();
                     document.getElementById('mobile-menu-admin')?.classList.remove('active');
                     document.getElementById('menu-overlay-admin')?.classList.remove('active');
                 });
             }
-            
-            if (topLogoutBtn) {
-                topLogoutBtn.addEventListener('click', handleLogout);
-            }
-            
-            // Conectar navegación de sidebar
-            const sidebarBtns = document.querySelectorAll('.sidebar-nav-btn');
-            sidebarBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tab = this.getAttribute('data-tab');
-                    if (tab && typeof cambiarTab === 'function') {
-                        cambiarTab(tab);
-                    }
-                });
-            });
-            
-            // Conectar navegación de bottom nav
-            const bottomNavBtns = document.querySelectorAll('.bottom-nav-btn');
-            bottomNavBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tab = this.getAttribute('data-tab');
-                    if (tab && typeof cambiarTab === 'function') {
-                        cambiarTab(tab);
-                    }
-                });
-            });
-            
-            // Conectar navegación móvil
-            const mobileTabBtns = document.querySelectorAll('.mobile-tab-btn');
-            mobileTabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tab = this.getAttribute('data-tab');
-                    if (tab && typeof cambiarTab === 'function') {
-                        cambiarTab(tab);
-                    }
-                    document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                    document.getElementById('menu-overlay-admin')?.classList.remove('active');
-                });
-            });
         });
     </script>
 
@@ -1064,7 +1092,22 @@
                     }
                 };
             }
-        }, 100);
+            if (typeof cerrarModalRubros === 'undefined') {
+                window.cerrarModalRubros = function() {
+                    document.getElementById('modal-rubros')?.classList.remove('active');
+                };
+            }
+            if (typeof cerrarModalPerfil === 'undefined') {
+                window.cerrarModalPerfil = function() {
+                    document.getElementById('modal-perfil')?.classList.remove('active');
+                };
+            }
+            if (typeof abrirModalPerfil === 'undefined') {
+                window.abrirModalPerfil = function() {
+                    document.getElementById('modal-perfil')?.classList.add('active');
+                };
+            }
+        }, 200);
     </script>
 </body>
 </html>
