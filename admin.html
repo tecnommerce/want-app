@@ -20,22 +20,22 @@
             </div>
             
             <nav class="sidebar-nav">
-                <button class="sidebar-nav-btn active" data-tab="pedidos">
+                <button class="sidebar-nav-btn active" data-tab="pedidos" id="sidebar-btn-pedidos">
                     <i class="fas fa-box"></i>
                     <span>Pedidos</span>
                     <span class="sidebar-badge" id="sidebar-badge-pedidos">0</span>
                 </button>
-                <button class="sidebar-nav-btn" data-tab="productos">
+                <button class="sidebar-nav-btn" data-tab="productos" id="sidebar-btn-productos">
                     <i class="fas fa-pizza-slice"></i>
                     <span>Productos</span>
                     <span class="sidebar-badge" id="sidebar-badge-productos">0</span>
                 </button>
-                <button class="sidebar-nav-btn" data-tab="delivery">
+                <button class="sidebar-nav-btn" data-tab="delivery" id="sidebar-btn-delivery">
                     <i class="fas fa-truck"></i>
                     <span>Delivery</span>
                     <span class="sidebar-badge" id="sidebar-badge-delivery">0</span>
                 </button>
-                <button class="sidebar-nav-btn" data-tab="reportes">
+                <button class="sidebar-nav-btn" data-tab="reportes" id="sidebar-btn-reportes">
                     <i class="fas fa-chart-line"></i>
                     <span>Reportes</span>
                 </button>
@@ -51,6 +51,12 @@
                         <p class="vendedor-email" id="vendedor-email-sidebar"></p>
                     </div>
                 </div>
+                <!-- Botón Perfil en sidebar -->
+                <button class="sidebar-perfil-btn" id="sidebar-perfil-btn">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Mi perfil</span>
+                </button>
+                <!-- Botón Cerrar sesión en sidebar -->
                 <button class="sidebar-logout" id="sidebar-logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Cerrar sesión</span>
@@ -99,9 +105,15 @@
                         </div>
                     </div>
                     
+                    <!-- Botón Perfil en top bar (móvil/escritorio) -->
                     <button class="btn-perfil-top" id="btn-open-profile">
                         <i class="fas fa-user-circle"></i>
                         <span>Perfil</span>
+                    </button>
+                    
+                    <!-- Botón Cerrar sesión en top bar (visible en móvil cuando no hay sidebar) -->
+                    <button class="btn-icon logout-top-btn" id="btn-logout" title="Cerrar sesión" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </header>
@@ -483,16 +495,16 @@
         </div>
         
         <div class="mobile-nav-admin">
-            <button class="mobile-tab-btn active" data-tab="pedidos">
+            <button class="mobile-tab-btn active" data-tab="pedidos" id="mobile-tab-pedidos">
                 <i class="fas fa-box"></i> Pedidos
             </button>
-            <button class="mobile-tab-btn" data-tab="productos">
+            <button class="mobile-tab-btn" data-tab="productos" id="mobile-tab-productos">
                 <i class="fas fa-pizza-slice"></i> Productos
             </button>
-            <button class="mobile-tab-btn" data-tab="delivery">
+            <button class="mobile-tab-btn" data-tab="delivery" id="mobile-tab-delivery">
                 <i class="fas fa-truck"></i> Delivery
             </button>
-            <button class="mobile-tab-btn" data-tab="reportes">
+            <button class="mobile-tab-btn" data-tab="reportes" id="mobile-tab-reportes">
                 <i class="fas fa-chart-line"></i> Reportes
             </button>
         </div>
@@ -510,25 +522,25 @@
 
     <!-- BOTTOM NAVIGATION - MÓVIL -->
     <nav class="bottom-nav" id="bottom-nav">
-        <button class="bottom-nav-btn active" data-tab="pedidos">
+        <button class="bottom-nav-btn active" data-tab="pedidos" id="bottom-nav-pedidos">
             <i class="fas fa-box"></i>
             <span>Pedidos</span>
         </button>
-        <button class="bottom-nav-btn" data-tab="productos">
+        <button class="bottom-nav-btn" data-tab="productos" id="bottom-nav-productos">
             <i class="fas fa-pizza-slice"></i>
             <span>Productos</span>
         </button>
-        <button class="bottom-nav-btn" data-tab="delivery">
+        <button class="bottom-nav-btn" data-tab="delivery" id="bottom-nav-delivery">
             <i class="fas fa-truck"></i>
             <span>Delivery</span>
         </button>
-        <button class="bottom-nav-btn" data-tab="reportes">
+        <button class="bottom-nav-btn" data-tab="reportes" id="bottom-nav-reportes">
             <i class="fas fa-chart-line"></i>
             <span>Reportes</span>
         </button>
     </nav>
 
-    <!-- MODALES -->
+    <!-- MODALES (MANTENIDOS IGUAL) -->
     <!-- MODAL RUBROS -->
     <div class="modal" id="modal-rubros">
         <div class="modal-content" style="max-width: 500px;">
@@ -905,7 +917,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-vendedor.js"></script>
-    <script src="js/admin.js"></script>
     
     <!-- Limpiar sesión de cliente antes de cargar panel vendedor -->
     <script>
@@ -918,6 +929,110 @@
                 }
             }
         })();
+    </script>
+    
+    <script src="js/admin.js"></script>
+
+    <!-- Script para conectar los nuevos botones con las funciones existentes -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Conectar botones de perfil
+            const btnOpenProfile = document.getElementById('btn-open-profile');
+            const sidebarPerfilBtn = document.getElementById('sidebar-perfil-btn');
+            const mobilePerfilBtn = document.getElementById('mobile-perfil-btn');
+            
+            if (btnOpenProfile) {
+                btnOpenProfile.addEventListener('click', function() {
+                    if (typeof abrirModalPerfil === 'function') {
+                        abrirModalPerfil();
+                    }
+                });
+            }
+            
+            if (sidebarPerfilBtn) {
+                sidebarPerfilBtn.addEventListener('click', function() {
+                    if (typeof abrirModalPerfil === 'function') {
+                        abrirModalPerfil();
+                    }
+                    // Cerrar menú móvil si está abierto
+                    document.getElementById('mobile-menu-admin')?.classList.remove('active');
+                    document.getElementById('menu-overlay-admin')?.classList.remove('active');
+                });
+            }
+            
+            if (mobilePerfilBtn) {
+                mobilePerfilBtn.addEventListener('click', function() {
+                    if (typeof abrirModalPerfil === 'function') {
+                        abrirModalPerfil();
+                    }
+                    // Cerrar menú móvil
+                    document.getElementById('mobile-menu-admin')?.classList.remove('active');
+                    document.getElementById('menu-overlay-admin')?.classList.remove('active');
+                });
+            }
+            
+            // Conectar botones de cerrar sesión
+            const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+            const topLogoutBtn = document.getElementById('btn-logout');
+            
+            function handleLogout() {
+                if (typeof logout === 'function') {
+                    logout();
+                }
+            }
+            
+            if (sidebarLogoutBtn) {
+                sidebarLogoutBtn.addEventListener('click', handleLogout);
+            }
+            
+            if (mobileLogoutBtn) {
+                mobileLogoutBtn.addEventListener('click', function() {
+                    handleLogout();
+                    document.getElementById('mobile-menu-admin')?.classList.remove('active');
+                    document.getElementById('menu-overlay-admin')?.classList.remove('active');
+                });
+            }
+            
+            if (topLogoutBtn) {
+                topLogoutBtn.addEventListener('click', handleLogout);
+            }
+            
+            // Conectar navegación de sidebar
+            const sidebarBtns = document.querySelectorAll('.sidebar-nav-btn');
+            sidebarBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    if (tab && typeof cambiarTab === 'function') {
+                        cambiarTab(tab);
+                    }
+                });
+            });
+            
+            // Conectar navegación de bottom nav
+            const bottomNavBtns = document.querySelectorAll('.bottom-nav-btn');
+            bottomNavBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    if (tab && typeof cambiarTab === 'function') {
+                        cambiarTab(tab);
+                    }
+                });
+            });
+            
+            // Conectar navegación móvil
+            const mobileTabBtns = document.querySelectorAll('.mobile-tab-btn');
+            mobileTabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    if (tab && typeof cambiarTab === 'function') {
+                        cambiarTab(tab);
+                    }
+                    document.getElementById('mobile-menu-admin')?.classList.remove('active');
+                    document.getElementById('menu-overlay-admin')?.classList.remove('active');
+                });
+            });
+        });
     </script>
 
     <!-- Reproductor de audio para notificaciones -->
