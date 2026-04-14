@@ -47,10 +47,10 @@
                 <!-- Bloque de perfil (Mis datos) -->
                 <div class="sidebar-perfil-block" id="sidebar-perfil-block">
                     <div class="perfil-logo-container">
-                        <img src="" alt="Logo" id="sidebar-logo-img" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;">
-                        <div id="sidebar-logo-placeholder" style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
-    <i class="fas fa-user-circle"></i>
-</div>
+                        <img src="" alt="Logo" id="sidebar-logo-img" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover; display: none;">
+                        <div id="sidebar-logo-placeholder" style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
                     </div>
                     <div class="perfil-info-block">
                         <span class="perfil-label">Mis datos</span>
@@ -479,10 +479,10 @@
         <div class="mobile-menu-footer">
             <div class="mobile-perfil-block" id="mobile-perfil-block">
                 <div class="perfil-logo-container">
-                    <img src="" alt="Logo" id="mobile-logo-img" style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover;">
-                    <div id="mobile-logo-placeholder" style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem;">
-    <i class="fas fa-user-circle"></i>
-</div>
+                    <img src="" alt="Logo" id="mobile-logo-img" style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover; display: none;">
+                    <div id="mobile-logo-placeholder" style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
                 </div>
                 <div class="perfil-info-block">
                     <span class="perfil-label">Mis datos</span>
@@ -520,7 +520,7 @@
     </nav>
 
     <!-- ============================================ -->
-    <!-- MODALES (MANTENIDOS DEL ORIGINAL) -->
+    <!-- MODALES -->
     <!-- ============================================ -->
     <div class="modal" id="modal-rubros">
         <div class="modal-content" style="max-width: 500px;">
@@ -552,7 +552,7 @@
                 <div class="perfil-header">
                     <div class="perfil-avatar" id="perfil-avatar-container">
                         <div id="perfil-avatar-img" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                            <i class="fas fa-store"></i>
+                            <i class="fas fa-user-circle"></i>
                         </div>
                         <button type="button" class="btn-cambiar-avatar" id="btn-cambiar-logo" title="Cambiar logo">
                             <i class="fas fa-pencil-alt"></i>
@@ -902,7 +902,7 @@
         })();
     </script>
 
-    <!-- Script de navegación y funcionalidad -->
+    <!-- Script de navegación, contadores y funcionalidad -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ================================================
@@ -935,7 +935,6 @@
                     if (btn.dataset.tab === tabId) btn.classList.add('active');
                 });
                 
-                // Mostrar métricas SOLO en Pedidos
                 const metricsGrid = document.getElementById('metrics-pedidos-grid');
                 if (metricsGrid) {
                     metricsGrid.style.display = (tabId === 'pedidos') ? 'grid' : 'none';
@@ -983,11 +982,10 @@
             });
             
             // ================================================
-            // CERRAR SESIÓN (FUNCIONAL 100%)
+            // CERRAR SESIÓN
             // ================================================
             function cerrarSesion() {
                 console.log('🚪 Cerrando sesión...');
-                
                 if (typeof logout === 'function') {
                     logout();
                 } else if (typeof supabaseVendedorClient !== 'undefined') {
@@ -1027,6 +1025,43 @@
                 document.getElementById('mobile-menu-admin')?.classList.remove('active');
                 document.getElementById('menu-overlay-admin')?.classList.remove('active');
             });
+            
+            // ================================================
+            // ACTUALIZAR CONTADORES DE SIDEBAR
+            // ================================================
+            function actualizarContadoresSidebar() {
+                // Contador de pedidos nuevos (preparando)
+                const countPreparando = document.getElementById('count-preparando');
+                const badgePedidos = document.getElementById('sidebar-badge-pedidos');
+                if (countPreparando && badgePedidos) {
+                    badgePedidos.textContent = countPreparando.textContent || '0';
+                }
+                
+                // Contador de productos
+                const productosGrid = document.getElementById('productos-admin-grid');
+                const badgeProductos = document.getElementById('sidebar-badge-productos');
+                if (productosGrid && badgeProductos) {
+                    const observer = new MutationObserver(() => {
+                        const cards = productosGrid.querySelectorAll('.producto-admin-card');
+                        badgeProductos.textContent = cards.length;
+                    });
+                    observer.observe(productosGrid, { childList: true, subtree: true });
+                }
+                
+                // Contador de delivery
+                const deliveryGrid = document.getElementById('delivery-grid');
+                const badgeDelivery = document.getElementById('sidebar-badge-delivery');
+                if (deliveryGrid && badgeDelivery) {
+                    const observer = new MutationObserver(() => {
+                        const cards = deliveryGrid.querySelectorAll('.delivery-card');
+                        badgeDelivery.textContent = cards.length;
+                    });
+                    observer.observe(deliveryGrid, { childList: true, subtree: true });
+                }
+            }
+            
+            setTimeout(actualizarContadoresSidebar, 1000);
+            setInterval(actualizarContadoresSidebar, 3000);
             
             // ================================================
             // ACTUALIZAR NOMBRE EN SIDEBAR
