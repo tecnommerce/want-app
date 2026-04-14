@@ -170,14 +170,17 @@
                     return { success: true, productos: productos };
                     
                 case 'crearPedido':
+                    // Obtener el último número de orden para este vendedor
                     const { data: ultimoPedido } = await supabaseClient
                         .from('pedidos')
                         .select('numero_orden')
                         .eq('vendedor_id', data.vendedor_id)
                         .order('numero_orden', { ascending: false })
                         .limit(1);
+                    
                     const numeroOrden = (ultimoPedido?.[0]?.numero_orden || 0) + 1;
                     
+                    // ✅ Insertar el pedido CON el campo 'productos'
                     const { data: pedidoNuevo, error: pedError } = await supabaseClient
                         .from('pedidos')
                         .insert([{
@@ -190,12 +193,15 @@
                             total: data.total,
                             estado: 'preparando',
                             numero_orden: numeroOrden,
-                            usuario_id: data.usuario_id || null
+                            usuario_id: data.usuario_id || null,
+                            productos: data.productos  // ✅ CORRECCIÓN: Guardar productos en el pedido
                         }])
                         .select()
                         .single();
+                    
                     if (pedError) throw pedError;
                     
+                    // También guardar en productos_pedido (para mantener compatibilidad)
                     for (const producto of data.productos) {
                         await supabaseClient
                             .from('productos_pedido')
@@ -206,6 +212,7 @@
                                 precio_unitario: producto.precio
                             }]);
                     }
+                    
                     return { success: true, pedidoId: pedidoNuevo.id };
                     
                 case 'getBanners':
@@ -221,6 +228,7 @@
                     return { success: false, error: `Acción no implementada: ${action}` };
             }
         } catch (error) {
+            console.error('❌ Error en callAPI:', error);
             return { success: false, error: error.message };
         }
     };
