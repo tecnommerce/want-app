@@ -2818,3 +2818,56 @@ body:has(#admin-auth[style*="display: flex"]) .page-container,
 body:has(#admin-auth[style*="display: block"]) .page-container {
     padding: 0 !important;
 }
+/* ===================================================
+   CORRECCIONES FINALES DE DISEÑO
+   =================================================== */
+
+/* 1. Ocultar bottom nav en escritorio */
+@media (min-width: 769px) {
+    .bottom-nav {
+        display: none !important;
+    }
+}
+
+/* 2. Las métricas SIEMPRE visibles arriba, sin título */
+.metrics-grid {
+    margin-bottom: 28px;
+}
+
+/* 3. Asegurar que el contenido de reportes NO muestre métricas duplicadas */
+#tab-reportes .metrics-grid {
+    display: none !important;
+}
+
+/* 4. Ocultar el título "Reportes" que aparece sobre las métricas (si existe) */
+.metrics-grid + h3,
+.metrics-grid ~ h3:first-of-type {
+    display: none;
+}
+
+/* 5. En móvil, el menú lateral (hamburguesa) se abre con botón, NO está fijo */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none !important;
+    }
+    
+    .mobile-menu-admin {
+        display: flex;
+    }
+}
+
+/* 6. Ajustar espaciado para que no se mezclen contenidos */
+.tab-content {
+    padding-top: 8px;
+}
+
+/* 7. Asegurar que el panel de reportes tenga su propio estilo */
+#tab-reportes .reportes-container {
+    margin-top: 0;
+}
+
+/* 8. Ocultar cualquier texto "Reportes" suelto antes de métricas */
+.admin-panel > h3,
+.admin-panel > .reportes-titulo {
+    display: none;
+}
