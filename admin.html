@@ -11,9 +11,7 @@
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- ============================================ -->
-        <!-- SIDEBAR - NAVEGACIÓN PRINCIPAL -->
-        <!-- ============================================ -->
+        <!-- SIDEBAR - SOLO ESCRITORIO -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
@@ -44,7 +42,6 @@
             </nav>
             
             <div class="sidebar-footer">
-                <!-- Bloque de perfil (Mis datos) -->
                 <div class="sidebar-perfil-block" id="sidebar-perfil-block">
                     <div class="perfil-logo-container">
                         <img src="" alt="Logo" id="sidebar-logo-img" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover; display: none;">
@@ -68,15 +65,17 @@
             </div>
         </aside>
 
-        <!-- ============================================ -->
         <!-- CONTENIDO PRINCIPAL -->
-        <!-- ============================================ -->
         <main class="main-content">
             <!-- TOP BAR -->
             <header class="top-bar">
                 <div class="top-bar-left">
-                    <button class="menu-toggle-mobile" id="menu-toggle-mobile">
-                        <i class="fas fa-bars"></i>
+                    <!-- ✅ AVATAR PERFIL MÓVIL (reemplaza hamburguesa) -->
+                    <button class="avatar-perfil-mobile" id="avatar-perfil-mobile">
+                        <img src="" alt="Perfil" id="header-avatar-img" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: none;">
+                        <div id="header-avatar-placeholder" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
                     </button>
                     <div class="top-bar-titulo">
                         <h1 id="top-bar-titulo">Pedidos</h1>
@@ -262,11 +261,8 @@
 
                 <!-- PANEL ADMIN (después de login) -->
                 <div class="admin-panel" id="admin-panel" style="display: none;">
-                    <!-- ============================================ -->
                     <!-- TAB PEDIDOS -->
-                    <!-- ============================================ -->
                     <div class="tab-content active" id="tab-pedidos">
-                        <!-- Métricas - SOLO visibles en Pedidos -->
                         <div class="metrics-grid metrics-pedidos" id="metrics-pedidos-grid">
                             <div class="metric-card">
                                 <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
@@ -298,7 +294,6 @@
                             </div>
                         </div>
                         
-                        <!-- Filtros y buscador -->
                         <div class="filtros-buscador">
                             <div class="filtros-pedidos">
                                 <button class="filtro-btn active" data-estado="preparando">
@@ -330,7 +325,6 @@
                             </div>
                         </div>
                         
-                        <!-- Contenedor de pedidos -->
                         <div class="pedidos-container" id="pedidos-container">
                             <div class="loading">
                                 <div class="spinner"></div>
@@ -339,9 +333,7 @@
                         </div>
                     </div>
 
-                    <!-- ============================================ -->
                     <!-- TAB PRODUCTOS -->
-                    <!-- ============================================ -->
                     <div class="tab-content" id="tab-productos">
                         <div class="productos-header-actions">
                             <button class="btn-primary" id="btn-agregar-producto">
@@ -356,9 +348,7 @@
                         </div>
                     </div>
 
-                    <!-- ============================================ -->
                     <!-- TAB DELIVERY -->
-                    <!-- ============================================ -->
                     <div class="tab-content" id="tab-delivery">
                         <div class="delivery-header-actions">
                             <button class="btn-primary" id="btn-agregar-delivery">
@@ -373,9 +363,7 @@
                         </div>
                     </div>
 
-                    <!-- ============================================ -->
                     <!-- TAB REPORTES -->
-                    <!-- ============================================ -->
                     <div class="tab-content" id="tab-reportes">
                         <div class="reportes-container">
                             <div class="reportes-section">
@@ -450,55 +438,6 @@
         </main>
     </div>
 
-    <!-- MENÚ MÓVIL -->
-    <div class="mobile-menu-admin" id="mobile-menu-admin">
-        <div class="mobile-menu-header">
-            <div class="mobile-menu-logo">
-                <img src="https://res.cloudinary.com/dlsmvyz8r/image/upload/v1775997469/logo-want-app-online-pedidos_faeoxm.png" alt="Want" style="height: 28px;">
-            </div>
-            <button class="menu-close" id="menu-close-admin">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="mobile-nav-admin">
-            <button class="mobile-tab-btn active" data-tab="pedidos" id="mobile-tab-pedidos">
-                <i class="fas fa-box"></i> Pedidos
-            </button>
-            <button class="mobile-tab-btn" data-tab="productos" id="mobile-tab-productos">
-                <i class="fas fa-pizza-slice"></i> Productos
-            </button>
-            <button class="mobile-tab-btn" data-tab="delivery" id="mobile-tab-delivery">
-                <i class="fas fa-truck"></i> Delivery
-            </button>
-            <button class="mobile-tab-btn" data-tab="reportes" id="mobile-tab-reportes">
-                <i class="fas fa-chart-line"></i> Reportes
-            </button>
-        </div>
-        
-        <div class="mobile-menu-footer">
-            <div class="mobile-perfil-block" id="mobile-perfil-block">
-                <div class="perfil-logo-container">
-                    <img src="" alt="Logo" id="mobile-logo-img" style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover; display: none;">
-                    <div id="mobile-logo-placeholder" style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #FF5A00, #FF7A00); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                </div>
-                <div class="perfil-info-block">
-                    <span class="perfil-label">Mis datos</span>
-                    <span class="perfil-nombre-corto" id="mobile-perfil-nombre">Negocio</span>
-                </div>
-                <button class="btn-editar-perfil" id="btn-editar-perfil-mobile">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-            <button class="mobile-logout-btn" id="mobile-logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
-        </div>
-    </div>
-    <div class="menu-overlay-admin" id="menu-overlay-admin"></div>
-
     <!-- BOTTOM NAVIGATION - MÓVIL -->
     <nav class="bottom-nav" id="bottom-nav">
         <button class="bottom-nav-btn active" data-tab="pedidos" id="bottom-nav-pedidos">
@@ -519,9 +458,7 @@
         </button>
     </nav>
 
-    <!-- ============================================ -->
-    <!-- MODALES -->
-    <!-- ============================================ -->
+    <!-- MODALES (MANTENIDOS IGUAL) -->
     <div class="modal" id="modal-rubros">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
@@ -902,176 +839,61 @@
         })();
     </script>
 
-    <!-- Script de navegación, contadores y funcionalidad -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ================================================
             // CAMBIAR DE PESTAÑA
-            // ================================================
             function cambiarTab(tabId) {
-                const titulos = {
-                    'pedidos': 'Pedidos',
-                    'productos': 'Productos',
-                    'delivery': 'Delivery',
-                    'reportes': 'Reportes'
-                };
+                const titulos = {'pedidos':'Pedidos','productos':'Productos','delivery':'Delivery','reportes':'Reportes'};
                 document.getElementById('top-bar-titulo').textContent = titulos[tabId] || 'Pedidos';
-                
                 document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                 document.getElementById('tab-' + tabId)?.classList.add('active');
-                
-                document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
+                document.querySelectorAll('.sidebar-nav-btn, .bottom-nav-btn').forEach(btn => {
                     btn.classList.remove('active');
                     if (btn.dataset.tab === tabId) btn.classList.add('active');
                 });
-                
-                document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.tab === tabId) btn.classList.add('active');
-                });
-                
-                document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.tab === tabId) btn.classList.add('active');
-                });
-                
                 const metricsGrid = document.getElementById('metrics-pedidos-grid');
-                if (metricsGrid) {
-                    metricsGrid.style.display = (tabId === 'pedidos') ? 'grid' : 'none';
-                }
+                if (metricsGrid) metricsGrid.style.display = (tabId === 'pedidos') ? 'grid' : 'none';
             }
             
-            document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
+            document.querySelectorAll('.sidebar-nav-btn, .bottom-nav-btn').forEach(btn => {
                 btn.addEventListener('click', () => cambiarTab(btn.dataset.tab));
             });
             
-            document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-                btn.addEventListener('click', () => cambiarTab(btn.dataset.tab));
-            });
-            
-            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    cambiarTab(this.dataset.tab);
-                    document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                    document.getElementById('menu-overlay-admin')?.classList.remove('active');
-                });
-            });
-            
-            // ================================================
-            // ABRIR MODAL PERFIL
-            // ================================================
+            // ABRIR PERFIL (AVATAR MÓVIL)
             function abrirPerfil() {
-                if (typeof abrirModalPerfil === 'function') {
-                    abrirModalPerfil();
-                } else {
-                    document.getElementById('modal-perfil')?.classList.add('active');
-                }
+                if (typeof abrirModalPerfil === 'function') abrirModalPerfil();
+                else document.getElementById('modal-perfil')?.classList.add('active');
             }
             
+            document.getElementById('avatar-perfil-mobile')?.addEventListener('click', abrirPerfil);
             document.getElementById('btn-editar-perfil-sidebar')?.addEventListener('click', abrirPerfil);
             document.getElementById('sidebar-perfil-block')?.addEventListener('click', abrirPerfil);
-            document.getElementById('btn-editar-perfil-mobile')?.addEventListener('click', function() {
-                abrirPerfil();
-                document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                document.getElementById('menu-overlay-admin')?.classList.remove('active');
-            });
-            document.getElementById('mobile-perfil-block')?.addEventListener('click', function() {
-                abrirPerfil();
-                document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                document.getElementById('menu-overlay-admin')?.classList.remove('active');
-            });
             
-            // ================================================
             // CERRAR SESIÓN
-            // ================================================
             function cerrarSesion() {
-                console.log('🚪 Cerrando sesión...');
-                if (typeof logout === 'function') {
-                    logout();
-                } else if (typeof supabaseVendedorClient !== 'undefined') {
+                if (typeof logout === 'function') logout();
+                else if (typeof supabaseVendedorClient !== 'undefined') {
                     supabaseVendedorClient.auth.signOut().then(() => {
-                        localStorage.clear();
-                        sessionStorage.clear();
+                        localStorage.clear(); sessionStorage.clear();
                         window.location.href = 'admin.html';
                     });
-                } else {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    window.location.reload();
-                }
+                } else { localStorage.clear(); sessionStorage.clear(); window.location.reload(); }
             }
             
             document.getElementById('sidebar-logout-btn')?.addEventListener('click', cerrarSesion);
-            document.getElementById('mobile-logout-btn')?.addEventListener('click', function() {
-                cerrarSesion();
-                document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                document.getElementById('menu-overlay-admin')?.classList.remove('active');
-            });
             
-            // ================================================
-            // MENÚ MÓVIL
-            // ================================================
-            document.getElementById('menu-toggle-mobile')?.addEventListener('click', function() {
-                document.getElementById('mobile-menu-admin')?.classList.add('active');
-                document.getElementById('menu-overlay-admin')?.classList.add('active');
-            });
-            
-            document.getElementById('menu-close-admin')?.addEventListener('click', function() {
-                document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                document.getElementById('menu-overlay-admin')?.classList.remove('active');
-            });
-            
-            document.getElementById('menu-overlay-admin')?.addEventListener('click', function() {
-                document.getElementById('mobile-menu-admin')?.classList.remove('active');
-                document.getElementById('menu-overlay-admin')?.classList.remove('active');
-            });
-            
-            // ================================================
-            // ACTUALIZAR CONTADORES DE SIDEBAR
-            // ================================================
-            function actualizarContadoresSidebar() {
-                // Contador de pedidos nuevos (preparando)
-                const countPreparando = document.getElementById('count-preparando');
-                const badgePedidos = document.getElementById('sidebar-badge-pedidos');
-                if (countPreparando && badgePedidos) {
-                    badgePedidos.textContent = countPreparando.textContent || '0';
-                }
-                
-                // Contador de productos
-                const productosGrid = document.getElementById('productos-admin-grid');
-                const badgeProductos = document.getElementById('sidebar-badge-productos');
-                if (productosGrid && badgeProductos) {
-                    const observer = new MutationObserver(() => {
-                        const cards = productosGrid.querySelectorAll('.producto-admin-card');
-                        badgeProductos.textContent = cards.length;
-                    });
-                    observer.observe(productosGrid, { childList: true, subtree: true });
-                }
-                
-                // Contador de delivery
-                const deliveryGrid = document.getElementById('delivery-grid');
-                const badgeDelivery = document.getElementById('sidebar-badge-delivery');
-                if (deliveryGrid && badgeDelivery) {
-                    const observer = new MutationObserver(() => {
-                        const cards = deliveryGrid.querySelectorAll('.delivery-card');
-                        badgeDelivery.textContent = cards.length;
-                    });
-                    observer.observe(deliveryGrid, { childList: true, subtree: true });
-                }
-            }
-            
-            setTimeout(actualizarContadoresSidebar, 1000);
-            setInterval(actualizarContadoresSidebar, 3000);
-            
-            // ================================================
-            // ACTUALIZAR NOMBRE EN SIDEBAR
-            // ================================================
+            // ACTUALIZAR NOMBRE Y AVATAR
             setTimeout(() => {
-                const nombreNegocio = localStorage.getItem('vendedor_nombre') || 
-                                      sessionStorage.getItem('vendedor_nombre') || 
-                                      'Negocio';
+                const nombreNegocio = localStorage.getItem('vendedor_nombre') || sessionStorage.getItem('vendedor_nombre') || 'Negocio';
+                const logoUrl = localStorage.getItem('vendedor_logo') || sessionStorage.getItem('vendedor_logo');
                 document.getElementById('sidebar-perfil-nombre').textContent = nombreNegocio;
-                document.getElementById('mobile-perfil-nombre').textContent = nombreNegocio;
+                
+                if (logoUrl) {
+                    const avatarImg = document.getElementById('header-avatar-img');
+                    const placeholder = document.getElementById('header-avatar-placeholder');
+                    if (avatarImg) { avatarImg.src = logoUrl; avatarImg.style.display = 'flex'; }
+                    if (placeholder) placeholder.style.display = 'none';
+                }
             }, 500);
         });
     </script>
@@ -1079,31 +901,5 @@
     <audio id="notificacion-sound" preload="auto">
         <source src="sounds/notification.mp3" type="audio/mpeg">
     </audio>
-
-    <script>
-        setTimeout(function() {
-            if (typeof abrirModalTiempo === 'undefined') {
-                window.abrirModalTiempo = function(pedidoId) {
-                    document.getElementById('modal-tiempo-entrega')?.classList.add('active');
-                    window.pedidoTiempoActual = pedidoId;
-                };
-            }
-            if (typeof abrirModalCoordinarTransferencia === 'undefined') {
-                window.abrirModalCoordinarTransferencia = function(pedidoId) {
-                    document.getElementById('modal-coordinar-transferencia')?.classList.add('active');
-                    window.pedidoTransferenciaActual = pedidoId;
-                };
-            }
-            if (typeof cerrarModalRubros === 'undefined') {
-                window.cerrarModalRubros = () => document.getElementById('modal-rubros')?.classList.remove('active');
-            }
-            if (typeof cerrarModalPerfil === 'undefined') {
-                window.cerrarModalPerfil = () => document.getElementById('modal-perfil')?.classList.remove('active');
-            }
-            if (typeof abrirModalPerfil === 'undefined') {
-                window.abrirModalPerfil = () => document.getElementById('modal-perfil')?.classList.add('active');
-            }
-        }, 200);
-    </script>
 </body>
 </html>
