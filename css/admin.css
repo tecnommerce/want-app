@@ -2871,3 +2871,107 @@ body:has(#admin-auth[style*="display: block"]) .page-container {
 .admin-panel > .reportes-titulo {
     display: none;
 }
+/* ===================================================
+   BLOQUE DE PERFIL EN SIDEBAR (MIS DATOS)
+   =================================================== */
+.sidebar-perfil-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--gray-200);
+}
+
+.sidebar-perfil-block:hover {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+}
+
+.perfil-logo-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.perfil-info-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.perfil-label {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.perfil-nombre-corto {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--gray-800);
+}
+
+.btn-editar-perfil {
+    background: none;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-full);
+    transition: all 0.2s;
+}
+
+.btn-editar-perfil:hover {
+    color: var(--primary);
+    background: white;
+}
+
+/* Bloque de perfil en menú móvil */
+.mobile-perfil-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    cursor: pointer;
+    border: 1px solid var(--gray-200);
+}
+
+/* Métricas - SOLO visibles en Pedidos */
+.metrics-pedidos {
+    display: grid;
+}
+
+#tab-productos .metrics-pedidos,
+#tab-delivery .metrics-pedidos,
+#tab-reportes .metrics-pedidos {
+    display: none !important;
+}
+
+/* Ocultar elementos que no se usan */
+.admin-tabs {
+    display: none !important;
+}
+
+.btn-perfil-top {
+    display: none !important;
+}
+
+/* Ocultar "Cargando..." */
+.loading p:contains("Cargando...") {
+    display: none;
+}
+
+/* Bottom nav solo en móvil */
+@media (min-width: 769px) {
+    .bottom-nav {
+        display: none !important;
+    }
+}
