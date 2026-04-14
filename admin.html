@@ -10,29 +10,78 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- HEADER ADMIN -->
-    <header class="header-admin" id="header-admin" style="display: none;">
-        <div class="container">
-            <div class="header-content">
-                <div class="header-logo-estado">
-                    <div class="header-logo">
-                        <img src="" alt="Logo" id="header-logo-img" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; display: none;">
-                        <img src="https://res.cloudinary.com/dlsmvyz8r/image/upload/v1775997469/logo-want-app-online-pedidos_faeoxm.png" alt="Want" style="height: 40px; width: auto;">
+    <div class="app-wrapper">
+        <!-- SIDEBAR - SOLO ESCRITORIO -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="https://res.cloudinary.com/dlsmvyz8r/image/upload/v1775997469/logo-want-app-online-pedidos_faeoxm.png" alt="Want" style="height: 32px; width: auto;">
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="sidebar-nav-btn active" data-tab="pedidos">
+                    <i class="fas fa-box"></i>
+                    <span>Pedidos</span>
+                    <span class="sidebar-badge" id="sidebar-badge-pedidos">0</span>
+                </button>
+                <button class="sidebar-nav-btn" data-tab="productos">
+                    <i class="fas fa-pizza-slice"></i>
+                    <span>Productos</span>
+                    <span class="sidebar-badge" id="sidebar-badge-productos">0</span>
+                </button>
+                <button class="sidebar-nav-btn" data-tab="delivery">
+                    <i class="fas fa-truck"></i>
+                    <span>Delivery</span>
+                    <span class="sidebar-badge" id="sidebar-badge-delivery">0</span>
+                </button>
+                <button class="sidebar-nav-btn" data-tab="reportes">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reportes</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-vendedor-info" id="sidebar-vendedor-info">
+                    <div class="vendedor-avatar" id="vendedor-avatar-sidebar">
+                        <i class="fas fa-store"></i>
                     </div>
-                    <div class="estado-toggle-header">
-                        <span class="estado-label" id="estado-abierto-texto">Abierto</span>
+                    <div class="vendedor-detalles">
+                        <p class="vendedor-nombre" id="vendedor-nombre-sidebar">Cargando...</p>
+                        <p class="vendedor-email" id="vendedor-email-sidebar"></p>
+                    </div>
+                </div>
+                <button class="sidebar-logout" id="sidebar-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- TOP BAR -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle-mobile" id="menu-toggle-mobile">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="top-bar-titulo">
+                        <h1 id="top-bar-titulo">Pedidos</h1>
+                    </div>
+                </div>
+                
+                <div class="top-bar-right">
+                    <div class="estado-toggle-top">
+                        <span class="estado-label-top">Abierto</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="toggle-estado-switch">
                             <span class="toggle-slider"></span>
                         </label>
-                        <span class="estado-badge-header" id="estado-abierto-badge">
-                            <i class="fas fa-check-circle"></i> Atendiendo
-                        </span>
                     </div>
-                </div>
-                <div class="header-actions">
+                    
                     <div class="notificaciones-container">
-                        <button class="btn-notificaciones" id="btn-notificaciones">
+                        <button class="btn-notificaciones-top" id="btn-notificaciones">
                             <i class="fas fa-bell"></i>
                             <span class="notificaciones-count" id="notificaciones-count">0</span>
                         </button>
@@ -50,25 +99,389 @@
                         </div>
                     </div>
                     
-                    <button class="header-btn" id="btn-open-profile" title="Mi perfil">
-                        <i class="fas fa-user-circle"></i> Perfil
-                    </button>
-                    <button class="btn-icon" id="btn-logout" title="Cerrar sesión">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                    <button class="menu-toggle-admin" id="menu-toggle-admin">
-                        <i class="fas fa-bars"></i>
+                    <button class="btn-perfil-top" id="btn-open-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Perfil</span>
                     </button>
                 </div>
+            </header>
+
+            <!-- CONTENEDOR DE PÁGINAS -->
+            <div class="page-container">
+                <!-- PANTALLA DE LOGIN/REGISTRO -->
+                <div class="admin-auth" id="admin-auth">
+                    <div class="auth-card">
+                        <div class="auth-logo">
+                            <h1 class="auth-logo-text">Want</h1>
+                            <p class="auth-subtitle">Panel de vendedores</p>
+                        </div>
+                        
+                        <!-- PANEL LOGIN -->
+                        <div class="auth-panel active" id="login-panel">
+                            <form id="login-form">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="login-email" placeholder="tu@email.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Contraseña</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="login-password" placeholder="••••••••" required>
+                                        <button type="button" class="toggle-password" data-target="login-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group remember-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="remember-me"> Recordarme
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                            </form>
+                            <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
+                            <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
+                            <div class="auth-links">
+                                <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
+                            </div>
+                        </div>
+
+                        <!-- PANEL REGISTRO -->
+                        <div class="auth-panel" id="register-panel">
+                            <button class="back-to-login" id="back-to-login">
+                                <i class="fas fa-arrow-left"></i> Volver al inicio
+                            </button>
+                            <form id="register-form">
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Nombre del negocio *</label>
+                                        <input type="text" id="reg-nombre" required>
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Email *</label>
+                                        <input type="email" id="reg-email" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Teléfono *</label>
+                                        <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Dirección *</label>
+                                        <input type="text" id="reg-direccion" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Rubro(s) del negocio *</label>
+                                    <div class="rubros-selector" id="rubros-selector-registro"></div>
+                                    <small class="input-help">Puedes seleccionar uno o varios rubros</small>
+                                    <div class="rubros-seleccionados-info">
+                                        <strong>Rubros seleccionados:</strong> <span id="rubros-lista-registro">Ninguno</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Horario de atención</label>
+                                    <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
+                                </div>
+                                <div class="form-group">
+                                    <label>Logo del negocio</label>
+                                    <input type="file" id="reg-logo" accept="image/*">
+                                    <div id="reg-logo-preview" class="image-preview"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Contraseña *</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="reg-password" required>
+                                            <button type="button" class="toggle-password" data-target="reg-password">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Confirmar *</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="reg-password2" required>
+                                            <button type="button" class="toggle-password" data-target="reg-password2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                            </form>
+                        </div>
+
+                        <!-- PANEL RECUPERAR CONTRASEÑA -->
+                        <div class="auth-panel" id="recover-panel">
+                            <button class="back-to-login" id="back-to-login-recover">
+                                <i class="fas fa-arrow-left"></i> Volver al inicio
+                            </button>
+                            <form id="recover-form">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="recover-email" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Enviar código</button>
+                            </form>
+                            <div id="recover-code-section" style="display: none;">
+                                <div class="form-group">
+                                    <label>Código de recuperación</label>
+                                    <input type="text" id="recover-code" placeholder="Ingresa el código de 6 dígitos">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Nueva contraseña</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="recover-new-password">
+                                            <button type="button" class="toggle-password" data-target="recover-new-password">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Confirmar</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="recover-new-password2">
+                                            <button type="button" class="toggle-password" data-target="recover-new-password2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-block" id="btn-reset-password">Restablecer contraseña</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL ADMIN (después de login) -->
+                <div class="admin-panel" id="admin-panel" style="display: none;">
+                    <!-- Métricas - Visible en escritorio y móvil -->
+                    <div class="metrics-grid" id="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
+                            <div class="metric-info">
+                                <h3 id="ventas-hoy">$0</h3>
+                                <p>Ventas hoy</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-calendar-week"></i></div>
+                            <div class="metric-info">
+                                <h3 id="ventas-semana">$0</h3>
+                                <p>Ventas semana</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="metric-info">
+                                <h3 id="ventas-mes">$0</h3>
+                                <p>Ventas mes</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="metric-info">
+                                <h3 id="pedidos-entregados">0</h3>
+                                <p>Entregados</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-truck"></i></div>
+                            <div class="metric-info">
+                                <h3 id="pedidos-pendientes">0</h3>
+                                <p>Pendientes</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs - Solo visible en escritorio -->
+                    <div class="admin-tabs">
+                        <button class="tab-btn active" data-tab="pedidos">
+                            <i class="fas fa-box"></i> Pedidos
+                            <span class="tab-badge" id="badge-pedidos">0</span>
+                        </button>
+                        <button class="tab-btn" data-tab="productos">
+                            <i class="fas fa-pizza-slice"></i> Productos
+                            <span class="tab-badge" id="badge-productos">0</span>
+                        </button>
+                        <button class="tab-btn" data-tab="delivery">
+                            <i class="fas fa-truck"></i> Delivery
+                            <span class="tab-badge" id="badge-delivery">0</span>
+                        </button>
+                        <button class="tab-btn" data-tab="reportes">
+                            <i class="fas fa-chart-line"></i> Reportes
+                        </button>
+                    </div>
+
+                    <!-- TAB PEDIDOS -->
+                    <div class="tab-content active" id="tab-pedidos">
+                        <div class="filtros-buscador">
+                            <div class="filtros-pedidos">
+                                <button class="filtro-btn active" data-estado="preparando">
+                                    <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
+                                </button>
+                                <button class="filtro-btn" data-estado="en preparacion">
+                                    <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
+                                </button>
+                                <button class="filtro-btn" data-estado="en camino">
+                                    <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
+                                </button>
+                                <button class="filtro-btn" data-estado="entregado">
+                                    <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
+                                </button>
+                            </div>
+                            <div class="buscador-container">
+                                <div class="buscador-input">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
+                                </div>
+                                <div class="buscador-buttons">
+                                    <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
+                                        <i class="fas fa-times"></i> Limpiar
+                                    </button>
+                                    <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
+                                        <i class="fas fa-plus-circle"></i> Nuevo pedido
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pedidos-container" id="pedidos-container">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Cargando pedidos...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB PRODUCTOS -->
+                    <div class="tab-content" id="tab-productos">
+                        <div class="productos-header-actions">
+                            <button class="btn-primary" id="btn-agregar-producto">
+                                <i class="fas fa-plus"></i> Agregar producto
+                            </button>
+                        </div>
+                        <div class="productos-admin-grid" id="productos-admin-grid">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Cargando productos...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB DELIVERY -->
+                    <div class="tab-content" id="tab-delivery">
+                        <div class="delivery-header-actions">
+                            <button class="btn-primary" id="btn-agregar-delivery">
+                                <i class="fas fa-plus"></i> Agregar delivery
+                            </button>
+                        </div>
+                        <div class="delivery-grid" id="delivery-grid">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Cargando deliveries...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB REPORTES -->
+                    <div class="tab-content" id="tab-reportes">
+                        <div class="reportes-container">
+                            <div class="reportes-section">
+                                <h3 class="reportes-titulo"><i class="fas fa-chart-simple"></i> Resumen de ventas</h3>
+                                <div class="reportes-metrics">
+                                    <div class="reporte-card">
+                                        <div class="reporte-icon"><i class="fas fa-calendar-day"></i></div>
+                                        <div class="reporte-info">
+                                            <h4>Ventas hoy</h4>
+                                            <p id="reporte-ventas-hoy">$0</p>
+                                        </div>
+                                    </div>
+                                    <div class="reporte-card">
+                                        <div class="reporte-icon"><i class="fas fa-calendar-week"></i></div>
+                                        <div class="reporte-info">
+                                            <h4>Ventas semana</h4>
+                                            <p id="reporte-ventas-semana">$0</p>
+                                        </div>
+                                    </div>
+                                    <div class="reporte-card">
+                                        <div class="reporte-icon"><i class="fas fa-calendar-alt"></i></div>
+                                        <div class="reporte-info">
+                                            <h4>Ventas mes</h4>
+                                            <p id="reporte-ventas-mes">$0</p>
+                                        </div>
+                                    </div>
+                                    <div class="reporte-card">
+                                        <div class="reporte-icon"><i class="fas fa-check-circle"></i></div>
+                                        <div class="reporte-info">
+                                            <h4>Entregados</h4>
+                                            <p id="reporte-pedidos-entregados">0</p>
+                                        </div>
+                                    </div>
+                                    <div class="reporte-card">
+                                        <div class="reporte-icon"><i class="fas fa-clock"></i></div>
+                                        <div class="reporte-info">
+                                            <h4>Pendientes</h4>
+                                            <p id="reporte-pedidos-pendientes">0</p>
+                                        </div>
+                                    </div>
+                                    <div class="reporte-card">
+                                        <div class="reporte-icon"><i class="fas fa-truck"></i></div>
+                                        <div class="reporte-info">
+                                            <h4>Total pedidos</h4>
+                                            <p id="reporte-total-pedidos">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="reportes-section">
+                                <h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top productos más vendidos</h3>
+                                <div id="reporte-top-productos" class="reportes-lista">
+                                    <div class="loading-small">Cargando...</div>
+                                </div>
+                            </div>
+                            <div class="reportes-section">
+                                <h3 class="reportes-titulo"><i class="fas fa-chart-line"></i> Ventas por día (últimos 7 días)</h3>
+                                <div id="reporte-ventas-dias" class="reportes-dias">
+                                    <div class="loading-small">Cargando...</div>
+                                </div>
+                            </div>
+                            <div class="reportes-section">
+                                <h3 class="reportes-titulo"><i class="fas fa-history"></i> Últimos 10 pedidos</h3>
+                                <div id="reporte-ultimos-pedidos" class="reportes-pedidos-lista">
+                                    <div class="loading-small">Cargando...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MENÚ MÓVIL (HAMBURGUESA) -->
+    <div class="mobile-menu-admin" id="mobile-menu-admin">
+        <div class="mobile-menu-header">
+            <div class="mobile-menu-logo">
+                <img src="https://res.cloudinary.com/dlsmvyz8r/image/upload/v1775997469/logo-want-app-online-pedidos_faeoxm.png" alt="Want" style="height: 28px;">
+            </div>
+            <button class="menu-close" id="menu-close-admin">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-vendedor-info">
+            <div class="vendedor-avatar-mobile" id="vendedor-avatar-mobile">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="vendedor-detalles-mobile">
+                <p class="vendedor-nombre-mobile" id="vendedor-nombre-mobile">Cargando...</p>
+                <p class="vendedor-email-mobile" id="vendedor-email-mobile"></p>
             </div>
         </div>
-    </header>
-
-    <!-- MENÚ MÓVIL -->
-    <div class="mobile-menu-admin" id="mobile-menu-admin" style="display: none;">
-        <button class="menu-close" id="menu-close-admin">
-            <i class="fas fa-times"></i>
-        </button>
+        
         <div class="mobile-nav-admin">
             <button class="mobile-tab-btn active" data-tab="pedidos">
                 <i class="fas fa-box"></i> Pedidos
@@ -82,365 +495,38 @@
             <button class="mobile-tab-btn" data-tab="reportes">
                 <i class="fas fa-chart-line"></i> Reportes
             </button>
+        </div>
+        
+        <div class="mobile-menu-footer">
+            <button class="mobile-perfil-btn" id="mobile-perfil-btn">
+                <i class="fas fa-user-circle"></i> Mi perfil
+            </button>
             <button class="mobile-logout-btn" id="mobile-logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
     </div>
-    <div class="menu-overlay-admin" id="menu-overlay-admin" style="display: none;"></div>
+    <div class="menu-overlay-admin" id="menu-overlay-admin"></div>
 
-    <!-- MAIN CONTENT -->
-    <main>
-        <div class="container">
-            <!-- PANTALLA DE LOGIN/REGISTRO -->
-            <div class="admin-auth" id="admin-auth">
-                <div class="auth-card">
-                    <div class="auth-logo">
-                        <h1 class="auth-logo-text">Want</h1>
-                        <p class="auth-subtitle">Panel de vendedores</p>
-                    </div>
-                    
-                    <!-- PANEL LOGIN -->
-                    <div class="auth-panel active" id="login-panel">
-                        <form id="login-form">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="login-email" placeholder="tu@email.com" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Contraseña</label>
-                                <div class="password-wrapper">
-                                    <input type="password" id="login-password" placeholder="••••••••" required>
-                                    <button type="button" class="toggle-password" data-target="login-password">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="form-group remember-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="remember-me"> Recordarme
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
-                        </form>
-                        <div class="auth-divider"><span>¿No tenés cuenta?</span></div>
-                        <button class="btn btn-outline btn-block" id="btn-show-register">Registrarse</button>
-                        <div class="auth-links">
-                            <button class="link-btn" id="btn-show-recover">¿Olvidaste tu contraseña?</button>
-                        </div>
-                    </div>
-
-                    <!-- PANEL REGISTRO -->
-                    <div class="auth-panel" id="register-panel">
-                        <button class="back-to-login" id="back-to-login">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </button>
-                        <form id="register-form">
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Nombre del negocio *</label>
-                                    <input type="text" id="reg-nombre" required>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Email *</label>
-                                    <input type="email" id="reg-email" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Teléfono *</label>
-                                    <input type="tel" id="reg-telefono" placeholder="5491112345678" required>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Dirección *</label>
-                                    <input type="text" id="reg-direccion" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Rubro(s) del negocio *</label>
-                                <div class="rubros-selector" id="rubros-selector-registro"></div>
-                                <small class="input-help">Puedes seleccionar uno o varios rubros</small>
-                                <div class="rubros-seleccionados-info">
-                                    <strong>Rubros seleccionados:</strong> <span id="rubros-lista-registro">Ninguno</span>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Horario de atención</label>
-                                <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
-                            </div>
-                            <div class="form-group">
-                                <label>Logo del negocio</label>
-                                <input type="file" id="reg-logo" accept="image/*">
-                                <div id="reg-logo-preview" class="image-preview"></div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Contraseña *</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="reg-password" required>
-                                        <button type="button" class="toggle-password" data-target="reg-password">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Confirmar *</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="reg-password2" required>
-                                        <button type="button" class="toggle-password" data-target="reg-password2">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
-                        </form>
-                    </div>
-
-                    <!-- PANEL RECUPERAR CONTRASEÑA -->
-                    <div class="auth-panel" id="recover-panel">
-                        <button class="back-to-login" id="back-to-login-recover">
-                            <i class="fas fa-arrow-left"></i> Volver al inicio
-                        </button>
-                        <form id="recover-form">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="recover-email" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Enviar código</button>
-                        </form>
-                        <div id="recover-code-section" style="display: none;">
-                            <div class="form-group">
-                                <label>Código de recuperación</label>
-                                <input type="text" id="recover-code" placeholder="Ingresa el código de 6 dígitos">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group half">
-                                    <label>Nueva contraseña</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="recover-new-password">
-                                        <button type="button" class="toggle-password" data-target="recover-new-password">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group half">
-                                    <label>Confirmar</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="recover-new-password2">
-                                        <button type="button" class="toggle-password" data-target="recover-new-password2">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary btn-block" id="btn-reset-password">Restablecer contraseña</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PANEL ADMIN (después de login) -->
-            <div class="admin-panel" id="admin-panel" style="display: none;">
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
-                        <div class="metric-info">
-                            <h3 id="ventas-hoy">$0</h3>
-                            <p>Ventas hoy</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-calendar-week"></i></div>
-                        <div class="metric-info">
-                            <h3 id="ventas-semana">$0</h3>
-                            <p>Ventas esta semana</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="metric-info">
-                            <h3 id="ventas-mes">$0</h3>
-                            <p>Ventas este mes</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
-                        <div class="metric-info">
-                            <h3 id="pedidos-entregados">0</h3>
-                            <p>Pedidos entregados</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-truck"></i></div>
-                        <div class="metric-info">
-                            <h3 id="pedidos-pendientes">0</h3>
-                            <p>Pedidos pendientes</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="admin-tabs">
-                    <button class="tab-btn active" data-tab="pedidos">
-                        <i class="fas fa-box"></i> Pedidos
-                        <span class="tab-badge" id="badge-pedidos">0</span>
-                    </button>
-                    <button class="tab-btn" data-tab="productos">
-                        <i class="fas fa-pizza-slice"></i> Productos
-                        <span class="tab-badge" id="badge-productos">0</span>
-                    </button>
-                    <button class="tab-btn" data-tab="delivery">
-                        <i class="fas fa-truck"></i> Delivery
-                        <span class="tab-badge" id="badge-delivery">0</span>
-                    </button>
-                    <button class="tab-btn" data-tab="reportes">
-                        <i class="fas fa-chart-line"></i> Reportes
-                    </button>
-                </div>
-
-                <!-- TAB PEDIDOS -->
-                <div class="tab-content active" id="tab-pedidos">
-                    <div class="filtros-buscador">
-                        <div class="filtros-pedidos">
-                            <button class="filtro-btn active" data-estado="preparando">
-                                <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
-                            </button>
-                            <button class="filtro-btn" data-estado="en preparacion">
-                                <i class="fas fa-utensils"></i> Preparación <span id="count-preparacion">0</span>
-                            </button>
-                            <button class="filtro-btn" data-estado="en camino">
-                                <i class="fas fa-truck"></i> En camino <span id="count-camino">0</span>
-                            </button>
-                            <button class="filtro-btn" data-estado="entregado">
-                                <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
-                            </button>
-                        </div>
-                        <div class="buscador-container">
-                            <div class="buscador-input">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
-                            </div>
-                            <div class="buscador-buttons">
-                                <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
-                                    <i class="fas fa-times"></i> Limpiar
-                                </button>
-                                <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
-                                    <i class="fas fa-plus-circle"></i> Nuevo pedido
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pedidos-container" id="pedidos-container">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Cargando pedidos...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB PRODUCTOS -->
-                <div class="tab-content" id="tab-productos">
-                    <div class="productos-header-actions">
-                        <button class="btn-primary" id="btn-agregar-producto">
-                            <i class="fas fa-plus"></i> Agregar producto
-                        </button>
-                    </div>
-                    <div class="productos-admin-grid" id="productos-admin-grid">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Cargando productos...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB DELIVERY -->
-                <div class="tab-content" id="tab-delivery">
-                    <div class="delivery-header-actions">
-                        <button class="btn-primary" id="btn-agregar-delivery">
-                            <i class="fas fa-plus"></i> Agregar delivery
-                        </button>
-                    </div>
-                    <div class="delivery-grid" id="delivery-grid">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Cargando deliveries...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB REPORTES -->
-                <div class="tab-content" id="tab-reportes">
-                    <div class="reportes-container">
-                        <div class="reportes-section">
-                            <h3 class="reportes-titulo"><i class="fas fa-chart-simple"></i> Resumen de ventas</h3>
-                            <div class="reportes-metrics">
-                                <div class="reporte-card">
-                                    <div class="reporte-icon"><i class="fas fa-calendar-day"></i></div>
-                                    <div class="reporte-info">
-                                        <h4>Ventas hoy</h4>
-                                        <p id="reporte-ventas-hoy">$0</p>
-                                    </div>
-                                </div>
-                                <div class="reporte-card">
-                                    <div class="reporte-icon"><i class="fas fa-calendar-week"></i></div>
-                                    <div class="reporte-info">
-                                        <h4>Ventas esta semana</h4>
-                                        <p id="reporte-ventas-semana">$0</p>
-                                    </div>
-                                </div>
-                                <div class="reporte-card">
-                                    <div class="reporte-icon"><i class="fas fa-calendar-alt"></i></div>
-                                    <div class="reporte-info">
-                                        <h4>Ventas este mes</h4>
-                                        <p id="reporte-ventas-mes">$0</p>
-                                    </div>
-                                </div>
-                                <div class="reporte-card">
-                                    <div class="reporte-icon"><i class="fas fa-check-circle"></i></div>
-                                    <div class="reporte-info">
-                                        <h4>Pedidos entregados</h4>
-                                        <p id="reporte-pedidos-entregados">0</p>
-                                    </div>
-                                </div>
-                                <div class="reporte-card">
-                                    <div class="reporte-icon"><i class="fas fa-clock"></i></div>
-                                    <div class="reporte-info">
-                                        <h4>Pedidos pendientes</h4>
-                                        <p id="reporte-pedidos-pendientes">0</p>
-                                    </div>
-                                </div>
-                                <div class="reporte-card">
-                                    <div class="reporte-icon"><i class="fas fa-truck"></i></div>
-                                    <div class="reporte-info">
-                                        <h4>Total pedidos</h4>
-                                        <p id="reporte-total-pedidos">0</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="reportes-section">
-                            <h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top productos más vendidos</h3>
-                            <div id="reporte-top-productos" class="reportes-lista">
-                                <div class="loading-small">Cargando...</div>
-                            </div>
-                        </div>
-                        <div class="reportes-section">
-                            <h3 class="reportes-titulo"><i class="fas fa-chart-line"></i> Ventas por día (últimos 7 días)</h3>
-                            <div id="reporte-ventas-dias" class="reportes-dias">
-                                <div class="loading-small">Cargando...</div>
-                            </div>
-                        </div>
-                        <div class="reportes-section">
-                            <h3 class="reportes-titulo"><i class="fas fa-history"></i> Últimos 10 pedidos</h3>
-                            <div id="reporte-ultimos-pedidos" class="reportes-pedidos-lista">
-                                <div class="loading-small">Cargando...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+    <!-- BOTTOM NAVIGATION - MÓVIL -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <button class="bottom-nav-btn active" data-tab="pedidos">
+            <i class="fas fa-box"></i>
+            <span>Pedidos</span>
+        </button>
+        <button class="bottom-nav-btn" data-tab="productos">
+            <i class="fas fa-pizza-slice"></i>
+            <span>Productos</span>
+        </button>
+        <button class="bottom-nav-btn" data-tab="delivery">
+            <i class="fas fa-truck"></i>
+            <span>Delivery</span>
+        </button>
+        <button class="bottom-nav-btn" data-tab="reportes">
+            <i class="fas fa-chart-line"></i>
+            <span>Reportes</span>
+        </button>
+    </nav>
 
     <!-- MODALES -->
     <!-- MODAL RUBROS -->
@@ -464,7 +550,7 @@
         </div>
     </div>
 
-    <!-- MODAL PERFIL (CORREGIDO - SIN BOTÓN GUARDAR SOLO DESCRIPCIÓN) -->
+    <!-- MODAL PERFIL -->
     <div class="modal" id="modal-perfil">
         <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
@@ -621,7 +707,7 @@
         </div>
     </div>
 
-    <!-- MODAL COORDINAR TRANSFERENCIA (SOLO UNO) -->
+    <!-- MODAL COORDINAR TRANSFERENCIA -->
     <div class="modal" id="modal-coordinar-transferencia">
         <div class="modal-content small">
             <div class="modal-header">
@@ -817,9 +903,9 @@
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-vendedor.js"></script>
-<script src="js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-vendedor.js"></script>
+    <script src="js/admin.js"></script>
     
     <!-- Limpiar sesión de cliente antes de cargar panel vendedor -->
     <script>
@@ -833,43 +919,33 @@
             }
         })();
     </script>
-    
-    <script src="js/admin.js"></script>
 
     <!-- Reproductor de audio para notificaciones -->
     <audio id="notificacion-sound" preload="auto">
         <source src="sounds/notification.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Fallback para funciones de modales (por si acaso) -->
+    <!-- Fallback para funciones de modales -->
     <script>
         setTimeout(function() {
             if (typeof abrirModalTiempo === 'undefined') {
-                console.log('⚠️ abrirModalTiempo no definida, definiendo...');
                 window.abrirModalTiempo = function(pedidoId, boton) {
-                    console.log('abrirModalTiempo llamada para pedido:', pedidoId);
                     const modal = document.getElementById('modal-tiempo-entrega');
                     if (modal) {
                         modal.style.display = 'flex';
                         modal.classList.add('active');
                         window.pedidoTiempoActual = pedidoId;
                         window.botonTiempoActual = boton;
-                    } else {
-                        alert('Error: Modal no encontrado');
                     }
                 };
             }
             if (typeof abrirModalCoordinarTransferencia === 'undefined') {
-                console.log('⚠️ abrirModalCoordinarTransferencia no definida, definiendo...');
                 window.abrirModalCoordinarTransferencia = function(pedidoId) {
-                    console.log('abrirModalCoordinarTransferencia llamada para pedido:', pedidoId);
                     const modal = document.getElementById('modal-coordinar-transferencia');
                     if (modal) {
                         modal.style.display = 'flex';
                         modal.classList.add('active');
                         window.pedidoTransferenciaActual = pedidoId;
-                    } else {
-                        alert('Error: Modal no encontrado');
                     }
                 };
             }
