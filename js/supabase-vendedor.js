@@ -39,25 +39,13 @@
                     return { success: true, vendedores: allVendedores };
                     
                 case 'getPedidos':
+                    // ✅ CORREGIDO: Trae los pedidos con la columna 'productos' incluida
                     let pedidosQuery = supabaseVendedorClient.from('pedidos').select('*');
                     if (data.vendedorId) pedidosQuery = pedidosQuery.eq('vendedor_id', data.vendedorId);
                     const { data: pedidos, error: pedError } = await pedidosQuery.order('fecha', { ascending: false });
                     if (pedError) throw pedError;
                     
-                    for (const pedido of (pedidos || [])) {
-                        const { data: prodPedido } = await supabaseVendedorClient
-                            .from('productos_pedido')
-                            .select(`cantidad, precio_unitario, productos(id, nombre, precio)`)
-                            .eq('pedido_id', pedido.id);
-                        if (prodPedido) {
-                            pedido.productos = prodPedido.map(pp => ({
-                                id: pp.productos.id,
-                                nombre: pp.productos.nombre,
-                                precio: pp.precio_unitario,
-                                cantidad: pp.cantidad
-                            }));
-                        }
-                    }
+                    // Los productos ya vienen en la columna 'productos' del pedido
                     return { success: true, pedidos: pedidos || [] };
                     
                 case 'getProductos':
@@ -202,11 +190,13 @@
                             metodo_pago: data.metodo_pago,
                             detalles: data.detalles || '',
                             estado: data.estado,
-                            total: data.total
+                            total: data.total,
+                            productos: data.productos  // ✅ Actualizar también la columna productos
                         })
                         .eq('id', data.id);
                     if (updPedidoError) throw updPedidoError;
                     
+                    // También actualizar productos_pedido para mantener compatibilidad
                     await supabaseVendedorClient
                         .from('productos_pedido')
                         .delete()
@@ -245,7 +235,8 @@
                             total: data.total,
                             estado: 'preparando',
                             numero_orden: nuevoNumero,
-                            usuario_id: data.usuario_id || null
+                            usuario_id: data.usuario_id || null,
+                            productos: data.productos  // ✅ Guardar productos en la columna
                         }])
                         .select()
                         .single();
@@ -267,6 +258,7 @@
                     return { success: false, error: `Acción no implementada: ${action}` };
             }
         } catch (error) {
+            console.error('❌ Error en callAPIVendedor:', error);
             return { success: false, error: error.message };
         }
     };
