@@ -2975,3 +2975,524 @@ body:has(#admin-auth[style*="display: block"]) .page-container {
         display: none !important;
     }
 }
+/* ===================================================
+   OPTIMIZACIÓN MÓVIL - EXPERIENCIA TIPO APP
+   =================================================== */
+
+@media (max-width: 768px) {
+    
+    /* ================================================
+       HEADER - MÁS COMPACTO
+       ================================================ */
+    .top-bar {
+        height: 56px;
+        padding: 0 12px;
+    }
+    
+    .top-bar-titulo h1 {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .menu-toggle-mobile {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .estado-toggle-top {
+        padding: 3px 8px;
+        gap: 6px;
+    }
+    
+    .estado-label-top {
+        font-size: 0.7rem;
+    }
+    
+    .toggle-switch {
+        width: 40px;
+        height: 20px;
+    }
+    
+    .toggle-slider:before {
+        height: 14px;
+        width: 14px;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+    
+    .btn-notificaciones-top {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    /* ================================================
+       PAGE CONTAINER - MENOS PADDING
+       ================================================ */
+    .page-container {
+        padding: 12px;
+    }
+    
+    /* ================================================
+       MÉTRICAS - SCROLL HORIZONTAL OPTIMIZADO
+       ================================================ */
+    .metrics-grid {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 4px;
+        margin-bottom: 16px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .metrics-grid::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .metric-card {
+        flex: 0 0 130px;
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .metric-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .metric-info h3 {
+        font-size: 1rem;
+    }
+    
+    .metric-info p {
+        font-size: 0.6rem;
+    }
+    
+    /* ================================================
+       FILTROS - MÁS COMPACTOS
+       ================================================ */
+    .filtros-buscador {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .filtros-pedidos {
+        padding: 4px 8px;
+        gap: 4px;
+    }
+    
+    .filtro-btn {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .filtro-btn i {
+        font-size: 0.7rem;
+    }
+    
+    .buscador-input input {
+        padding: 12px 12px 12px 40px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-limpiar-busqueda,
+    .btn-nuevo-pedido {
+        padding: 12px 10px;
+        font-size: 0.8rem;
+    }
+    
+    /* ================================================
+       TARJETAS DE PEDIDOS - DISEÑO APP OPTIMIZADO
+       ================================================ */
+    .pedidos-lista-movil {
+        gap: 12px;
+    }
+    
+    .pedido-card-movil {
+        padding: 14px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: 1px solid var(--gray-200);
+        background: white;
+    }
+    
+    .pedido-card-header {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+    
+    .pedido-numero-movil {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .pedido-estado-movil {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    
+    .pedido-card-body {
+        margin-bottom: 12px;
+    }
+    
+    .pedido-cliente-movil {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--gray-800);
+    }
+    
+    .pedido-resumen-movil {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    /* ✅ NUEVO: Mostrar método de pago en la tarjeta */
+    .pedido-pago-movil {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        display: inline-block;
+        font-weight: 500;
+    }
+    
+    .pago-efectivo {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    
+    .pago-transferencia {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    
+    .pedido-card-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+    }
+    
+    .pedido-card-footer .btn-tabla {
+        flex: 1 1 calc(50% - 3px);
+        justify-content: center;
+        padding: 10px 8px;
+        font-size: 0.7rem;
+        min-width: 0;
+        white-space: nowrap;
+    }
+    
+    /* Botones más táctiles */
+    .btn-tabla {
+        padding: 10px 12px;
+        font-size: 0.7rem;
+        border-radius: 40px;
+    }
+    
+    /* ================================================
+       PRODUCTOS - VISTA LISTA OPTIMIZADA
+       ================================================ */
+    .productos-admin-grid {
+        gap: 10px;
+    }
+    
+    .producto-admin-card {
+        padding: 12px;
+        gap: 12px;
+        border-radius: 16px;
+    }
+    
+    .producto-admin-imagen {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+    }
+    
+    .producto-admin-nombre {
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+    
+    .producto-admin-precio {
+        font-size: 0.95rem;
+        margin: 4px 0;
+    }
+    
+    .producto-admin-descripcion {
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+    }
+    
+    .producto-admin-actions {
+        gap: 6px;
+    }
+    
+    .producto-admin-actions button {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+    }
+    
+    /* ================================================
+       DELIVERY - TARJETAS OPTIMIZADAS
+       ================================================ */
+    .delivery-grid {
+        gap: 10px;
+    }
+    
+    .delivery-card {
+        padding: 14px;
+        border-radius: 16px;
+    }
+    
+    .delivery-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    .delivery-info p {
+        font-size: 0.75rem;
+    }
+    
+    .delivery-actions button {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* ================================================
+       REPORTES - OPTIMIZADO
+       ================================================ */
+    .reportes-section {
+        padding: 14px;
+        margin-bottom: 14px;
+        border-radius: 16px;
+    }
+    
+    .reportes-titulo {
+        font-size: 0.95rem;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+    }
+    
+    .reportes-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .reporte-card {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .reporte-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .reporte-info h4 {
+        font-size: 0.65rem;
+    }
+    
+    .reporte-info p {
+        font-size: 0.95rem;
+    }
+    
+    /* ================================================
+       MODALES - FULL SCREEN Y FUNCIONALES
+       ================================================ */
+    .modal {
+        align-items: flex-end;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+        padding: 16px 18px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1rem;
+    }
+    
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 18px;
+    }
+    
+    .modal-footer {
+        padding: 14px 18px;
+        gap: 10px;
+    }
+    
+    .modal-footer button {
+        flex: 1;
+        padding: 14px;
+        font-size: 0.9rem;
+    }
+    
+    /* Formularios en modales */
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 14px;
+        font-size: 0.95rem;
+        border-radius: 12px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    /* ================================================
+       BOTTOM NAVIGATION - MÁS COMPACTA
+       ================================================ */
+    .bottom-nav {
+        height: 60px;
+        padding: 4px 8px;
+    }
+    
+    .bottom-nav-btn {
+        padding: 4px;
+        font-size: 0.65rem;
+    }
+    
+    .bottom-nav-btn i {
+        font-size: 1.2rem;
+        margin-bottom: 2px;
+    }
+    
+    /* ================================================
+       MENÚ HAMBURGUESA - OPTIMIZADO
+       ================================================ */
+    .mobile-menu-admin {
+        width: 85%;
+        max-width: 300px;
+    }
+    
+    .mobile-menu-header {
+        padding: 16px;
+    }
+    
+    .mobile-vendedor-info {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .vendedor-avatar-mobile {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+    
+    .vendedor-nombre-mobile {
+        font-size: 0.9rem;
+    }
+    
+    .vendedor-email-mobile {
+        font-size: 0.7rem;
+    }
+    
+    .mobile-nav-admin {
+        padding: 12px 12px;
+        gap: 2px;
+    }
+    
+    .mobile-tab-btn {
+        padding: 14px 16px;
+        font-size: 0.95rem;
+        gap: 14px;
+    }
+    
+    .mobile-tab-btn i {
+        font-size: 1.1rem;
+    }
+    
+    .mobile-menu-footer {
+        padding: 16px;
+        gap: 8px;
+    }
+    
+    .mobile-perfil-btn,
+    .mobile-logout-btn {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+    
+    /* ================================================
+       ELIMINAR DUPLICADOS
+       ================================================ */
+    /* Ocultar tabs de escritorio en móvil */
+    .admin-tabs {
+        display: none !important;
+    }
+    
+    /* Ocultar sidebar en móvil */
+    .sidebar {
+        display: none !important;
+    }
+    
+    /* Ocultar botón de logout del header (está en menú hamburguesa) */
+    .logout-top-btn {
+        display: none !important;
+    }
+    
+    /* ================================================
+       UTILIDADES - TAMAÑOS TÁCTILES
+       ================================================ */
+    button,
+    .btn,
+    .btn-primary,
+    .btn-outline,
+    .filtro-btn,
+    .mobile-tab-btn,
+    .bottom-nav-btn {
+        min-height: 44px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+    
+    /* Scroll suave */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+}

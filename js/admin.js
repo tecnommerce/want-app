@@ -872,10 +872,15 @@ function renderizarPedidosMovil() {
                     <span class="pedido-estado-movil ${estadoClase}">${estadoTexto}</span>
                 </div>
                 <div class="pedido-card-body">
-                    <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
-                    <div class="pedido-resumen-movil">📦 ${escapeHTML(productosResumen)}</div>
-                    <div class="pedido-resumen-movil">💰 ${total}</div>
-                </div>
+    <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
+    <div class="pedido-resumen-movil">📦 ${escapeHTML(productosResumen)}</div>
+    <div class="pedido-resumen-movil">
+        <span>💰 ${total}</span>
+        <span class="pedido-pago-movil ${p.metodo_pago === 'efectivo' ? 'pago-efectivo' : 'pago-transferencia'}">
+            ${p.metodo_pago === 'efectivo' ? '💵 Efectivo' : '🏦 Transferencia'}
+        </span>
+    </div>
+</div>
                 <div class="pedido-card-footer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
                     ${botonesHTML}
                 </div>
