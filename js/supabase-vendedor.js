@@ -8,7 +8,7 @@
     
     const supabaseVendedorClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
-            storage: window.sessionStorage,
+            storage: window.localStorage,
             autoRefreshToken: true,
             persistSession: true
         }
