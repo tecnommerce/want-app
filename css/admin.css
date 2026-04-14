@@ -429,124 +429,142 @@ body:has(#admin-auth[style*="display: flex"]) .bottom-nav { display: none !impor
 body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !important; padding: 0 !important; }
 
 /* ===================================================
-   RESPONSIVE - MÓVIL (≤768px) - OPTIMIZADO
+   RESPONSIVE - MÓVIL (≤768px) - REDISEÑO COMPLETO
    =================================================== */
 @media (max-width: 768px) {
+    /* Reset de ancho para todo */
+    * { max-width: 100vw; }
+    
     .sidebar { display: none !important; }
-    .main-content { margin-left: 0; padding-bottom: var(--bottom-nav-height); }
+    .main-content { margin-left: 0; padding-bottom: var(--bottom-nav-height); width: 100%; overflow-x: hidden; }
     .bottom-nav { display: flex; }
     .admin-tabs { display: none !important; }
     
-    /* HEADER */
-    .top-bar { height: 56px; padding: 0 12px; }
-    .top-bar-titulo h1 { font-size: 1rem; }
-    .avatar-perfil-mobile { display: flex; }
-    .estado-toggle-top .estado-label-top { display: none; }
-    .estado-toggle-top { padding: 3px 8px; }
-    .toggle-switch { width: 40px; height: 20px; }
-    .toggle-slider:before { height: 14px; width: 14px; }
-    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
-    .btn-notificaciones-top { width: 40px; height: 40px; }
-    .page-container { padding: 12px; }
+    /* Contenedor principal - padding consistente */
+    .page-container { padding: 12px; width: 100%; box-sizing: border-box; }
     
-    /* MÉTRICAS - 2x2 GRID */
+    /* ================================================
+       HEADER - COMPACTO Y CENTRADO
+       ================================================ */
+    .top-bar { 
+        height: 56px; 
+        padding: 0 12px; 
+        width: 100%; 
+    }
+    .top-bar-left { gap: 8px; }
+    .top-bar-titulo h1 { font-size: 1rem; font-weight: 600; }
+    .avatar-perfil-mobile { display: flex; width: 40px; height: 40px; }
+    .top-bar-right { gap: 8px; }
+    .estado-toggle-top .estado-label-top { display: none; }
+    .estado-toggle-top { padding: 2px 6px; }
+    .toggle-switch { width: 38px; height: 18px; }
+    .toggle-slider:before { height: 12px; width: 12px; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+    .btn-notificaciones-top { width: 38px; height: 38px; font-size: 1rem; }
+    
+    /* ================================================
+       MÉTRICAS - GRID 2x2 PERFECTO
+       ================================================ */
     .metrics-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px;
-        overflow: visible;
-        margin-bottom: 16px;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+        margin-bottom: 12px;
+        width: 100%;
     }
     .metric-card {
-        flex: none;
-        padding: 12px 10px;
+        padding: 12px 8px;
         gap: 8px;
+        border-radius: 14px;
+        width: 100%;
+        box-sizing: border-box;
     }
-    .metric-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-    .metric-info h3 {
-        font-size: 1.1rem;
-    }
-    .metric-info p {
-        font-size: 0.6rem;
-        white-space: nowrap;
-    }
+    .metric-icon { width: 34px; height: 34px; font-size: 1rem; }
+    .metric-info h3 { font-size: 1rem; line-height: 1.2; }
+    .metric-info p { font-size: 0.55rem; letter-spacing: 0.2px; }
     
-    /* FILTROS - SCROLL HORIZONTAL COMPACTO */
+    /* ================================================
+       FILTROS - SCROLL HORIZONTAL SIN DESBORDE
+       ================================================ */
     .filtros-buscador {
-        gap: 12px;
-        margin-bottom: 14px;
+        gap: 10px;
+        margin-bottom: 12px;
+        width: 100%;
     }
     .filtros-pedidos {
         width: 100%;
         overflow-x: auto;
         flex-wrap: nowrap;
-        justify-content: flex-start;
-        padding: 6px 8px;
-        gap: 6px;
+        padding: 5px 6px;
+        gap: 5px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        border-radius: 30px;
     }
     .filtros-pedidos::-webkit-scrollbar { display: none; }
     .filtro-btn {
-        padding: 8px 12px;
-        font-size: 0.75rem;
+        padding: 7px 10px;
+        font-size: 0.7rem;
         white-space: nowrap;
         flex-shrink: 0;
+        border-radius: 25px;
     }
-    .filtro-btn i {
-        font-size: 0.7rem;
-        margin-right: 2px;
-    }
+    .filtro-btn i { font-size: 0.65rem; }
+    .filtro-btn span { padding: 1px 4px; font-size: 0.55rem; }
     
-    /* BUSCADOR */
+    /* Buscador */
     .buscador-container {
         width: 100%;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
     }
     .buscador-input { width: 100%; }
     .buscador-input input {
         width: 100%;
-        padding: 12px 12px 12px 40px;
-        font-size: 0.9rem;
+        padding: 11px 11px 11px 38px;
+        font-size: 0.85rem;
+        border-radius: 25px;
     }
+    .buscador-input i { left: 14px; font-size: 0.85rem; }
     .buscador-buttons {
         width: 100%;
         gap: 8px;
     }
     .btn-limpiar-busqueda, .btn-nuevo-pedido {
         flex: 1;
-        justify-content: center;
-        padding: 12px 8px;
-        font-size: 0.8rem;
+        padding: 11px 6px;
+        font-size: 0.75rem;
+        border-radius: 25px;
+        white-space: nowrap;
     }
     
-    /* TABLA DESKTOP OCULTA */
+    /* ================================================
+       TARJETAS DE PEDIDOS - ANCHO 100% CONTROLADO
+       ================================================ */
     .pedidos-tabla { display: none; }
     .pedidos-container {
+        width: 100%;
         max-height: none;
         overflow: visible;
         background: transparent;
         box-shadow: none;
         border: none;
+        padding: 0;
     }
-    
-    /* TARJETAS DE PEDIDOS - DISEÑO COMPACTO */
     .pedidos-lista-movil {
         display: flex;
         flex-direction: column;
         gap: 10px;
+        width: 100%;
     }
     .pedido-card-movil {
         background: white;
         border-radius: 14px;
         padding: 12px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         border: 1px solid var(--gray-200);
+        width: 100%;
+        box-sizing: border-box;
     }
     .pedido-card-header {
         display: flex;
@@ -556,11 +574,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         padding-bottom: 8px;
         border-bottom: 1px solid var(--gray-100);
     }
-    .pedido-numero-movil {
-        font-weight: 700;
-        color: var(--primary);
-        font-size: 0.85rem;
-    }
+    .pedido-numero-movil { font-weight: 700; color: var(--primary); font-size: 0.85rem; }
     .pedido-estado-movil {
         font-size: 0.6rem;
         padding: 3px 8px;
@@ -568,69 +582,73 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         font-weight: 600;
         text-transform: uppercase;
     }
-    .pedido-card-body {
-        margin-bottom: 10px;
-    }
-    .pedido-cliente-movil {
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: var(--gray-800);
-    }
+    .pedido-card-body { margin-bottom: 10px; }
+    .pedido-cliente-movil { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
     .pedido-resumen-movil {
         font-size: 0.7rem;
         color: var(--gray-600);
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-bottom: 2px;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 3px;
     }
     .pedido-pago-movil {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         padding: 2px 8px;
         border-radius: 10px;
         font-weight: 500;
-        margin-left: 6px;
     }
-    .pago-efectivo {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-    .pago-transferencia {
-        background: #dbeafe;
-        color: #2563eb;
-    }
+    .pago-efectivo { background: #dcfce7; color: #16a34a; }
+    .pago-transferencia { background: #dbeafe; color: #2563eb; }
     
-    /* BOTONES EN TARJETA - 2 COLUMNAS */
+    /* Botones en tarjeta - EDICIÓN Y CANCELAR JUNTOS */
     .pedido-card-footer {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        display: flex;
+        flex-wrap: wrap;
         gap: 6px;
         margin-top: 10px;
+        width: 100%;
     }
     .pedido-card-footer .btn-tabla {
+        flex: 1 1 calc(50% - 3px);
         justify-content: center;
         padding: 10px 4px;
         font-size: 0.65rem;
-        margin: 0;
-        width: 100%;
+        border-radius: 25px;
+        min-width: 0;
         white-space: nowrap;
     }
+    /* Botones de Editar y Cancelar en misma fila */
+    .pedido-card-footer .btn-editar,
+    .pedido-card-footer .btn-cancelar-tabla {
+        flex: 1 1 calc(50% - 3px);
+    }
+    /* Botones principales ocupan ancho completo si es necesario */
+    .pedido-card-footer .btn-confirmar-preparar,
+    .pedido-card-footer .btn-coordinar,
+    .pedido-card-footer .btn-pedido-listo,
+    .pedido-card-footer .btn-enviar-delivery,
+    .pedido-card-footer .btn-entregar-pedido {
+        flex: 1 1 100%;
+    }
     .btn-tabla {
-        padding: 10px 8px;
+        padding: 10px 6px;
         font-size: 0.65rem;
-        border-radius: 30px;
+        border-radius: 25px;
     }
-    .btn-tabla i {
-        font-size: 0.7rem;
-    }
+    .btn-tabla i { font-size: 0.7rem; margin-right: 3px; }
     
-    /* PRODUCTOS */
-    .productos-header-actions { margin-bottom: 16px; }
+    /* ================================================
+       PRODUCTOS - ANCHO CONTROLADO
+       ================================================ */
+    .productos-header-actions { margin-bottom: 12px; width: 100%; }
+    .productos-header-actions .btn-primary { width: 100%; justify-content: center; }
     .productos-admin-grid {
         display: flex;
         flex-direction: column;
         gap: 10px;
+        width: 100%;
     }
     .producto-admin-card {
         flex-direction: row;
@@ -638,110 +656,114 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         padding: 10px;
         gap: 10px;
         border-radius: 14px;
+        width: 100%;
+        box-sizing: border-box;
     }
-    .producto-admin-imagen {
-        width: 65px;
-        height: 65px;
-        border-bottom: none;
-        border-radius: 10px;
-    }
+    .producto-admin-imagen { width: 60px; height: 60px; border-radius: 10px; }
     .producto-admin-info { flex: 1; padding: 0; }
     .producto-admin-nombre { font-size: 0.85rem; margin-bottom: 2px; }
     .producto-admin-precio { font-size: 0.9rem; margin: 3px 0; }
     .producto-admin-descripcion { font-size: 0.65rem; margin-bottom: 6px; }
     .producto-admin-actions { gap: 6px; }
-    .producto-admin-actions button {
-        padding: 8px 8px;
-        font-size: 0.65rem;
-    }
+    .producto-admin-actions button { padding: 8px 8px; font-size: 0.65rem; }
     
-    /* DELIVERY */
-    .delivery-header-actions { margin-bottom: 16px; }
+    /* ================================================
+       DELIVERY - ANCHO CONTROLADO
+       ================================================ */
+    .delivery-header-actions { margin-bottom: 12px; width: 100%; }
+    .delivery-header-actions .btn-primary { width: 100%; justify-content: center; }
     .delivery-grid {
         grid-template-columns: 1fr;
         gap: 10px;
+        width: 100%;
     }
     .delivery-card {
         padding: 12px;
         border-radius: 14px;
+        width: 100%;
+        box-sizing: border-box;
     }
     .delivery-info h4 { font-size: 0.85rem; }
     .delivery-info p { font-size: 0.7rem; }
     .delivery-actions { gap: 8px; }
-    .delivery-actions button {
-        width: 38px;
-        height: 38px;
-    }
+    .delivery-actions button { width: 36px; height: 36px; }
     
-    /* REPORTES */
-    .reportes-container { padding: 0; }
+    /* ================================================
+       REPORTES - ANCHO CONTROLADO
+       ================================================ */
+    .reportes-container { padding: 0; width: 100%; }
     .reportes-section {
         padding: 14px 12px;
         margin-bottom: 12px;
         border-radius: 14px;
+        width: 100%;
+        box-sizing: border-box;
     }
-    .reportes-titulo {
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-    }
+    .reportes-titulo { font-size: 0.9rem; margin-bottom: 12px; padding-bottom: 10px; }
     .reportes-metrics {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
     }
-    .reporte-card {
-        padding: 10px;
-        gap: 8px;
-    }
-    .reporte-icon {
-        width: 34px;
-        height: 34px;
-        font-size: 0.9rem;
-    }
+    .reporte-card { padding: 10px; gap: 8px; }
+    .reporte-icon { width: 34px; height: 34px; font-size: 0.9rem; }
     .reporte-info h4 { font-size: 0.6rem; }
     .reporte-info p { font-size: 0.9rem; }
     
-    /* MODALES */
-    .modal { align-items: flex-end; }
-    .modal-content {
-        width: 100%;
-        max-width: 100%;
-        border-radius: 20px 20px 0 0;
-        max-height: 85vh;
+    /* ================================================
+       MODALES - CENTRADOS Y CONTROLADOS
+       ================================================ */
+    .modal {
+        align-items: center !important;
+        padding: 16px;
+        box-sizing: border-box;
     }
-    .modal-header { padding: 14px 18px; }
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 18px !important;
+        max-height: 80vh;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+    .modal-header { padding: 14px 16px; }
     .modal-header h3 { font-size: 1rem; }
-    .modal-close { width: 34px; height: 34px; }
+    .modal-close { width: 32px; height: 32px; }
     .modal-body { padding: 16px; }
     .modal-footer {
         padding: 12px 16px;
         gap: 8px;
+        flex-wrap: wrap;
     }
     .modal-footer button {
         flex: 1;
-        padding: 12px;
-        font-size: 0.85rem;
+        padding: 12px 10px;
+        font-size: 0.8rem;
+        white-space: nowrap;
     }
     
-    /* FORMULARIOS EN MODALES */
-    .form-group { margin-bottom: 14px; }
-    .form-group label {
-        font-size: 0.75rem;
-        margin-bottom: 5px;
+    /* Formularios centrados */
+    .form-group {
+        margin-bottom: 14px;
+        width: 100%;
     }
+    .form-group label { font-size: 0.75rem; margin-bottom: 5px; }
     .form-group input,
     .form-group select,
     .form-group textarea {
         padding: 12px 12px;
         font-size: 0.9rem;
         border-radius: 10px;
+        width: 100%;
+        box-sizing: border-box;
     }
     .form-row {
         flex-direction: column;
         gap: 10px;
+        width: 100%;
     }
+    .form-row .form-group { width: 100%; }
     
-    /* PERFIL MODAL */
+    /* Perfil modal centrado */
     .perfil-header {
         flex-direction: column;
         text-align: center;
@@ -749,27 +771,21 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         margin-bottom: 20px;
         padding-bottom: 16px;
     }
-    .perfil-avatar { width: 70px; height: 70px; }
+    .perfil-avatar { width: 70px; height: 70px; margin: 0 auto; }
     .btn-cambiar-avatar { width: 28px; height: 28px; }
     .perfil-info h3 { font-size: 1rem; }
     .perfil-info p { font-size: 0.75rem; }
-    .btn-save {
-        padding: 12px;
-        font-size: 0.9rem;
-    }
+    .btn-save { padding: 12px; font-size: 0.9rem; }
     
-    /* RUBROS */
+    /* Rubros */
     .rubros-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
         padding: 10px;
     }
-    .btn-rubro {
-        padding: 10px 8px;
-        font-size: 0.75rem;
-    }
+    .btn-rubro { padding: 10px 8px; font-size: 0.75rem; }
     
-    /* NOTIFICACIONES */
+    /* Notificaciones */
     .notificaciones-panel {
         position: fixed;
         top: auto;
@@ -778,28 +794,19 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         right: 0;
         width: 100%;
         max-width: 100%;
-        border-radius: 20px 20px 0 0;
+        border-radius: 18px 18px 0 0;
         max-height: 60vh;
     }
-    .notificacion-item { padding: 12px 16px; }
-    .notificacion-icono { width: 38px; height: 38px; }
-    .notificacion-mensaje { font-size: 0.8rem; }
     
-    /* BOTTOM NAV */
+    /* Bottom nav */
     .bottom-nav {
         height: 60px;
         padding: 4px 8px;
     }
-    .bottom-nav-btn {
-        padding: 4px;
-        font-size: 0.6rem;
-    }
-    .bottom-nav-btn i {
-        font-size: 1.2rem;
-        margin-bottom: 2px;
-    }
+    .bottom-nav-btn { padding: 4px; font-size: 0.6rem; }
+    .bottom-nav-btn i { font-size: 1.2rem; margin-bottom: 2px; }
     
-    /* UTILIDADES TÁCTILES */
+    /* Utilidades táctiles */
     button, .btn, .btn-primary, .btn-outline, .filtro-btn, .bottom-nav-btn {
         min-height: 44px;
         -webkit-tap-highlight-color: transparent;
@@ -807,13 +814,14 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     input, select, textarea { font-size: 16px !important; }
 }
 
-/* Para pantallas muy pequeñas */
+/* Pantallas muy pequeñas (≤380px) */
 @media (max-width: 380px) {
-    .metric-card { padding: 10px 8px; }
-    .metric-icon { width: 32px; height: 32px; }
-    .metric-info h3 { font-size: 1rem; }
+    .metric-card { padding: 10px 6px; }
+    .metric-icon { width: 30px; height: 30px; }
+    .metric-info h3 { font-size: 0.9rem; }
     .pedido-card-footer .btn-tabla { font-size: 0.6rem; padding: 8px 2px; }
-    .btn-tabla i { font-size: 0.6rem; }
+    .btn-tabla i { font-size: 0.6rem; margin-right: 2px; }
+    .filtro-btn { padding: 6px 8px; font-size: 0.65rem; }
 }
 
 /* ===================================================
