@@ -7,6 +7,7 @@ let pedidosUsuario = [];
 let authSubscription = null;
 let notificacionesAbiertas = false;
 let notificacionesActuales = [];
+let realtimeCanalPedidos = null;  // ✅ Canal de tiempo real para pedidos
 
 // ===================================================
 // UTILIDADES
@@ -50,7 +51,6 @@ function formatearPrecio(precio) {
 function formatearFecha(fechaISO) {
     if (!fechaISO) return 'N/A';
     const fecha = new Date(fechaISO);
-    // Forzar zona horaria Argentina (UTC-3)
     return fecha.toLocaleString('es-AR', { 
         day: '2-digit', 
         month: '2-digit', 
@@ -134,6 +134,9 @@ function mostrarMiCuenta() {
     // Ocultar buscador en Mi Cuenta
     if (searchContainer) searchContainer.style.display = 'none';
     
+    // ✅ Detener tiempo real al salir de Mis pedidos
+    detenerRealtimePedidosUsuario();
+    
     forzarCargaDatosUsuario().then(() => {
         cargarDatosUsuarioFormulario();
     });
@@ -151,6 +154,9 @@ function volverAlHome() {
     
     // Mostrar buscador en el home
     if (searchContainer) searchContainer.style.display = 'block';
+    
+    // ✅ Detener tiempo real al salir de Mis pedidos
+    detenerRealtimePedidosUsuario();
     
     if (typeof cargarNegocios === 'function') cargarNegocios();
     if (typeof cargarBanners === 'function') cargarBanners();
@@ -355,6 +361,10 @@ async function guardarDatosUsuario(e) {
     });
 }
 
+// ===================================================
+// FUNCIONES DE PEDIDOS DEL USUARIO
+// ===================================================
+
 async function cargarPedidosUsuario() {
     if (!usuarioActual) return;
     
@@ -363,6 +373,96 @@ async function cargarPedidosUsuario() {
         pedidosUsuario = result.pedidos || [];
         renderizarPedidosUsuario();
         actualizarTotalGastado();
+        
+        // ✅ Iniciar tiempo real para los pedidos de este usuario
+        iniciarRealtimePedidosUsuario();
+    }
+}
+
+// ✅ NUEVA FUNCIÓN: Iniciar tiempo real para pedidos del usuario
+function iniciarRealtimePedidosUsuario() {
+    if (!usuarioActual) return;
+    
+    // Cerrar canal anterior si existe
+    if (realtimeCanalPedidos) {
+        supabaseClient.removeChannel(realtimeCanalPedidos);
+    }
+    
+    console.log('🔄 Iniciando tiempo real para pedidos del usuario:', usuarioActual.id);
+    
+    realtimeCanalPedidos = supabaseClient
+        .channel('usuario-pedidos-' + usuarioActual.id)
+        .on('postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'pedidos',
+                filter: `usuario_id=eq.${usuarioActual.id}`
+            },
+            (payload) => {
+                console.log('📢 Pedido actualizado en tiempo real:', payload.new);
+                const pedidoActualizado = payload.new;
+                
+                // Actualizar el pedido en el array local
+                const index = pedidosUsuario.findIndex(p => p.id === pedidoActualizado.id);
+                if (index !== -1) {
+                    // Mantener los productos si no vienen en el payload
+                    if (!pedidoActualizado.productos && pedidosUsuario[index].productos) {
+                        pedidoActualizado.productos = pedidosUsuario[index].productos;
+                    }
+                    pedidosUsuario[index] = pedidoActualizado;
+                } else {
+                    // Si no existe, agregarlo
+                    pedidosUsuario.push(pedidoActualizado);
+                }
+                
+                // Re-renderizar la lista de pedidos
+                renderizarPedidosUsuario();
+                actualizarTotalGastado();
+                
+                // Mostrar notificación del cambio
+                const estadoTexto = getEstadoPedidoTexto(pedidoActualizado.estado);
+                const mensaje = `📦 Pedido #${pedidoActualizado.numero_orden || pedidoActualizado.id}: ${estadoTexto}`;
+                
+                // Si la pantalla de mis pedidos está visible, mostrar toast
+                const misPedidosScreen = document.getElementById('mis-pedidos-screen');
+                if (misPedidosScreen && misPedidosScreen.style.display === 'block') {
+                    mostrarToast(mensaje, 'info');
+                }
+            }
+        )
+        .on('postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'pedidos',
+                filter: `usuario_id=eq.${usuarioActual.id}`
+            },
+            (payload) => {
+                console.log('📢 Nuevo pedido en tiempo real:', payload.new);
+                const nuevoPedido = payload.new;
+                
+                // Agregar al array local
+                pedidosUsuario.unshift(nuevoPedido);
+                
+                // Re-renderizar
+                renderizarPedidosUsuario();
+                actualizarTotalGastado();
+                
+                // Mostrar notificación
+                const mensaje = `🎉 ¡Nuevo pedido #${nuevoPedido.numero_orden || nuevoPedido.id} registrado!`;
+                mostrarToast(mensaje, 'success');
+            }
+        )
+        .subscribe();
+}
+
+// ✅ NUEVA FUNCIÓN: Detener tiempo real
+function detenerRealtimePedidosUsuario() {
+    if (realtimeCanalPedidos) {
+        console.log('🛑 Deteniendo tiempo real de pedidos');
+        supabaseClient.removeChannel(realtimeCanalPedidos);
+        realtimeCanalPedidos = null;
     }
 }
 
@@ -467,6 +567,9 @@ function cerrarModalDetallePedido() {
 }
 
 async function cerrarSesion() {
+    // ✅ Detener tiempo real al cerrar sesión
+    detenerRealtimePedidosUsuario();
+    
     if (typeof signOut === 'function') {
         const result = await signOut();
         if (result.success) {
@@ -729,7 +832,6 @@ function irAMisPedidosDesdeNotificacion(notificacionId) {
 window.addEventListener('nuevaNotificacion', () => {
     console.log('🔔 Evento nuevaNotificacion recibido');
     actualizarContadorNotificaciones();
-    // Si el panel está abierto, recargar lista
     if (notificacionesAbiertas) {
         cargarListaNotificaciones();
     }
@@ -774,6 +876,7 @@ document.addEventListener('usuarioActualizado', (event) => {
 
 window.onSessionClosed = function() {
     console.log('🔴 Sesión cerrada por SessionManager');
+    detenerRealtimePedidosUsuario();  // ✅ Detener tiempo real
     usuarioActual = null;
     window.location.href = 'login.html';
 };
