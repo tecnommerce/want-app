@@ -45,9 +45,22 @@ body {
     color: var(--gray-800);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    width: 100%;
+    overflow-x: hidden;
 }
 
-.app-wrapper { display: flex; min-height: 100vh; }
+html {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+.app-wrapper { 
+    display: flex; 
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+}
 
 /* ===================================================
    SIDEBAR - ESCRITORIO
@@ -433,113 +446,150 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
    =================================================== */
 @media (max-width: 768px) {
     /* Reset de ancho para todo */
+    html, body { width: 100%; height: 100%; overflow-x: hidden; }
     * { max-width: 100vw; }
     
     .sidebar { display: none !important; }
-    .main-content { margin-left: 0; padding-bottom: var(--bottom-nav-height); width: 100%; overflow-x: hidden; }
+    .main-content { 
+        margin-left: 0; 
+        padding-bottom: var(--bottom-nav-height); 
+        width: 100vw; 
+        overflow-x: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
     .bottom-nav { display: flex; }
     .admin-tabs { display: none !important; }
     
     /* Contenedor principal - padding consistente */
-    .page-container { padding: 12px; width: 100%; box-sizing: border-box; }
+    .page-container { 
+        padding: 10px; 
+        width: 100%; 
+        box-sizing: border-box;
+        flex: 1;
+    }
     
     /* ================================================
        HEADER - COMPACTO Y CENTRADO
        ================================================ */
     .top-bar { 
-        height: 56px; 
-        padding: 0 12px; 
+        height: 54px; 
+        padding: 0 10px; 
         width: 100%; 
+        box-sizing: border-box;
+        position: sticky;
+        top: 0;
+        z-index: 99;
     }
-    .top-bar-left { gap: 8px; }
-    .top-bar-titulo h1 { font-size: 1rem; font-weight: 600; }
-    .avatar-perfil-mobile { display: flex; width: 40px; height: 40px; }
-    .top-bar-right { gap: 8px; }
+    .top-bar-left { gap: 10px; align-items: center; }
+    .top-bar-titulo h1 { font-size: 0.95rem; font-weight: 700; }
+    .avatar-perfil-mobile { display: flex; width: 38px; height: 38px; }
+    .top-bar-right { gap: 10px; }
     .estado-toggle-top .estado-label-top { display: none; }
-    .estado-toggle-top { padding: 2px 6px; }
-    .toggle-switch { width: 38px; height: 18px; }
-    .toggle-slider:before { height: 12px; width: 12px; }
-    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+    .estado-toggle-top { padding: 4px 8px; border-radius: 20px; }
+    .toggle-switch { width: 40px; height: 22px; }
+    .toggle-slider:before { height: 14px; width: 14px; left: 4px; bottom: 4px; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
     .btn-notificaciones-top { width: 38px; height: 38px; font-size: 1rem; }
     
     /* ================================================
-       MÉTRICAS - GRID 2x2 PERFECTO
+       MÉTRICAS - GRID 2x2 COMPACTO
        ================================================ */
     .metrics-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 8px;
-        margin-bottom: 12px;
+        gap: 6px;
+        margin-bottom: 10px;
         width: 100%;
     }
     .metric-card {
-        padding: 12px 8px;
+        padding: 10px;
         gap: 8px;
-        border-radius: 14px;
+        border-radius: 12px;
         width: 100%;
         box-sizing: border-box;
+        flex-direction: column;
+        text-align: center;
     }
-    .metric-icon { width: 34px; height: 34px; font-size: 1rem; }
-    .metric-info h3 { font-size: 1rem; line-height: 1.2; }
-    .metric-info p { font-size: 0.55rem; letter-spacing: 0.2px; }
+    .metric-icon { 
+        width: 32px; 
+        height: 32px; 
+        font-size: 0.9rem;
+        margin: 0 auto;
+    }
+    .metric-info { padding: 0; }
+    .metric-info h3 { font-size: 0.95rem; line-height: 1.1; }
+    .metric-info p { font-size: 0.5rem; letter-spacing: 0.1px; }
     
     /* ================================================
        FILTROS - SCROLL HORIZONTAL SIN DESBORDE
        ================================================ */
     .filtros-buscador {
-        gap: 10px;
-        margin-bottom: 12px;
+        gap: 8px;
+        margin-bottom: 10px;
         width: 100%;
+        flex-direction: column;
     }
     .filtros-pedidos {
         width: 100%;
         overflow-x: auto;
+        overflow-y: hidden;
         flex-wrap: nowrap;
-        padding: 5px 6px;
-        gap: 5px;
+        padding: 5px 4px;
+        gap: 4px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         border-radius: 30px;
+        background: white;
+        border: 1px solid var(--gray-200);
     }
     .filtros-pedidos::-webkit-scrollbar { display: none; }
     .filtro-btn {
-        padding: 7px 10px;
-        font-size: 0.7rem;
+        padding: 6px 10px;
+        font-size: 0.68rem;
         white-space: nowrap;
         flex-shrink: 0;
-        border-radius: 25px;
+        border-radius: 20px;
+        transition: all 0.2s;
     }
-    .filtro-btn i { font-size: 0.65rem; }
-    .filtro-btn span { padding: 1px 4px; font-size: 0.55rem; }
+    .filtro-btn i { font-size: 0.6rem; }
+    .filtro-btn span { padding: 1px 3px; font-size: 0.5rem; }
     
     /* Buscador */
     .buscador-container {
         width: 100%;
-        flex-direction: column;
-        gap: 8px;
+        flex-direction: row;
+        gap: 6px;
+        align-items: flex-start;
     }
-    .buscador-input { width: 100%; }
+    .buscador-input { 
+        flex: 1;
+        position: relative;
+    }
     .buscador-input input {
         width: 100%;
-        padding: 11px 11px 11px 38px;
+        padding: 10px 10px 10px 36px;
         font-size: 0.85rem;
-        border-radius: 25px;
+        border-radius: 20px;
     }
-    .buscador-input i { left: 14px; font-size: 0.85rem; }
+    .buscador-input i { left: 12px; font-size: 0.8rem; top: 50%; }
     .buscador-buttons {
-        width: 100%;
-        gap: 8px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: nowrap;
     }
     .btn-limpiar-busqueda, .btn-nuevo-pedido {
-        flex: 1;
-        padding: 11px 6px;
-        font-size: 0.75rem;
-        border-radius: 25px;
+        padding: 10px 10px;
+        font-size: 0.7rem;
+        border-radius: 20px;
         white-space: nowrap;
+        flex-shrink: 0;
     }
+    .btn-limpiar-busqueda i, .btn-nuevo-pedido i { font-size: 0.75rem; }
     
     /* ================================================
-       TARJETAS DE PEDIDOS - ANCHO 100% CONTROLADO
+       TARJETAS DE PEDIDOS - COMPACTAS Y PERFECTAS
        ================================================ */
     .pedidos-tabla { display: none; }
     .pedidos-container {
@@ -550,18 +600,19 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         box-shadow: none;
         border: none;
         padding: 0;
+        margin-bottom: 10px;
     }
     .pedidos-lista-movil {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         width: 100%;
     }
     .pedido-card-movil {
         background: white;
-        border-radius: 14px;
-        padding: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         border: 1px solid var(--gray-200);
         width: 100%;
         box-sizing: border-box;
@@ -570,61 +621,89 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 8px;
-        padding-bottom: 8px;
+        margin-bottom: 6px;
+        padding-bottom: 6px;
         border-bottom: 1px solid var(--gray-100);
+        gap: 8px;
     }
-    .pedido-numero-movil { font-weight: 700; color: var(--primary); font-size: 0.85rem; }
+    .pedido-numero-movil { 
+        font-weight: 700; 
+        color: var(--primary); 
+        font-size: 0.8rem;
+        flex: 1;
+    }
     .pedido-estado-movil {
-        font-size: 0.6rem;
-        padding: 3px 8px;
-        border-radius: 12px;
+        font-size: 0.55rem;
+        padding: 2px 6px;
+        border-radius: 10px;
         font-weight: 600;
         text-transform: uppercase;
+        white-space: nowrap;
     }
-    .pedido-card-body { margin-bottom: 10px; }
-    .pedido-cliente-movil { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+    .pedido-card-body { 
+        margin-bottom: 8px;
+    }
+    .pedido-cliente-movil { 
+        font-size: 0.8rem; 
+        font-weight: 600; 
+        margin-bottom: 3px;
+        color: var(--gray-800);
+    }
     .pedido-resumen-movil {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         color: var(--gray-600);
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 5px;
+        gap: 3px;
         margin-bottom: 3px;
+        line-height: 1.3;
     }
+    .pedido-resumen-movil strong { font-weight: 600; }
     .pedido-pago-movil {
-        font-size: 0.6rem;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-weight: 500;
+        font-size: 0.55rem;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-block;
     }
     .pago-efectivo { background: #dcfce7; color: #16a34a; }
     .pago-transferencia { background: #dbeafe; color: #2563eb; }
     
-    /* Botones en tarjeta - EDICIÓN Y CANCELAR JUNTOS */
+    .pedido-direccion-movil {
+        font-size: 0.65rem;
+        color: var(--gray-600);
+        margin-bottom: 3px;
+        display: flex;
+        align-items: flex-start;
+        gap: 3px;
+    }
+    .pedido-direccion-movil i { flex-shrink: 0; margin-top: 2px; font-size: 0.55rem; }
+    
+    /* Botones en tarjeta - OPTIMIZADOS PARA MÓVIL */
     .pedido-card-footer {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 10px;
+        gap: 5px;
+        margin-top: 8px;
         width: 100%;
     }
     .pedido-card-footer .btn-tabla {
-        flex: 1 1 calc(50% - 3px);
+        flex: 1 1 calc(50% - 2.5px);
         justify-content: center;
-        padding: 10px 4px;
-        font-size: 0.65rem;
-        border-radius: 25px;
+        padding: 8px 3px;
+        font-size: 0.6rem;
+        border-radius: 18px;
         min-width: 0;
         white-space: nowrap;
+        min-height: 32px;
     }
-    /* Botones de Editar y Cancelar en misma fila */
+    /* Botones de Editar y Cancelar lado a lado */
     .pedido-card-footer .btn-editar,
     .pedido-card-footer .btn-cancelar-tabla {
-        flex: 1 1 calc(50% - 3px);
+        flex: 1 1 calc(50% - 2.5px);
     }
-    /* Botones principales ocupan ancho completo si es necesario */
+    /* Botones principales ancho completo */
     .pedido-card-footer .btn-confirmar-preparar,
     .pedido-card-footer .btn-coordinar,
     .pedido-card-footer .btn-pedido-listo,
@@ -633,195 +712,423 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         flex: 1 1 100%;
     }
     .btn-tabla {
-        padding: 10px 6px;
-        font-size: 0.65rem;
-        border-radius: 25px;
+        padding: 8px 4px;
+        font-size: 0.6rem;
+        border-radius: 18px;
     }
-    .btn-tabla i { font-size: 0.7rem; margin-right: 3px; }
+    .btn-tabla i { font-size: 0.65rem; margin-right: 2px; }
     
     /* ================================================
-       PRODUCTOS - ANCHO CONTROLADO
+       PRODUCTOS - LISTA COMPACTA
        ================================================ */
-    .productos-header-actions { margin-bottom: 12px; width: 100%; }
-    .productos-header-actions .btn-primary { width: 100%; justify-content: center; }
+    .productos-header-actions { 
+        margin-bottom: 10px; 
+        width: 100%; 
+    }
+    .productos-header-actions .btn-primary { 
+        width: 100%; 
+        justify-content: center;
+        padding: 10px;
+    }
     .productos-admin-grid {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         width: 100%;
     }
     .producto-admin-card {
-        flex-direction: row;
+        display: flex;
         align-items: center;
         padding: 10px;
         gap: 10px;
-        border-radius: 14px;
+        border-radius: 12px;
         width: 100%;
         box-sizing: border-box;
     }
-    .producto-admin-imagen { width: 60px; height: 60px; border-radius: 10px; }
+    .producto-admin-imagen { 
+        width: 50px; 
+        height: 50px; 
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
     .producto-admin-info { flex: 1; padding: 0; }
-    .producto-admin-nombre { font-size: 0.85rem; margin-bottom: 2px; }
-    .producto-admin-precio { font-size: 0.9rem; margin: 3px 0; }
-    .producto-admin-descripcion { font-size: 0.65rem; margin-bottom: 6px; }
-    .producto-admin-actions { gap: 6px; }
-    .producto-admin-actions button { padding: 8px 8px; font-size: 0.65rem; }
+    .producto-admin-nombre { font-size: 0.8rem; margin-bottom: 2px; }
+    .producto-admin-precio { font-size: 0.85rem; margin: 2px 0; color: var(--primary); font-weight: 700; }
+    .producto-admin-descripcion { font-size: 0.6rem; margin-bottom: 4px; }
+    .producto-admin-actions { gap: 4px; }
+    .producto-admin-actions button { padding: 6px 8px; font-size: 0.6rem; }
     
     /* ================================================
-       DELIVERY - ANCHO CONTROLADO
+       DELIVERY - LISTA COMPACTA
        ================================================ */
-    .delivery-header-actions { margin-bottom: 12px; width: 100%; }
-    .delivery-header-actions .btn-primary { width: 100%; justify-content: center; }
+    .delivery-header-actions { 
+        margin-bottom: 10px; 
+        width: 100%; 
+    }
+    .delivery-header-actions .btn-primary { 
+        width: 100%; 
+        justify-content: center;
+        padding: 10px;
+    }
     .delivery-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         width: 100%;
     }
     .delivery-card {
-        padding: 12px;
-        border-radius: 14px;
+        padding: 10px;
+        border-radius: 12px;
         width: 100%;
         box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .delivery-info h4 { font-size: 0.85rem; }
-    .delivery-info p { font-size: 0.7rem; }
-    .delivery-actions { gap: 8px; }
-    .delivery-actions button { width: 36px; height: 36px; }
+    .delivery-info h4 { font-size: 0.8rem; margin-bottom: 2px; }
+    .delivery-info p { font-size: 0.65rem; }
+    .delivery-actions { gap: 6px; }
+    .delivery-actions button { width: 32px; height: 32px; font-size: 0.7rem; }
     
     /* ================================================
-       REPORTES - ANCHO CONTROLADO
+       REPORTES - COMPACTOS
        ================================================ */
     .reportes-container { padding: 0; width: 100%; }
     .reportes-section {
-        padding: 14px 12px;
-        margin-bottom: 12px;
-        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 12px;
         width: 100%;
         box-sizing: border-box;
     }
-    .reportes-titulo { font-size: 0.9rem; margin-bottom: 12px; padding-bottom: 10px; }
+    .reportes-titulo { font-size: 0.85rem; margin-bottom: 10px; padding-bottom: 8px; }
     .reportes-metrics {
+        display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        gap: 6px;
     }
-    .reporte-card { padding: 10px; gap: 8px; }
-    .reporte-icon { width: 34px; height: 34px; font-size: 0.9rem; }
-    .reporte-info h4 { font-size: 0.6rem; }
-    .reporte-info p { font-size: 0.9rem; }
+    .reporte-card { 
+        padding: 8px; 
+        gap: 6px;
+        border-radius: 10px;
+    }
+    .reporte-icon { width: 30px; height: 30px; font-size: 0.8rem; }
+    .reporte-info h4 { font-size: 0.55rem; margin-bottom: 2px; }
+    .reporte-info p { font-size: 0.8rem; }
     
     /* ================================================
-       MODALES - CENTRADOS Y CONTROLADOS
+       AUTENTICACIÓN - CENTRADA PERFECTA
        ================================================ */
-    .modal {
-        align-items: center !important;
-        padding: 16px;
+    .admin-auth {
+        padding: 20px 12px;
+    }
+    .auth-card { 
+        padding: 24px 20px;
+        border-radius: 16px;
+        max-width: 100%;
+        width: 100%;
         box-sizing: border-box;
     }
-    .modal-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        border-radius: 18px !important;
-        max-height: 80vh;
-        margin: 0 auto;
-        box-sizing: border-box;
-    }
-    .modal-header { padding: 14px 16px; }
-    .modal-header h3 { font-size: 1rem; }
-    .modal-close { width: 32px; height: 32px; }
-    .modal-body { padding: 16px; }
-    .modal-footer {
-        padding: 12px 16px;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-    .modal-footer button {
-        flex: 1;
-        padding: 12px 10px;
-        font-size: 0.8rem;
-        white-space: nowrap;
-    }
-    
-    /* Formularios centrados */
+    .auth-logo-text { font-size: 1.8rem; margin-bottom: 8px; }
+    .auth-subtitle { font-size: 0.8rem; }
+    .auth-panel { animation: fadeIn 0.3s ease; }
+    .auth-divider span { background: white; padding: 0 12px; }
     .form-group {
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         width: 100%;
     }
-    .form-group label { font-size: 0.75rem; margin-bottom: 5px; }
+    .remember-group { margin-bottom: 10px; }
+    .back-to-login { margin-bottom: 16px; }
+    
+    /* Perfil en formulario de registro */
+    .image-preview {
+        margin-top: 8px;
+        text-align: center;
+    }
+    .image-preview img {
+        max-width: 80px;
+        border-radius: 8px;
+    }
+    
+    /* ================================================
+       MODALES - CENTRADOS Y PERFECTOS
+       ================================================ */
+    .modal {
+        padding: 12px;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+    .modal.active {
+        align-items: flex-end !important;
+    }
+    .modal-content {
+        width: calc(100% - 16px) !important;
+        max-width: 100% !important;
+        border-radius: 16px !important;
+        max-height: 85vh;
+        margin: 0 auto;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+    .modal-header { 
+        padding: 12px 14px; 
+        gap: 10px;
+    }
+    .modal-header h3 { font-size: 0.95rem; }
+    .modal-close { width: 30px; height: 30px; }
+    .modal-body { 
+        padding: 12px 14px;
+        overflow-y: auto;
+        flex: 1;
+    }
+    .modal-footer {
+        padding: 10px 14px;
+        gap: 6px;
+        flex-wrap: wrap;
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-100);
+    }
+    .modal-footer button {
+        flex: 1 1 calc(50% - 3px);
+        padding: 10px 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        min-height: 36px;
+    }
+    
+    /* ================================================
+       FORMULARIOS - OPTIMIZADOS PARA MÓVIL
+       ================================================ */
+    .form-group {
+        margin-bottom: 12px;
+        width: 100%;
+    }
+    .form-group label { 
+        font-size: 0.72rem; 
+        margin-bottom: 4px;
+        display: block;
+        font-weight: 600;
+    }
     .form-group input,
     .form-group select,
     .form-group textarea {
-        padding: 12px 12px;
-        font-size: 0.9rem;
-        border-radius: 10px;
+        padding: 10px 10px;
+        font-size: 16px !important;
+        border-radius: 8px;
         width: 100%;
         box-sizing: border-box;
+        border: 1px solid var(--gray-200);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
     }
     .form-row {
+        display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         width: 100%;
     }
-    .form-row .form-group { width: 100%; }
+    .form-row .form-group { 
+        width: 100%;
+        margin-bottom: 0;
+    }
+    .password-wrapper input { font-size: 16px !important; }
+    .remember-group { margin-bottom: 12px; }
+    .checkbox-label { font-size: 0.8rem; }
     
-    /* Perfil modal centrado */
+    /* Perfil modal */
     .perfil-header {
+        display: flex;
         flex-direction: column;
         text-align: center;
-        gap: 12px;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--gray-200);
     }
-    .perfil-avatar { width: 70px; height: 70px; margin: 0 auto; }
-    .btn-cambiar-avatar { width: 28px; height: 28px; }
-    .perfil-info h3 { font-size: 1rem; }
-    .perfil-info p { font-size: 0.75rem; }
-    .btn-save { padding: 12px; font-size: 0.9rem; }
+    .perfil-avatar { 
+        width: 60px; 
+        height: 60px; 
+        margin: 0 auto;
+    }
+    .btn-cambiar-avatar { width: 24px; height: 24px; }
+    .perfil-info h3 { font-size: 0.95rem; margin-bottom: 2px; }
+    .perfil-info p { font-size: 0.7rem; }
+    .btn-save { 
+        width: 100%; 
+        padding: 10px; 
+        font-size: 0.8rem;
+        margin-top: 12px;
+    }
     
     /* Rubros */
     .rubros-grid {
+        display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        padding: 10px;
+        gap: 6px;
+        padding: 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    .btn-rubro { padding: 10px 8px; font-size: 0.75rem; }
+    .btn-rubro { 
+        padding: 8px 8px; 
+        font-size: 0.7rem;
+        border-radius: 10px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .rubros-tags-container { margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .rubro-tag { 
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        margin-right: 0;
+        margin-bottom: 4px;
+        border-radius: 8px;
+    }
+    .rubros-selector {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-bottom: 8px;
+    }
     
-    /* Notificaciones */
+    /* ================================================
+       NOTIFICACIONES - PANEL BOTTOM
+       ================================================ */
     .notificaciones-panel {
-        position: fixed;
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 18px 18px 0 0;
-        max-height: 60vh;
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 16px 16px 0 0 !important;
+        max-height: 70vh;
+        box-sizing: border-box;
+    }
+    .notificaciones-lista { max-height: 65vh; }
+    .notificacion-item { 
+        padding: 12px 14px;
+        font-size: 0.75rem;
     }
     
-    /* Bottom nav */
+    /* ================================================
+       BOTTOM NAVIGATION
+       ================================================ */
     .bottom-nav {
         height: 60px;
         padding: 4px 8px;
+        gap: 0;
     }
-    .bottom-nav-btn { padding: 4px; font-size: 0.6rem; }
-    .bottom-nav-btn i { font-size: 1.2rem; margin-bottom: 2px; }
+    .bottom-nav-btn { 
+        padding: 4px;
+        font-size: 0.55rem;
+        gap: 2px;
+    }
+    .bottom-nav-btn i { font-size: 1.1rem; margin-bottom: 0; }
+    .bottom-nav-btn span { line-height: 1; }
     
-    /* Utilidades táctiles */
-    button, .btn, .btn-primary, .btn-outline, .filtro-btn, .bottom-nav-btn {
-        min-height: 44px;
+    /* ================================================
+       UTILIDADES TÁCTILES
+       ================================================ */
+    button, .btn, .btn-primary, .btn-outline, 
+    .filtro-btn, .bottom-nav-btn, .btn-tabla {
+        min-height: 40px;
         -webkit-tap-highlight-color: transparent;
     }
-    input, select, textarea { font-size: 16px !important; }
+    input, select, textarea { 
+        font-size: 16px !important;
+        border-radius: 8px;
+    }
+    
+    /* Sin overflow horizontal */
+    body, html, .app-wrapper, .main-content, .page-container {
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100vw;
+    }
+    
+    /* ================================================
+       ELEMENTOS ESPECÍFICOS SIN OVERFLOW
+       ================================================ */
+    .pedidos-container,
+    .productos-admin-grid,
+    .delivery-grid,
+    .reportes-container,
+    .filtros-buscador,
+    .buscador-container {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Tablas/listados en móvil */
+    table, .pedidos-tabla {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Prevenir overflow en cards */
+    .pedido-card-movil,
+    .producto-admin-card,
+    .delivery-card,
+    .reporte-card {
+        box-sizing: border-box;
+        width: 100%;
+        overflow: hidden;
+    }
+}
 }
 
 /* Pantallas muy pequeñas (≤380px) */
 @media (max-width: 380px) {
-    .metric-card { padding: 10px 6px; }
-    .metric-icon { width: 30px; height: 30px; }
-    .metric-info h3 { font-size: 0.9rem; }
-    .pedido-card-footer .btn-tabla { font-size: 0.6rem; padding: 8px 2px; }
-    .btn-tabla i { font-size: 0.6rem; margin-right: 2px; }
-    .filtro-btn { padding: 6px 8px; font-size: 0.65rem; }
+    .top-bar-titulo h1 { font-size: 0.85rem; }
+    .metrics-grid { gap: 4px; margin-bottom: 8px; }
+    .metric-card { padding: 8px; }
+    .metric-icon { width: 28px; height: 28px; font-size: 0.8rem; }
+    .metric-info h3 { font-size: 0.85rem; }
+    .metric-info p { font-size: 0.45rem; }
+    
+    .filtro-btn { padding: 5px 8px; font-size: 0.6rem; }
+    .buscador-input input { font-size: 0.8rem; padding: 9px 9px 9px 32px; }
+    
+    .pedido-card-movil { padding: 8px; }
+    .pedido-numero-movil { font-size: 0.75rem; }
+    .pedido-cliente-movil { font-size: 0.75rem; }
+    .pedido-resumen-movil { font-size: 0.6rem; }
+    .pedido-card-footer .btn-tabla { 
+        font-size: 0.55rem; 
+        padding: 6px 2px;
+        min-height: 28px;
+    }
+    .btn-tabla i { font-size: 0.55rem; margin-right: 1px; }
+    
+    .modal-content { border-radius: 14px !important; }
+    .modal-header h3 { font-size: 0.9rem; }
+    .modal-footer button { font-size: 0.7rem; }
+    .form-group label { font-size: 0.68rem; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea { font-size: 15px !important; padding: 9px 8px; }
+    
+    .auth-card { padding: 18px 16px; }
+    .auth-logo-text { font-size: 1.6rem; }
+}
+
+/* Pantallas GRANDES pero compactas (769px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .sidebar-width { --sidebar-width: 240px; }
 }
 
 /* ===================================================
@@ -834,4 +1141,191 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     .metric-info h3 { font-size: 1.8rem; }
     .productos-admin-grid { grid-template-columns: repeat(4, 1fr); }
     .delivery-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ===================================================
+   MEJORAS GLOBALES PARA MÓVIL & TECLADO VIRTUAL
+   =================================================== */
+@media (max-width: 768px) {
+    /* Viewport Meta - ajusta mejor para teclado virtual */
+    @supports (padding: max(0px)) {
+        body {
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+        }
+    }
+    
+    /* Prevenir zoom en inputs */
+    input, select, textarea, button {
+        font-size: 16px !important;
+    }
+    
+    /* Scroll suave para mejor UX */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* ================================================
+       MEJORAS DE OVERFLOW & SCROLL
+       ================================================ */
+    body, html, .app-wrapper {
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100vw;
+    }
+    
+    .page-container {
+        overflow-x: hidden;
+    }
+    
+    /* Controlar scroll en modales */
+    .modal-body {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+    
+    /* ================================================
+       FOCALES & INTERACCIÓN TÁCTIL
+       ================================================ */
+    /* Mejorar visual focus para móvil */
+    input:focus, select:focus, textarea:focus, button:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255, 90, 0, 0.1);
+    }
+    
+    /* Área táctil mínima de 44px */
+    button, input[type="button"], input[type="submit"], 
+    .btn, .btn-tabla, .filtro-btn, .bottom-nav-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Remover highlight táctil feo */
+    button, a, input, select, textarea {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* ================================================
+       MEJORAS ESPECÍFICAS DE TECLADO VIRTUAL
+       ================================================ */
+    /* Cuando se abre teclado virtual */
+    @media (max-height: 600px) {
+        .top-bar { height: 50px; }
+        .bottom-nav { height: 50px; }
+        .modal-content { max-height: 70vh; }
+        .metrics-grid { margin-bottom: 6px; gap: 4px; }
+    }
+    
+    /* Solucionar problema de scroll en inputs */
+    input[type="text"], 
+    input[type="email"], 
+    input[type="tel"],
+    input[type="password"],
+    select,
+    textarea {
+        border-radius: 8px;
+        border: 1px solid var(--gray-200);
+        padding: 10px 10px;
+        font-size: 16px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+    
+    /* Mejorar select visual */
+    select {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF5A00' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 20px;
+        padding-right: 30px;
+    }
+    
+    /* ================================================
+       ANIMACIONES SUAVES
+       ================================================ */
+    * {
+        transition: none !important;
+    }
+    
+    .modal {
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    .tab-content.active {
+        animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* ================================================
+       MEJORA DE ESPACIADO EN FORMULARIOS LARGOS
+       ================================================ */
+    .modal-body {
+        padding: 12px 14px 16px 14px;
+        max-height: calc(85vh - 100px);
+        overflow-y: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group:last-child {
+        margin-bottom: 6px;
+    }
+    
+    /* ================================================
+       MEJORA DE BOTONES EN MODAL
+       ================================================ */
+    .modal-footer {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 10;
+    }
+    
+    .modal-footer button {
+        flex: 1 1 calc(50% - 3px);
+        min-height: 40px;
+    }
+    
+    /* ================================================
+       MEJORA DE CONTENEDORES SIN OVERFLOW
+       ================================================ */
+    .pedidos-lista-movil,
+    .rubros-grid,
+    .notificaciones-lista,
+    .productos-admin-grid,
+    .delivery-grid {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* ===================================================
+   MODO LANDSCAPE (HORIZONTAL) - PEQUEÑOS
+   =================================================== */
+@media (max-width: 768px) and (max-height: 500px) {
+    .page-container { padding: 8px; }
+    .top-bar { height: 48px; }
+    .metrics-grid { margin-bottom: 6px; gap: 4px; }
+    .metric-card { padding: 8px; }
+    .metric-icon { width: 28px; height: 28px; font-size: 0.8rem; }
+    .pedido-card-movil { padding: 8px; }
 }

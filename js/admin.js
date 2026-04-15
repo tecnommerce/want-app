@@ -814,15 +814,21 @@ function renderizarPedidosMovil() {
         const numeroMostrar = p.numero_orden || p.id;
         const total = formatearPrecio(p.total || 0);
         
+        // Productos resumen compacto
         let productosResumen = '';
         if (p.productos && Array.isArray(p.productos) && p.productos.length > 0) {
             const primeros = p.productos.slice(0, 2);
             productosResumen = primeros.map(pr => `${pr.cantidad}x ${pr.nombre}`).join(', ');
-            if (p.productos.length > 2) productosResumen += ` +${p.productos.length - 2} más`;
+            if (p.productos.length > 2) productosResumen += ` +${p.productos.length - 2}`;
         } else {
             productosResumen = 'Sin productos';
         }
         
+        // Dirección compacta
+        const direccionCorta = p.cliente_direccion ? p.cliente_direccion.substring(0, 40) : 'Sin dirección';
+        const mostrarDireccionCompleta = p.cliente_direccion ? (p.cliente_direccion.length > 40 ? '...' : '') : '';
+        
+        // Estados
         let estadoTexto = '', estadoClase = '';
         if (estado === 'preparando') { estadoTexto = 'NUEVO'; estadoClase = 'estado-preparando'; }
         else if (estado === 'en preparacion') { estadoTexto = 'PREPARACIÓN'; estadoClase = 'estado-en-preparacion'; }
@@ -831,37 +837,35 @@ function renderizarPedidosMovil() {
         
         let botonesHTML = '';
         
-        // ✅ CAMBIOS AQUÍ - NUEVA LÓGICA DE BOTONES PARA MÓVIL
+        // Botones según estado
         if (estado === 'preparando') {
             botonesHTML = `
-                <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
+                <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Preparar</button>
             `;
             if (p.metodo_pago === 'transferencia') {
                 botonesHTML += `<button class="btn-tabla btn-coordinar" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-exchange-alt"></i> Coordinar</button>`;
             }
             botonesHTML += `
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
             `;
         } else if (estado === 'en preparacion') {
-            // ✅ CAMBIADO: Solo botón "Pedido listo" + Editar + Cancelar
             botonesHTML = `
-                <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Pedido listo</button>
+                <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Listo</button>
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
             `;
         } else if (estado === 'en camino') {
-            // ✅ CAMBIADO: "Enviar al delivery" + "Pedido entregado" + Editar + Cancelar
             botonesHTML = `
-                <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Enviar al delivery</button>
+                <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
                 <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
             `;
         } else if (estado === 'entregado') {
             botonesHTML = `
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
             `;
         }
         
@@ -872,16 +876,17 @@ function renderizarPedidosMovil() {
                     <span class="pedido-estado-movil ${estadoClase}">${estadoTexto}</span>
                 </div>
                 <div class="pedido-card-body">
-    <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
-    <div class="pedido-resumen-movil">📦 ${escapeHTML(productosResumen)}</div>
-    <div class="pedido-resumen-movil">
-        <span>💰 ${total}</span>
-        <span class="pedido-pago-movil ${p.metodo_pago === 'efectivo' ? 'pago-efectivo' : 'pago-transferencia'}">
-            ${p.metodo_pago === 'efectivo' ? '💵 Efectivo' : '🏦 Transferencia'}
-        </span>
-    </div>
-</div>
-                <div class="pedido-card-footer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                    <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')} ${p.cliente_telefono ? `<span style="font-size: 0.65rem; color: var(--gray-500); font-weight: normal;">📞</span>` : ''}</div>
+                    <div class="pedido-resumen-movil"><strong>Pedido:</strong> ${escapeHTML(productosResumen)}</div>
+                    <div class="pedido-direccion-movil" title="${p.cliente_direccion || 'Sin dirección'}"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(direccionCorta)}${mostrarDireccionCompleta}</div>
+                    <div class="pedido-resumen-movil">
+                        <strong>Total:</strong> ${total}
+                        <span class="pedido-pago-movil ${p.metodo_pago === 'efectivo' ? 'pago-efectivo' : 'pago-transferencia'}">
+                            ${p.metodo_pago === 'efectivo' ? '💵 Efectivo' : '🏦 Transferencia'}
+                        </span>
+                    </div>
+                </div>
+                <div class="pedido-card-footer">
                     ${botonesHTML}
                 </div>
             </div>
