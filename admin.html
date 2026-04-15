@@ -52,7 +52,6 @@
                         </div>
                     </div>
                     <div class="perfil-info-block">
-                        <span class="perfil-label">Mis datos</span>
                         <span class="perfil-nombre-corto" id="sidebar-perfil-nombre">Negocio</span>
                     </div>
                     <button class="btn-editar-perfil" id="btn-editar-perfil-sidebar" title="Editar mis datos">
@@ -298,6 +297,7 @@
                         
                         <div class="filtros-buscador">
                             <div class="filtros-pedidos">
+                                <span class="filtros-scroll-hint"><i class="fas fa-chevron-left"></i></span>
                                 <button class="filtro-btn active" data-estado="preparando">
                                     <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
                                 </button>
@@ -310,20 +310,19 @@
                                 <button class="filtro-btn" data-estado="entregado">
                                     <i class="fas fa-check-circle"></i> Entregados <span id="count-entregado">0</span>
                                 </button>
+                                <span class="filtros-scroll-hint"><i class="fas fa-chevron-right"></i></span>
                             </div>
                             <div class="buscador-container">
                                 <div class="buscador-input">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre o teléfono...">
-                                </div>
-                                <div class="buscador-buttons">
-                                    <button class="btn-limpiar-busqueda" id="btn-limpiar-busqueda">
-                                        <i class="fas fa-times"></i> Limpiar
-                                    </button>
-                                    <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
-                                        <i class="fas fa-plus-circle"></i> Nuevo pedido
+                                    <input type="text" id="buscador-pedidos" placeholder="Buscar por #ID, nombre..." autocomplete="off">
+                                    <button class="btn-limpiar-buscador" id="btn-limpiar-buscador" style="display: none;">
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 </div>
+                                <button class="btn-nuevo-pedido" id="btn-nuevo-pedido">
+                                    <i class="fas fa-plus-circle"></i> Nuevo
+                                </button>
                             </div>
                         </div>
                         
@@ -893,8 +892,13 @@
                 if (logoUrl) {
                     const avatarImg = document.getElementById('header-avatar-img');
                     const placeholder = document.getElementById('header-avatar-placeholder');
+                    const sidebarImg = document.getElementById('sidebar-logo-img');
+                    const sidebarPlaceholder = document.getElementById('sidebar-logo-placeholder');
+                    
                     if (avatarImg) { avatarImg.src = logoUrl; avatarImg.style.display = 'flex'; }
                     if (placeholder) placeholder.style.display = 'none';
+                    if (sidebarImg) { sidebarImg.src = logoUrl; sidebarImg.style.display = 'block'; }
+                    if (sidebarPlaceholder) sidebarPlaceholder.style.display = 'none';
                 }
             }, 500);
         });

@@ -514,7 +514,7 @@ async function cargarProductos(forceRefresh = false) {
         if (response.error) throw new Error(response.error);
         productos = (response.productos || []).filter(p => p.vendedor_id?.toString() === vendedorActual.id.toString());
         renderizarProductosAdmin();
-        const badge = document.getElementById('badge-productos');
+        const badge = document.getElementById('sidebar-badge-productos');
         if (badge) badge.textContent = productos.length;
     } catch (error) {
         if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar productos</p></div>`;
@@ -530,7 +530,7 @@ async function cargarDeliveries(forceRefresh = false) {
         if (response.error) throw new Error(response.error);
         deliveries = response.deliveries || [];
         renderizarDeliveries();
-        const badge = document.getElementById('badge-delivery');
+        const badge = document.getElementById('sidebar-badge-delivery');
         if (badge) badge.textContent = deliveries.length;
     } catch (error) {
         if (container) container.innerHTML = `<div class="error-mensaje"><p>Error al cargar deliveries</p></div>`;
@@ -583,12 +583,14 @@ function actualizarContadoresPedidos() {
     const cpr = document.getElementById('count-preparacion');
     const cc = document.getElementById('count-camino');
     const ce = document.getElementById('count-entregado');
-    const bp = document.getElementById('badge-pedidos');
+    const bp = document.getElementById('sidebar-badge-pedidos');
+    const pnc = document.getElementById('pedidos-nuevos-count');
     if (cp) cp.textContent = contarPorEstado.preparando;
     if (cpr) cpr.textContent = contarPorEstado['en preparacion'];
     if (cc) cc.textContent = contarPorEstado['en camino'];
     if (ce) ce.textContent = contarPorEstado.entregado;
     if (bp) bp.textContent = contarPorEstado.preparando;
+    if (pnc) pnc.textContent = contarPorEstado.preparando;
 }
 
 function actualizarReportes() {
@@ -1840,6 +1842,7 @@ async function iniciarPanel(vendedor) {
     if (adminPanel) adminPanel.style.display = 'block';
     if (headerAdmin) headerAdmin.style.display = 'block';
     
+    // Actualizar nombre y logo en header
     const headerNombreNegocio = document.getElementById('header-nombre-negocio');
     if (headerNombreNegocio) headerNombreNegocio.textContent = vendedor.nombre;
     
@@ -1847,6 +1850,28 @@ async function iniciarPanel(vendedor) {
     if (headerLogoImg && vendedor.logo_url) {
         headerLogoImg.src = vendedor.logo_url;
         headerLogoImg.style.display = 'block';
+    }
+    
+    // Guardar nombre y logo en storage para persistencia
+    const storageKey = localStorage.getItem('want_sesion') ? 'localStorage' : 'sessionStorage';
+    if (storageKey === 'localStorage') {
+        localStorage.setItem('vendedor_nombre', vendedor.nombre || 'Negocio');
+        if (vendedor.logo_url) localStorage.setItem('vendedor_logo', vendedor.logo_url);
+    } else {
+        sessionStorage.setItem('vendedor_nombre', vendedor.nombre || 'Negocio');
+        if (vendedor.logo_url) sessionStorage.setItem('vendedor_logo', vendedor.logo_url);
+    }
+    
+    // Actualizar sidebar
+    const sidebarNombre = document.getElementById('sidebar-perfil-nombre');
+    if (sidebarNombre) sidebarNombre.textContent = vendedor.nombre || 'Negocio';
+    
+    const sidebarLogo = document.getElementById('sidebar-logo-img');
+    const sidebarPlaceholder = document.getElementById('sidebar-logo-placeholder');
+    if (vendedor.logo_url && sidebarLogo) {
+        sidebarLogo.src = vendedor.logo_url;
+        sidebarLogo.style.display = 'block';
+        if (sidebarPlaceholder) sidebarPlaceholder.style.display = 'none';
     }
     
     actualizarUIEstadoAbierto();
@@ -2057,20 +2082,30 @@ function inicializarMenuAdmin() {
 
 function inicializarBuscador() {
     const buscadorInput = document.getElementById('buscador-pedidos');
-    const limpiarBtn = document.getElementById('btn-limpiar-busqueda');
+    const limpiarBtn = document.getElementById('btn-limpiar-buscador');
+    
     if (buscadorInput) {
         buscadorInput.addEventListener('input', (e) => {
-            terminoBusqueda = e.target.value;
+            terminoBusqueda = e.target.value.trim();
+            if (limpiarBtn) {
+                limpiarBtn.style.display = terminoBusqueda ? 'flex' : 'none';
+            }
             renderizarPedidos();
         });
+        
+        // Prevenir autocompletado
+        buscadorInput.setAttribute('autocomplete', 'off');
     }
+    
     if (limpiarBtn) {
-        limpiarBtn.addEventListener('click', () => {
+        limpiarBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (buscadorInput) {
                 buscadorInput.value = '';
+                buscadorInput.focus();
                 terminoBusqueda = '';
+                limpiarBtn.style.display = 'none';
                 renderizarPedidos();
-                mostrarToast('Búsqueda limpiada', 'info');
             }
         });
     }
