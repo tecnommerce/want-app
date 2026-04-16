@@ -815,6 +815,7 @@ function renderizarPedidosMovil() {
         const estado = p.estado || 'preparando';
         const numeroMostrar = p.numero_orden || p.id;
         const total = formatearPrecio(p.total || 0);
+        const nombreCliente = escapeHTML(p.cliente_nombre || 'Cliente');
         
         // Productos resumen compacto
         let productosResumen = '';
@@ -826,9 +827,8 @@ function renderizarPedidosMovil() {
             productosResumen = 'Sin productos';
         }
         
-        // Dirección compacta
-        const direccionCorta = p.cliente_direccion ? p.cliente_direccion.substring(0, 40) : 'Sin dirección';
-        const mostrarDireccionCompleta = p.cliente_direccion ? (p.cliente_direccion.length > 40 ? '...' : '') : '';
+        // Dirección - mostrar más texto
+        const direccionCompleta = p.cliente_direccion ? escapeHTML(p.cliente_direccion) : 'Sin dirección registrada';
         
         // Estados
         let estadoTexto = '', estadoClase = '';
@@ -845,7 +845,7 @@ function renderizarPedidosMovil() {
                 <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Preparar</button>
             `;
             if (p.metodo_pago === 'transferencia') {
-                botonesHTML += `<button class="btn-tabla btn-coordinar" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-exchange-alt"></i> Coordinar</button>`;
+                botonesHTML += `<button class="btn-tabla btn-solicitar-pago" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-money-bill-wave"></i> <span class="badge-pago">Solicitar pago</span></button>`;
             }
             botonesHTML += `
                 <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
@@ -874,13 +874,12 @@ function renderizarPedidosMovil() {
         html += `
             <div class="pedido-card-movil" data-pedido-id="${p.id}">
                 <div class="pedido-card-header">
-                    <span class="pedido-numero-movil">#${numeroMostrar}</span>
+                    <span class="pedido-numero-movil">#${numeroMostrar} - ${nombreCliente}</span>
                     <span class="pedido-estado-movil ${estadoClase}">${estadoTexto}</span>
                 </div>
                 <div class="pedido-card-body">
-                    <div class="pedido-cliente-movil">${escapeHTML(p.cliente_nombre || 'Sin nombre')} ${p.cliente_telefono ? `<span style="font-size: 0.65rem; color: var(--gray-500); font-weight: normal;">📞</span>` : ''}</div>
                     <div class="pedido-resumen-movil"><strong>Pedido:</strong> ${escapeHTML(productosResumen)}</div>
-                    <div class="pedido-direccion-movil" title="${p.cliente_direccion || 'Sin dirección'}"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(direccionCorta)}${mostrarDireccionCompleta}</div>
+                    <div class="pedido-direccion-movil" title="${direccionCompleta}"><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong> ${direccionCompleta}</div>
                     <div class="pedido-resumen-movil">
                         <strong>Total:</strong> ${total}
                         <span class="pedido-pago-movil ${p.metodo_pago === 'efectivo' ? 'pago-efectivo' : 'pago-transferencia'}">

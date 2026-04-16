@@ -67,7 +67,8 @@ function getEstadoPedidoTexto(estado) {
         'preparando': 'Pedido tomado',
         'en preparacion': 'Preparando',
         'en camino': 'En camino',
-        'entregado': 'Entregado'
+        'entregado': 'Entregado',
+        'cancelado': 'Pedido cancelado'
     };
     return estados[estado] || estado;
 }
@@ -77,7 +78,8 @@ function getEstadoColor(estado) {
         'preparando': '#FF9800',
         'en preparacion': '#2196F3',
         'en camino': '#9C27B0',
-        'entregado': '#4CAF50'
+        'entregado': '#4CAF50',
+        'cancelado': '#EF4444'
     };
     return colores[estado] || '#666';
 }
@@ -467,10 +469,52 @@ function detenerRealtimePedidosUsuario() {
 }
 
 function renderizarPedidosUsuario() {
-    const pedidosActuales = pedidosUsuario.filter(p => p.estado !== 'entregado');
+    const pedidosActuales = pedidosUsuario.filter(p => p.estado !== 'entregado' && p.estado !== 'cancelado');
+    const pedidosCancelados = pedidosUsuario.filter(p => p.estado === 'cancelado');
     const pedidosHistorial = pedidosUsuario.filter(p => p.estado === 'entregado');
     
     renderizarListaPedidos(pedidosActuales, 'pedidos-actuales-container');
+    if (pedidosCancelados.length > 0) {
+        const container = document.getElementById('pedidos-actuales-container');
+        if (container) {
+            const pedidosCanceladosHTML = pedidosCancelados.map(pedido => {
+                const estadoTexto = getEstadoPedidoTexto(pedido.estado);
+                const estadoColor = getEstadoColor(pedido.estado);
+                const fecha = formatearFechaArgentina(pedido.fecha);
+                
+                let productosResumen = '';
+                if (pedido.productos && pedido.productos.length > 0) {
+                    const primeros = pedido.productos.slice(0, 2);
+                    productosResumen = primeros.map(pr => `${pr.cantidad}x ${pr.nombre}`).join(', ');
+                    if (pedido.productos.length > 2) productosResumen += ` +${pedido.productos.length - 2} más`;
+                }
+                
+                return `
+                    <div class="pedido-card" onclick="verDetallePedido(${pedido.id})">
+                        <div class="pedido-card-header">
+                            <span class="pedido-numero">Pedido #${pedido.numero_orden || pedido.id}</span>
+                            <span class="pedido-estado" style="background: ${estadoColor}20; color: ${estadoColor};">${estadoTexto}</span>
+                        </div>
+                        <div class="pedido-card-body">
+                            <div class="pedido-fecha">📅 ${fecha}</div>
+                            <div class="pedido-negocio">🏪 ${escapeHTML(pedido.vendedor_nombre || 'Negocio')}</div>
+                            <div class="pedido-productos">📦 ${escapeHTML(productosResumen)}</div>
+                            <div class="pedido-total">💰 ${formatearPrecio(pedido.total)}</div>
+                        </div>
+                        <div class="pedido-card-footer">
+                            <button class="btn-ver-detalle" onclick="event.stopPropagation(); verDetallePedido(${pedido.id})">Ver detalle <i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (container.innerHTML === `<div class="sin-pedidos"><i class="fas fa-inbox"></i><p>No hay pedidos en esta sección</p></div>`) {
+                container.innerHTML = pedidosCanceladosHTML;
+            } else {
+                container.innerHTML += pedidosCanceladosHTML;
+            }
+        }
+    }
     renderizarListaPedidos(pedidosHistorial, 'pedidos-historial-container');
 }
 
