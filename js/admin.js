@@ -850,7 +850,7 @@ function renderizarPedidosMovil() {
                 botonesHTML += `<button class="btn-texto-action btn-solicitar-pago-texto" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-money-bill-wave"></i> Solicitar pago</button>`;
             }
             botonesHTML += `
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -860,7 +860,7 @@ function renderizarPedidosMovil() {
                 <div class="pedido-botones-wrapper">
                     <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Listo</button>
                     <div class="pedido-botones-texto">
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -871,7 +871,7 @@ function renderizarPedidosMovil() {
                     <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
                     <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
                     <div class="pedido-botones-texto">
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -880,7 +880,7 @@ function renderizarPedidosMovil() {
             botonesHTML = `
                 <div class="pedido-botones-wrapper">
                     <div class="pedido-botones-texto">
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>

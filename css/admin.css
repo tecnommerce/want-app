@@ -614,6 +614,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     /* ================================================
        MÉTRICAS - GRID 2x2 COMPACTO
        ================================================ */
+    #metrics-pedidos-grid { display: none !important; }
     .metrics-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
