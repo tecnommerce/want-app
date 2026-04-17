@@ -842,32 +842,48 @@ function renderizarPedidosMovil() {
         // Botones según estado
         if (estado === 'preparando') {
             botonesHTML = `
-                <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Preparar</button>
+                <div class="pedido-botones-wrapper">
+                    <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Preparar</button>
+                    <div class="pedido-botones-texto">
             `;
             if (p.metodo_pago === 'transferencia') {
-                botonesHTML += `<button class="btn-tabla btn-solicitar-pago" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-money-bill-wave"></i> <span class="badge-pago">Solicitar pago</span></button>`;
+                botonesHTML += `<button class="btn-texto-action btn-solicitar-pago-texto" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-money-bill-wave"></i> Solicitar pago</button>`;
             }
             botonesHTML += `
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
+                    </div>
+                </div>
             `;
         } else if (estado === 'en preparacion') {
             botonesHTML = `
-                <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Listo</button>
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
+                <div class="pedido-botones-wrapper">
+                    <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Listo</button>
+                    <div class="pedido-botones-texto">
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
+                    </div>
+                </div>
             `;
         } else if (estado === 'en camino') {
             botonesHTML = `
-                <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
-                <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
+                <div class="pedido-botones-wrapper">
+                    <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
+                    <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
+                    <div class="pedido-botones-texto">
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
+                    </div>
+                </div>
             `;
         } else if (estado === 'entregado') {
             botonesHTML = `
-                <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${p.id})"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${p.id}, this)"><i class="fas fa-times"></i> Cancelar</button>
+                <div class="pedido-botones-wrapper">
+                    <div class="pedido-botones-texto">
+                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Editar</button>
+                        <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
+                    </div>
+                </div>
             `;
         }
         
@@ -878,13 +894,10 @@ function renderizarPedidosMovil() {
                     <span class="pedido-estado-movil ${estadoClase}">${estadoTexto}</span>
                 </div>
                 <div class="pedido-card-body">
-                    <div class="pedido-resumen-movil"><strong>Pedido:</strong> ${escapeHTML(productosResumen)}</div>
-                    <div class="pedido-direccion-movil" title="${direccionCompleta}"><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong> ${direccionCompleta}</div>
-                    <div class="pedido-resumen-movil">
-                        <strong>Total:</strong> ${total}
-                        <span class="pedido-pago-movil ${p.metodo_pago === 'efectivo' ? 'pago-efectivo' : 'pago-transferencia'}">
-                            ${p.metodo_pago === 'efectivo' ? '💵 Efectivo' : '🏦 Transferencia'}
-                        </span>
+                    <div class="pedido-resumen-movil">${escapeHTML(productosResumen)}</div>
+                    <div class="pedido-direccion-movil" title="${direccionCompleta}"><i class="fas fa-map-marker-alt"></i> ${direccionCompleta}</div>
+                    <div class="pedido-monto-pago-movil">
+                        ${total} · ${p.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia'}
                     </div>
                 </div>
                 <div class="pedido-card-footer">

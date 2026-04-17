@@ -776,6 +776,63 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     }
     .btn-tabla i { font-size: 0.6rem; margin-right: 1px; }
     
+    /* Botones wrapper para organizar botones principales y de texto */
+    .pedido-botones-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+    
+    /* Botones principales dentro del wrapper (ancho completo) */
+    .pedido-botones-wrapper .btn-tabla {
+        flex: 1 1 100%;
+        padding: 10px 8px;
+        font-size: 0.75rem;
+        min-height: 36px;
+        justify-content: center;
+    }
+    
+    /* Contenedor de botones de texto */
+    .pedido-botones-texto {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    /* Botones de texto (Editar, Cancelar, Solicitar pago) */
+    .btn-texto-action {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+    }
+    .btn-texto-action:active {
+        opacity: 0.7;
+    }
+    .btn-texto-action i { font-size: 0.7rem; }
+    
+    .btn-cancelar-texto { color: #ef4444; }
+    .btn-editar-texto { color: #3b82f6; }
+    .btn-solicitar-pago-texto { color: #ec4899; }
+    
+    /* Monto y método de pago en formato compacto */
+    .pedido-monto-pago-movil {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-top: 8px;
+    }
+    
     /* ================================================
        PRODUCTOS - LISTA COMPACTA
        ================================================ */
