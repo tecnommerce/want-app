@@ -828,7 +828,7 @@ function renderizarPedidosMovil() {
         }
         
         // Dirección - mostrar más texto
-        const direccionCompleta = p.cliente_direccion ? escapeHTML(p.cliente_direccion) : 'Sin dirección registrada';
+        const direccionCompleta = p.direccion ? escapeHTML(p.direccion) : 'Sin dirección registrada';
         
         // Estados
         let estadoTexto = '', estadoClase = '';
