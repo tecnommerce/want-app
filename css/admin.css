@@ -1066,11 +1066,30 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         border-bottom: 1px solid var(--gray-200);
     }
     .perfil-avatar { 
-        width: 60px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: auto; 
         height: 60px; 
         margin: 0 auto;
+        position: static;
     }
-    .btn-cambiar-avatar { width: 24px; height: 24px; }
+    .btn-cambiar-avatar { 
+        position: static;
+        width: 32px; 
+        height: 32px;
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray-600);
+        font-size: 0.75rem;
+        padding: 0;
+    }
     .perfil-info h3 { font-size: 0.95rem; margin-bottom: 2px; }
     .perfil-info p { font-size: 0.7rem; }
     .btn-save { 
