@@ -1865,6 +1865,10 @@ async function iniciarPanel(vendedor) {
     const sidebarNombre = document.getElementById('sidebar-perfil-nombre');
     if (sidebarNombre) sidebarNombre.textContent = vendedor.nombre || 'Negocio';
     
+    // Actualizar nombre en top-bar para móvil
+    const topBarNombreVendedor = document.getElementById('top-bar-nombre-vendedor');
+    if (topBarNombreVendedor) topBarNombreVendedor.textContent = vendedor.nombre || 'Negocio';
+    
     const sidebarLogo = document.getElementById('sidebar-logo-img');
     const sidebarPlaceholder = document.getElementById('sidebar-logo-placeholder');
     if (vendedor.logo_url && sidebarLogo) {
