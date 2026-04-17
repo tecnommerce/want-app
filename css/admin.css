@@ -803,7 +803,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     .pedido-numero-movil { 
         font-weight: 700; 
         color: var(--primary); 
-        font-size: 0.8rem;
+        font-size: 0.95rem;
         flex: 1;
     }
     .pedido-estado-movil {
@@ -824,7 +824,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         color: var(--gray-800);
     }
     .pedido-resumen-movil {
-        font-size: 0.65rem;
+        font-size: 0.8rem;
         color: var(--gray-600);
         display: flex;
         align-items: center;
@@ -845,7 +845,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     .pago-transferencia { background: #dbeafe; color: #2563eb; }
     
     .pedido-direccion-movil {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
         color: var(--gray-700);
         margin: 8px 0;
         display: flex;
@@ -951,11 +951,25 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     
     .btn-cancelar-texto { color: #ef4444; }
     .btn-editar-texto { color: #3b82f6; }
+    .btn-ver-pedido-verde { color: var(--success); font-weight: 600; }
+    .btn-ver-pedido-verde:hover { color: #059669; }
+    
+    .pedido-detalles-movil {
+        font-size: 0.8rem;
+        color: var(--gray-700);
+        background: #F3F4F6;
+        padding: 8px;
+        border-radius: 8px;
+        margin-top: 8px;
+        border-left: 3px solid var(--primary);
+        line-height: 1.4;
+    }
+    .pedido-detalles-movil strong { color: var(--gray-800); font-weight: 600; }
     .btn-solicitar-pago-texto { color: #ec4899; }
     
     /* Monto y método de pago en formato compacto */
     .pedido-monto-pago-movil {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         font-weight: 600;
         color: var(--gray-800);
         margin-top: 8px;

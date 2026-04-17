@@ -669,33 +669,35 @@ function actualizarReportes() {
             }
         }
     });
-    const ventasDiasContainer = document.getElementById('reporte-ventas-dias');
-    if (ventasDiasContainer) {
-        ventasDiasContainer.innerHTML = diasSemana.map((dia,i)=>`
-            <div class="dia-item">
-                <span class="dia-nombre">${dia}</span>
-                <span class="dia-valor">${formatearPrecio(ventasPorDia[i])}</span>
-            </div>
-        `).join('');
-    }
+    // Comentado: Venta por día últimos 7 días
+    // const ventasDiasContainer = document.getElementById('reporte-ventas-dias');
+    // if (ventasDiasContainer) {
+    //     ventasDiasContainer.innerHTML = diasSemana.map((dia,i)=>`
+    //         <div class="dia-item">
+    //             <span class="dia-nombre">${dia}</span>
+    //             <span class="dia-valor">${formatearPrecio(ventasPorDia[i])}</span>
+    //         </div>
+    //     `).join('');
+    // }
     
-    const ultimosPedidos = [...pedidos].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).slice(0,10);
-    const ultimosPedidosContainer = document.getElementById('reporte-ultimos-pedidos');
-    if (ultimosPedidosContainer) {
-        if (ultimosPedidos.length === 0) {
-            ultimosPedidosContainer.innerHTML = '<div class="loading-small">No hay pedidos</div>';
-        } else {
-            ultimosPedidosContainer.innerHTML = ultimosPedidos.map(p=>`
-                <div class="pedido-item">
-                    <div class="pedido-info">
-                        <div class="pedido-numero">Pedido #${p.numero_orden || p.id}</div>
-                        <div class="pedido-cliente">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
-                    </div>
-                    <div class="pedido-total">${formatearPrecio(p.total || 0)}</div>
-                </div>
-            `).join('');
-        }
-    }
+    // Comentado: Últimos 10 pedidos
+    // const ultimosPedidos = [...pedidos].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).slice(0,10);
+    // const ultimosPedidosContainer = document.getElementById('reporte-ultimos-pedidos');
+    // if (ultimosPedidosContainer) {
+    //     if (ultimosPedidos.length === 0) {
+    //         ultimosPedidosContainer.innerHTML = '<div class="loading-small">No hay pedidos</div>';
+    //     } else {
+    //         ultimosPedidosContainer.innerHTML = ultimosPedidos.map(p=>`
+    //             <div class="pedido-item">
+    //                 <div class="pedido-info">
+    //                     <div class="pedido-numero">Pedido #${p.numero_orden || p.id}</div>
+    //                     <div class="pedido-cliente">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</div>
+    //                 </div>
+    //                 <div class="pedido-total">${formatearPrecio(p.total || 0)}</div>
+    //             </div>
+    //         `).join('');
+    //     }
+    // }
 }
 
 // ===================================================
@@ -857,7 +859,7 @@ function renderizarPedidosMovil() {
                 botonesHTML += `<button class="btn-texto-action btn-solicitar-pago-texto" onclick="abrirModalCoordinarTransferencia(${p.id})"><i class="fas fa-money-bill-wave"></i> Solicitar pago</button>`;
             }
             botonesHTML += `
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
+                        <button class="btn-texto-action btn-ver-pedido-verde" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -867,7 +869,7 @@ function renderizarPedidosMovil() {
                 <div class="pedido-botones-wrapper">
                     <button class="btn-tabla btn-pedido-listo" onclick="pedidoListoParaEnCamino(${p.id}, this)"><i class="fas fa-check-circle"></i> Listo</button>
                     <div class="pedido-botones-texto">
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
+                        <button class="btn-texto-action btn-ver-pedido-verde" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -878,7 +880,7 @@ function renderizarPedidosMovil() {
                     <button class="btn-tabla btn-enviar-delivery" onclick="abrirModalAsignarDelivery(${p.id})"><i class="fas fa-truck"></i> Delivery</button>
                     <button class="btn-tabla btn-entregar-pedido" onclick="entregarPedido(${p.id}, this)"><i class="fas fa-check-double"></i> Entregar</button>
                     <div class="pedido-botones-texto">
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
+                        <button class="btn-texto-action btn-ver-pedido-verde" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -887,7 +889,7 @@ function renderizarPedidosMovil() {
             botonesHTML = `
                 <div class="pedido-botones-wrapper">
                     <div class="pedido-botones-texto">
-                        <button class="btn-texto-action btn-editar-texto" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
+                        <button class="btn-texto-action btn-ver-pedido-verde" onclick="abrirModalEditarPedido(${p.id})">Ver pedido</button>
                         <button class="btn-texto-action btn-cancelar-texto" onclick="cancelarPedido(${p.id}, this)">Cancelar</button>
                     </div>
                 </div>
@@ -906,6 +908,7 @@ function renderizarPedidosMovil() {
                     <div class="pedido-monto-pago-movil">
                         ${total} · ${p.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia'}
                     </div>
+                    ${p.detalles ? `<div class="pedido-detalles-movil"><strong>Detalles:</strong> ${escapeHTML(p.detalles)}</div>` : ''}
                 </div>
                 <div class="pedido-card-footer">
                     ${botonesHTML}
@@ -1917,12 +1920,12 @@ async function iniciarPanel(vendedor) {
 
     const btnCampana = document.getElementById('btn-notificaciones');
     if (btnCampana) {
-        btnCampana.onclick = function(e) {
+        btnCampana.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             console.log('🔔 Campana clickeada');
             toggleNotificacionesVendedor();
-        };
+        });
     }
     
     const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
