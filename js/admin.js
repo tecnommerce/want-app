@@ -176,6 +176,13 @@ function marcarNotificacionLeidaVendedor(notificacionId) {
     }
 }
 
+function borrarTodasNotificacionesVendedor() {
+    notificacionesVendedor = [];
+    guardarNotificacionesVendedor();
+    renderizarNotificacionesVendedor();
+    actualizarContadorNotificacionesVendedor();
+}
+
 function inicializarNotificacionesVendedor() {
     obtenerNotificacionesVendedor();
     actualizarContadorNotificacionesVendedor();
@@ -1925,6 +1932,19 @@ async function iniciarPanel(vendedor) {
             e.stopPropagation();
             console.log('❌ Cerrar notificaciones clickeado');
             cerrarPanelNotificacionesVendedor();
+        };
+    }
+    
+    const btnLimpiarTodasNotif = document.getElementById('btn-limpiar-todas-notif');
+    if (btnLimpiarTodasNotif) {
+        btnLimpiarTodasNotif.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🗑️ Borrar todas las notificaciones clickeado');
+            if (notificacionesVendedor.length > 0) {
+                borrarTodasNotificacionesVendedor();
+                mostrarToast('Notificaciones borradas', 'success');
+            }
         };
     }
     

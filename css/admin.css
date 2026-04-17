@@ -534,7 +534,11 @@ html {
 .notificaciones-panel { position: absolute; top: calc(100% + 10px); right: 0; width: 380px; max-width: calc(100vw - 40px); background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); z-index: 1001; display: none; overflow: hidden; border: 1px solid var(--gray-200); }
 .notificaciones-panel.active { display: block; }
 .notificaciones-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--primary); color: white; font-weight: 600; }
-.btn-cerrar-notif { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+.notificaciones-header-actions { display: flex; gap: 8px; align-items: center; }
+.btn-limpiar-todas-notif { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.btn-limpiar-todas-notif:hover { background: rgba(255,255,255,0.3); }
+.btn-limpiar-todas-notif:active { transform: scale(0.95); }
+.btn-cerrar-notif { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .notificaciones-lista { max-height: 400px; overflow-y: auto; }
 .notificacion-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--gray-100); cursor: pointer; }
 .notificacion-icono { width: 44px; height: 44px; background: var(--primary-soft); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--primary); }
@@ -602,7 +606,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
        ================================================ */
     .top-bar { 
         height: 54px; 
-        padding: 0 10px; 
+        padding: 12px 10px 0 10px; 
         width: 100%; 
         box-sizing: border-box;
         position: sticky;
@@ -629,8 +633,8 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     .metrics-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 6px;
-        margin-bottom: 10px;
+        gap: 8px;
+        margin-bottom: 16px;
         width: 100%;
     }
     .metric-card {
@@ -656,8 +660,8 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
        FILTROS - SCROLL HORIZONTAL SIN DESBORDE
        ================================================ */
     .filtros-buscador {
-        gap: 8px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 16px;
         width: 100%;
         flex-direction: column;
     }
@@ -722,9 +726,9 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     }
     .buscador-input input {
         width: 100%;
-        padding: 10px 10px 10px 36px;
+        padding: 8px 10px 8px 36px;
         padding-right: 36px;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         border-radius: 20px;
     }
     .buscador-input i { 
@@ -750,8 +754,8 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         color: var(--primary);
     }
     .btn-nuevo-pedido {
-        padding: 10px 12px;
-        font-size: 0.7rem;
+        padding: 8px 10px;
+        font-size: 0.65rem;
         border-radius: 20px;
         white-space: nowrap;
         flex-shrink: 0;
@@ -770,7 +774,7 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         box-shadow: none;
         border: none;
         padding: 0;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
     }
     .pedidos-lista-movil {
         display: flex;
@@ -1451,8 +1455,6 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         width: 100%;
         overflow: hidden;
     }
-}
-}
 
 /* Pantallas muy pequeñas (≤380px) */
 @media (max-width: 380px) {
