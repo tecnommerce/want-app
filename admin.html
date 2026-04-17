@@ -845,7 +845,8 @@
             // CAMBIAR DE PESTAÑA
             function cambiarTab(tabId) {
                 const titulos = {'pedidos':'Pedidos','productos':'Productos','delivery':'Delivery','reportes':'Reportes'};
-                document.getElementById('top-bar-titulo').textContent = titulos[tabId] || 'Pedidos';
+                const tituloTexto = document.getElementById('top-bar-titulo-texto');
+                if (tituloTexto) tituloTexto.textContent = titulos[tabId] || 'Pedidos';
                 document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                 document.getElementById('tab-' + tabId)?.classList.add('active');
                 document.querySelectorAll('.sidebar-nav-btn, .bottom-nav-btn').forEach(btn => {

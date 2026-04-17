@@ -2025,7 +2025,7 @@ async function iniciarPanel(vendedor) {
 }
 
 function inicializarTabs() {
-    const tabs = document.querySelectorAll('.tab-btn');
+    const tabs = document.querySelectorAll('.sidebar-nav-btn');
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
@@ -2081,7 +2081,7 @@ function inicializarMenuAdmin() {
             const tabId = tab.getAttribute('data-tab');
             mobileTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            document.querySelectorAll('.tab-btn').forEach(t => {
+            document.querySelectorAll('.sidebar-nav-btn').forEach(t => {
                 t.classList.remove('active');
                 if (t.getAttribute('data-tab') === tabId) t.classList.add('active');
             });
