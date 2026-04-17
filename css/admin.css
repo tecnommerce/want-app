@@ -513,7 +513,18 @@ html {
 .btn-rubro { background: white; border: 1.5px solid var(--gray-300); border-radius: 40px; padding: 10px 14px; font-size: 0.8rem; font-weight: 500; cursor: pointer; color: var(--gray-700); text-align: center; }
 .btn-rubro:hover { border-color: var(--primary); background: var(--primary-soft); }
 .btn-rubro.selected { background: var(--primary); border-color: var(--primary); color: white; }
-.rubro-tag { background: var(--primary-soft); color: var(--primary); font-size: 0.75rem; font-weight: 500; padding: 6px 14px; border-radius: 20px; display: inline-block; }
+.rubro-tag { background: var(--primary-soft); color: var(--primary); font-size: 0.75rem; font-weight: 500; padding: 6px 14px; border-radius: 20px; display: inline-block; margin: 4px 6px 4px 0; }
+.rubros-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+    padding: 8px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--gray-200);
+}
+.rubro-placeholder { color: var(--gray-400); font-size: 0.75rem; font-style: italic; }
 
 /* ===================================================
    NOTIFICACIONES

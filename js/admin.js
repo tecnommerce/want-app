@@ -1744,28 +1744,31 @@ function mostrarPanelRegistro() {
     document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('register-panel').classList.add('active');
     rubrosTempRegistro = [];
+
+    // Actualizar el contenedor de rubros (vacío inicialmente)
     const rubrosContainer = document.getElementById('rubros-selector-registro');
     if (rubrosContainer) {
-        rubrosContainer.innerHTML = RUBROS_DISPONIBLES.map(rubro => `
-            <button type="button" class="btn-rubro-registro ${rubrosTempRegistro.includes(rubro) ? 'selected' : ''}" data-rubro="${rubro}">
-                ${rubro}
-            </button>
-        `).join('');
-        document.querySelectorAll('.btn-rubro-registro').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const rubro = btn.getAttribute('data-rubro');
-                if (rubrosTempRegistro.includes(rubro)) {
-                    rubrosTempRegistro = rubrosTempRegistro.filter(r => r !== rubro);
-                    btn.classList.remove('selected');
-                } else {
-                    rubrosTempRegistro.push(rubro);
-                    btn.classList.add('selected');
+        rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
+    }
+    actualizarListaRubrosRegistro();
+
+    // Configurar el botón para abrir el modal de rubros
+    const btnSeleccionarRubros = document.getElementById('btn-seleccionar-rubros-registro');
+    if (btnSeleccionarRubros) {
+        btnSeleccionarRubros.onclick = () => {
+            abrirModalRubros(rubrosTempRegistro, (nuevosRubros) => {
+                rubrosTempRegistro = nuevosRubros;
+                if (rubrosContainer) {
+                    if (nuevosRubros.length === 0) {
+                        rubrosContainer.innerHTML = '<span class="rubro-placeholder">No hay rubros seleccionados</span>';
+                    } else {
+                        rubrosContainer.innerHTML = nuevosRubros.map(r => `<span class="rubro-tag">${escapeHTML(r)}</span>`).join('');
+                    }
                 }
                 actualizarListaRubrosRegistro();
             });
-        });
+        };
     }
-    actualizarListaRubrosRegistro();
 }
 
 function actualizarListaRubrosRegistro() {
