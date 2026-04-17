@@ -395,6 +395,118 @@ html {
 .btn-save { width: 100%; margin-top: 24px; background: var(--primary); color: white; border: none; padding: 14px; border-radius: var(--radius-full); font-weight: 600; font-size: 1rem; cursor: pointer; }
 
 /* ===================================================
+   EDITAR PEDIDO - PRODUCTOS
+   =================================================== */
+.productos-seleccion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.producto-item-editar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border: 1.5px solid var(--gray-200);
+    margin-bottom: 10px;
+}
+
+.producto-info-editar {
+    flex: 1;
+    min-width: 0;
+}
+
+.producto-nombre-editar {
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.producto-precio-editar {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.producto-controles-editar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cantidad-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300);
+    padding: 2px 4px;
+}
+
+.btn-cantidad-editar {
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-cantidad-editar:hover {
+    background: var(--gray-100);
+    color: var(--primary-dark);
+}
+
+.btn-cantidad-editar:active {
+    transform: scale(0.9);
+}
+
+.cantidad-display {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 0.85rem;
+}
+
+.btn-eliminar-editar {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-eliminar-editar:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-eliminar-editar:active {
+    opacity: 0.7;
+}
+
+/* ===================================================
    RUBROS
    =================================================== */
 .rubros-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; padding: 12px; background: var(--gray-50); border-radius: var(--radius-md); border: 1.5px solid var(--gray-200); }
@@ -1453,6 +1565,44 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
         .bottom-nav { height: 50px; }
         .modal-content { max-height: 70vh; }
         .metrics-grid { margin-bottom: 6px; gap: 4px; }
+    }
+    
+    /* ================================================
+       EDITAR PEDIDO - PRODUCTOS (MÓVIL)
+       ================================================ */
+    .producto-item-editar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .producto-info-editar {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+    
+    .producto-nombre-editar {
+        font-size: 0.9rem;
+    }
+    
+    .producto-controles-editar {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
+    
+    .btn-cantidad-editar {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .cantidad-display {
+        font-size: 0.9rem;
+    }
+    
+    .btn-eliminar-editar {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
     }
     
     /* Solucionar problema de scroll en inputs */

@@ -1497,21 +1497,27 @@ function renderizarProductosEditar() {
     const container = document.getElementById('productos-editar-container');
     if (!container) return;
     if (productosTempEdit.length === 0) {
-        container.innerHTML = '<p style="text-align: center;">No hay productos agregados</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--gray-500);">No hay productos agregados</p>';
         return;
     }
     container.innerHTML = productosTempEdit.map((p, idx) => `
-        <div class="producto-item-seleccion">
-            <div class="producto-info-seleccion">
-                <div class="producto-nombre-seleccion">${escapeHTML(p.nombre)}</div>
-                <div class="producto-precio-seleccion">${formatearPrecio(p.precio)} c/u</div>
+        <div class="producto-item-editar">
+            <div class="producto-info-editar">
+                <div class="producto-nombre-editar">${escapeHTML(p.nombre)}</div>
+                <div class="producto-precio-editar">${formatearPrecio(p.precio)} c/u</div>
             </div>
-            <div class="producto-cantidad-seleccion">
-                <button onclick="modificarCantidadProductoEdit(${idx}, -1)">-</button>
-                <span>${p.cantidad}</span>
-                <button onclick="modificarCantidadProductoEdit(${idx}, 1)">+</button>
+            <div class="producto-controles-editar">
+                <div class="cantidad-controls">
+                    <button type="button" class="btn-cantidad-editar btn-menos" onclick="modificarCantidadProductoEdit(${idx}, -1)">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="cantidad-display">${p.cantidad}</span>
+                    <button type="button" class="btn-cantidad-editar btn-mas" onclick="modificarCantidadProductoEdit(${idx}, 1)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn-eliminar-editar" onclick="eliminarProductoEdit(${idx})">Eliminar</button>
             </div>
-            <button class="btn-eliminar-producto" onclick="eliminarProductoEdit(${idx})"><i class="fas fa-trash"></i></button>
         </div>
     `).join('');
 }
