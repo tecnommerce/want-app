@@ -272,7 +272,8 @@
                 <div class="admin-panel" id="admin-panel" style="display: none;">
                     <!-- TAB PEDIDOS -->
                     <div class="tab-content active" id="tab-pedidos">
-                        <div class="metrics-grid metrics-pedidos" id="metrics-pedidos-grid">
+                        <!-- MÉTRICAS SOLO EN ESCRITORIO (HIDDEN EN MÓVIL) -->
+                        <div class="metrics-grid metrics-pedidos hide-mobile" id="metrics-pedidos-grid">
                             <div class="metric-card">
                                 <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
                                 <div class="metric-info">
@@ -304,7 +305,7 @@
                         </div>
                         
                         <div class="filtros-buscador">
-                            <div class="filtros-pedidos">
+                            <div class="filtros-pedidos filtros-ampliados">
                                 <span class="filtros-scroll-hint"><i class="fas fa-chevron-left"></i></span>
                                 <button class="filtro-btn active" data-estado="preparando">
                                     <i class="fas fa-clock"></i> Nuevos <span id="count-preparando">0</span>
@@ -375,68 +376,98 @@
                     <!-- TAB REPORTES -->
                     <div class="tab-content" id="tab-reportes">
                         <div class="reportes-container">
-                            <div class="reportes-section">
-                                <h3 class="reportes-titulo"><i class="fas fa-chart-simple"></i> Detalle de ventas</h3>
-                                <div class="reportes-metrics">
-                                    <div class="reporte-card">
-                                        <div class="reporte-icon"><i class="fas fa-calendar-day"></i></div>
-                                        <div class="reporte-info">
-                                            <h4>Ventas hoy</h4>
-                                            <p id="reporte-ventas-hoy">$0</p>
-                                        </div>
+                            <!-- HEADER CON FILTROS Y DESCARGA -->
+                            <div class="reportes-header">
+                                <div class="reportes-header-left">
+                                    <h2 class="reportes-titulo-main"><i class="fas fa-chart-bar"></i> Reportes de Ventas</h2>
+                                    <p class="reportes-subtitle">Analiza tus ventas y descarga reportes</p>
+                                </div>
+                                <div class="reportes-header-right">
+                                    <div class="reporte-fecha-selector">
+                                        <label for="reporte-fecha-desde">Desde:</label>
+                                        <input type="date" id="reporte-fecha-desde">
                                     </div>
-                                    <div class="reporte-card">
-                                        <div class="reporte-icon"><i class="fas fa-calendar-week"></i></div>
-                                        <div class="reporte-info">
-                                            <h4>Ventas semana</h4>
-                                            <p id="reporte-ventas-semana">$0</p>
-                                        </div>
+                                    <div class="reporte-fecha-selector">
+                                        <label for="reporte-fecha-hasta">Hasta:</label>
+                                        <input type="date" id="reporte-fecha-hasta">
                                     </div>
-                                    <div class="reporte-card">
-                                        <div class="reporte-icon"><i class="fas fa-calendar-alt"></i></div>
-                                        <div class="reporte-info">
-                                            <h4>Ventas mes</h4>
-                                            <p id="reporte-ventas-mes">$0</p>
-                                        </div>
+                                    <button class="btn btn-primary" id="btn-reporte-filtrar">
+                                        <i class="fas fa-filter"></i> Filtrar
+                                    </button>
+                                    <button class="btn btn-secondary" id="btn-descargar-excel" title="Descargar en Excel">
+                                        <i class="fas fa-download"></i> Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ESTADÍSTICAS PRINCIPALES -->
+                            <div class="reportes-stats-main">
+                                <div class="stat-card stat-card-primary">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
                                     </div>
-                                    <div class="reporte-card">
-                                        <div class="reporte-icon"><i class="fas fa-check-circle"></i></div>
-                                        <div class="reporte-info">
-                                            <h4>Entregados</h4>
-                                            <p id="reporte-pedidos-entregados">0</p>
-                                        </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Total Ventas</p>
+                                        <h3 class="stat-card-value" id="reporte-total-ventas">$0</h3>
+                                        <small class="stat-card-detail" id="reporte-total-pedidos-count">0 pedidos</small>
                                     </div>
-                                    <div class="reporte-card">
-                                        <div class="reporte-icon"><i class="fas fa-clock"></i></div>
-                                        <div class="reporte-info">
-                                            <h4>Pendientes</h4>
-                                            <p id="reporte-pedidos-pendientes">0</p>
-                                        </div>
+                                </div>
+
+                                <div class="stat-card stat-card-success">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-check-circle"></i>
                                     </div>
-                                    <div class="reporte-card">
-                                        <div class="reporte-icon"><i class="fas fa-truck"></i></div>
-                                        <div class="reporte-info">
-                                            <h4>Total pedidos</h4>
-                                            <p id="reporte-total-pedidos">0</p>
-                                        </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Entregados</p>
+                                        <h3 class="stat-card-value" id="reporte-pedidos-entregados-count">0</h3>
+                                        <small class="stat-card-detail" id="reporte-entregados-percent">0%</small>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card stat-card-warning">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">En Progreso</p>
+                                        <h3 class="stat-card-value" id="reporte-pedidos-progreso">0</h3>
+                                        <small class="stat-card-detail" id="reporte-progreso-percent">0%</small>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card stat-card-info">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-ticket-alt"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Ticket Promedio</p>
+                                        <h3 class="stat-card-value" id="reporte-ticket-promedio">$0</h3>
+                                        <small class="stat-card-detail" id="reporte-ticket-variacion">+0%</small>
                                     </div>
                                 </div>
                             </div>
-                            <div class="reportes-section">
-                                <h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top productos más vendidos</h3>
-                                <div id="reporte-top-productos" class="reportes-lista">
-                                    <div class="loading-small">Cargando...</div>
+
+                            <!-- TOP PRODUCTOS & MÉTODO PAGO -->
+                            <div class="reportes-grid-2col">
+                                <div class="reportes-section">
+                                    <h3 class="reportes-titulo"><i class="fas fa-crown"></i> Top 5 Productos</h3>
+                                    <div id="reporte-top-productos" class="reportes-lista-productos">
+                                        <div class="loading-small">Cargando...</div>
+                                    </div>
+                                </div>
+
+                                <div class="reportes-section">
+                                    <h3 class="reportes-titulo"><i class="fas fa-credit-card"></i> Métodos de Pago</h3>
+                                    <div id="reporte-metodos-pago" class="reportes-metodos-pago">
+                                        <div class="loading-small">Cargando...</div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- ÚLTIMOS PEDIDOS -->
                             <div class="reportes-section">
-                                <h3 class="reportes-titulo"><i class="fas fa-chart-line"></i> Ventas por día (últimos 7 días)</h3>
-                                <div id="reporte-ventas-dias" class="reportes-dias">
-                                    <div class="loading-small">Cargando...</div>
-                                </div>
-                            </div>
-                            <div class="reportes-section">
-                                <h3 class="reportes-titulo"><i class="fas fa-history"></i> Últimos 10 pedidos</h3>
-                                <div id="reporte-ultimos-pedidos" class="reportes-pedidos-lista">
+                                <h3 class="reportes-titulo"><i class="fas fa-list"></i> Últimos Pedidos</h3>
+                                <div id="reporte-ultimos-pedidos" class="reportes-pedidos-tabla">
                                     <div class="loading-small">Cargando...</div>
                                 </div>
                             </div>
@@ -835,6 +866,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-vendedor.js"></script>
     <script src="js/admin.js"></script>
+    <script src="js/reportes-vendedor.js"></script>
     
     <script>
         (async function() {
