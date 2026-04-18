@@ -680,18 +680,6 @@ function calcularMetricas() {
             pedidosPendientes++;
         }
     });
-    
-    const vh = document.getElementById('ventas-hoy');
-    const vs = document.getElementById('ventas-semana');
-    const vm = document.getElementById('ventas-mes');
-    const pe = document.getElementById('pedidos-entregados');
-    const pp = document.getElementById('pedidos-pendientes');
-    
-    if (vh) vh.textContent = formatearPrecio(ventasHoy);
-    if (vs) vs.textContent = formatearPrecio(ventasSemana);
-    if (vm) vm.textContent = formatearPrecio(ventasMes);
-    if (pe) pe.textContent = pedidosEntregados;
-    if (pp) pp.textContent = pedidosPendientes;
 }
 
 function actualizarContadoresPedidos() {
@@ -705,13 +693,11 @@ function actualizarContadoresPedidos() {
     const cc = document.getElementById('count-camino');
     const ce = document.getElementById('count-entregado');
     const bp = document.getElementById('sidebar-badge-pedidos');
-    const pnc = document.getElementById('pedidos-nuevos-count');
     if (cp) cp.textContent = contarPorEstado.preparando;
     if (cpr) cpr.textContent = contarPorEstado['en preparacion'];
     if (cc) cc.textContent = contarPorEstado['en camino'];
     if (ce) ce.textContent = contarPorEstado.entregado;
     if (bp) bp.textContent = contarPorEstado.preparando;
-    if (pnc) pnc.textContent = contarPorEstado.preparando;
 }
 
 function actualizarReportes() {

@@ -272,38 +272,6 @@
                 <div class="admin-panel" id="admin-panel" style="display: none;">
                     <!-- TAB PEDIDOS -->
                     <div class="tab-content active" id="tab-pedidos">
-                        <!-- MÉTRICAS SOLO EN ESCRITORIO (HIDDEN EN MÓVIL) -->
-                        <div class="metrics-grid metrics-pedidos hide-mobile" id="metrics-pedidos-grid">
-                            <div class="metric-card">
-                                <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
-                                <div class="metric-info">
-                                    <h3 id="ventas-hoy">$0</h3>
-                                    <p>Ventas hoy</p>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="metric-info">
-                                    <h3 id="pedidos-entregados">0</h3>
-                                    <p>Entregados</p>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon"><i class="fas fa-clock"></i></div>
-                                <div class="metric-info">
-                                    <h3 id="pedidos-pendientes">0</h3>
-                                    <p>Pendientes</p>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon"><i class="fas fa-bell"></i></div>
-                                <div class="metric-info">
-                                    <h3 id="pedidos-nuevos-count">0</h3>
-                                    <p>Nuevos pedidos</p>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <div class="filtros-buscador">
                             <div class="filtros-pedidos filtros-ampliados">
                                 <span class="filtros-scroll-hint"><i class="fas fa-chevron-left"></i></span>
@@ -893,8 +861,6 @@
                     btn.classList.remove('active');
                     if (btn.dataset.tab === tabId) btn.classList.add('active');
                 });
-                const metricsGrid = document.getElementById('metrics-pedidos-grid');
-                if (metricsGrid) metricsGrid.style.display = (tabId === 'pedidos') ? 'grid' : 'none';
             }
             
             document.querySelectorAll('.sidebar-nav-btn, .bottom-nav-btn').forEach(btn => {
