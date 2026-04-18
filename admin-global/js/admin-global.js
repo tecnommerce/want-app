@@ -8,14 +8,27 @@
 
 /**
  * Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
+ * Parsea correctamente sin crear Dates inválidas
  * @returns {Date} Objeto Date que representa la hora REAL de Argentina
  */
 function getArgentinaDate() {
     const now = new Date();
-    const argentinaDate = new Date(now.toLocaleString('es-AR', {
+    const localeStr = now.toLocaleString('es-AR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
         timeZone: 'America/Argentina/Buenos_Aires'
-    }));
-    return argentinaDate;
+    });
+    const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+):(\d+)/);
+    if (!matches) {
+        console.warn('⚠️ Error parseando fecha Argentina');
+        return now;
+    }
+    const [, day, month, year, hours, minutes, seconds] = matches;
+    return new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
 }
 
 /**
@@ -24,6 +37,10 @@ function getArgentinaDate() {
  */
 function getArgentinaDateISO() {
     const argentinaDate = getArgentinaDate();
+    if (isNaN(argentinaDate.getTime())) {
+        console.error('❌ Error: Fecha Argentina inválida');
+        return new Date().toISOString();
+    }
     const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
     return utcCorrect.toISOString();
 }

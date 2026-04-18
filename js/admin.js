@@ -51,38 +51,39 @@ let notificacionesPanelAbierto = false;
 
 /**
  * FUNCIÓN CRÍTICA: Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
- * Garantiza que la hora devuelta representa la hora REAL de Argentina
- * @returns {Date} Objeto Date que representa la hora REAL de Argentina (aunque mantiene UTC internamente)
+ * Parsea correctamente sin crear Dates inválidas
+ * @returns {Date} Objeto Date que representa la hora REAL de Argentina
  */
 function getArgentinaDate() {
-    // Crear fecha actual
     const now = new Date();
-    
-    // Argentina está en UTC-3 (sin horario de verano)
-    // Para obtener la hora correcta: Convertir UTC actual a Argentina
-    const argentinaDate = new Date(now.toLocaleString('es-AR', {
+    const localeStr = now.toLocaleString('es-AR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
         timeZone: 'America/Argentina/Buenos_Aires'
-    }));
-    
-    return argentinaDate;
+    });
+    const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+):(\d+)/);
+    if (!matches) {
+        console.warn('⚠️ Error parseando fecha Argentina');
+        return now;
+    }
+    const [, day, month, year, hours, minutes, seconds] = matches;
+    return new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
 }
 
 /**
- * Convierte una fecha de Argentina a ISO 8601 (UTC) correctamente
- * IMPORTANTE: El Date Object es UTC, pero representa la hora Argentina
- * Cuando guardamos: 02:00 Argentina → 05:00 UTC → ISO será "T05:00:00Z"
+ * Obtiene la fecha actual en Argentina en formato ISO 8601 para base de datos
  * @returns {string} Fecha en formato ISO: "2026-04-18T05:00:00.000Z"
  */
 function getArgentinaDateISO() {
     const argentinaDate = getArgentinaDate();
-    
-    // El Date objeto tiene la hora de Argentina, pero JS lo trata como UTC
-    // Necesitamos convertir: si dice 02:00, en UTC sería 05:00 (UTC-3)
-    // Entonces sumamos 3 horas para obtener la hora UTC correcta
-    const isoString = argentinaDate.toISOString();
-    
-    // El isoString ahora tiene la hora incorrecta (02:00 en lugar de 05:00)
-    // Necesitamos ajustarlo sumando 3 horas
+    if (isNaN(argentinaDate.getTime())) {
+        console.error('❌ Error: Fecha Argentina inválida');
+        return new Date().toISOString();
+    }
     const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
     return utcCorrect.toISOString();
 }
