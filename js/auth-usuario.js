@@ -821,30 +821,41 @@ function cargarListaNotificaciones() {
             minute: '2-digit' 
         });
         
-        let icono = 'fa-truck';
+        let icono = 'fa-bell';
         let color = '#FF5A00';
         
-        if (notif.estadoNuevo === 'entregado') {
+        // Determinar icono basado en el mensaje
+        if (notif.mensaje.includes('entregado')) {
             icono = 'fa-check-circle';
             color = '#10b981';
-        } else if (notif.estadoNuevo === 'en camino') {
+        } else if (notif.mensaje.includes('camino')) {
             icono = 'fa-truck';
             color = '#3b82f6';
-        } else if (notif.estadoNuevo === 'en preparacion') {
+        } else if (notif.mensaje.includes('preparando') || notif.mensaje.includes('Preparando')) {
             icono = 'fa-utensils';
             color = '#f59e0b';
+        } else if (notif.mensaje.includes('enviado')) {
+            icono = 'fa-paper-plane';
+            color = '#FF5A00';
+        }
+        
+        // HTML para tiempo estimado si existe
+        let tiempoHTML = '';
+        if (notif.tiempo_estimado) {
+            tiempoHTML = `<div class="notificacion-tiempo" style="color: #2196F3; font-size: 0.8rem; margin-top: 6px;">⏱ Tiempo estimado: ${escapeHTML(notif.tiempo_estimado)}</div>`;
         }
         
         return `
-            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" data-id="${notif.id}" onclick="window.irAMisPedidosDesdeNotificacion(${notif.id})">
+            <div class="notificacion-item ${notif.leida ? 'leida' : ''}" data-id="${notif.id}" onclick="irAMisPedidosDesdeNotificacion(${notif.id})">
                 <div class="notificacion-icono" style="background: ${color}20; color: ${color};">
                     <i class="fas ${icono}"></i>
                 </div>
                 <div class="notificacion-contenido">
                     <div class="notificacion-mensaje">${escapeHTML(notif.mensaje)}</div>
+                    ${tiempoHTML}
                     <div class="notificacion-fecha">${fechaStr}</div>
                 </div>
-                <button class="notificacion-eliminar" onclick="event.stopPropagation(); window.eliminarNotificacionItem(${notif.id})">
+                <button class="notificacion-eliminar" onclick="event.stopPropagation(); eliminarNotificacionItem(${notif.id})">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -862,15 +873,51 @@ function cargarListaNotificaciones() {
     }, 500);
 }
 
-function eliminarNotificacionItem(notificacionId) {
-    window.eliminarNotificacion(notificacionId);
-    cargarListaNotificaciones();
+function marcarNotificacionLeida(notificacionId) {
+    let notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    const notificacion = notificaciones.find(n => n.id === notificacionId);
+    if (notificacion) {
+        notificacion.leida = true;
+        localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+        actualizarContadorNotificaciones();
+    }
+}
+
+function eliminarNotificacion(notificacionId) {
+    let notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    notificaciones = notificaciones.filter(n => n.id !== notificacionId);
+    localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
     actualizarContadorNotificaciones();
+}
+
+function agregarNotificacion(pedidoId, mensaje, tiempo_estimado = null) {
+    let notificaciones = JSON.parse(localStorage.getItem('want_notificaciones') || '[]');
+    const notificacion = {
+        id: Date.now(),
+        pedido_id: pedidoId,
+        mensaje: mensaje,
+        tiempo_estimado: tiempo_estimado,
+        fecha: new Date().toISOString(),
+        leida: false
+    };
+    notificaciones.unshift(notificacion); // Agregar al inicio
+    localStorage.setItem('want_notificaciones', JSON.stringify(notificaciones));
+    
+    // Disparar evento de nueva notificación
+    window.dispatchEvent(new CustomEvent('nuevaNotificacion'));
+    actualizarContadorNotificaciones();
+    
+    return notificacion;
+}
+
+function eliminarNotificacionItem(notificacionId) {
+    eliminarNotificacion(notificacionId);
+    cargarListaNotificaciones();
 }
 
 function irAMisPedidosDesdeNotificacion(notificacionId) {
     // Marcar como leída
-    window.marcarNotificacionLeida(notificacionId);
+    marcarNotificacionLeida(notificacionId);
     actualizarContadorNotificaciones();
     
     // Cerrar panel de notificaciones
@@ -1058,3 +1105,6 @@ window.eliminarNotificacionItem = eliminarNotificacionItem;
 window.actualizarContadorNotificaciones = actualizarContadorNotificaciones;
 window.mostrarNotificacionTemporal = mostrarNotificacionTemporal;
 window.irAMisPedidosDesdeNotificacion = irAMisPedidosDesdeNotificacion;
+window.marcarNotificacionLeida = marcarNotificacionLeida;
+window.eliminarNotificacion = eliminarNotificacion;
+window.agregarNotificacion = agregarNotificacion;

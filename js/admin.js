@@ -280,23 +280,43 @@ function renderizarNotificacionesVendedor() {
         });
         
         let icono = 'fa-bell';
-        if (notif.tipo === 'pedido') icono = 'fa-box';
-        else if (notif.tipo === 'success') icono = 'fa-check-circle';
-        else if (notif.tipo === 'error') icono = 'fa-exclamation-circle';
+        let color = '#FF5A00';
+        if (notif.tipo === 'pedido') {
+            icono = 'fa-box';
+            color = '#FF5A00';
+        }
+        else if (notif.tipo === 'success') {
+            icono = 'fa-check-circle';
+            color = '#10b981';
+        }
+        else if (notif.tipo === 'error') {
+            icono = 'fa-exclamation-circle';
+            color = '#ef4444';
+        }
         
         return `
             <div class="notificacion-item ${notif.leida ? 'leida' : ''}" onclick="marcarNotificacionLeidaVendedor(${notif.id})">
-                <div class="notificacion-icono">
+                <div class="notificacion-icono" style="background: ${color}20; color: ${color};">
                     <i class="fas ${icono}"></i>
                 </div>
                 <div class="notificacion-contenido">
                     <div class="notificacion-mensaje">${escapeHTML(notif.mensaje)}</div>
                     <div class="notificacion-fecha">${fechaStr}</div>
                 </div>
+                <button class="notificacion-eliminar" onclick="event.stopPropagation(); eliminarNotificacionVendedor(${notif.id})">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `;
     }).join('');
     
+    actualizarContadorNotificacionesVendedor();
+}
+
+function eliminarNotificacionVendedor(notificacionId) {
+    notificacionesVendedor = notificacionesVendedor.filter(n => n.id !== notificacionId);
+    guardarNotificacionesVendedor();
+    renderizarNotificacionesVendedor();
     actualizarContadorNotificacionesVendedor();
 }
 
@@ -2727,6 +2747,13 @@ window.confirmarTiempoYPreparar = confirmarTiempoYPreparar;
 window.abrirModalCoordinarTransferencia = abrirModalCoordinarTransferencia;
 window.cerrarModalCoordinarTransferencia = cerrarModalCoordinarTransferencia;
 window.enviarCoordinacionTransferencia = enviarCoordinacionTransferencia;
+window.toggleNotificacionesVendedor = toggleNotificacionesVendedor;
+window.cerrarPanelNotificacionesVendedor = cerrarPanelNotificacionesVendedor;
+window.agregarNotificacionVendedor = agregarNotificacionVendedor;
+window.marcarNotificacionLeidaVendedor = marcarNotificacionLeidaVendedor;
+window.eliminarNotificacionVendedor = eliminarNotificacionVendedor;
+window.borrarTodasNotificacionesVendedor = borrarTodasNotificacionesVendedor;
+window.renderizarNotificacionesVendedor = renderizarNotificacionesVendedor;
 
 // ===================================================
 // DOM CONTENT LOADED
