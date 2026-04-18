@@ -51,48 +51,38 @@ let notificacionesPanelAbierto = false;
 
 /**
  * FUNCIÓN CRÍTICA: Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
- * Usa Intl.DateTimeFormat para obtener la hora REAL actual de Argentina
- * @returns {Date} Objeto Date que representa la hora REAL de Argentina
+ * Retorna ISO UTC que cuando se muestra con timeZone Argentina, se ve correctamente
+ * @returns {string} Fecha en formato ISO UTC: "2026-04-18T05:00:00.000Z"
  */
-function getArgentinaDate() {
+function getArgentinaDateISO() {
     const now = new Date();
     
-    // Usar Intl.DateTimeFormat para obtener componentes individuales en zona Argentina
-    const formatter = new Intl.DateTimeFormat('en-CA', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
+    // Obtener la hora formateada en Argentina
+    const localeStr = now.toLocaleString('es-AR', {
         timeZone: 'America/Argentina/Buenos_Aires'
     });
     
-    // Extraer componentes: año, mes, día, hora, minuto, segundo
-    const parts = formatter.formatToParts(now);
-    const date = {};
-    for (let part of parts) {
-        date[part.type] = part.value;
-    }
+    // localeStr ejemplo: "18/04/2026 02:00:00"
+    const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)[,\s]+(\d+):(\d+):(\d+)/);
     
-    // Crear Date con la hora de Argentina
-    const argentinaDate = new Date(`${date.year}-${date.month}-${date.day}T${date.hour}:${date.minute}:${date.second}`);
-    return argentinaDate;
-}
-
-/**
- * Obtiene la fecha actual en Argentina en formato ISO 8601 para base de datos
- * @returns {string} Fecha en formato ISO con hora UTC real
- */
-function getArgentinaDateISO() {
-    const argentinaDate = getArgentinaDate();
-    if (isNaN(argentinaDate.getTime())) {
-        console.error('❌ Error: Fecha Argentina inválida');
+    if (!matches) {
+        console.error('❌ Error parseando fecha Argentina');
         return new Date().toISOString();
     }
-    // Argentina es UTC-3, sumar 3 horas para obtener UTC real
-    const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
+    
+    const [, day, month, year, hours, minutes, seconds] = matches;
+    
+    // Crear un Date con la hora Argentina interpretada como UTC (con Z explícito)
+    const dateAsUTC = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
+    
+    if (isNaN(dateAsUTC.getTime())) {
+        console.error('❌ Error creando Date');
+        return new Date().toISOString();
+    }
+    
+    // SUMAR 3 horas: UTC = Argentina + 3 (porque Argentina es UTC-3)
+    const utcCorrect = new Date(dateAsUTC.getTime() + 3 * 60 * 60 * 1000);
+    
     return utcCorrect.toISOString();
 }
 

@@ -9,30 +9,17 @@
     // ===================================================
     // FUNCIONES DE FECHA - ZONA HORARIA ARGENTINA (UTC-3)
     // ===================================================
-    function getArgentinaDate() {
+    function getArgentinaDateISO() {
         const now = new Date();
-        const formatter = new Intl.DateTimeFormat('en-CA', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
+        const localeStr = now.toLocaleString('es-AR', {
             timeZone: 'America/Argentina/Buenos_Aires'
         });
-        const parts = formatter.formatToParts(now);
-        const date = {};
-        for (let part of parts) {
-            date[part.type] = part.value;
-        }
-        return new Date(`${date.year}-${date.month}-${date.day}T${date.hour}:${date.minute}:${date.second}`);
-    }
-    
-    function getArgentinaDateISO() {
-        const argentinaDate = getArgentinaDate();
-        if (isNaN(argentinaDate.getTime())) return new Date().toISOString();
-        const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
+        const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)[,\s]+(\d+):(\d+):(\d+)/);
+        if (!matches) return new Date().toISOString();
+        const [, day, month, year, hours, minutes, seconds] = matches;
+        const dateAsUTC = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
+        if (isNaN(dateAsUTC.getTime())) return new Date().toISOString();
+        const utcCorrect = new Date(dateAsUTC.getTime() + 3 * 60 * 60 * 1000);
         return utcCorrect.toISOString();
     }
     
