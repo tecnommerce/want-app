@@ -95,6 +95,48 @@ function getArgentinaDateISO() {
 }
 
 /**
+ * FUNCIÓN: Obtiene la fecha/hora ACTUAL en Argentina como Date object
+ * Retorna un Date que representa la fecha/hora local de Argentina
+ * @returns {Date} Date object con la fecha/hora de Argentina
+ */
+function getArgentinaDate() {
+    const now = new Date();
+    
+    // Obtener la hora formateada en Argentina
+    const localeStr = now.toLocaleString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
+    
+    // localeStr ejemplo: "18/04/2026 02:00:00"
+    const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)[,\s]+(\d+):(\d+):(\d+)/);
+    
+    if (!matches) {
+        console.error('❌ Error parseando fecha Argentina');
+        return new Date();
+    }
+    
+    const [, day, month, year, hours, minutes, seconds] = matches;
+    
+    // Crear un Date object que representa la fecha/hora de Argentina
+    // Usamos Date.UTC para evitar que JavaScript interprete como zona local
+    const dateArgentina = new Date(Date.UTC(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes),
+        parseInt(seconds)
+    ));
+    
+    if (isNaN(dateArgentina.getTime())) {
+        console.error('❌ Error creando Date Argentina');
+        return new Date();
+    }
+    
+    return dateArgentina;
+}
+
+/**
  * Formatea una fecha para mostrar en la UI (Argentina)
  * Convierte timestamps UTC a hora Argentina y formatea
  * @param {string|Date} fecha - Fecha ISO o Date object (en UTC)
