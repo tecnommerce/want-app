@@ -8,32 +8,39 @@
 
 /**
  * Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
- * Parsea correctamente sin crear Dates inválidas
+ * Usa Intl.DateTimeFormat para obtener la hora REAL actual de Argentina
  * @returns {Date} Objeto Date que representa la hora REAL de Argentina
  */
 function getArgentinaDate() {
     const now = new Date();
-    const localeStr = now.toLocaleString('es-AR', {
+    
+    // Usar Intl.DateTimeFormat para obtener componentes individuales en zona Argentina
+    const formatter = new Intl.DateTimeFormat('en-CA', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
+        hour12: false,
         timeZone: 'America/Argentina/Buenos_Aires'
     });
-    const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+):(\d+)/);
-    if (!matches) {
-        console.warn('⚠️ Error parseando fecha Argentina');
-        return now;
+    
+    // Extraer componentes: año, mes, día, hora, minuto, segundo
+    const parts = formatter.formatToParts(now);
+    const date = {};
+    for (let part of parts) {
+        date[part.type] = part.value;
     }
-    const [, day, month, year, hours, minutes, seconds] = matches;
-    return new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+    
+    // Crear Date con la hora de Argentina
+    const argentinaDate = new Date(`${date.year}-${date.month}-${date.day}T${date.hour}:${date.minute}:${date.second}`);
+    return argentinaDate;
 }
 
 /**
  * Obtiene la fecha actual en Argentina en formato ISO 8601 para base de datos
- * @returns {string} Fecha en formato ISO: "2026-04-18T05:00:00.000Z"
+ * @returns {string} Fecha en formato ISO con hora UTC real
  */
 function getArgentinaDateISO() {
     const argentinaDate = getArgentinaDate();
@@ -41,6 +48,7 @@ function getArgentinaDateISO() {
         console.error('❌ Error: Fecha Argentina inválida');
         return new Date().toISOString();
     }
+    // Argentina es UTC-3, sumar 3 horas para obtener UTC real
     const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
     return utcCorrect.toISOString();
 }

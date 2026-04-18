@@ -11,19 +11,22 @@
     // ===================================================
     function getArgentinaDate() {
         const now = new Date();
-        const localeStr = now.toLocaleString('es-AR', {
+        const formatter = new Intl.DateTimeFormat('en-CA', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
+            hour12: false,
             timeZone: 'America/Argentina/Buenos_Aires'
         });
-        const matches = localeStr.match(/(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+):(\d+)/);
-        if (!matches) return now;
-        const [, day, month, year, hours, minutes, seconds] = matches;
-        return new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+        const parts = formatter.formatToParts(now);
+        const date = {};
+        for (let part of parts) {
+            date[part.type] = part.value;
+        }
+        return new Date(`${date.year}-${date.month}-${date.day}T${date.hour}:${date.minute}:${date.second}`);
     }
     
     function getArgentinaDateISO() {
