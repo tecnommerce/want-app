@@ -2003,6 +2003,13 @@ async function iniciarPanel(vendedor) {
     actualizarReportes();
     iniciarRealtimeVendedor();
     inicializarNotificacionesVendedor();
+    
+    // INICIALIZAR CONTROLES DE LA INTERFAZ
+    inicializarTabs();
+    inicializarFiltros();
+    inicializarMenuAdmin();
+    inicializarBuscador();
+    inicializarMenuHamburguesa();
 }
 
 function inicializarTabs() {

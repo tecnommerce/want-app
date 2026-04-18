@@ -428,6 +428,9 @@ function iniciarRealtimePedidosUsuario() {
                 const estadoTexto = getEstadoPedidoTexto(pedidoActualizado.estado);
                 const mensaje = `📦 Pedido #${pedidoActualizado.numero_orden || pedidoActualizado.id}: ${estadoTexto}`;
                 
+                // Crear notificación persistente
+                agregarNotificacion(pedidoActualizado.id, mensaje, pedidoActualizado.tiempo_estimado || null);
+                
                 // Si la pantalla de mis pedidos está visible, mostrar toast
                 const misPedidosScreen = document.getElementById('mis-pedidos-screen');
                 if (misPedidosScreen && misPedidosScreen.style.display === 'block') {
@@ -455,6 +458,7 @@ function iniciarRealtimePedidosUsuario() {
                 
                 // Mostrar notificación
                 const mensaje = `🎉 ¡Nuevo pedido #${nuevoPedido.numero_orden || nuevoPedido.id} registrado!`;
+                agregarNotificacion(nuevoPedido.id, mensaje, nuevoPedido.tiempo_estimado || null);
                 mostrarToast(mensaje, 'success');
             }
         )
