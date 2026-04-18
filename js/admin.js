@@ -50,65 +50,83 @@ let notificacionesPanelAbierto = false;
 // ===================================================
 
 /**
- * Obtiene la fecha y hora actual en Argentina (UTC-3)
- * @returns {Date} Objeto Date con la hora correcta de Argentina
+ * FUNCIÓN CRÍTICA: Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
+ * Garantiza que la hora devuelta representa la hora REAL de Argentina
+ * @returns {Date} Objeto Date que representa la hora REAL de Argentina (aunque mantiene UTC internamente)
  */
 function getArgentinaDate() {
+    // Crear fecha actual
     const now = new Date();
-    // Argentina usa UTC-3 (sin horario de verano actual)
-    // Convertir a zona horaria de Argentina
-    const argentinaTime = new Date(now.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'}));
-    return argentinaTime;
+    
+    // Argentina está en UTC-3 (sin horario de verano)
+    // Para obtener la hora correcta: Convertir UTC actual a Argentina
+    const argentinaDate = new Date(now.toLocaleString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+    }));
+    
+    return argentinaDate;
 }
 
 /**
- * Obtiene la fecha actual en Argentina en formato ISO
- * Recomendado para guardar en base de datos
- * @returns {string} Fecha en formato ISO 8601
+ * Convierte una fecha de Argentina a ISO 8601 (UTC) correctamente
+ * IMPORTANTE: El Date Object es UTC, pero representa la hora Argentina
+ * Cuando guardamos: 02:00 Argentina → 05:00 UTC → ISO será "T05:00:00Z"
+ * @returns {string} Fecha en formato ISO: "2026-04-18T05:00:00.000Z"
  */
 function getArgentinaDateISO() {
-    const now = new Date();
-    // Obtener fecha en Argentina
-    const argentinaStr = now.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'});
-    // Convertir a ISO: "17/04/2026 14:30:45" -> "2026-04-17T14:30:45"
-    const [datePart, timePart] = argentinaStr.split(' ');
-    const [day, month, year] = datePart.split('/');
-    const isoDate = `${year}-${month}-${day}T${timePart}`;
-    return isoDate + 'Z'; // Agregar Z para indicar UTC
+    const argentinaDate = getArgentinaDate();
+    
+    // El Date objeto tiene la hora de Argentina, pero JS lo trata como UTC
+    // Necesitamos convertir: si dice 02:00, en UTC sería 05:00 (UTC-3)
+    // Entonces sumamos 3 horas para obtener la hora UTC correcta
+    const isoString = argentinaDate.toISOString();
+    
+    // El isoString ahora tiene la hora incorrecta (02:00 en lugar de 05:00)
+    // Necesitamos ajustarlo sumando 3 horas
+    const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
+    return utcCorrect.toISOString();
 }
 
 /**
- * Formatea una fecha para mostrar en la UI
- * @param {string|Date} fecha - Fecha a formatear (ISO string o Date)
- * @returns {string} Fecha formateada como "17/04/2026 14:30"
+ * Formatea una fecha para mostrar en la UI (Argentina)
+ * Convierte timestamps UTC a hora Argentina y formatea
+ * @param {string|Date} fecha - Fecha ISO o Date object (en UTC)
+ * @returns {string} Formato: "18/04/2026 02:15"
  */
 function formatearFechaArgentina(fecha) {
     if (!fecha) return '-';
     const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
-    return date.toLocaleString('es-AR', {
+    
+    // Convertir a hora Argentina usando toLocaleString
+    const opciones = {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         timeZone: 'America/Argentina/Buenos_Aires'
-    });
+    };
+    
+    return date.toLocaleString('es-AR', opciones);
 }
 
 /**
- * Formatea una fecha solo (sin hora)
- * @param {string|Date} fecha - Fecha a formatear
- * @returns {string} Fecha formateada como "17/04/2026"
+ * Formatea una fecha solo (sin hora) para UI
+ * @param {string|Date} fecha - Fecha ISO o Date object (en UTC)
+ * @returns {string} Formato: "18/04/2026"
  */
 function formatearFechaArgentinaCorta(fecha) {
     if (!fecha) return '-';
     const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
-    return date.toLocaleString('es-AR', {
+    
+    const opciones = {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         timeZone: 'America/Argentina/Buenos_Aires'
-    });
+    };
+    
+    return date.toLocaleString('es-AR', opciones);
 }
 
 function obtenerNotificacionesVendedor() {
@@ -616,30 +634,52 @@ async function cargarDeliveries(forceRefresh = false) {
 // ===================================================
 
 function calcularMetricas() {
-    const hoy = new Date();
+    // Obtener hoy en Argentina (UTC-3)
+    const hoyArgentina = getArgentinaDate();
+    const hoy = new Date(hoyArgentina);
     hoy.setHours(0, 0, 0, 0);
+    
+    // Inicio de semana en Argentina
     const inicioSemana = new Date(hoy);
     inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+    
+    // Inicio de mes en Argentina
     const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    
     let ventasHoy = 0, ventasSemana = 0, ventasMes = 0, pedidosEntregados = 0, pedidosPendientes = 0;
+    
     pedidos.forEach(pedido => {
-        const fechaPedido = new Date(pedido.fecha);
-        fechaPedido.setHours(0, 0, 0, 0);
+        if (!pedido.fecha) return;
+        
+        // Convertir fecha ISO (UTC) a objeto Date
+        const fechaPedidoISO = new Date(pedido.fecha);
+        
+        // Convertir a hora Argentina
+        const fechaPedidoArgentina = new Date(fechaPedidoISO.toLocaleString('es-AR', {
+            timeZone: 'America/Argentina/Buenos_Aires'
+        }));
+        
+        // Poner hora a medianoche para comparación
+        fechaPedidoArgentina.setHours(0, 0, 0, 0);
+        
         const total = parseFloat(pedido.total) || 0;
+        
         if (pedido.estado === 'entregado') {
             pedidosEntregados++;
-            if (fechaPedido >= hoy) ventasHoy += total;
-            if (fechaPedido >= inicioSemana) ventasSemana += total;
-            if (fechaPedido >= inicioMes) ventasMes += total;
+            if (fechaPedidoArgentina >= hoy) ventasHoy += total;
+            if (fechaPedidoArgentina >= inicioSemana) ventasSemana += total;
+            if (fechaPedidoArgentina >= inicioMes) ventasMes += total;
         } else if (pedido.estado !== 'entregado' && pedido.estado !== 'cancelado') {
             pedidosPendientes++;
         }
     });
+    
     const vh = document.getElementById('ventas-hoy');
     const vs = document.getElementById('ventas-semana');
     const vm = document.getElementById('ventas-mes');
     const pe = document.getElementById('pedidos-entregados');
     const pp = document.getElementById('pedidos-pendientes');
+    
     if (vh) vh.textContent = formatearPrecio(ventasHoy);
     if (vs) vs.textContent = formatearPrecio(ventasSemana);
     if (vm) vm.textContent = formatearPrecio(ventasMes);

@@ -51,16 +51,27 @@ let carrito = [];
 // ===================================================
 
 /**
- * Obtiene la fecha actual en Argentina en formato ISO
- * @returns {string} Fecha en formato ISO 8601 con zona Argentina
+ * FUNCIÓN CRÍTICA: Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
+ * @returns {Date} Objeto Date que representa la hora REAL de Argentina
+ */
+function getArgentinaDate() {
+    const now = new Date();
+    const argentinaDate = new Date(now.toLocaleString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+    }));
+    return argentinaDate;
+}
+
+/**
+ * Obtiene la fecha actual en Argentina en formato ISO 8601 para base de datos
+ * El ISO será UTC correcto (hora Argentina + 3 horas)
+ * @returns {string} Fecha en formato ISO: "2026-04-18T05:00:00.000Z"
  */
 function getArgentinaDateISO() {
-    const now = new Date();
-    const argentinaStr = now.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'});
-    const [datePart, timePart] = argentinaStr.split(' ');
-    const [day, month, year] = datePart.split('/');
-    const isoDate = `${year}-${month}-${day}T${timePart}`;
-    return isoDate + 'Z';
+    const argentinaDate = getArgentinaDate();
+    // Sumar 3 horas para convertir Argentina (UTC-3) a UTC
+    const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
+    return utcCorrect.toISOString();
 }
 
 function obtenerVendedorId() {
@@ -710,7 +721,7 @@ async function enviarPedido() {
             imagen_url: item.imagen_url
         })),
         total: total,
-        fecha: new Date().toISOString(),
+        fecha: getArgentinaDateISO(),
         usuario_id: usuarioId
     };
     

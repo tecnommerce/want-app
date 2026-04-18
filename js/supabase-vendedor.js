@@ -6,6 +6,23 @@
     const SUPABASE_URL = 'https://owrpzmgncfrgatzccjlc.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93cnB6bWduY2ZyZ2F0emNjamxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNjIxNTIsImV4cCI6MjA5MDkzODE1Mn0.TOFcl0_Ua3jpISBKnrNdI4skIFMiyitWv0rLDoTzTkQ';
     
+    // ===================================================
+    // FUNCIONES DE FECHA - ZONA HORARIA ARGENTINA (UTC-3)
+    // ===================================================
+    function getArgentinaDate() {
+        const now = new Date();
+        const argentinaDate = new Date(now.toLocaleString('es-AR', {
+            timeZone: 'America/Argentina/Buenos_Aires'
+        }));
+        return argentinaDate;
+    }
+    
+    function getArgentinaDateISO() {
+        const argentinaDate = getArgentinaDate();
+        const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
+        return utcCorrect.toISOString();
+    }
+    
     const supabaseVendedorClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
             storage: window.localStorage,
@@ -223,10 +240,6 @@
                         .limit(1);
                     const nuevoNumero = (ultimoOrden?.[0]?.numero_orden || 0) + 1;
                     
-                    // Obtener fecha actual en Argentina (UTC-3)
-                    const ahora = new Date();
-                    const fechaArgentina = new Date(ahora.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'}));
-                    
                     const { data: nuevoPedido, error: createPedError } = await supabaseVendedorClient
                         .from('pedidos')
                         .insert([{
@@ -241,7 +254,7 @@
                             numero_orden: nuevoNumero,
                             usuario_id: data.usuario_id || null,
                             productos: data.productos,
-                            fecha: fechaArgentina.toISOString()
+                            fecha: getArgentinaDateISO()
                         }])
                         .select()
                         .single();

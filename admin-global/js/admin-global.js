@@ -3,6 +3,32 @@
 // ===================================================
 
 // ===================================================
+// FUNCIONES DE FECHA - ZONA HORARIA ARGENTINA (UTC-3)
+// ===================================================
+
+/**
+ * Obtiene la fecha/hora ACTUAL en Argentina (UTC-3)
+ * @returns {Date} Objeto Date que representa la hora REAL de Argentina
+ */
+function getArgentinaDate() {
+    const now = new Date();
+    const argentinaDate = new Date(now.toLocaleString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+    }));
+    return argentinaDate;
+}
+
+/**
+ * Obtiene la fecha actual en Argentina en formato ISO 8601 para base de datos
+ * @returns {string} Fecha en formato ISO: "2026-04-18T05:00:00.000Z"
+ */
+function getArgentinaDateISO() {
+    const argentinaDate = getArgentinaDate();
+    const utcCorrect = new Date(argentinaDate.getTime() + 3 * 60 * 60 * 1000);
+    return utcCorrect.toISOString();
+}
+
+// ===================================================
 // SISTEMA DE NOTIFICACIONES - UNA SOLA A LA VEZ
 // ===================================================
 
@@ -161,7 +187,14 @@ function formatearPrecio(precio) {
 function formatearFecha(fechaISO) {
     if (!fechaISO) return 'N/A';
     const fecha = new Date(fechaISO);
-    return fecha.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return fecha.toLocaleString('es-AR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
 }
 
 function getEstadoTexto(estado) {
