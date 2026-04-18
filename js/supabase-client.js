@@ -215,10 +215,11 @@
                             metodo_pago: data.metodo_pago,
                             detalles: data.detalles || '',
                             total: data.total,
-                            estado: 'preparando',
+                            estado: 'pedido_enviado',
                             numero_orden: numeroOrden,
                             usuario_id: data.usuario_id || null,
-                            productos: data.productos  // ✅ CORRECCIÓN: Guardar productos en el pedido
+                            vendedor_nombre: data.vendedor_nombre || null,
+                            productos: data.productos
                         }])
                         .select()
                         .single();

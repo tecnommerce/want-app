@@ -233,15 +233,20 @@ function actualizarContadorNotificacionesVendedor() {
 
 function toggleNotificacionesVendedor() {
     const panel = document.getElementById('notificaciones-panel');
-    if (!panel) return;
+    if (!panel) {
+        console.error('❌ Panel de notificaciones no encontrado');
+        return;
+    }
     
     if (notificacionesPanelAbierto) {
         panel.classList.remove('active');
         notificacionesPanelAbierto = false;
+        console.log('❌ Panel cerrado');
     } else {
         renderizarNotificacionesVendedor();
         panel.classList.add('active');
         notificacionesPanelAbierto = true;
+        console.log('✅ Panel abierto, notificaciones renderizadas');
     }
 }
 
@@ -250,6 +255,7 @@ function cerrarPanelNotificacionesVendedor() {
     if (panel) {
         panel.classList.remove('active');
         notificacionesPanelAbierto = false;
+        console.log('❌ Panel de notificaciones cerrado');
     }
 }
 
@@ -1997,143 +2003,6 @@ async function iniciarPanel(vendedor) {
     actualizarReportes();
     iniciarRealtimeVendedor();
     inicializarNotificacionesVendedor();
-
-    const btnCampana = document.getElementById('btn-notificaciones');
-    if (btnCampana) {
-        btnCampana.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔔 Campana clickeada');
-            toggleNotificacionesVendedor();
-        });
-    }
-    
-    const btnCerrarNotif = document.getElementById('btn-cerrar-notif');
-    if (btnCerrarNotif) {
-        btnCerrarNotif.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('❌ Cerrar notificaciones clickeado');
-            cerrarPanelNotificacionesVendedor();
-        };
-    }
-    
-    const btnLimpiarTodasNotif = document.getElementById('btn-limpiar-todas-notif');
-    if (btnLimpiarTodasNotif) {
-        btnLimpiarTodasNotif.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🗑️ Borrar todas las notificaciones clickeado');
-            if (notificacionesVendedor.length > 0) {
-                borrarTodasNotificacionesVendedor();
-                mostrarToast('Notificaciones borradas', 'success');
-            }
-        };
-    }
-    
-    const perfilForm = document.getElementById('perfil-form');
-    if (perfilForm) {
-        perfilForm.addEventListener('submit', actualizarPerfil);
-    }
-    
-    const btnRefresh = document.getElementById('btn-refresh');
-    if (btnRefresh) {
-        btnRefresh.addEventListener('click', async () => {
-            await withLoading(btnRefresh, async () => {
-                await cargarPedidos(true);
-                await cargarProductos(true);
-                await cargarDeliveries(true);
-                actualizarReportes();
-                mostrarToast('Datos actualizados', 'success');
-            });
-        });
-    }
-    
-    const btnLogout = document.getElementById('btn-logout');
-    if (btnLogout) btnLogout.addEventListener('click', cerrarSesion);
-    
-    const mobileLogout = document.getElementById('mobile-logout-btn');
-    if (mobileLogout) mobileLogout.addEventListener('click', cerrarSesion);
-    
-    const btnOpenProfile = document.getElementById('btn-open-profile');
-    if (btnOpenProfile) btnOpenProfile.addEventListener('click', abrirModalPerfil);
-    
-    const btnAgregarProducto = document.getElementById('btn-agregar-producto');
-    if (btnAgregarProducto) btnAgregarProducto.addEventListener('click', () => abrirModalProducto());
-    
-    const btnAgregarDelivery = document.getElementById('btn-agregar-delivery');
-    if (btnAgregarDelivery) btnAgregarDelivery.addEventListener('click', () => abrirModalDelivery());
-    
-    const btnNuevoPedido = document.getElementById('btn-nuevo-pedido');
-    if (btnNuevoPedido) btnNuevoPedido.addEventListener('click', () => abrirModalNuevoPedido());
-    
-    const btnGuardarProducto = document.getElementById('guardar-producto');
-    if (btnGuardarProducto) btnGuardarProducto.addEventListener('click', guardarProducto);
-    
-    const btnGuardarDelivery = document.getElementById('guardar-delivery');
-    if (btnGuardarDelivery) btnGuardarDelivery.addEventListener('click', guardarDelivery);
-    
-    const btnGuardarEditarPedido = document.getElementById('guardar-editar-pedido');
-    if (btnGuardarEditarPedido) btnGuardarEditarPedido.addEventListener('click', guardarEditarPedido);
-    
-    const btnGuardarNuevoPedido = document.getElementById('guardar-nuevo-pedido');
-    if (btnGuardarNuevoPedido) btnGuardarNuevoPedido.addEventListener('click', guardarNuevoPedido);
-    
-    const btnConfirmarAgregarProducto = document.getElementById('btn-confirmar-agregar-producto');
-    if (btnConfirmarAgregarProducto) btnConfirmarAgregarProducto.addEventListener('click', confirmarAgregarProducto);
-    
-    const btnEnviarDelivery = document.getElementById('btn-enviar-delivery');
-    if (btnEnviarDelivery) btnEnviarDelivery.addEventListener('click', enviarPedidoADelivery);
-    
-    const btnConfirmarTiempo = document.getElementById('btn-confirmar-tiempo');
-    if (btnConfirmarTiempo) btnConfirmarTiempo.addEventListener('click', enviarConfirmacionWhatsApp);
-    
-    const btnCancelarTiempo = document.getElementById('btn-cancelar-tiempo');
-    if (btnCancelarTiempo) btnCancelarTiempo.addEventListener('click', () => cerrarModalConZIndex('modal-tiempo-entrega'));
-    
-    const cerrarModalTiempoBtn = document.getElementById('cerrar-modal-tiempo');
-    if (cerrarModalTiempoBtn) cerrarModalTiempoBtn.addEventListener('click', () => cerrarModalConZIndex('modal-tiempo-entrega'));
-    
-    const btnAgregarProductoEditar = document.getElementById('btn-agregar-producto-editar');
-    if (btnAgregarProductoEditar) {
-        btnAgregarProductoEditar.addEventListener('click', () => {
-            abrirModalSeleccionarProducto(productosTempEdit, (prod) => {
-                const existente = productosTempEdit.find(p => p.id === prod.id);
-                if (existente) {
-                    existente.cantidad += prod.cantidad;
-                } else {
-                    productosTempEdit.push(prod);
-                }
-                renderizarProductosEditar();
-                actualizarTotalEdit();
-            });
-        });
-    }
-    
-    const btnAgregarProductoNuevo = document.getElementById('btn-agregar-producto-nuevo');
-    if (btnAgregarProductoNuevo) {
-        btnAgregarProductoNuevo.addEventListener('click', () => {
-            abrirModalSeleccionarProducto(productosTempNuevo, (prod) => {
-                const existente = productosTempNuevo.find(p => p.id === prod.id);
-                if (existente) {
-                    existente.cantidad += prod.cantidad;
-                } else {
-                    productosTempNuevo.push(prod);
-                }
-                renderizarProductosNuevo();
-                actualizarTotalNuevo();
-            });
-        });
-    }
-    
-    const toggleSwitch = document.getElementById('toggle-estado-switch');
-    if (toggleSwitch) toggleSwitch.addEventListener('change', toggleEstadoAbierto);
-    
-    inicializarTabs();
-    inicializarFiltros();
-    inicializarMenuAdmin();
-    inicializarBuscador();
-    inicializarMenuHamburguesa();
 }
 
 function inicializarTabs() {
