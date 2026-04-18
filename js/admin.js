@@ -2501,15 +2501,24 @@ function abrirModalTiempo(pedidoId, boton) {
 }
 
 function confirmarTiempoYPreparar() {
-    const tiempoEntrega = document.getElementById('tiempo-entrega-input')?.value.trim();
-    if (!tiempoEntrega) {
-        mostrarToast('Ingrese un tiempo estimado de entrega', 'error');
+    const cantidad = document.getElementById('tiempo-entrega-input')?.value.trim();
+    const unidad = document.getElementById('tiempo-entrega-unidad')?.value || 'minutos';
+    
+    if (!cantidad || parseInt(cantidad) <= 0) {
+        mostrarToast('Ingrese una cantidad válida', 'error');
         return;
     }
     if (!pedidoPendienteTiempo) return;
     
-    actualizarTiempoEstimado(pedidoPendienteTiempo.id, tiempoEntrega);
+    // Construir el string: "45 minutos" o "2 horas"
+    const tiempoEstimado = `${cantidad} ${unidad}`;
+    
+    actualizarTiempoEstimado(pedidoPendienteTiempo.id, tiempoEstimado);
     actualizarEstado(pedidoPendienteTiempo.id, 'en preparacion', botonPendienteTiempo);
+    
+    // Limpiar campos
+    document.getElementById('tiempo-entrega-input').value = '';
+    document.getElementById('tiempo-entrega-unidad').value = 'minutos';
     
     cerrarModalConZIndex('modal-tiempo-entrega');
     pedidoPendienteTiempo = null;

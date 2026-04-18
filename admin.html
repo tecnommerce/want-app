@@ -630,7 +630,13 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="tiempo-entrega-input">¿En cuánto tiempo estará listo el pedido?</label>
-                    <input type="text" id="tiempo-entrega-input" class="form-control" placeholder="Ej: 45 minutos, 1 hora" autocomplete="off">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="tiempo-entrega-input" class="form-control" placeholder="Cantidad" min="1" max="999" autocomplete="off" style="flex: 1;">
+                        <select id="tiempo-entrega-unidad" class="form-control" style="flex: 1;">
+                            <option value="minutos">Minutos</option>
+                            <option value="horas">Horas</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

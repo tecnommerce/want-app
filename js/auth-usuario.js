@@ -549,12 +549,11 @@ function renderizarListaPedidos(pedidos, containerId) {
         return `
             <div class="pedido-card" onclick="verDetallePedido(${pedido.id})">
                 <div class="pedido-card-header">
-                    <span class="pedido-numero">Pedido #${pedido.numero_orden || pedido.id}</span>
+                    <span class="pedido-numero">Tu pedido en ${escapeHTML(pedido.vendedor_nombre || 'Negocio')}</span>
                     <span class="pedido-estado" style="background: ${estadoColor}20; color: ${estadoColor};">${estadoTexto}</span>
                 </div>
                 <div class="pedido-card-body">
                     <div class="pedido-fecha">📅 ${fecha}</div>
-                    <div class="pedido-negocio">🏪 ${escapeHTML(pedido.vendedor_nombre || 'Negocio')}</div>
                     <div class="pedido-productos">📦 ${escapeHTML(productosResumen)}</div>
                     <div class="pedido-total">💰 ${formatearPrecio(pedido.total)}</div>
                     ${tiempoEstimadoHTML}
