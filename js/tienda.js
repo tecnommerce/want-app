@@ -600,7 +600,7 @@ async function confirmarPedido() {
     };
     
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
-    const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
+    const pedidoConId = { ...pedido, id: Date.now(), estado: 'pedido_enviado' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     
@@ -749,7 +749,7 @@ async function enviarPedido() {
     };
     
     let pedidosGuardados = JSON.parse(localStorage.getItem('want_pedidos') || '[]');
-    const pedidoConId = { ...pedido, id: Date.now(), estado: 'preparando' };
+    const pedidoConId = { ...pedido, id: Date.now(), estado: 'pedido_enviado' };
     pedidosGuardados.push(pedidoConId);
     localStorage.setItem('want_pedidos', JSON.stringify(pedidosGuardados));
     

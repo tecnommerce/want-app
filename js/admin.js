@@ -426,6 +426,7 @@ function normalizarEstado(estado) {
 
 function getEstadoTexto(estado) {
     const textos = {
+        'pedido_enviado': 'PEDIDO ENVIADO',
         'preparando': 'NUEVO PEDIDO',
         'en preparacion': 'EN PREPARACIÓN',
         'en camino': 'EN CAMINO',
@@ -683,21 +684,23 @@ function calcularMetricas() {
 }
 
 function actualizarContadoresPedidos() {
-    const contarPorEstado = { preparando: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
+    const contarPorEstado = { preparando: 0, pedido_enviado: 0, 'en preparacion': 0, 'en camino': 0, entregado: 0 };
     pedidos.forEach(p => {
         const estado = p.estado || 'preparando';
         if (contarPorEstado[estado] !== undefined) contarPorEstado[estado]++;
     });
+    // Combinar "pedido_enviado" y "preparando" como nuevos pedidos
+    const totalNuevos = (contarPorEstado.pedido_enviado || 0) + (contarPorEstado.preparando || 0);
     const cp = document.getElementById('count-preparando');
     const cpr = document.getElementById('count-preparacion');
     const cc = document.getElementById('count-camino');
     const ce = document.getElementById('count-entregado');
     const bp = document.getElementById('sidebar-badge-pedidos');
-    if (cp) cp.textContent = contarPorEstado.preparando;
+    if (cp) cp.textContent = totalNuevos;
     if (cpr) cpr.textContent = contarPorEstado['en preparacion'];
     if (cc) cc.textContent = contarPorEstado['en camino'];
     if (ce) ce.textContent = contarPorEstado.entregado;
-    if (bp) bp.textContent = contarPorEstado.preparando;
+    if (bp) bp.textContent = totalNuevos;
 }
 
 function actualizarReportes() {
@@ -712,7 +715,14 @@ function actualizarReportes() {
 // ===================================================
 
 function filtrarPedidos() {
-    let filtrados = pedidos.filter(p => p.estado === filtroActual);
+    let filtrados = pedidos.filter(p => {
+        // Si el filtro es "preparando", incluir tanto "preparando" como "pedido_enviado"
+        if (filtroActual === 'preparando') {
+            return p.estado === 'preparando' || p.estado === 'pedido_enviado';
+        } else {
+            return p.estado === filtroActual;
+        }
+    });
     if (terminoBusqueda.trim()) {
         const termino = terminoBusqueda.toLowerCase().trim();
         filtrados = filtrados.filter(p => {
@@ -766,7 +776,7 @@ function renderizarPedidosDesktop() {
         let botonesHTML = '';
         
         // ✅ CAMBIOS AQUÍ - NUEVA LÓGICA DE BOTONES
-        if (estado === 'preparando') {
+        if (estado === 'pedido_enviado' || estado === 'preparando') {
             botonesHTML = `
                 <button class="btn-tabla btn-confirmar-preparar" onclick="event.stopPropagation(); abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Confirmar y preparar</button>
             `;
@@ -848,7 +858,8 @@ function renderizarPedidosMovil() {
         
         // Estados
         let estadoTexto = '', estadoClase = '';
-        if (estado === 'preparando') { estadoTexto = 'NUEVO'; estadoClase = 'estado-preparando'; }
+        if (estado === 'pedido_enviado') { estadoTexto = 'NUEVO'; estadoClase = 'estado-nuevo'; }
+        else if (estado === 'preparando') { estadoTexto = 'NUEVO'; estadoClase = 'estado-preparando'; }
         else if (estado === 'en preparacion') { estadoTexto = 'PREPARACIÓN'; estadoClase = 'estado-en-preparacion'; }
         else if (estado === 'en camino') { estadoTexto = 'EN CAMINO'; estadoClase = 'estado-en-camino'; }
         else if (estado === 'entregado') { estadoTexto = 'ENTREGADO'; estadoClase = 'estado-entregado'; }
@@ -856,7 +867,7 @@ function renderizarPedidosMovil() {
         let botonesHTML = '';
         
         // Botones según estado
-        if (estado === 'preparando') {
+        if (estado === 'pedido_enviado' || estado === 'preparando') {
             botonesHTML = `
                 <div class="pedido-botones-wrapper">
                     <button class="btn-tabla btn-confirmar-preparar" onclick="abrirModalTiempo(${p.id}, this)"><i class="fas fa-check-circle"></i> Preparar</button>
@@ -2148,6 +2159,16 @@ function inicializarBuscador() {
             renderizarPedidos();
         });
         
+        // Limpiar buscador al perder el foco
+        buscadorInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                buscadorInput.value = '';
+                terminoBusqueda = '';
+                if (limpiarBtn) limpiarBtn.style.display = 'none';
+                renderizarPedidos();
+            }, 100);
+        });
+        
         // Prevenir autocompletado
         buscadorInput.setAttribute('autocomplete', 'off');
     }
@@ -2252,7 +2273,14 @@ function verPedidoCompletoMovil(pedidoId) {
     }
     
     let botonesAccion = '';
-    if (estado === 'preparando') {
+    if (estado === 'pedido_enviado') {
+        botonesAccion = `
+            <button class="btn-tabla btn-whatsapp" onclick="confirmarPedidoWhatsApp(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
+            <button class="btn-tabla btn-preparar" onclick="actualizarEstado(${pedido.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>
+            <button class="btn-tabla btn-editar" onclick="abrirModalEditarPedido(${pedido.id})"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-tabla btn-cancelar-tabla" onclick="cancelarPedido(${pedido.id}, this)"><i class="fas fa-trash-alt"></i> Cancelar</button>
+        `;
+    } else if (estado === 'preparando') {
         botonesAccion = `
             <button class="btn-tabla btn-whatsapp" onclick="confirmarPedidoWhatsApp(${pedido.id}, this)"><i class="fab fa-whatsapp"></i> Confirmar</button>
             <button class="btn-tabla btn-preparar" onclick="actualizarEstado(${pedido.id}, 'en preparacion', this)"><i class="fas fa-utensils"></i> Preparar</button>

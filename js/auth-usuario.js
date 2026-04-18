@@ -64,6 +64,7 @@ function formatearFecha(fechaISO) {
 
 function getEstadoPedidoTexto(estado) {
     const estados = {
+        'pedido_enviado': 'Pedido enviado',
         'preparando': 'Pedido tomado',
         'en preparacion': 'Preparando',
         'en camino': 'En camino',
@@ -75,6 +76,7 @@ function getEstadoPedidoTexto(estado) {
 
 function getEstadoColor(estado) {
     const colores = {
+        'pedido_enviado': '#3B82F6',
         'preparando': '#FF9800',
         'en preparacion': '#2196F3',
         'en camino': '#9C27B0',
@@ -539,6 +541,11 @@ function renderizarListaPedidos(pedidos, containerId) {
             if (pedido.productos.length > 2) productosResumen += ` +${pedido.productos.length - 2} más`;
         }
         
+        let tiempoEstimadoHTML = '';
+        if (pedido.tiempo_estimado) {
+            tiempoEstimadoHTML = `<div class="pedido-tiempo-estimado"><i class="fas fa-clock"></i> <span>${escapeHTML(pedido.tiempo_estimado)}</span></div>`;
+        }
+        
         return `
             <div class="pedido-card" onclick="verDetallePedido(${pedido.id})">
                 <div class="pedido-card-header">
@@ -550,6 +557,7 @@ function renderizarListaPedidos(pedidos, containerId) {
                     <div class="pedido-negocio">🏪 ${escapeHTML(pedido.vendedor_nombre || 'Negocio')}</div>
                     <div class="pedido-productos">📦 ${escapeHTML(productosResumen)}</div>
                     <div class="pedido-total">💰 ${formatearPrecio(pedido.total)}</div>
+                    ${tiempoEstimadoHTML}
                 </div>
                 <div class="pedido-card-footer">
                     <button class="btn-ver-detalle" onclick="event.stopPropagation(); verDetallePedido(${pedido.id})">Ver detalle <i class="fas fa-chevron-right"></i></button>
@@ -591,6 +599,11 @@ function verDetallePedido(pedidoId) {
         detallesHTML = `<div class="detalle-seccion"><strong>📝 Detalles adicionales:</strong><p>${escapeHTML(pedido.detalles)}</p></div>`;
     }
     
+    let tiempoEstimadoHTML = '';
+    if (pedido.tiempo_estimado) {
+        tiempoEstimadoHTML = `<div class="detalle-tiempo-estimado"><strong>⏱️ Tiempo estimado:</strong><p>${escapeHTML(pedido.tiempo_estimado)}</p></div>`;
+    }
+    
     document.getElementById('detalle-pedido-titulo').textContent = `Pedido #${pedido.numero_orden || pedido.id}`;
     document.getElementById('detalle-pedido-body').innerHTML = `
         <div class="detalle-estado" style="background: ${estadoColor}20; color: ${estadoColor}; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 16px;"><strong>${estadoTexto}</strong></div>
@@ -599,7 +612,7 @@ function verDetallePedido(pedidoId) {
         <div class="detalle-seccion"><strong>📞 Teléfono:</strong><p>${pedido.cliente_telefono}</p></div>
         <div class="detalle-seccion"><strong>📍 Dirección:</strong><p>${escapeHTML(pedido.direccion)}</p></div>
         <div class="detalle-seccion"><strong>💳 Método de pago:</strong><p>${metodoPago}</p></div>
-        ${productosHTML}${detallesHTML}
+        ${tiempoEstimadoHTML}${productosHTML}${detallesHTML}
         <div class="detalle-total"><strong>Total:</strong> ${formatearPrecio(pedido.total)}</div>
     `;
     
