@@ -45,6 +45,72 @@ let pedidoParaAsignar = null;
 let notificacionesVendedor = [];
 let notificacionesPanelAbierto = false;
 
+// ===================================================
+// FUNCIONES DE FECHA - ZONA HORARIA ARGENTINA (UTC-3)
+// ===================================================
+
+/**
+ * Obtiene la fecha y hora actual en Argentina (UTC-3)
+ * @returns {Date} Objeto Date con la hora correcta de Argentina
+ */
+function getArgentinaDate() {
+    const now = new Date();
+    // Argentina usa UTC-3 (sin horario de verano actual)
+    // Convertir a zona horaria de Argentina
+    const argentinaTime = new Date(now.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'}));
+    return argentinaTime;
+}
+
+/**
+ * Obtiene la fecha actual en Argentina en formato ISO
+ * Recomendado para guardar en base de datos
+ * @returns {string} Fecha en formato ISO 8601
+ */
+function getArgentinaDateISO() {
+    const now = new Date();
+    // Obtener fecha en Argentina
+    const argentinaStr = now.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'});
+    // Convertir a ISO: "17/04/2026 14:30:45" -> "2026-04-17T14:30:45"
+    const [datePart, timePart] = argentinaStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    const isoDate = `${year}-${month}-${day}T${timePart}`;
+    return isoDate + 'Z'; // Agregar Z para indicar UTC
+}
+
+/**
+ * Formatea una fecha para mostrar en la UI
+ * @param {string|Date} fecha - Fecha a formatear (ISO string o Date)
+ * @returns {string} Fecha formateada como "17/04/2026 14:30"
+ */
+function formatearFechaArgentina(fecha) {
+    if (!fecha) return '-';
+    const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
+    return date.toLocaleString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
+}
+
+/**
+ * Formatea una fecha solo (sin hora)
+ * @param {string|Date} fecha - Fecha a formatear
+ * @returns {string} Fecha formateada como "17/04/2026"
+ */
+function formatearFechaArgentinaCorta(fecha) {
+    if (!fecha) return '-';
+    const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
+    return date.toLocaleString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
+}
+
 function obtenerNotificacionesVendedor() {
     const saved = localStorage.getItem('want_notificaciones_vendedor');
     if (saved) {
@@ -67,7 +133,7 @@ function agregarNotificacionVendedor(mensaje, tipo = 'info') {
         mensaje: mensaje,
         tipo: tipo,
         leida: false,
-        fecha: new Date().toISOString()
+        fecha: getArgentinaDateISO()
     };
     notificacionesVendedor.unshift(notificacion);
     if (notificacionesVendedor.length > 50) notificacionesVendedor.pop();
@@ -142,7 +208,8 @@ function renderizarNotificacionesVendedor() {
             day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            timeZone: 'America/Argentina/Buenos_Aires'
         });
         
         let icono = 'fa-bell';
@@ -602,18 +669,44 @@ function actualizarContadoresPedidos() {
 
 function actualizarReportes() {
     if (!pedidos) return;
-    const hoy = new Date(); hoy.setHours(0,0,0,0);
-    const inicioSemana = new Date(hoy); inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+    
+    // Obtener "hoy" en Argentina (UTC-3)
+    const ahora = new Date();
+    const hoyStr = ahora.toLocaleString('es-AR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/Argentina/Buenos_Aires'
+    });
+    const [datePart] = hoyStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    const hoy = new Date(`${year}-${month}-${day}T00:00:00`);
+    
+    const inicioSemana = new Date(hoy);
+    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
     const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
     let ventasHoy=0, ventasSemana=0, ventasMes=0, pedidosEntregados=0, pedidosPendientes=0;
     pedidos.forEach(pedido => {
-        const fechaPedido = new Date(pedido.fecha); fechaPedido.setHours(0,0,0,0);
+        const fechaPedido = new Date(pedido.fecha);
+        // Establecer solo la parte de fecha (sin hora) para comparación
+        const fechaPedidoStr = fechaPedido.toLocaleString('es-AR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: 'America/Argentina/Buenos_Aires'
+        });
+        const [d, m, y] = fechaPedidoStr.split('/');
+        const fechaPedidoDate = new Date(`${y}-${m}-${d}T00:00:00`);
+        
         const total = parseFloat(pedido.total) || 0;
         if (pedido.estado === 'entregado') {
             pedidosEntregados++;
-            if (fechaPedido >= hoy) ventasHoy += total;
-            if (fechaPedido >= inicioSemana) ventasSemana += total;
-            if (fechaPedido >= inicioMes) ventasMes += total;
+            if (fechaPedidoDate >= hoy) ventasHoy += total;
+            if (fechaPedidoDate >= inicioSemana) ventasSemana += total;
+            if (fechaPedidoDate >= inicioMes) ventasMes += total;
         } else if (pedido.estado !== 'entregado' && pedido.estado !== 'cancelado') {
             pedidosPendientes++;
         }
@@ -796,7 +889,7 @@ function renderizarPedidosDesktop() {
         
         html += `<tr>
             <td class="col-id">#${numeroMostrar}</td>
-            <td class="col-fecha">${fecha.toLocaleString('es-AR')}</td>
+            <td class="col-fecha">${fecha.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'})}</td>
             <td class="col-cliente">${escapeHTML(p.cliente_nombre || 'Sin nombre')}</td>
             <td class="col-telefono">${p.cliente_telefono || '-'}</td>
             <td class="col-direccion">${escapeHTML(p.direccion || '-')}</td>
@@ -2193,7 +2286,7 @@ function verPedidoCompleto(pedidoId) {
                     <button class="modal-close" onclick="cerrarModalPedidoCompleto()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="detalle-seccion"><strong><i class="fas fa-calendar"></i> Fecha:</strong><p>${fecha.toLocaleString('es-AR')}</p></div>
+                    <div class="detalle-seccion"><strong><i class="fas fa-calendar"></i> Fecha:</strong><p>${fecha.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'})}</p></div>
                     <div class="detalle-seccion"><strong><i class="fas fa-user"></i> Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre || 'Sin nombre')}</p></div>
                     <div class="detalle-seccion"><strong><i class="fas fa-phone"></i> Teléfono:</strong><p>${pedido.cliente_telefono || 'Sin teléfono'}</p></div>
                     <div class="detalle-seccion"><strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong><p>${escapeHTML(pedido.direccion || 'Sin dirección')}</p></div>
@@ -2280,7 +2373,7 @@ function verPedidoCompletoMovil(pedidoId) {
                     <button class="modal-close" onclick="cerrarModalPedidoCompletoMovil()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="detalle-seccion"><strong><i class="fas fa-calendar"></i> Fecha:</strong><p>${fecha.toLocaleString('es-AR')}</p></div>
+                    <div class="detalle-seccion"><strong><i class="fas fa-calendar"></i> Fecha:</strong><p>${fecha.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'})}</p></div>
                     <div class="detalle-seccion"><strong><i class="fas fa-user"></i> Cliente:</strong><p>${escapeHTML(pedido.cliente_nombre || 'Sin nombre')}</p></div>
                     <div class="detalle-seccion"><strong><i class="fas fa-phone"></i> Teléfono:</strong><p>${pedido.cliente_telefono || 'Sin teléfono'}</p></div>
                     <div class="detalle-seccion"><strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong><p>${escapeHTML(pedido.direccion || 'Sin dirección')}</p></div>

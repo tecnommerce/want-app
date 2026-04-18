@@ -1415,7 +1415,7 @@ async function cargarLogs() {
             
             return `
                 <tr>
-                    <td style="white-space: nowrap;">${new Date(log.created_at).toLocaleString('es-AR')}</td>
+                    <td style="white-space: nowrap;">${new Date(log.created_at).toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'})}</td>
                     <td><strong>${escapeHTML(log.usuario_email)}</strong><br><small style="color:#888">${log.usuario_tipo}</small></td>
                     <td>${icono} ${escapeHTML(log.accion)}</td>
                     <td>${escapeHTML(log.entidad)} ${log.entidad_id ? `#${log.entidad_id}` : ''}</td>
@@ -1445,7 +1445,7 @@ async function exportarLogs() {
         }
         
         const exportData = data.map(log => ({
-            Fecha: new Date(log.created_at).toLocaleString('es-AR'),
+            Fecha: new Date(log.created_at).toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'}),
             Usuario: log.usuario_email,
             Tipo: log.usuario_tipo,
             Accion: log.accion,

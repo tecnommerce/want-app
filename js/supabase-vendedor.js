@@ -223,6 +223,10 @@
                         .limit(1);
                     const nuevoNumero = (ultimoOrden?.[0]?.numero_orden || 0) + 1;
                     
+                    // Obtener fecha actual en Argentina (UTC-3)
+                    const ahora = new Date();
+                    const fechaArgentina = new Date(ahora.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'}));
+                    
                     const { data: nuevoPedido, error: createPedError } = await supabaseVendedorClient
                         .from('pedidos')
                         .insert([{
@@ -236,7 +240,8 @@
                             estado: 'preparando',
                             numero_orden: nuevoNumero,
                             usuario_id: data.usuario_id || null,
-                            productos: data.productos  // ✅ Guardar productos en la columna
+                            productos: data.productos,
+                            fecha: fechaArgentina.toISOString()
                         }])
                         .select()
                         .single();

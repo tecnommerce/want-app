@@ -46,6 +46,23 @@ let vendedorActual = null;
 let productos = [];
 let carrito = [];
 
+// ===================================================
+// FUNCIONES DE FECHA - ZONA HORARIA ARGENTINA (UTC-3)
+// ===================================================
+
+/**
+ * Obtiene la fecha actual en Argentina en formato ISO
+ * @returns {string} Fecha en formato ISO 8601 con zona Argentina
+ */
+function getArgentinaDateISO() {
+    const now = new Date();
+    const argentinaStr = now.toLocaleString('es-AR', {timeZone: 'America/Argentina/Buenos_Aires'});
+    const [datePart, timePart] = argentinaStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    const isoDate = `${year}-${month}-${day}T${timePart}`;
+    return isoDate + 'Z';
+}
+
 function obtenerVendedorId() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('vendedor');
@@ -544,7 +561,7 @@ async function confirmarPedido() {
             imagen_url: item.imagen_url
         })),
         total: total,
-        fecha: new Date().toISOString(),
+        fecha: getArgentinaDateISO(),
         usuario_id: usuarioId
     };
     
