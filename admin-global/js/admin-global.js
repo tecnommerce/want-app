@@ -22,7 +22,14 @@ function getArgentinaDateISO() {
         return new Date().toISOString();
     }
     const [, day, month, year, hours, minutes, seconds] = matches;
-    const dateAsUTC = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
+    const dateAsUTC = new Date(Date.UTC(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes),
+        parseInt(seconds)
+    ));
     if (isNaN(dateAsUTC.getTime())) {
         console.error('❌ Error creando Date');
         return new Date().toISOString();

@@ -72,8 +72,16 @@ function getArgentinaDateISO() {
     
     const [, day, month, year, hours, minutes, seconds] = matches;
     
-    // Crear un Date con la hora Argentina interpretada como UTC (con Z explícito)
-    const dateAsUTC = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
+    // Usar Date.UTC con argumentos numéricos (más confiable que cadenas)
+    // Month es 0-indexed, así que restamos 1
+    const dateAsUTC = new Date(Date.UTC(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes),
+        parseInt(seconds)
+    ));
     
     if (isNaN(dateAsUTC.getTime())) {
         console.error('❌ Error creando Date');
