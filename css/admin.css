@@ -2097,6 +2097,177 @@ body:has(#admin-auth[style*="display: flex"]) .main-content { margin-left: 0 !im
     .cantidad-display {
         font-size: 0.9rem;
     }
+
+/* ===================================================
+   SELECTOR DE HORARIOS - NUEVO DISEÑO
+   =================================================== */
+.horario-selector {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.horario-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.preset-btn {
+    background: white;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-btn:hover {
+    background: #eff6ff;
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.preset-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.horario-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.dias-selector {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dia-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.dia-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.dia-checkbox:hover {
+    border-color: var(--primary);
+    background: #eff6ff;
+}
+
+.dia-checkbox input[type="checkbox"]:checked + span,
+.dia-checkbox:has(input:checked) {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: #eff6ff;
+}
+
+.horas-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.time-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.time-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.time-input {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: white;
+    color: #1f2937;
+    transition: border-color 0.2s;
+}
+
+.time-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 90, 0, 0.1);
+}
+
+.horario-preview {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.horario-preview small {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.preview-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: linear-gradient(135deg, rgba(255,90,0,0.05), rgba(255,90,0,0.02));
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .horario-presets {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .horas-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    .dias-selector {
+        flex-direction: column;
+    }
+    
+    .dia-checkbox {
+        width: 100%;
+    }
+}
     
     .btn-eliminar-editar {
         font-size: 0.8rem;

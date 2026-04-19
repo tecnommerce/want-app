@@ -195,7 +195,50 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Horario de atención</label>
-                                    <input type="text" id="reg-horario" placeholder="Ej: Lun a Dom 18-24hs">
+                                    <div class="horario-selector" id="reg-horario-selector">
+                                        <!-- Presets rápidos -->
+                                        <div class="horario-presets">
+                                            <button type="button" class="preset-btn" data-preset="09-18">09:00 - 18:00</button>
+                                            <button type="button" class="preset-btn" data-preset="10-22">10:00 - 22:00</button>
+                                            <button type="button" class="preset-btn" data-preset="12-24">12:00 - 24:00</button>
+                                            <button type="button" class="preset-btn" data-preset="18-03">18:00 - 03:00</button>
+                                        </div>
+                                        
+                                        <!-- Selector de días y horas -->
+                                        <div class="horario-form">
+                                            <div class="dias-selector">
+                                                <label class="dia-checkbox">
+                                                    <input type="checkbox" name="reg-dia" value="Lun-Vie" checked> Lun-Vie
+                                                </label>
+                                                <label class="dia-checkbox">
+                                                    <input type="checkbox" name="reg-dia" value="Sábado"> Sábado
+                                                </label>
+                                                <label class="dia-checkbox">
+                                                    <input type="checkbox" name="reg-dia" value="Domingo"> Domingo
+                                                </label>
+                                            </div>
+                                            
+                                            <div class="horas-selector">
+                                                <div class="time-group">
+                                                    <label>Desde</label>
+                                                    <input type="time" id="reg-hora-inicio" value="09:00" class="time-input">
+                                                </div>
+                                                <div class="time-group">
+                                                    <label>Hasta</label>
+                                                    <input type="time" id="reg-hora-fin" value="18:00" class="time-input">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Vista previa -->
+                                        <div class="horario-preview">
+                                            <small>Resumen:</small>
+                                            <div id="reg-horario-preview" class="preview-text">Lun a Vie 09:00 - 18:00</div>
+                                        </div>
+                                        
+                                        <!-- Hidden input para almacenar valor final -->
+                                        <input type="hidden" id="reg-horario" value="Lun a Vie 09:00 - 18:00">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Logo del negocio</label>
@@ -527,7 +570,50 @@
                         </div>
                         <div class="form-group">
                             <label>Horario de atención</label>
-                            <input type="text" id="perfil-horario" class="form-control">
+                            <div class="horario-selector" id="perfil-horario-selector">
+                                <!-- Presets rápidos -->
+                                <div class="horario-presets">
+                                    <button type="button" class="preset-btn" data-preset="09-18">09:00 - 18:00</button>
+                                    <button type="button" class="preset-btn" data-preset="10-22">10:00 - 22:00</button>
+                                    <button type="button" class="preset-btn" data-preset="12-24">12:00 - 24:00</button>
+                                    <button type="button" class="preset-btn" data-preset="18-03">18:00 - 03:00</button>
+                                </div>
+                                
+                                <!-- Selector de días y horas -->
+                                <div class="horario-form">
+                                    <div class="dias-selector">
+                                        <label class="dia-checkbox">
+                                            <input type="checkbox" name="perfil-dia" value="Lun-Vie" checked> Lun-Vie
+                                        </label>
+                                        <label class="dia-checkbox">
+                                            <input type="checkbox" name="perfil-dia" value="Sábado"> Sábado
+                                        </label>
+                                        <label class="dia-checkbox">
+                                            <input type="checkbox" name="perfil-dia" value="Domingo"> Domingo
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="horas-selector">
+                                        <div class="time-group">
+                                            <label>Desde</label>
+                                            <input type="time" id="perfil-hora-inicio" value="09:00" class="time-input">
+                                        </div>
+                                        <div class="time-group">
+                                            <label>Hasta</label>
+                                            <input type="time" id="perfil-hora-fin" value="18:00" class="time-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Vista previa -->
+                                <div class="horario-preview">
+                                    <small>Resumen:</small>
+                                    <div id="perfil-horario-preview" class="preview-text">Lun a Vie 09:00 - 18:00</div>
+                                </div>
+                                
+                                <!-- Hidden input para almacenar valor final -->
+                                <input type="hidden" id="perfil-horario" value="Lun a Vie 09:00 - 18:00">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">

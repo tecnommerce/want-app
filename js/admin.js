@@ -218,6 +218,135 @@ function agregarNotificacionVendedor(mensaje, tipo = 'info') {
     mostrarToast(mensaje, 'info');
 }
 
+// ===================================================
+// SELECTOR DE HORARIOS - FUNCIONES
+// ===================================================
+
+/**
+ * Inicializa los controles del selector de horarios
+ * @param {string} prefix - 'reg' para registro, 'perfil' para perfil
+ */
+function inicializarSelectorHorarios(prefix) {
+    const selector = document.getElementById(`${prefix}-horario-selector`);
+    if (!selector) return;
+    
+    // Botones de presets
+    const presetBtns = selector.querySelectorAll('.preset-btn');
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const preset = btn.dataset.preset;
+            aplicarPresetHorario(prefix, preset);
+        });
+    });
+    
+    // Inputs de tiempo
+    const horaInicio = selector.querySelector(`#${prefix}-hora-inicio`);
+    const horaFin = selector.querySelector(`#${prefix}-hora-fin`);
+    const checkboxes = selector.querySelectorAll(`input[name="${prefix}-dia"]`);
+    
+    [horaInicio, horaFin].forEach(input => {
+        if (input) {
+            input.addEventListener('change', () => actualizarResumenHorario(prefix));
+        }
+    });
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => actualizarResumenHorario(prefix));
+    });
+    
+    // Actualizar resumen inicial
+    actualizarResumenHorario(prefix);
+}
+
+/**
+ * Aplica un preset rápido de horario
+ * @param {string} prefix - 'reg' o 'perfil'
+ * @param {string} preset - Ej: "09-18", "10-22", "12-24", "18-03"
+ */
+function aplicarPresetHorario(prefix, preset) {
+    const selector = document.getElementById(`${prefix}-horario-selector`);
+    if (!selector) return;
+    
+    const [inicio, fin] = preset.split('-');
+    const horaInicio = selector.querySelector(`#${prefix}-hora-inicio`);
+    const horaFin = selector.querySelector(`#${prefix}-hora-fin`);
+    
+    if (horaInicio) horaInicio.value = `${inicio}:00`;
+    if (horaFin) horaFin.value = `${fin}:00`;
+    
+    // Resetear checkboxes (marcar todos los días por defecto)
+    const checkboxes = selector.querySelectorAll(`input[name="${prefix}-dia"]`);
+    checkboxes.forEach((cb, idx) => {
+        cb.checked = idx === 0; // Solo "Lun-Vie"
+    });
+    
+    // Actualizar visualmente
+    document.querySelectorAll(`#${prefix}-horario-selector .preset-btn`).forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    actualizarResumenHorario(prefix);
+}
+
+/**
+ * Actualiza el resumen visual del horario
+ * @param {string} prefix - 'reg' o 'perfil'
+ */
+function actualizarResumenHorario(prefix) {
+    const selector = document.getElementById(`${prefix}-horario-selector`);
+    if (!selector) return;
+    
+    const horaInicio = selector.querySelector(`#${prefix}-hora-inicio`)?.value || '09:00';
+    const horaFin = selector.querySelector(`#${prefix}-hora-fin`)?.value || '18:00';
+    const checkboxes = selector.querySelectorAll(`input[name="${prefix}-dia"]:checked`);
+    
+    // Construir resumen de días
+    const diasSeleccionados = Array.from(checkboxes).map(cb => cb.value);
+    const diasTexto = diasSeleccionados.length === 0 
+        ? 'Selecciona días' 
+        : diasSeleccionados.join(' / ');
+    
+    // Formato final
+    const resumen = `${diasTexto} ${horaInicio} - ${horaFin}`;
+    
+    // Actualizar preview
+    const preview = selector.querySelector(`#${prefix}-horario-preview`);
+    if (preview) preview.textContent = resumen;
+    
+    // Actualizar hidden input
+    const hiddenInput = selector.querySelector(`#${prefix}-horario`);
+    if (hiddenInput) hiddenInput.value = resumen;
+}
+
+/**
+ * Carga un horario guardado en el selector
+ * @param {string} prefix - 'reg' o 'perfil'
+ * @param {string} horarioGuardado - Ej: "Lun a Vie 09:00 - 18:00"
+ */
+function cargarHorarioEnSelector(prefix, horarioGuardado) {
+    if (!horarioGuardado) return;
+    
+    const selector = document.getElementById(`${prefix}-horario-selector`);
+    if (!selector) return;
+    
+    // Parsear horario guardado
+    // Formato esperado: "Lun-Vie 09:00 - 18:00" o "Lun a Vie 09:00 - 18:00"
+    const regexHora = /(\d{2}):(\d{2})\s*-\s*(\d{2}):(\d{2})/;
+    const match = horarioGuardado.match(regexHora);
+    
+    if (match) {
+        const horaInicio = selector.querySelector(`#${prefix}-hora-inicio`);
+        const horaFin = selector.querySelector(`#${prefix}-hora-fin`);
+        
+        if (horaInicio) horaInicio.value = `${match[1]}:${match[2]}`;
+        if (horaFin) horaFin.value = `${match[3]}:${match[4]}`;
+    }
+    
+    actualizarResumenHorario(prefix);
+}
+
 function actualizarContadorNotificacionesVendedor() {
     const noLeidas = notificacionesVendedor.filter(n => !n.leida).length;
     const contador = document.getElementById('notificaciones-count');
@@ -1388,6 +1517,11 @@ function cargarPerfil() {
             });
         };
     }
+    
+    // Inicializar selector de horarios
+    inicializarSelectorHorarios('perfil');
+    // Cargar horario guardado en el selector
+    cargarHorarioEnSelector('perfil', vendedorActual.horario);
 }
 
 async function actualizarPerfil(e) {
@@ -1865,6 +1999,9 @@ function mostrarPanelRegistro() {
             });
         };
     }
+    
+    // Inicializar selector de horarios
+    inicializarSelectorHorarios('reg');
 }
 
 function actualizarListaRubrosRegistro() {
