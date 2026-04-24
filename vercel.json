@@ -1,26 +1,114 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/admin.html", "dest": "/admin.html" },
-    { "src": "/tienda.html", "dest": "/tienda.html" },
-    { "src": "/index.html", "dest": "/index.html" },
-    { "src": "/login.html", "dest": "/login.html" },
-    { "src": "/sounds/(.*)", "dest": "/sounds/$1" },
-    { "src": "/css/(.*)", "dest": "/css/$1" },
-    { "src": "/js/(.*)", "dest": "/js/$1" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/admin-global/(.*)",
+      "dest": "/admin-global/$1"
     },
     {
-      "src": "/([^/]+?)\\.html",
+      "src": "/sounds/(.*)",
+      "dest": "/sounds/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/js/$1"
+    },
+    {
+      "src": "/admin-global/css/(.*)",
+      "dest": "/admin-global/css/$1"
+    },
+    {
+      "src": "/admin-global/js/(.*)",
+      "dest": "/admin-global/js/$1"
+    },
+    {
+      "src": "/google1676a437bfe50cb7.html",
+      "dest": "/google1676a437bfe50cb7.html"
+    },
+    {
+      "src": "/index.html",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/login.html",
+      "dest": "/login.html"
+    },
+    {
+      "src": "/tienda.html",
+      "dest": "/tienda.html"
+    },
+    {
+      "src": "/admin.html",
+      "dest": "/admin.html"
+    },
+    {
+      "src": "/privacidad.html",
+      "dest": "/privacidad.html"
+    },
+    {
+      "src": "/terminos.html",
+      "dest": "/terminos.html"
+    },
+    {
+      "src": "/admin-global/login.html",
+      "dest": "/admin-global/login.html"
+    },
+    {
+      "src": "/admin-global/dashboard.html",
+      "dest": "/admin-global/dashboard.html"
+    },
+    {
+      "src": "/([^/]+)\\.html",
       "dest": "/$1.html"
     },
     {
-      "src": "/([^/]+)",
+      "src": "/\\?(.*)",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(\\?.*)",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/([^/?]+)",
       "dest": "/tienda.html?negocio=$1"
     },
-    { "src": "/(.*)", "dest": "/$1" }
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/sounds/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
   ]
 }
