@@ -57,6 +57,22 @@
         flex: 1;
         max-width: none;
     }
+    
+    /* Ocultar navegación desktop en móvil */
+    .nav-desktop {
+        display: none !important;
+    }
+    
+    .nav-legal {
+        display: none;
+    }
+}
+
+@media (min-width: 769px) {
+    /* Asegurar que nav-desktop se muestre en escritorio */
+    .nav-desktop {
+        display: flex !important;
+    }
 }
 
 @media (max-width: 480px) {

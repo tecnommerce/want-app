@@ -2,42 +2,187 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Términos del Servicio de Want</title>
-    <style>body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones de Want</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FF5A00'%3EW%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF5A00;
+            --primary-light: #FF7A00;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #FFF5EB 0%, #FFFFFF 100%);
+            color: var(--gray-700);
+            line-height: 1.7;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header img {
+            height: 50px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        
+        .header p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        
+        h2 {
+            color: var(--gray-800);
+            font-size: 1.4rem;
+            margin: 30px 0 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2:first-child {
+            margin-top: 0;
+        }
+        
+        h2 i {
+            color: var(--primary);
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            color: var(--gray-700);
+        }
+        
+        strong {
+            color: var(--gray-800);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: var(--primary-soft);
+            border-radius: var(--radius-lg);
+            transition: all 0.2s ease;
+        }
+        
+        .back-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-4px);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 16px;
+            }
+            
+            .content-card {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Términos del Servicio de Want</h1>
-    <p>Última actualización: 12 de abril de 2026</p>
+    <div class="container">
+        <div class="header">
+            <img src="https://res.cloudinary.com/dlsmvyz8r/image/upload/v1775997469/logo-want-app-online-pedidos_faeoxm.png" alt="Want">
+            <h1>Términos y Condiciones</h1>
+            <p>Última actualización: 12 de abril de 2026</p>
+        </div>
+        
+        <div class="content-card">
+            <p>Bienvenido a Want. Al usar nuestra aplicación, aceptas cumplir con estos términos.</p>
 
-    <p>Bienvenido a Want. Al usar nuestra aplicación, aceptas cumplir con estos términos.</p>
+            <h2><i class="fas fa-mobile-alt"></i> 1. Uso de la aplicación</h2>
+            <p>Want es una plataforma que conecta a los usuarios con vendedores para realizar pedidos. Aceptas usar la aplicación solo para fines legales y de acuerdo con estos términos.</p>
 
-    <h2>1. Uso de la aplicación</h2>
-    <p>Want es una plataforma que conecta a los usuarios con vendedores para realizar pedidos. Aceptas usar la aplicación solo para fines legales y de acuerdo con estos términos.</p>
+            <h2><i class="fas fa-user-circle"></i> 2. Cuentas de usuario</h2>
+            <p>Eres responsable de mantener la confidencialidad de tu cuenta y de todas las actividades que ocurran bajo ella.</p>
 
-    <h2>2. Cuentas de usuario</h2>
-    <p>Eres responsable de mantener la confidencialidad de tu cuenta y de todas las actividades que ocurran bajo ella.</p>
+            <h2><i class="fas fa-ban"></i> 3. Conducta prohibida</h2>
+            <p>No está permitido:</p>
+            <ul>
+                <li>Usar la aplicación para realizar pedidos falsos o fraudulentos.</li>
+                <li>Intentar acceder a áreas restringidas o comprometer la seguridad del sistema.</li>
+                <li>Cargar contenido ilegal, abusivo o que infrinja derechos de terceros.</li>
+            </ul>
 
-    <h2>3. Conducta prohibida</h2>
-    <p>No está permitido:</p>
-    <ul>
-        <li>Usar la aplicación para realizar pedidos falsos o fraudulentos.</li>
-        <li>Intentar acceder a áreas restringidas o comprometer la seguridad del sistema.</li>
-        <li>Cargar contenido ilegal, abusivo o que infrinja derechos de terceros.</li>
-    </ul>
+            <h2><i class="fas fa-shopping-cart"></i> 4. Pedidos y pagos</h2>
+            <p>Los pedidos están sujetos a la confirmación del vendedor. El método de pago se acuerda directamente con el vendedor a través de la aplicación.</p>
 
-    <h2>4. Pedidos y pagos</h2>
-    <p>Los pedidos están sujetos a la confirmación del vendedor. El método de pago se acuerda directamente con el vendedor a través de la aplicación.</p>
+            <h2><i class="fas fa-exclamation-triangle"></i> 5. Limitación de responsabilidad</h2>
+            <p>Want actúa únicamente como intermediario. No somos responsables por la calidad de los productos o servicios proporcionados por los vendedores. Toda transacción es bajo tu propio riesgo.</p>
 
-    <h2>5. Limitación de responsabilidad</h2>
-    <p>Want actúa únicamente como intermediario. No somos responsables por la calidad de los productos o servicios proporcionados por los vendedores. Toda transacción es bajo tu propio riesgo.</p>
+            <h2><i class="fas fa-edit"></i> 6. Modificaciones</h2>
+            <p>Podemos modificar estos términos en cualquier momento. Te notificaremos sobre cambios importantes.</p>
 
-    <h2>6. Modificaciones</h2>
-    <p>Podemos modificar estos términos en cualquier momento. Te notificaremos sobre cambios importantes.</p>
+            <h2><i class="fas fa-balance-scale"></i> 7. Ley aplicable</h2>
+            <p>Estos términos se rigen por las leyes de la República Argentina.</p>
 
-    <h2>7. Ley aplicable</h2>
-    <p>Estos términos se rigen por las leyes de la República Argentina.</p>
-
-    <h2>8. Contacto</h2>
-    <p>Para preguntas sobre estos términos, contáctanos en: <strong>[Tu Correo Electrónico]</strong></p>
+            <h2><i class="fas fa-envelope"></i> 8. Contacto</h2>
+            <p>Para preguntas sobre estos términos, contáctanos en: <strong>[Tu Correo Electrónico]</strong></p>
+            
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Volver al inicio
+            </a>
+        </div>
+    </div>
 </body>
 </html>
