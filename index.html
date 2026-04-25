@@ -470,15 +470,52 @@
             }
             
             .logo {
-                font-size: 1.4rem;
+                font-size: 1.1rem;
+                order: 1;
+            }
+            
+            .logo img {
+                height: 32px !important;
+                width: auto !important;
             }
             
             .search-container {
-                position: sticky;
-                top: 60px;
-                background: white;
-                z-index: 999;
-                padding: 8px 0;
+                order: 2;
+                width: auto;
+                flex: 1;
+                max-width: 180px;
+                margin: 0 8px;
+            }
+            
+            .search-box {
+                padding: 6px 10px;
+                border-radius: 20px;
+            }
+            
+            .search-box input {
+                padding: 4px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .header-actions {
+                order: 3;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .notificaciones-container {
+                order: 1;
+            }
+            
+            .btn-notificaciones {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            
+            .user-avatar-mobile {
+                order: 2;
             }
             
             .notificacion-toast {
