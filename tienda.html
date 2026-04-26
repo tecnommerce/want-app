@@ -977,24 +977,26 @@
             }
             
             .header-content {
-                gap: 8px;
+                gap: 4px;
                 flex-wrap: nowrap;
             }
             
             .logo {
-                font-size: 1.1rem;
+                font-size: 0.95rem;
                 order: 1;
+                flex-shrink: 0;
             }
             
             .logo img {
-                height: 32px !important;
+                height: 28px !important;
             }
             
             .header-actions {
                 order: 2;
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 4px;
+                flex-shrink: 0;
             }
             
             .cart-icon-desktop {
@@ -1007,11 +1009,44 @@
             
             .user-avatar-mobile {
                 display: flex !important;
+                padding: 0;
             }
             
             .avatar-name {
                 display: none;
             }
+            
+            .avatar-img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo img {
+                height: 26px !important;
+            }
+            
+            .avatar-img {
+                width: 26px;
+                height: 26px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .logo {
+                font-size: 0.85rem;
+            }
+            
+            .logo img {
+                height: 24px !important;
+            }
+            
+            .avatar-img {
+                width: 24px;
+                height: 24px;
+            }
+        }
             
             .vendedor-perfil-section {
                 padding: 20px;
@@ -1060,10 +1095,37 @@
             }
             
             .header-actions {
-                gap: 8px;
+                gap: 6px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo img {
+                height: 28px !important;
             }
             
-            /* PRODUCTOS EN LISTA MÓVIL */
+            .avatar-img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .logo {
+                font-size: 0.9rem;
+            }
+            
+            .logo img {
+                height: 26px !important;
+            }
+            
+            .avatar-img {
+                width: 26px;
+                height: 26px;
+            }
+        }
+        
+        /* PRODUCTOS EN LISTA MÓVIL */
             .productos-grid {
                 display: flex !important;
                 flex-direction: column;
