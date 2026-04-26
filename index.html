@@ -474,18 +474,18 @@
             }
             
             .header-content {
-                gap: 4px;
+                gap: 6px;
                 flex-wrap: nowrap;
             }
             
             .logo {
-                font-size: 0.95rem;
+                font-size: 1rem;
                 order: 1;
                 flex-shrink: 0;
             }
             
             .logo img {
-                height: 28px !important;
+                height: 30px !important;
                 width: auto !important;
             }
             
@@ -493,18 +493,17 @@
                 order: 2;
                 flex: 1;
                 min-width: 0;
-                max-width: 140px;
-                margin: 0 4px;
+                margin: 0 6px;
             }
             
             .search-box {
-                padding: 5px 8px;
-                border-radius: 18px;
+                padding: 6px 10px;
+                border-radius: 20px;
             }
             
             .search-box input {
-                padding: 3px 6px;
-                font-size: 0.75rem;
+                padding: 4px 8px;
+                font-size: 0.8rem;
                 min-width: 0;
             }
             
@@ -512,7 +511,7 @@
                 order: 3;
                 display: flex;
                 align-items: center;
-                gap: 4px;
+                gap: 6px;
                 flex-shrink: 0;
             }
             
@@ -521,9 +520,9 @@
             }
             
             .btn-notificaciones {
-                width: 28px;
-                height: 28px;
-                font-size: 0.8rem;
+                width: 30px;
+                height: 30px;
+                font-size: 0.85rem;
                 padding: 0;
             }
             
@@ -533,8 +532,8 @@
             }
             
             .avatar-img {
-                width: 28px;
-                height: 28px;
+                width: 30px;
+                height: 30px;
             }
             
             .notificacion-toast {
@@ -546,11 +545,37 @@
         
         @media (max-width: 480px) {
             .logo img {
-                height: 26px !important;
+                height: 28px !important;
             }
             
-            .search-container {
-                max-width: 120px;
+            .search-box {
+                padding: 5px 8px;
+            }
+            
+            .search-box input {
+                font-size: 0.75rem;
+                padding: 3px 6px;
+            }
+            
+            .btn-notificaciones {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
+            }
+            
+            .avatar-img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .logo {
+                font-size: 0.9rem;
+            }
+            
+            .logo img {
+                height: 26px !important;
             }
             
             .search-box {
@@ -559,7 +584,7 @@
             
             .search-box input {
                 font-size: 0.7rem;
-                padding: 3px 5px;
+                padding: 2px 5px;
             }
             
             .btn-notificaciones {
@@ -571,40 +596,6 @@
             .avatar-img {
                 width: 26px;
                 height: 26px;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            .logo {
-                font-size: 0.85rem;
-            }
-            
-            .logo img {
-                height: 24px !important;
-            }
-            
-            .search-container {
-                max-width: 100px;
-            }
-            
-            .search-box {
-                padding: 4px 6px;
-            }
-            
-            .search-box input {
-                font-size: 0.65rem;
-                padding: 2px 4px;
-            }
-            
-            .btn-notificaciones {
-                width: 24px;
-                height: 24px;
-                font-size: 0.7rem;
-            }
-            
-            .avatar-img {
-                width: 24px;
-                height: 24px;
             }
         }
         
